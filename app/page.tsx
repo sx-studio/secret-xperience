@@ -1,0 +1,1859 @@
+'use client'
+import { useEffect } from 'react'
+import { createClient } from './lib/supabase'
+
+export default function Home() {
+  useEffect(() => {
+    const supabase = createClient()
+
+// ── Age Gate ──
+var gate = document.getElementById('gate');
+document.getElementById('gyes').addEventListener('click', function(){
+  gate.classList.add('gone');
+  document.body.style.overflow = '';
+});
+document.getElementById('gno').addEventListener('click', function(){
+  gate.innerHTML = '<div style="position:relative;z-index:2;background:var(--bg1);border:0.5px solid var(--b3);border-radius:var(--rxl);padding:2.5rem 2rem;max-width:360px;width:90%;text-align:center"><div style="font-family:var(--serif);font-size:22px;color:var(--t);margin-bottom:.75rem">Access Denied</div><div style="font-size:13px;color:var(--t2)">You must be 18 or older to access SecretXperience.eu.</div></div>';
+});
+document.body.style.overflow = 'hidden';
+document.getElementById('gyes').addEventListener('click', function(){ document.body.style.overflow = ''; });
+
+// ── Sidebar (mobile) ──
+var sidebar = document.getElementById('sidebar');
+var sov = document.getElementById('sov');
+function openSidebar(){ sidebar.classList.add('open'); sov.classList.add('show'); sov.setAttribute('aria-hidden','false'); }
+function closeSidebar(){ sidebar.classList.remove('open'); sov.classList.remove('show'); sov.setAttribute('aria-hidden','true'); }
+document.getElementById('menuBtn').addEventListener('click', openSidebar);
+document.getElementById('filterToggle').addEventListener('click', openSidebar);
+document.getElementById('sideClose').addEventListener('click', closeSidebar);
+sov.addEventListener('click', closeSidebar);
+
+// ── Interactive pills / tabs ──
+document.querySelectorAll('.cat').forEach(function(c){
+  c.addEventListener('click', function(){
+    document.querySelectorAll('.cat').forEach(function(x){ x.classList.remove('active'); });
+    this.classList.add('active');
+  });
+});
+document.querySelectorAll('.pp').forEach(function(p){
+  p.addEventListener('click', function(){
+    document.querySelectorAll('.pp').forEach(function(x){ x.classList.remove('active'); });
+    this.classList.add('active');
+  });
+});
+document.querySelectorAll('.etype').forEach(function(e){
+  e.addEventListener('click', function(){
+    document.querySelectorAll('.etype').forEach(function(x){ x.classList.remove('active'); });
+    this.classList.add('active');
+  });
+});
+document.querySelectorAll('.tab').forEach(function(t){
+  t.addEventListener('click', function(){
+    document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
+    this.classList.add('active');
+  });
+});
+document.querySelectorAll('.bni').forEach(function(b){
+  b.addEventListener('click', function(){
+    document.querySelectorAll('.bni').forEach(function(x){ x.classList.remove('active'); });
+    this.classList.add('active');
+  });
+});
+document.querySelectorAll('.tier').forEach(function(t){
+  t.addEventListener('click', function(){
+    document.querySelectorAll('.tier').forEach(function(x){ x.style.outline='none'; });
+    this.style.outline = '1.5px solid var(--gold)';
+  });
+});
+
+// ── Rating slider ──
+var rsl = document.getElementById('rsl');
+rsl.addEventListener('input', function(){ document.getElementById('rval').textContent = parseFloat(this.value).toFixed(1); });
+
+// ── How It Works data ──
+var howData = {
+  escorts: {
+    name: 'Escorts',
+    desc: 'Browse verified escort profiles filtered by type — independent, private, agency, VIP/elite, touring, duo and more. Message directly or book through SecretXperience for a fully discreet experience.',
+    steps: ['Browse & filter','View verified profile','Message or book','Discreet confirmation'],
+    anim: function(el){
+      var types=['Independent','Private','Agency','VIP','Touring'], colors=['rgba(100,80,200,.2)','rgba(184,77,114,.2)','rgba(26,143,106,.2)','rgba(197,160,90,.2)','rgba(100,140,220,.2)'], tcs=['#b0a0f8','#e07aa0','#26d4a0','var(--gold)','#7aaaee'];
+      types.forEach(function(t,i){
+        var d=document.createElement('div');
+        d.style.cssText='position:absolute;left:'+Math.max(8,8+i*118)+'px;top:calc(50% - 55px);width:100px;border:0.5px solid rgba(255,255,255,0.1);border-radius:13px;background:var(--bg1);padding:10px 8px;text-align:center;opacity:0;animation:fadeInUp .4s forwards;animation-delay:'+(i*.1)+'s';
+        d.innerHTML='<div style="width:34px;height:34px;border-radius:50%;background:'+colors[i]+';margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:'+tcs[i]+'">'+t[0]+t[1]+'</div><div style="font-size:10px;font-weight:600;color:var(--t)">'+t+'</div><div style="margin-top:4px;font-size:9px;background:rgba(38,212,160,.12);color:#26d4a0;border-radius:6px;padding:1px 0">✓ Verified</div>';
+        el.appendChild(d);
+      });
+    }
+  },
+  companionship: {
+    name: 'Companionship',
+    desc: 'Find companions for dinner dates, travel, social events and personal connection. All profiles are identity-verified. Set your preferences, book your time, and enjoy a fully discreet experience.',
+    steps: ['Search companions','Check availability','Set experience type','Confirm & meet'],
+    anim: function(el){
+      ['Dinner Date','Travel','Social Events','Personal Time'].forEach(function(ev,i){
+        var d=document.createElement('div');
+        d.style.cssText='position:absolute;left:'+(8+i*152)+'px;top:calc(50% - 50px);width:136px;background:var(--bg1);border:0.5px solid rgba(255,255,255,0.1);border-radius:13px;padding:14px;text-align:center;opacity:0;animation:fadeInUp .5s forwards;animation-delay:'+(i*.12)+'s';
+        d.innerHTML='<i class="ti ti-heart" style="font-size:24px;color:var(--pink)" aria-hidden="true"></i><div style="font-size:11px;font-weight:600;margin-top:7px;color:var(--t)">'+ev+'</div>';
+        el.appendChild(d);
+      });
+    }
+  },
+  nightlife: {
+    name: 'Nightlife',
+    desc: 'Discover premium clubs, bars, private parties, and adult entertainment venues. Real-time door status, event calendars, table reservations, and guest list bookings — all in one place.',
+    steps: ['Find a venue','Check the calendar','Reserve / guest list','Arrive & enjoy'],
+    anim: function(el){
+      el.style.background='var(--bg)';
+      for(var i=0;i<18;i++){
+        var d=document.createElement('div');
+        var x=Math.random()*90;var s=Math.random()*5+2;
+        d.style.cssText='position:absolute;left:'+x+'%;bottom:50px;width:'+s+'px;height:'+s+'px;border-radius:50%;background:var(--gold);opacity:'+(Math.random()*.5+.1)+';animation:floatBubble '+(Math.random()*2+1.5)+'s linear infinite;animation-delay:'+(Math.random()*2)+'s';
+        el.appendChild(d);
+      }
+      var bar=document.createElement('div');
+      bar.style.cssText='position:absolute;bottom:0;left:0;right:0;height:50px;background:var(--bg1);border-top:0.5px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;gap:14px';
+      ['Club Noir','The Velvet','Boudoir X'].forEach(function(n){
+        var b=document.createElement('div');
+        b.style.cssText='font-size:11px;font-weight:600;color:var(--gold);padding:5px 13px;border:0.5px solid var(--gbrd);border-radius:12px;background:var(--gbg)';
+        b.textContent=n; bar.appendChild(b);
+      });
+      el.appendChild(bar);
+    }
+  },
+  creators: {
+    name: 'Creators',
+    desc: 'Subscribe to exclusive adult creator content — photos, videos, live streams and custom requests. Creators set their own rates. Full privacy, direct messaging, and tip-based interactions built in.',
+    steps: ['Discover creators','Subscribe or tip','Unlock content','Message directly'],
+    anim: function(el){
+      ['LC','NV','MX','RK'].forEach(function(c,i){
+        var d=document.createElement('div');
+        d.style.cssText='position:absolute;left:'+(8+i*155)+'px;top:calc(50% - 65px);width:140px;border:0.5px solid rgba(255,255,255,0.1);border-radius:13px;background:var(--bg1);overflow:hidden;opacity:0;animation:slideInL .4s forwards;animation-delay:'+(i*.12)+'s';
+        d.innerHTML='<div style="height:70px;background:var(--bg2);display:flex;align-items:center;justify-content:center"><div style="width:42px;height:42px;border-radius:50%;background:rgba(100,80,200,.2);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:#b0a0f8">'+c+'</div></div><div style="padding:9px"><div style="font-size:11px;font-weight:600;color:var(--t)">Creator '+c+'</div><div style="font-size:9px;color:var(--t3);margin-top:1px">from €15/mo</div><div style="margin-top:5px;font-size:9px;background:var(--gbg);color:var(--gold);border-radius:6px;padding:2px 0;text-align:center;border:0.5px solid var(--gbrd)">Subscribe</div></div>';
+        el.appendChild(d);
+      });
+    }
+  },
+  rentals: {
+    name: 'Rentals',
+    desc: 'Book private apartments, themed suites, or discreet villas. Verified locations with flexible hourly, nightly or weekly bookings. Full amenity listings and secure payment.',
+    steps: ['Search locations','View amenities','Pick your time slot','Check in discreetly'],
+    anim: function(el){
+      ['Private Apt.','Themed Suite','Villa','Loft'].forEach(function(p,i){
+        var d=document.createElement('div');
+        d.style.cssText='position:absolute;left:'+(8+i*155)+'px;top:calc(50% - 65px);width:140px;border:0.5px solid rgba(255,255,255,0.1);border-radius:13px;overflow:hidden;background:var(--bg1);opacity:0;animation:fadeInUp .4s forwards;animation-delay:'+(i*.13)+'s';
+        d.innerHTML='<div style="height:70px;background:var(--bg2);display:flex;align-items:center;justify-content:center"><i class="ti ti-home" style="font-size:28px;color:var(--t3)" aria-hidden="true"></i></div><div style="padding:9px"><div style="font-size:11px;font-weight:600;color:var(--t)">'+p+'</div><div style="font-size:9px;background:rgba(26,143,106,.15);color:#1dc9a0;border-radius:6px;padding:2px 0;text-align:center;margin-top:5px">✓ Verified</div></div>';
+        el.appendChild(d);
+      });
+    }
+  },
+  hotels: {
+    name: 'Hotels',
+    desc: 'Discreet hotel listings with adult-friendly policies. Filter by amenities, privacy rating, and SecretXperience member discount partnerships. Instant booking with guaranteed privacy.',
+    steps: ['Filter hotels','Check policies','Book your room','Member discount applied'],
+    anim: function(el){
+      ['Hôtel Discret','The Lounge','Velvet Rooms'].forEach(function(h,i){
+        var d=document.createElement('div');
+        d.style.cssText='position:absolute;left:'+(12+i*208)+'px;top:calc(50% - 55px);width:190px;border:0.5px solid rgba(255,255,255,0.1);border-radius:13px;background:var(--bg1);padding:14px;opacity:0;animation:slideInL .5s forwards;animation-delay:'+(i*.15)+'s';
+        d.innerHTML='<i class="ti ti-bed" style="font-size:24px;color:var(--t3)" aria-hidden="true"></i><div style="font-family:var(--serif);font-size:14px;color:var(--t);margin-top:6px">'+h+'</div><div style="font-size:12px;color:var(--gold);margin-top:2px">★★★★★</div><div style="font-size:9px;color:var(--t3);margin-top:3px">Adult-friendly · Discreet</div>';
+        el.appendChild(d);
+      });
+    }
+  },
+  events: {
+    name: 'Event Spaces',
+    desc: 'Private venues for adult gatherings, themed parties, and exclusive events. Capacity filters, catering options, AV support, and full event planning assistance through the platform.',
+    steps: ['Choose a venue','Set your event type','Invite guests','Host the night'],
+    anim: function(el){
+      ['Private Party','Themed Night','Networking','Dinner Event'].forEach(function(e,i){
+        var d=document.createElement('div');
+        d.style.cssText='position:absolute;top:'+(12+Math.floor(i/2)*75)+'px;left:'+(8+(i%2)*310)+'px;width:290px;border:0.5px solid rgba(255,255,255,0.1);border-radius:13px;background:var(--bg1);padding:11px 13px;display:flex;align-items:center;gap:11px;opacity:0;animation:fadeInUp .4s forwards;animation-delay:'+(i*.12)+'s';
+        d.innerHTML='<i class="ti ti-calendar-event" style="font-size:22px;color:var(--t3)" aria-hidden="true"></i><div><div style="font-size:12px;font-weight:600;color:var(--t)">'+e+'</div><div style="font-size:10px;color:var(--t3);margin-top:1px">Brussels · Up to 120 guests</div></div>';
+        el.appendChild(d);
+      });
+    }
+  },
+  photo: {
+    name: 'Photo / Video Locations',
+    desc: 'Professionally equipped studios and private sets for adult photography and video production. All venues verified, legally compliant, and bookable by the hour or full day.',
+    steps: ['Find a studio','Check equipment list','Book your time slot','Shoot & wrap'],
+    anim: function(el){
+      ['4K Camera','Ring Lights','Backdrops','Sound Booth','Private Set'].forEach(function(eq,i){
+        var d=document.createElement('div');
+        d.style.cssText='position:absolute;left:'+(8+i*122)+'px;top:calc(50% - 50px);width:110px;border:0.5px solid rgba(255,255,255,0.1);border-radius:13px;background:var(--bg1);padding:12px;text-align:center;opacity:0;animation:bounceSoft .6s ease-in-out forwards;animation-delay:'+(i*.12)+'s';
+        d.innerHTML='<i class="ti ti-camera" style="font-size:24px;color:var(--t3)" aria-hidden="true"></i><div style="font-size:10px;font-weight:600;margin-top:6px;color:var(--t)">'+eq+'</div>';
+        el.appendChild(d);
+      });
+    }
+  },
+  shop: {
+    name: 'Adult Shop',
+    desc: 'Browse curated adult product collections from verified sellers. Discreet shipping guaranteed. Filter by category, brand, and price. Member discounts on all partner products.',
+    steps: ['Browse products','Add to cart','Discreet checkout','Delivered to you'],
+    anim: function(el){
+      ['Lingerie','Toys','Accessories','Wellness','Books'].forEach(function(item,i){
+        var d=document.createElement('div');
+        d.style.cssText='position:absolute;left:'+(8+i*122)+'px;top:calc(50% - 62px);width:110px;border:0.5px solid rgba(255,255,255,0.1);border-radius:13px;background:var(--bg1);overflow:hidden;opacity:0;animation:fadeInUp .4s forwards;animation-delay:'+(i*.1)+'s';
+        d.innerHTML='<div style="height:66px;background:var(--bg2);display:flex;align-items:center;justify-content:center"><i class="ti ti-shopping-bag" style="font-size:26px;color:var(--t3)" aria-hidden="true"></i></div><div style="padding:7px 9px"><div style="font-size:10px;font-weight:600;color:var(--t)">'+item+'</div><div style="font-size:9px;color:var(--t3)">From €19</div></div>';
+        el.appendChild(d);
+      });
+    }
+  },
+  memberships: {
+    name: 'Memberships',
+    desc: 'Upgrade to Gold or Platinum for priority placement, exclusive access, verified badges, premium filters, and member-only discounts across every category on SecretXperience.',
+    steps: ['Choose your tier','Unlock features','Get discounts','Priority access'],
+    anim: function(el){
+      [{n:'Free',bg:'var(--bg3)',c:'var(--t2)',f:['Basic search','Public listings','Saved listings']},{n:'Gold',bg:'var(--gbg)',c:'var(--gold)',f:['Premium filters','Member discounts','Priority messaging','Verified badge']},{n:'Platinum',bg:'var(--tbg)',c:'#1dc9a0',f:['All Gold features','Top placement','Exclusive events','Dedicated support']}].forEach(function(t,i){
+        var d=document.createElement('div');
+        d.style.cssText='position:absolute;left:'+(10+i*207)+'px;top:12px;width:190px;border-radius:13px;background:var(--bg1);border:0.5px solid rgba(255,255,255,0.1);padding:13px;opacity:0;animation:slideInL .5s forwards;animation-delay:'+(i*.15)+'s';
+        var feats=t.f.map(function(f){return'<div style="font-size:10px;color:var(--t3);padding:3px 0;border-top:0.5px solid rgba(255,255,255,0.06)">✓ '+f+'</div>'}).join('');
+        d.innerHTML='<div style="background:'+t.bg+';color:'+t.c+';border-radius:7px;padding:6px 0;text-align:center;font-size:12px;font-weight:600;margin-bottom:9px;letter-spacing:.04em">'+t.n+'</div>'+feats;
+        el.appendChild(d);
+      });
+    }
+  }
+};
+
+function renderHow(key){
+  var d = howData[key]; if(!d) return;
+  var demo = document.getElementById('expDemo');
+  demo.innerHTML = '';
+  demo.style.background = 'var(--bg2)';
+  d.anim(demo);
+  document.getElementById('expName').textContent = d.name;
+  document.getElementById('expDesc').textContent = d.desc;
+  var stepsEl = document.getElementById('expSteps');
+  stepsEl.innerHTML = '';
+  d.steps.forEach(function(s,i){
+    var div = document.createElement('div'); div.className = 'estep';
+    div.innerHTML = '<div class="esn">'+(i+1)+'</div><span>'+s+'</span>';
+    stepsEl.appendChild(div);
+  });
+}
+
+document.querySelectorAll('.hcat').forEach(function(c){
+  c.addEventListener('click', function(){
+    document.querySelectorAll('.hcat').forEach(function(x){ x.classList.remove('active'); });
+    this.classList.add('active');
+    renderHow(this.dataset.how);
+  });
+});
+// ── Detail panel data ──
+var listingData = {
+  'Sophia A.': {
+    icon:'ti-user', cat:'Escort · Independent', type:'Private', name:'Sophia A.',
+    rating:'4.9', city:'Brussels, BE', s1:'128', s2:'4.9', s3:'3 yrs', s4:'2.1k',
+    badges:[{cls:'bv',txt:'✓ Verified'},{cls:'bp',txt:'Premium'}],
+    desc:'A discreet, elegant companion based in Brussels. Available for private meetings, dinner dates, and overnight bookings. Fluent in English, French, and Dutch. All interactions are handled with the utmost professionalism.',
+    tags:['Dinner date','Overnight','Travel companion','Social events','Private meetings','GFE'],
+    pricing:[{dur:'1 Hour',amt:'€200',note:'Incall or outcall',feat:false},{dur:'2 Hours',amt:'€350',note:'Most popular',feat:true},{dur:'Half day',amt:'€600',note:'4 hrs · flexible',feat:false},{dur:'Overnight',amt:'€1,200',note:'10pm – 8am',feat:false}],
+  },
+  'Elise V.': {
+    icon:'ti-user', cat:'Escort · Agency', type:'Elite', name:'Elise V.',
+    rating:'5.0', city:'Antwerp, BE', s1:'214', s2:'5.0', s3:'5 yrs', s4:'4.8k',
+    badges:[{cls:'bv',txt:'✓ Verified'},{cls:'be',txt:'VIP'}],
+    desc:'Elite agency companion available in Antwerp and Brussels. Impeccable presentation, multilingual, and experienced in high-end corporate and private social settings. Available for travel throughout Europe.',
+    tags:['VIP events','Corporate','Overnight','Travel Europe','Dinner date','Duo available'],
+    pricing:[{dur:'1 Hour',amt:'€500',note:'Outcall only',feat:false},{dur:'3 Hours',amt:'€1,200',note:'Most popular',feat:true},{dur:'Half day',amt:'€1,800',note:'Up to 6 hrs',feat:false},{dur:'Full day',amt:'€3,500',note:'International',feat:false}],
+  },
+  'Nadia R.': {
+    icon:'ti-user', cat:'Escort · Touring', type:'Touring', name:'Nadia R.',
+    rating:'4.8', city:'Ghent, BE', s1:'97', s2:'4.8', s3:'2 yrs', s4:'1.4k',
+    badges:[{cls:'bv',txt:'✓ Verified'}],
+    desc:'Touring companion visiting Belgium regularly. Available in Ghent, Brussels, and Bruges. Warm, genuine, and easy to be with. Great for longer bookings and travel experiences.',
+    tags:['Dinner date','GFE','Travel','Overnight','Social events'],
+    pricing:[{dur:'1 Hour',amt:'€350',note:'Incall or outcall',feat:false},{dur:'2 Hours',amt:'€600',note:'Most popular',feat:true},{dur:'Overnight',amt:'€1,000',note:'Touring rate',feat:false},{dur:'Weekend',amt:'€2,800',note:'Travel incl.',feat:false}],
+  },
+  'Club Noir': {
+    icon:'ti-building', cat:'Nightlife', type:'Members Club', name:'Club Noir',
+    rating:'4.7', city:'Brussels, BE', s1:'342', s2:'4.7', s3:'8 yrs', s4:'18k',
+    badges:[{cls:'bt',txt:'Trending'}],
+    desc:'Brussels\'s most exclusive private nightclub. Strict door policy, high-end bar, themed nights every weekend. Membership and guest list available through SecretXperience.',
+    tags:['Private bar','Themed nights','Guest list','VIP tables','Late license','Members only'],
+    pricing:[{dur:'Entry',amt:'€50',note:'Guest list',feat:false},{dur:'VIP Table',amt:'€500',note:'Bottle included',feat:true},{dur:'Private Room',amt:'€1,200',note:'Up to 20 guests',feat:false},{dur:'Membership',amt:'€200/mo',note:'Priority entry',feat:false}],
+  },
+  'Luna Creative': {
+    icon:'ti-camera', cat:'Creators', type:'Subscription', name:'Luna Creative',
+    rating:'4.8', city:'Online', s1:'840', s2:'4.8', s3:'1 yr', s4:'12k',
+    badges:[{cls:'bv',txt:'✓ Verified'}],
+    desc:'Premium adult content creator with exclusive photo sets, video content, and live sessions. New content posted weekly. Direct messaging included with all tiers.',
+    tags:['Photo sets','Video content','Live sessions','Custom requests','Messaging','Behind the scenes'],
+    pricing:[{dur:'Basic',amt:'€9/mo',note:'Photos & video',feat:false},{dur:'Premium',amt:'€15/mo',note:'+ live sessions',feat:true},{dur:'VIP',amt:'€35/mo',note:'Custom content',feat:false},{dur:'Custom',amt:'POA',note:'One-off request',feat:false}],
+  },
+  'Le Boudoir Suite': {
+    icon:'ti-home', cat:'Rentals', type:'Themed Suite', name:'Le Boudoir Suite',
+    rating:'4.6', city:'Ghent, BE', s1:'76', s2:'4.6', s3:'4 yrs', s4:'3.2k',
+    badges:[{cls:'bp',txt:'Premium'}],
+    desc:'Luxuriously appointed private suite in central Ghent. Designed for adult stays with a king bed, mood lighting, jacuzzi, and fully stocked minibar. Completely discreet check-in.',
+    tags:['Jacuzzi','King bed','Mood lighting','Minibar','Discreet entry','24h service'],
+    pricing:[{dur:'2 Hours',amt:'€120',note:'Daytime',feat:false},{dur:'4 Hours',amt:'€200',note:'Most popular',feat:true},{dur:'Overnight',amt:'€350',note:'10pm – noon',feat:false},{dur:'Weekend',amt:'€800',note:'Fri–Sun',feat:false}],
+  },
+  'Studio Rouge': {
+    icon:'ti-map', cat:'Photo / Video', type:'Studio', name:'Studio Rouge',
+    rating:'5.0', city:'Brussels, BE', s1:'58', s2:'5.0', s3:'6 yrs', s4:'5.4k',
+    badges:[{cls:'bv',txt:'✓ Verified'},{cls:'bt',txt:'Trending'}],
+    desc:'Professional adult photography and video production studio in central Brussels. Fully equipped with 4K cameras, lighting rigs, multiple set configurations, and a private dressing room.',
+    tags:['4K cameras','Pro lighting','Multiple sets','Dressing room','Sound system','Private entry'],
+    pricing:[{dur:'2 Hours',amt:'€240',note:'1 set',feat:false},{dur:'Half day',amt:'€480',note:'2 sets',feat:true},{dur:'Full day',amt:'€800',note:'All sets',feat:false},{dur:'Overnight',amt:'€1,100',note:'Creative sessions',feat:false}],
+  },
+  'Noir Collection': {
+    icon:'ti-shopping-bag', cat:'Adult Shop', type:'Online Store', name:'Noir Collection',
+    rating:'4.7', city:'Online · BE', s1:'1.2k', s2:'4.7', s3:'3 yrs', s4:'28k',
+    badges:[{cls:'bt',txt:'Trending'}],
+    desc:'Curated adult boutique specialising in luxury lingerie, premium toys, and wellness products. All orders shipped in plain, discreet packaging within 48 hours across Europe.',
+    tags:['Luxury lingerie','Premium toys','Wellness','Discreet shipping','EU delivery','Gift wrapping'],
+    pricing:[{dur:'Standard',amt:'€19+',note:'Free ship €50+',feat:false},{dur:'Premium',amt:'€49+',note:'Priority ship',feat:true},{dur:'Gift set',amt:'€89+',note:'Curated box',feat:false},{dur:'VIP access',amt:'€15/mo',note:'Member discounts',feat:false}],
+  }
+};
+
+// ── Open / Close detail panel ──
+var dpOverlay = document.getElementById('detail-overlay');
+var dpPanel = document.getElementById('detail-panel');
+var dpSaved = false;
+
+function openDetail(data) {
+  // Populate hero
+  document.getElementById('dpHeroIcon').className = 'ti ' + data.icon;
+  var badgesEl = document.getElementById('dpHeroBadges');
+  badgesEl.innerHTML = '';
+  (data.badges||[]).forEach(function(b){
+    var s = document.createElement('span');
+    s.className = 'badge ' + b.cls;
+    s.textContent = b.txt;
+    badgesEl.appendChild(s);
+  });
+  // Identity
+  document.getElementById('dpCat').textContent = data.cat;
+  document.getElementById('dpTypePill').textContent = data.type;
+  document.getElementById('dpName').textContent = data.name;
+  document.getElementById('dpRating').textContent = data.rating;
+  document.getElementById('dpCity').textContent = data.city;
+  // Stats
+  document.getElementById('dpS1').textContent = data.s1;
+  document.getElementById('dpS2').textContent = data.s2;
+  document.getElementById('dpS3').textContent = data.s3;
+  document.getElementById('dpS4').textContent = data.s4;
+  // Desc
+  document.getElementById('dpDesc').textContent = data.desc;
+  // Tags
+  var tagsEl = document.getElementById('dpTags');
+  tagsEl.innerHTML = '';
+  (data.tags||[]).forEach(function(tag,i){
+    var s = document.createElement('span');
+    s.className = 'dp-tag' + (i < 2 ? ' highlight' : '');
+    s.textContent = tag;
+    tagsEl.appendChild(s);
+  });
+  // Pricing
+  var priceEl = document.getElementById('dpPricing');
+  priceEl.innerHTML = '';
+  (data.pricing||[]).forEach(function(p){
+    var d = document.createElement('div');
+    d.className = 'dp-price-card' + (p.feat ? ' featured' : '');
+    d.innerHTML = '<div class="dp-price-dur">'+p.dur+'</div><div class="dp-price-amt">'+p.amt+'</div><div class="dp-price-note">'+p.note+'</div>';
+    priceEl.appendChild(d);
+  });
+  // Scroll to top
+  document.getElementById('dpBody').scrollTop = 0;
+  // Open
+  dpOverlay.classList.add('open');
+  dpPanel.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDetail() {
+  dpOverlay.classList.remove('open');
+  dpPanel.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('dpClose').addEventListener('click', closeDetail);
+dpOverlay.addEventListener('click', closeDetail);
+
+// Save toggle
+document.getElementById('dpSave').addEventListener('click', function(){
+  dpSaved = !dpSaved;
+  this.classList.toggle('saved', dpSaved);
+  this.querySelector('i').className = dpSaved ? 'ti ti-heart-filled' : 'ti ti-heart';
+});
+
+// Keyboard close
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape' && dpPanel.classList.contains('open')) closeDetail();
+});
+
+// ── Wire cards to panel ──
+document.querySelectorAll('.card').forEach(function(card){
+  card.addEventListener('click', function(){
+    var name = this.querySelector('.card-name').textContent.trim();
+    var data = listingData[name];
+    if(data) openDetail(data);
+  });
+  card.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' || e.key === ' ') this.click();
+  });
+});
+
+// ── Wire similar cards (re-open with fallback) ──
+document.querySelectorAll('.dp-sim-card').forEach(function(sc){
+  sc.addEventListener('click', function(){
+    var name = this.querySelector('.dp-sim-name').textContent.trim();
+    var data = listingData[name];
+    if(data) openDetail(data);
+  });
+});
+
+// ══ TOAST ══
+function showToast(msg){
+  var t=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show')},2800);
+}
+
+// ══ MODAL HELPERS ══
+function openModal(id){
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal(id){
+  document.getElementById(id).classList.remove('open');
+  // only restore scroll if no other modals open
+  if(!document.querySelector('.modal-overlay.open'))
+    document.body.style.overflow='';
+}
+
+// ══ AUTH MODAL ══
+document.getElementById('loginBtn')?.addEventListener('click',function(){window.location.href='/login'});
+document.getElementById('signupBtn')?.addEventListener('click',function(){window.location.href='/login'});
+document.getElementById('authClose').addEventListener('click',function(){closeModal('authModal')});
+document.getElementById('authModal').addEventListener('click',function(e){if(e.target===this)closeModal('authModal')});
+
+function showAuthTab(tab){
+  document.querySelectorAll('.auth-tab').forEach(function(t){t.classList.toggle('active',t.dataset.tab===tab)});
+  document.getElementById('loginPanel').classList.toggle('active',tab==='login');
+  document.getElementById('signupPanel').classList.toggle('active',tab==='signup');
+}
+document.querySelectorAll('.auth-tab').forEach(function(t){
+  t.addEventListener('click',function(){showAuthTab(this.dataset.tab)});
+});
+document.getElementById('switchToSignup').addEventListener('click',function(){showAuthTab('signup')});
+document.getElementById('switchToLogin').addEventListener('click',function(){showAuthTab('login')});
+
+// Role picker
+document.querySelectorAll('.role-card').forEach(function(rc){
+  rc.addEventListener('click',function(){
+    document.querySelectorAll('.role-card').forEach(function(x){x.classList.remove('selected')});
+    this.classList.add('selected');
+  });
+});
+
+// Password toggles
+document.querySelectorAll('.pw-toggle').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    var inp=document.getElementById(this.dataset.target);
+    var showing=inp.type==='text';
+    inp.type=showing?'password':'text';
+    this.querySelector('i').className=showing?'ti ti-eye':'ti ti-eye-off';
+  });
+});
+
+// Login submit (mock)
+document.getElementById('loginSubmit').addEventListener('click',function(){
+  var email=document.getElementById('loginEmail').value.trim();
+  var pw=document.getElementById('loginPw').value.trim();
+  var err=document.getElementById('loginErr');
+  if(!email||!pw){err.classList.add('show');return;}
+  err.classList.remove('show');
+  // Simulate login success
+  setTimeout(function(){
+    closeModal('authModal');
+    showToast('Welcome back to SecretXperience!');
+    document.getElementById('loginBtn').textContent='My account';
+  },300);
+});
+
+// Signup submit (mock)
+document.getElementById('signupSubmit').addEventListener('click',function(){
+  var email=document.getElementById('signupEmail').value.trim();
+  var pw=document.getElementById('signupPw').value.trim();
+  var terms=document.getElementById('termsCheck').checked;
+  var err=document.getElementById('signupErr');
+  if(!email||!pw||!terms){err.classList.add('show');err.textContent=!terms?'You must agree to the terms to continue.':'Please fill in all required fields.';return;}
+  err.classList.remove('show');
+  document.getElementById('signupSuccess').classList.add('show');
+  document.getElementById('signupSubmit').style.display='none';
+  setTimeout(function(){
+    closeModal('authModal');
+    document.getElementById('signupSuccess').classList.remove('show');
+    document.getElementById('signupSubmit').style.display='';
+    showToast('Account created — check your email!');
+  },3200);
+});
+
+// ══ BOOKING MODAL ══
+var bookStep=0,selDate='',selTime='',selDur='2 Hours',selPrice=350;
+var calYear=new Date().getFullYear(),calMonth=new Date().getMonth();
+var availDays=[1,3,4,5,6]; // Mon, Wed, Thu, Fri, Sat (0=Sun)
+
+function openBookModal(name,cat){
+  document.getElementById('bookListingName').textContent=name||'Sophia A.';
+  document.getElementById('bookListingCat').textContent=cat||'Escort · Independent · Brussels';
+  document.getElementById('sumName').textContent=name||'Sophia A.';
+  selDate='';selTime='';selDur='2 Hours';selPrice=350;bookStep=0;
+  updateBookSteps();
+  renderCal();
+  openModal('bookModal');
+}
+
+document.getElementById('bookClose').addEventListener('click',function(){closeModal('bookModal')});
+document.getElementById('bookModal').addEventListener('click',function(e){if(e.target===this)closeModal('bookModal')});
+
+function updateBookSteps(){
+  document.querySelectorAll('.book-step').forEach(function(s,i){
+    s.classList.toggle('active',i===bookStep);
+    s.classList.toggle('done',i<bookStep);
+  });
+  document.querySelectorAll('.book-pane').forEach(function(p,i){
+    p.classList.toggle('active',i===bookStep);
+  });
+}
+
+// Calendar
+var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+var DAYS_SHORT=['Mo','Tu','We','Th','Fr','Sa','Su'];
+
+function renderCal(){
+  document.getElementById('calMonthLabel').textContent=MONTHS[calMonth]+' '+calYear;
+  var grid=document.getElementById('calGrid');
+  grid.innerHTML='';
+  var first=new Date(calYear,calMonth,1).getDay();
+  var offset=(first===0)?6:first-1; // Mon-first
+  var days=new Date(calYear,calMonth+1,0).getDate();
+  var today=new Date();
+  for(var i=0;i<offset;i++){var e=document.createElement('div');e.className='cal-day inactive';grid.appendChild(e);}
+  for(var d=1;d<=days;d++){
+    (function(day){
+      var date=new Date(calYear,calMonth,day);
+      var dow=date.getDay(); // 0=Sun
+      var isPast=date<new Date(today.getFullYear(),today.getMonth(),today.getDate());
+      var isAvail=availDays.includes(dow);
+      var el=document.createElement('div');
+      el.textContent=day;
+      el.className='cal-day'+(isPast?' inactive':isAvail?' avail':'');
+      var dateStr=calYear+'-'+String(calMonth+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+      if(dateStr===selDate)el.classList.add('selected');
+      if(!isPast&&isAvail){
+        el.addEventListener('click',function(){
+          selDate=dateStr;
+          document.querySelectorAll('.cal-day').forEach(function(c){c.classList.remove('selected')});
+          el.classList.add('selected');
+        });
+      }
+      grid.appendChild(el);
+    })(d);
+  }
+}
+
+document.getElementById('calPrev').addEventListener('click',function(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}renderCal();});
+document.getElementById('calNext').addEventListener('click',function(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderCal();});
+
+// Time slots
+document.querySelectorAll('.time-slot').forEach(function(ts){
+  ts.addEventListener('click',function(){
+    document.querySelectorAll('.time-slot').forEach(function(x){x.classList.remove('selected')});
+    this.classList.add('selected');
+    selTime=this.dataset.time;
+  });
+});
+
+// Duration pills
+document.querySelectorAll('.dur-pill').forEach(function(dp){
+  dp.addEventListener('click',function(){
+    document.querySelectorAll('.dur-pill').forEach(function(x){x.classList.remove('selected')});
+    this.classList.add('selected');
+    selDur=this.dataset.dur;selPrice=parseInt(this.dataset.price);
+    document.getElementById('sumDur').textContent=selDur;
+    document.getElementById('sumPrice').textContent='€'+selPrice.toLocaleString();
+  });
+});
+
+// Meet type toggle
+document.getElementById('meetType').addEventListener('change',function(){
+  document.getElementById('locationField').style.display=this.value.includes('Outcall')?'block':'none';
+});
+
+// Step navigation
+document.getElementById('bookNext0').addEventListener('click',function(){
+  if(!selDate){showToast('Please select a date first');return;}
+  bookStep=1;updateBookSteps();
+});
+document.getElementById('bookBack1').addEventListener('click',function(){bookStep=0;updateBookSteps();});
+document.getElementById('bookNext1').addEventListener('click',function(){
+  if(!selTime){showToast('Please select a time');return;}
+  bookStep=2;updateBookSteps();
+  document.getElementById('sumDate').textContent=selDate;
+  document.getElementById('sumTime').textContent=selTime;
+});
+document.getElementById('bookBack2').addEventListener('click',function(){bookStep=1;updateBookSteps();});
+document.getElementById('bookNext2').addEventListener('click',function(){bookStep=3;updateBookSteps();});
+document.getElementById('bookBack3').addEventListener('click',function(){bookStep=2;updateBookSteps();});
+document.getElementById('bookSubmit').addEventListener('click',function(){
+  document.getElementById('bookSuccess').classList.add('show');
+  this.style.display='none';
+  document.getElementById('bookBack3').style.display='none';
+  setTimeout(function(){
+    closeModal('bookModal');
+    document.getElementById('bookSuccess').classList.remove('show');
+    document.getElementById('bookSubmit').style.display='';
+    document.getElementById('bookBack3').style.display='';
+    bookStep=0;selDate='';selTime='';updateBookSteps();
+    showToast('Booking request sent — awaiting confirmation');
+  },3000);
+});
+
+// ── Wire booking CTA in detail panel ──
+document.querySelector('.dp-cta-book').addEventListener('click',function(){
+  var name=document.getElementById('dpName').textContent;
+  var cat=document.getElementById('dpCat').textContent;
+  closeDetail();
+  setTimeout(function(){openBookModal(name,cat+' · '+document.getElementById('dpCity').textContent);},200);
+});
+
+document.querySelector('.dp-cta-msg').addEventListener('click',function(){
+  closeDetail();
+  setTimeout(function(){openModal('msgModal');},200);
+});
+
+// ══ MESSAGING ══
+document.getElementById('msgClose').addEventListener('click',function(){closeModal('msgModal')});
+document.getElementById('msgModal').addEventListener('click',function(e){if(e.target===this)closeModal('msgModal')});
+
+var threadData={
+  sophia:{av:'SA',avStyle:'background:rgba(100,80,200,.2);color:#b0a0f8',name:'Sophia A.',sub:'Online now · Escort · Private',msgs:[
+    {me:false,text:'Hi! Thanks for reaching out through SecretXperience. Happy to answer any questions you have.',time:'14:02'},
+    {me:true,text:"Hi Sophia, I saw your profile — I'm interested in booking you for Thursday evening.",time:'14:05'},
+    {me:false,text:"Thursday works for me! I'm available from 18:00. What duration are you thinking?",time:'14:06'},
+    {me:true,text:'Probably 2–3 hours, starting around 19:00. Is outcall possible?',time:'14:08'},
+    {me:false,text:"Yes, outcall is fine. I'm in Brussels — where would you like to meet?",time:'14:09'},
+    {me:true,text:'Hotel Amigo in the centre. Does that work?',time:'14:11'},
+    {me:false,text:'Perfect, I know it well. Looking forward to Thursday! Use the booking button above when you\'re ready to confirm.',time:'14:12'},
+  ]},
+  luna:{av:'LC',avStyle:'background:rgba(26,143,106,.15);color:#1dc9a0',name:'Luna Creative',sub:'Creator · Subscription',msgs:[
+    {me:false,text:'Hi! Your custom content request is ready. Check your subscription portal to access it.',time:'11:30'},
+    {me:true,text:'Amazing, thank you! Really happy with it.',time:'11:45'},
+    {me:false,text:'Glad you enjoyed it! Let me know if you\'d like anything else.',time:'11:46'},
+  ]},
+  elise:{av:'EV',avStyle:'background:rgba(197,160,90,.15);color:var(--gold)',name:'Elise V.',sub:'Escort · Elite · Antwerp',msgs:[
+    {me:false,text:'Hello, thank you for your interest. What dates are you considering?',time:'Yesterday 16:00'},
+    {me:true,text:'I\'m flexible, probably next weekend if you\'re available.',time:'Yesterday 16:12'},
+    {me:false,text:'Next weekend works. Saturday or Sunday?',time:'Yesterday 17:00'},
+  ]},
+  support:{av:'SX',avStyle:'background:var(--gbg);color:var(--gold)',name:'SecretXperience Support',sub:'Response time: ~2 hours',msgs:[
+    {me:false,text:'Welcome to SecretXperience.eu! How can we help you today?',time:'3 days ago'},
+  ]}
+};
+var activeThread='sophia';
+
+function loadThread(key){
+  activeThread=key;
+  var d=threadData[key];
+  if(!d)return;
+  document.getElementById('chatAv').textContent=d.av;
+  document.getElementById('chatAv').style.cssText='width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0;font-family:var(--serif);'+d.avStyle;
+  document.getElementById('chatName').textContent=d.name;
+  document.querySelector('#chatArea .mhs').innerHTML='<span class="msg-online"></span> '+d.sub;
+  var body=document.getElementById('chatBody');
+  body.innerHTML='<div class="msg-date-sep">Today</div>';
+  d.msgs.forEach(function(m){
+    var div=document.createElement('div');
+    div.className='msg-bubble '+(m.me?'me':'them');
+    div.innerHTML=m.text+'<div class="msg-bubble-time">'+m.time+'</div>';
+    body.appendChild(div);
+  });
+  body.scrollTop=body.scrollHeight;
+  document.querySelectorAll('.msg-thread').forEach(function(t){t.classList.toggle('active',t.dataset.thread===key)});
+  // clear unread badge
+  var th=document.querySelector('.msg-thread[data-thread="'+key+'"]');
+  if(th){var badge=th.querySelector('.msg-unread');if(badge)badge.remove();}
+}
+
+document.querySelectorAll('.msg-thread').forEach(function(t){
+  t.addEventListener('click',function(){loadThread(this.dataset.thread)});
+});
+
+// Send message
+function sendMsg(){
+  var inp=document.getElementById('msgInput');
+  var text=inp.value.trim();
+  if(!text)return;
+  var body=document.getElementById('chatBody');
+  var div=document.createElement('div');div.className='msg-bubble me';
+  var now=new Date();
+  div.innerHTML=text+'<div class="msg-bubble-time">'+now.getHours()+':'+String(now.getMinutes()).padStart(2,'0')+'</div>';
+  body.appendChild(div);
+  inp.value='';inp.style.height='auto';
+  body.scrollTop=body.scrollHeight;
+  // push to thread data
+  if(threadData[activeThread]) threadData[activeThread].msgs.push({me:true,text:text,time:'now'});
+  // mock reply
+  setTimeout(function(){
+    var replies=['Got it, thanks!','I\'ll get back to you shortly.','That works for me.','Let me check my schedule.','Sure, happy to arrange that.'];
+    var reply=replies[Math.floor(Math.random()*replies.length)];
+    var rd=document.createElement('div');rd.className='msg-bubble them';
+    rd.innerHTML=reply+'<div class="msg-bubble-time">now</div>';
+    body.appendChild(rd);body.scrollTop=body.scrollHeight;
+  },1200+Math.random()*800);
+}
+document.getElementById('msgSend').addEventListener('click',sendMsg);
+document.getElementById('msgInput').addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}
+  this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px';
+});
+
+// Quick replies
+document.querySelectorAll('.msg-quick').forEach(function(qb){
+  qb.addEventListener('click',function(){
+    document.getElementById('msgInput').value=this.textContent;
+    document.getElementById('msgInput').focus();
+  });
+});
+
+// Nav login button -> open auth
+document.getElementById('loginBtn')?.addEventListener('click',function(){window.location.href='/login'});
+document.getElementById('signupBtn')?.addEventListener('click',function(){window.location.href='/login'});
+
+// ── Backend modal (wire to nav or keyboard shortcut) ──
+document.getElementById('backendClose').addEventListener('click',function(){closeModal('backendModal')});
+document.getElementById('backendModal').addEventListener('click',function(e){if(e.target===this)closeModal('backendModal')});
+document.getElementById('closeBackend').addEventListener('click',function(){closeModal('backendModal')});
+
+// Press B to open backend panel (dev shortcut)
+document.addEventListener('keydown',function(e){
+  if(e.key==='b'&&e.altKey){e.preventDefault();openModal('backendModal');}
+  if(e.key==='Escape'){
+    ['authModal','bookModal','msgModal','backendModal'].forEach(function(id){
+      if(document.getElementById(id).classList.contains('open'))closeModal(id);
+    });
+    if(dpPanel.classList.contains('open'))closeDetail();
+  }
+});
+
+// Load first thread on open
+document.getElementById('msgModal').addEventListener('transitionend',function(){
+  if(this.classList.contains('open'))loadThread('sophia');
+});
+
+renderHow('escorts');
+
+    // Sign out handler
+    document.querySelectorAll('[data-action="logout"]').forEach(function(btn) {
+      btn.addEventListener('click', async function() {
+        await supabase.auth.signOut()
+        window.location.href = '/login'
+      })
+    })
+
+
+    // ── Real listings from Supabase ──
+    const activeFilters: any = { category: 'all', verified: false, premium: false, trending: false, minRating: 0, priceMax: null }
+
+    const getCategoryIcon = (cat: string) => {
+      const icons: any = {
+        escorts: 'ti-user', companionship: 'ti-heart', nightlife: 'ti-building',
+        creators: 'ti-camera', adult: 'ti-flame', rentals: 'ti-home',
+        hotels: 'ti-bed', events: 'ti-confetti', photo: 'ti-camera',
+        affiliate: 'ti-link', memberships: 'ti-crown', experiences: 'ti-sparkles', shop: 'ti-shopping-bag'
+      }
+      return icons[cat] || 'ti-tag'
+    }
+
+    const renderCards = (listings: any[]) => {
+      const container = document.getElementById('listingCards')
+      if (!container) return
+      const countEl = document.querySelector('.res-count')
+      if (listings.length === 0) {
+        container.innerHTML = '<p style="color:var(--t3);grid-column:1/-1;text-align:center;padding:2rem 0">No listings found</p>'
+        if (countEl) countEl.textContent = '0 listings found'
+        return
+      }
+      container.innerHTML = listings.map((l: any) => `
+        <div class="card" role="listitem" tabindex="0">
+          <div class="card-img">
+            <i class="ti ${getCategoryIcon(l.category)}" aria-hidden="true"></i>
+            <div class="card-badges">
+              ${l.verified ? '<span class="badge bv">✓ Verified</span>' : ''}
+              ${l.premium ? '<span class="badge bp">Premium</span>' : ''}
+              ${l.trending ? '<span class="badge bt">Trending</span>' : ''}
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-cat">${l.category}${l.subcategory ? ' · ' + l.subcategory : ''}</div>
+            <div class="card-name">${l.title}</div>
+            <div class="card-meta">
+              <span class="card-price">${l.price_from ? '€' + l.price_from + (l.price_to ? '–€' + l.price_to : '') : 'Contact'}</span>
+              <span class="card-rating"><i class="ti ti-star-filled" aria-hidden="true"></i> ${l.rating ? l.rating.toFixed(1) : '—'}</span>
+            </div>
+            <div class="card-loc"><i class="ti ti-map-pin" aria-hidden="true"></i> ${l.city || '—'}, ${l.country || ''}</div>
+          </div>
+        </div>
+      `).join('')
+      if (countEl) countEl.textContent = listings.length + ' listings found'
+    }
+
+    const fetchListings = async (filters: any) => {
+      let query = (supabase as any).from('listings').select('*').eq('active', true)
+      if (filters.category && filters.category !== 'all') query = query.eq('category', filters.category)
+      if (filters.verified) query = query.eq('verified', true)
+      if (filters.premium) query = query.eq('premium', true)
+      if (filters.trending) query = query.eq('trending', true)
+      if (filters.minRating > 0) query = query.gte('rating', filters.minRating)
+      if (filters.priceMax) query = query.lte('price_from', filters.priceMax)
+      const { data } = await query.order('created_at', { ascending: false })
+      renderCards(data || [])
+    }
+
+    // Wire category bar to real data
+    document.querySelectorAll('.cat').forEach(function(cat) {
+      cat.addEventListener('click', function() {
+        activeFilters.category = (cat as HTMLElement).dataset.cat || 'all'
+        fetchListings(activeFilters)
+      })
+    })
+
+    // Wire filter checkboxes
+    document.getElementById('fv')?.addEventListener('change', function(e) {
+      activeFilters.verified = (e.target as HTMLInputElement).checked
+      fetchListings(activeFilters)
+    })
+    document.getElementById('fp')?.addEventListener('change', function(e) {
+      activeFilters.premium = (e.target as HTMLInputElement).checked
+      fetchListings(activeFilters)
+    })
+    document.getElementById('ft')?.addEventListener('change', function(e) {
+      activeFilters.trending = (e.target as HTMLInputElement).checked
+      fetchListings(activeFilters)
+    })
+
+    // Wire rating slider
+    document.getElementById('rsl')?.addEventListener('input', function(e) {
+      const val = (e.target as HTMLInputElement).value
+      activeFilters.minRating = parseFloat(val)
+      const rval = document.getElementById('rval')
+      if (rval) rval.textContent = val
+      fetchListings(activeFilters)
+    })
+
+    // Wire price pills
+    document.querySelectorAll('.pp').forEach(function(pill) {
+      pill.addEventListener('click', function() {
+        document.querySelectorAll('.pp').forEach(p => p.classList.remove('active'))
+        pill.classList.add('active')
+        const text = pill.textContent || ''
+        if (text === 'Free') activeFilters.priceMax = 0
+        else if (text === '€0–100') activeFilters.priceMax = 100
+        else if (text === '€100–500') activeFilters.priceMax = 500
+        else if (text === '€500–1k') activeFilters.priceMax = 1000
+        else if (text === '€1k–5k') activeFilters.priceMax = 5000
+        else activeFilters.priceMax = null
+        fetchListings(activeFilters)
+      })
+    })
+
+    // Initial load
+    fetchListings(activeFilters)
+
+  }, [])
+
+  return (
+    <div dangerouslySetInnerHTML={{ __html: `<!-- ══ AGE GATE ══ -->
+<div id="gate" role="dialog" aria-modal="true" aria-label="Age verification">
+  <div class="gate-box">
+    <div class="gate-wordmark">SecretXperience · Age Verification</div>
+    <i class="ti ti-shield-lock gate-emblem" aria-hidden="true"></i>
+    <h2>Are you 18 or older?</h2>
+    <p>This website contains adult content and services intended for adults only. You must be at least 18 years of age — or the age of majority in your jurisdiction — to enter.</p>
+    <div class="gate-btns">
+      <button class="g-yes" id="gyes">Yes, I am 18+ — Enter Site</button>
+      <button class="g-no" id="gno">No — Exit</button>
+    </div>
+    <div class="gate-legal">
+      By entering you confirm you have read and agree to our <a href="#">Terms of Use</a> and <a href="#">Privacy Policy</a>. This site uses cookies for enhanced experience.
+    </div>
+  </div>
+</div>
+
+<!-- ══ SIDEBAR OVERLAY ══ -->
+<div class="sov" id="sov" aria-hidden="true"></div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+
+  <!-- NAV -->
+  <nav role="navigation" aria-label="Main navigation">
+    <div class="nav-logo">Secret<span>Xperience</span></div>
+    <div class="nav-search">
+      <i class="ti ti-search" aria-hidden="true"></i>
+      <input type="text" placeholder="Search listings, companions, venues…" aria-label="Search"/>
+    </div>
+    <div class="nav-right">
+      <button class="nb" id="locBtn" aria-label="Location"><i class="ti ti-map-pin" aria-hidden="true"></i> Brussels</button>
+      <button class="nb" id="loginBtn">Log in</button>
+      <button class="nb pri" id="signupBtn">Sign up</button>
+      <button class="nb nav-menu-btn" id="menuBtn" aria-label="Open menu"><i class="ti ti-menu-2"></i></button>
+    </div>
+  </nav>
+
+  <!-- CATEGORY BAR -->
+  <div class="catbar" role="navigation" aria-label="Categories" id="catBar">
+    <div class="cat active" data-cat="all">All</div>
+    <div class="cat" data-cat="escorts">Escorts</div>
+    <div class="cat" data-cat="companionship">Companionship</div>
+    <div class="cat" data-cat="nightlife">Nightlife</div>
+    <div class="cat" data-cat="creators">Creators</div>
+    <div class="cat" data-cat="adult">Adult Services</div>
+    <div class="cat" data-cat="rentals">Rentals</div>
+    <div class="cat" data-cat="hotels">Hotels</div>
+    <div class="cat" data-cat="events">Event Spaces</div>
+    <div class="cat" data-cat="photo">Photo / Video</div>
+    <div class="cat" data-cat="affiliate">Affiliate</div>
+    <div class="cat" data-cat="memberships">Memberships</div>
+    <div class="cat" data-cat="experiences">Experiences</div>
+    <div class="cat" data-cat="shop">Adult Shop</div>
+  </div>
+
+  <div class="layout">
+
+    <!-- ══ SIDEBAR ══ -->
+    <aside class="sidebar" id="sidebar" aria-label="Filters">
+      <div class="sidebar-hd">
+        <div class="sidebar-title">Filters</div>
+        <button class="sidebar-close" id="sideClose" aria-label="Close filters"><i class="ti ti-x"></i></button>
+      </div>
+
+      <div class="fsec">
+        <div class="flbl">Escort type</div>
+        <div class="etype-list">
+          <button class="etype active">All escorts</button>
+          <button class="etype">Independent</button>
+          <button class="etype">Private</button>
+          <button class="etype">Agency</button>
+          <button class="etype">VIP / Elite</button>
+          <button class="etype">Touring</button>
+          <button class="etype">Duo / Couple</button>
+          <button class="etype">Male</button>
+          <button class="etype">Female</button>
+          <button class="etype">Non-binary</button>
+          <button class="etype">Trans</button>
+        </div>
+      </div>
+
+      <div class="fsec">
+        <div class="flbl">Features</div>
+        <div class="frow"><input type="checkbox" id="fv" checked/><label for="fv">Verified only</label></div>
+        <div class="frow"><input type="checkbox" id="fp"/><label for="fp">Premium listings</label></div>
+        <div class="frow"><input type="checkbox" id="ft"/><label for="ft">Trending now</label></div>
+        <div class="frow"><input type="checkbox" id="fn"/><label for="fn">Available now</label></div>
+      </div>
+
+      <div class="fsec">
+        <div class="flbl">Price range</div>
+        <div class="ppills">
+          <div class="pp active">Free</div>
+          <div class="pp">€0–100</div>
+          <div class="pp">€100–500</div>
+          <div class="pp">€500–1k</div>
+          <div class="pp">€1k–5k</div>
+          <div class="pp">€5k+</div>
+        </div>
+      </div>
+
+      <div class="fsec">
+        <div class="flbl">Minimum rating</div>
+        <input type="range" class="rslider" min="0" max="5" step="0.5" value="3" id="rsl" aria-label="Minimum rating"/>
+        <div style="font-size:11px;color:var(--t3);margin-top:4px">
+          <i class="ti ti-star-filled" style="color:var(--gold);font-size:12px" aria-hidden="true"></i>
+          <span id="rval">3.0</span>+ stars
+        </div>
+      </div>
+
+      <div class="fsec">
+        <div class="flbl">Membership tier</div>
+        <div class="tier-stack">
+          <div class="tier">Free</div>
+          <div class="tier gold-tier"><i class="ti ti-crown" aria-hidden="true" style="font-size:12px"></i> Gold Member</div>
+          <div class="tier plat-tier"><i class="ti ti-diamond" aria-hidden="true" style="font-size:12px"></i> Platinum Member</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ══ MAIN ══ -->
+    <main class="main" id="mainContent">
+
+      <!-- Admin bar -->
+      <div class="admin-bar" role="region" aria-label="Admin overview">
+        <div class="admin-top">
+          <div class="admin-label">
+            <i class="ti ti-shield-check" aria-hidden="true" style="color:var(--gold)"></i>
+            Admin Overview
+            <span class="admin-badge">Super Admin</span>
+          </div>
+          <div class="live-dot"><span></span> Live · Brussels</div>
+        </div>
+        <div class="admin-stats">
+          <div class="astat"><div class="astat-v">2,841</div><div class="astat-l">Active listings</div></div>
+          <div class="astat"><div class="astat-v">418</div><div class="astat-l">Pending review</div></div>
+          <div class="astat"><div class="astat-v">12,440</div><div class="astat-l">Registered users</div></div>
+          <div class="astat"><div class="astat-v">€38.2k</div><div class="astat-l">Revenue this month</div></div>
+        </div>
+      </div>
+
+      <!-- Featured -->
+      <div class="featured">
+        <div class="ft-left">
+          <div class="ft-tag">Featured this week</div>
+          <div class="ft-title">Velvet Lounge — Private Experiences</div>
+          <div class="ft-sub">Premium events · Verified · Brussels</div>
+        </div>
+        <button class="ft-btn">View listing <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs" role="tablist">
+        <div class="tab active" role="tab">All listings</div>
+        <div class="tab" role="tab">Near me</div>
+        <div class="tab" role="tab">New</div>
+        <div class="tab" role="tab">Top rated</div>
+        <div class="tab" role="tab">My saves</div>
+      </div>
+
+      <!-- Filter toggle (mobile) -->
+      <button class="filter-toggle" id="filterToggle" aria-label="Open filters">
+        <i class="ti ti-adjustments-horizontal" aria-hidden="true"></i> Filters &amp; sort
+      </button>
+
+      <div class="res-row">
+        <div class="res-count">248 listings found</div>
+        <select class="sort-sel" aria-label="Sort listings">
+          <option>Sort: Relevance</option>
+          <option>Sort: Rating ↓</option>
+          <option>Sort: Price ↑</option>
+          <option>Sort: Price ↓</option>
+          <option>Sort: Newest</option>
+        </select>
+      </div>
+
+      <!-- Listing Cards -->
+      <div class="cards" id="listingCards" role="list">
+
+        <div class="card" role="listitem" tabindex="0">
+          <div class="card-img">
+            <i class="ti ti-user" aria-hidden="true"></i>
+            <div class="card-badges"><span class="badge bv">✓ Verified</span><span class="badge bp">Premium</span></div>
+          </div>
+          <div class="card-body">
+            <div class="card-cat">Escort · Independent</div>
+            <div class="card-name">Sophia A.</div>
+            <span class="card-sub">Private</span>
+            <div class="card-meta"><span class="card-price">€200/hr</span><span class="card-rating"><i class="ti ti-star-filled" aria-hidden="true"></i> 4.9</span></div>
+            <div class="card-loc"><i class="ti ti-map-pin" aria-hidden="true"></i> Brussels</div>
+          </div>
+        </div>
+
+        <div class="card" role="listitem" tabindex="0">
+          <div class="card-img">
+            <i class="ti ti-user" aria-hidden="true"></i>
+            <div class="card-badges"><span class="badge bv">✓ Verified</span><span class="badge be">VIP</span></div>
+          </div>
+          <div class="card-body">
+            <div class="card-cat">Escort · Agency</div>
+            <div class="card-name">Elise V.</div>
+            <span class="card-sub">Elite</span>
+            <div class="card-meta"><span class="card-price">€500/hr</span><span class="card-rating"><i class="ti ti-star-filled" aria-hidden="true"></i> 5.0</span></div>
+            <div class="card-loc"><i class="ti ti-map-pin" aria-hidden="true"></i> Antwerp</div>
+          </div>
+        </div>
+
+        <div class="card" role="listitem" tabindex="0">
+          <div class="card-img">
+            <i class="ti ti-user" aria-hidden="true"></i>
+            <div class="card-badges"><span class="badge bv">✓ Verified</span></div>
+          </div>
+          <div class="card-body">
+            <div class="card-cat">Escort · Touring</div>
+            <div class="card-name">Nadia R.</div>
+            <span class="card-sub">Touring</span>
+            <div class="card-meta"><span class="card-price">€350/hr</span><span class="card-rating"><i class="ti ti-star-filled" aria-hidden="true"></i> 4.8</span></div>
+            <div class="card-loc"><i class="ti ti-map-pin" aria-hidden="true"></i> Ghent</div>
+          </div>
+        </div>
+
+        <div class="card" role="listitem" tabindex="0">
+          <div class="card-img">
+            <i class="ti ti-building" aria-hidden="true"></i>
+            <div class="card-badges"><span class="badge bt">Trending</span></div>
+          </div>
+          <div class="card-body">
+            <div class="card-cat">Nightlife</div>
+            <div class="card-name">Club Noir</div>
+            <div class="card-meta"><span class="card-price">€50 entry</span><span class="card-rating"><i class="ti ti-star-filled" aria-hidden="true"></i> 4.7</span></div>
+            <div class="card-loc"><i class="ti ti-map-pin" aria-hidden="true"></i> Brussels</div>
+          </div>
+        </div>
+
+        <div class="card" role="listitem" tabindex="0">
+          <div class="card-img">
+            <i class="ti ti-camera" aria-hidden="true"></i>
+            <div class="card-badges"><span class="badge bv">✓ Verified</span></div>
+          </div>
+          <div class="card-body">
+            <div class="card-cat">Creators</div>
+            <div class="card-name">Luna Creative</div>
+            <div class="card-meta"><span class="card-price">€15/mo</span><span class="card-rating"><i class="ti ti-star-filled" aria-hidden="true"></i> 4.8</span></div>
+            <div class="card-loc"><i class="ti ti-map-pin" aria-hidden="true"></i> Online</div>
+          </div>
+        </div>
+
+        <div class="card" role="listitem" tabindex="0">
+          <div class="card-img">
+            <i class="ti ti-home" aria-hidden="true"></i>
+            <div class="card-badges"><span class="badge bp">Premium</span></div>
+          </div>
+          <div class="card-body">
+            <div class="card-cat">Rentals</div>
+            <div class="card-name">Le Boudoir Suite</div>
+            <div class="card-meta"><span class="card-price">€350/night</span><span class="card-rating"><i class="ti ti-star-filled" aria-hidden="true"></i> 4.6</span></div>
+            <div class="card-loc"><i class="ti ti-map-pin" aria-hidden="true"></i> Ghent</div>
+          </div>
+        </div>
+
+        <div class="card" role="listitem" tabindex="0">
+          <div class="card-img">
+            <i class="ti ti-map" aria-hidden="true"></i>
+            <div class="card-badges"><span class="badge bv">✓ Verified</span><span class="badge bt">Trending</span></div>
+          </div>
+          <div class="card-body">
+            <div class="card-cat">Photo / Video</div>
+            <div class="card-name">Studio Rouge</div>
+            <div class="card-meta"><span class="card-price">€120/hr</span><span class="card-rating"><i class="ti ti-star-filled" aria-hidden="true"></i> 5.0</span></div>
+            <div class="card-loc"><i class="ti ti-map-pin" aria-hidden="true"></i> Brussels</div>
+          </div>
+        </div>
+
+        <div class="card" role="listitem" tabindex="0">
+          <div class="card-img">
+            <i class="ti ti-shopping-bag" aria-hidden="true"></i>
+            <div class="card-badges"><span class="badge bt">Trending</span></div>
+          </div>
+          <div class="card-body">
+            <div class="card-cat">Adult Shop</div>
+            <div class="card-name">Noir Collection</div>
+            <div class="card-meta"><span class="card-price">From €19</span><span class="card-rating"><i class="ti ti-star-filled" aria-hidden="true"></i> 4.7</span></div>
+            <div class="card-loc"><i class="ti ti-map-pin" aria-hidden="true"></i> Online · BE</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- User Profiles -->
+      <div class="sec-title">User profiles</div>
+      <div class="profiles">
+
+        <div class="pcard" tabindex="0">
+          <div class="av" style="background:rgba(100,80,200,.18);color:#b0a0f8">SA</div>
+          <div class="pinfo">
+            <div class="pn">Sophia A.</div>
+            <div class="pr">Independent Escort · Private</div>
+            <div class="pstats">
+              <span class="pst"><i class="ti ti-star-filled" style="color:var(--gold)" aria-hidden="true"></i> 4.9</span>
+              <span class="pst"><i class="ti ti-eye" aria-hidden="true"></i> 2.1k views</span>
+              <span class="pst"><i class="ti ti-circle-check" style="color:#26d4a0" aria-hidden="true"></i> Verified</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pcard" tabindex="0">
+          <div class="av" style="background:var(--tbg);color:#1dc9a0">LC</div>
+          <div class="pinfo">
+            <div class="pn">Luna Creative</div>
+            <div class="pr">Creator · Subscription</div>
+            <div class="pstats">
+              <span class="pst"><i class="ti ti-star-filled" style="color:var(--gold)" aria-hidden="true"></i> 4.8</span>
+              <span class="pst"><i class="ti ti-users" aria-hidden="true"></i> 840 subscribers</span>
+              <span class="pst"><i class="ti ti-circle-check" style="color:#26d4a0" aria-hidden="true"></i> Verified</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pcard" tabindex="0">
+          <div class="av" style="background:var(--pbg);color:#e07aa0">MR</div>
+          <div class="pinfo">
+            <div class="pn">Marc R.</div>
+            <div class="pr">Registered User · Gold Member</div>
+            <div class="pstats">
+              <span class="pst"><i class="ti ti-heart" aria-hidden="true"></i> 32 saves</span>
+              <span class="pst"><i class="ti ti-calendar" aria-hidden="true"></i> 12 bookings</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pcard admin-p" tabindex="0">
+          <div class="av" style="background:var(--gbg);color:var(--gold)">SX</div>
+          <div class="pinfo">
+            <div class="pn">Admin · SecretXperience</div>
+            <div class="pr" style="color:var(--gold)">Super Admin</div>
+            <div class="pstats">
+              <span class="pst"><i class="ti ti-settings" aria-hidden="true"></i> Full access</span>
+              <span class="pst"><i class="ti ti-shield-check" style="color:var(--gold)" aria-hidden="true"></i> Moderator</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ══ HOW IT WORKS ══ -->
+  <section class="how-wrap" aria-label="How SecretXperience works">
+    <div class="how-hd">How SecretXperience works</div>
+    <div class="how-sub">Select a category below for an animated walk-through</div>
+    <div class="how-cats" id="howCats" role="tablist">
+      <div class="hcat active" data-how="escorts" role="tab">Escorts</div>
+      <div class="hcat" data-how="companionship" role="tab">Companionship</div>
+      <div class="hcat" data-how="nightlife" role="tab">Nightlife</div>
+      <div class="hcat" data-how="creators" role="tab">Creators</div>
+      <div class="hcat" data-how="rentals" role="tab">Rentals</div>
+      <div class="hcat" data-how="hotels" role="tab">Hotels</div>
+      <div class="hcat" data-how="events" role="tab">Event Spaces</div>
+      <div class="hcat" data-how="photo" role="tab">Photo / Video</div>
+      <div class="hcat" data-how="shop" role="tab">Adult Shop</div>
+      <div class="hcat" data-how="memberships" role="tab">Memberships</div>
+    </div>
+    <div class="exp-panel">
+      <div class="exp-demo" id="expDemo" aria-live="polite"></div>
+      <div class="exp-body">
+        <div class="exp-name" id="expName"></div>
+        <div class="exp-desc" id="expDesc"></div>
+        <div class="exp-steps" id="expSteps"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ FOOTER ══ -->
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-col">
+        <div class="footer-col-title">Discover</div>
+        <a href="#">Escorts</a>
+        <a href="#">Companionship</a>
+        <a href="#">Nightlife</a>
+        <a href="#">Creators</a>
+        <a href="#">Adult Services</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Venues</div>
+        <a href="#">Rentals</a>
+        <a href="#">Hotels</a>
+        <a href="#">Event Spaces</a>
+        <a href="#">Photo / Video</a>
+        <a href="#">Adult Shop</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Account</div>
+        <a href="#">Sign up</a>
+        <a href="#">Log in</a>
+        <a href="#">Memberships</a>
+        <a href="#">Verified badge</a>
+        <a href="#">List a service</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Legal</div>
+        <a href="#">Terms of Use</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Cookie Policy</a>
+        <a href="#">DMCA</a>
+        <a href="#">18 U.S.C. § 2257</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-logo">Secret<span>Xperience</span>.eu</div>
+      <div class="footer-legal">© 2025 SecretXperience.eu — All rights reserved. Adults only (18+). All listed providers are independent contractors. SecretXperience.eu is not responsible for third-party content.</div>
+    </div>
+  </footer>
+
+  <!-- ══ AUTH MODAL ══ -->
+  <div class="modal-overlay" id="authModal" role="dialog" aria-modal="true" aria-label="Sign in or create account">
+    <div class="modal">
+      <button class="modal-close" id="authClose" aria-label="Close"><i class="ti ti-x"></i></button>
+      <div class="auth-tabs">
+        <div class="auth-tab active" data-tab="login">Log in</div>
+        <div class="auth-tab" data-tab="signup">Create account</div>
+      </div>
+
+      <!-- LOGIN -->
+      <div class="auth-panel active" id="loginPanel">
+        <div class="auth-body">
+          <div class="modal-logo">Secret<span>Xperience</span>.eu</div>
+          <div class="social-btns">
+            <button class="social-btn"><i class="ti ti-brand-google"></i> Continue with Google</button>
+            <button class="social-btn"><i class="ti ti-brand-apple"></i> Continue with Apple</button>
+          </div>
+          <div class="divider">or continue with email</div>
+          <div class="modal-err" id="loginErr">Invalid email or password. Please try again.</div>
+          <div class="field"><label>Email address</label><input type="email" id="loginEmail" placeholder="you@example.com"/></div>
+          <div class="field"><label>Password</label>
+            <div class="pw-wrap">
+              <input type="password" id="loginPw" placeholder="Your password"/>
+              <button class="pw-toggle" data-target="loginPw" aria-label="Show password"><i class="ti ti-eye"></i></button>
+            </div>
+          </div>
+          <div style="text-align:right;margin-bottom:.85rem"><a style="font-size:12px;color:var(--gold);cursor:pointer">Forgot password?</a></div>
+          <button class="modal-btn" id="loginSubmit">Log in to SecretXperience</button>
+          <div class="modal-switch">No account? <a id="switchToSignup">Create one for free</a></div>
+        </div>
+      </div>
+
+      <!-- SIGNUP -->
+      <div class="auth-panel" id="signupPanel">
+        <div class="auth-body">
+          <div class="modal-logo">Secret<span>Xperience</span>.eu</div>
+          <div class="social-btns">
+            <button class="social-btn"><i class="ti ti-brand-google"></i> Sign up with Google</button>
+            <button class="social-btn"><i class="ti ti-brand-apple"></i> Sign up with Apple</button>
+          </div>
+          <div class="divider">or create account with email</div>
+          <div class="modal-err" id="signupErr">Please fill in all required fields.</div>
+          <div style="margin-bottom:1rem">
+            <div class="flbl" style="margin-bottom:.5rem">I am a</div>
+            <div class="role-pick">
+              <div class="role-card selected" data-role="user"><i class="ti ti-user"></i><span>User / Client</span></div>
+              <div class="role-card" data-role="provider"><i class="ti ti-briefcase"></i><span>Service Provider</span></div>
+              <div class="role-card" data-role="venue"><i class="ti ti-building"></i><span>Venue / Hotel</span></div>
+              <div class="role-card" data-role="creator"><i class="ti ti-camera"></i><span>Content Creator</span></div>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>First name</label><input type="text" id="signupFirst" placeholder="First name"/></div>
+            <div class="field"><label>Last name</label><input type="text" id="signupLast" placeholder="Last name"/></div>
+          </div>
+          <div class="field"><label>Email address</label><input type="email" id="signupEmail" placeholder="you@example.com"/></div>
+          <div class="field"><label>Password</label>
+            <div class="pw-wrap">
+              <input type="password" id="signupPw" placeholder="Min. 8 characters"/>
+              <button class="pw-toggle" data-target="signupPw" aria-label="Show password"><i class="ti ti-eye"></i></button>
+            </div>
+            <div class="field-hint">Use at least 8 characters with a mix of letters and numbers.</div>
+          </div>
+          <div class="field"><label>Country</label>
+            <select>
+              <option>Belgium</option><option>Netherlands</option><option>France</option>
+              <option>Germany</option><option>Luxembourg</option><option>United Kingdom</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="terms-row">
+            <input type="checkbox" id="termsCheck"/>
+            <label for="termsCheck">I am 18+ and agree to the <a href="#">Terms of Use</a>, <a href="#">Privacy Policy</a>, and confirm all content I post is legal and consensual.</label>
+          </div>
+          <button class="modal-btn" id="signupSubmit">Create my account</button>
+          <div class="modal-switch">Already have an account? <a id="switchToLogin">Log in</a></div>
+          <div class="modal-success" id="signupSuccess">
+            <i class="ti ti-circle-check"></i>
+            <h3>Account created!</h3>
+            <p>Welcome to SecretXperience.eu. Check your email for a verification link before you can log in.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ BOOKING MODAL ══ -->
+  <div class="modal-overlay" id="bookModal" role="dialog" aria-modal="true" aria-label="Request booking">
+    <div class="modal">
+      <button class="modal-close" id="bookClose" aria-label="Close"><i class="ti ti-x"></i></button>
+      <div class="book-body">
+        <div class="modal-logo">Secret<span>Xperience</span>.eu · Booking</div>
+
+        <!-- Listing preview -->
+        <div class="book-listing-row">
+          <div class="book-listing-av"><i class="ti ti-user" id="bookListingIcon"></i></div>
+          <div class="book-listing-info">
+            <div class="bln" id="bookListingName">Sophia A.</div>
+            <div class="blc" id="bookListingCat">Escort · Independent · Brussels</div>
+          </div>
+        </div>
+
+        <!-- Step indicators -->
+        <div class="book-steps">
+          <div class="book-step active" data-step="0">Date</div>
+          <div class="book-step" data-step="1">Time &amp; duration</div>
+          <div class="book-step" data-step="2">Details</div>
+          <div class="book-step" data-step="3">Confirm</div>
+        </div>
+
+        <!-- Step 0: Date picker -->
+        <div class="book-pane active" id="bookPane0">
+          <div class="flbl" style="margin-bottom:.75rem">Select a date</div>
+          <div class="cal-nav">
+            <button class="cal-nav-btn" id="calPrev"><i class="ti ti-chevron-left"></i></button>
+            <div class="cal-month" id="calMonthLabel"></div>
+            <button class="cal-nav-btn" id="calNext"><i class="ti ti-chevron-right"></i></button>
+          </div>
+          <div class="cal-header">
+            <div class="cal-day-name">Mo</div><div class="cal-day-name">Tu</div>
+            <div class="cal-day-name">We</div><div class="cal-day-name">Th</div>
+            <div class="cal-day-name">Fr</div><div class="cal-day-name">Sa</div>
+            <div class="cal-day-name">Su</div>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+          <button class="modal-btn" id="bookNext0" style="margin-top:1rem">Continue</button>
+        </div>
+
+        <!-- Step 1: Time & duration -->
+        <div class="book-pane" id="bookPane1">
+          <div class="flbl" style="margin-bottom:.6rem">Available times</div>
+          <div class="time-slots" id="timeSlots">
+            <div class="time-slot" data-time="14:00">14:00</div>
+            <div class="time-slot" data-time="15:00">15:00</div>
+            <div class="time-slot" data-time="16:00">16:00</div>
+            <div class="time-slot" data-time="18:00">18:00</div>
+            <div class="time-slot" data-time="19:00">19:00</div>
+            <div class="time-slot" data-time="20:00">20:00</div>
+            <div class="time-slot" data-time="21:00">21:00</div>
+            <div class="time-slot" data-time="22:00">22:00</div>
+          </div>
+          <div class="flbl" style="margin:.75rem 0 .6rem">Duration</div>
+          <div class="duration-pills" id="durPills">
+            <div class="dur-pill" data-dur="1 Hour" data-price="200">1 Hour — €200</div>
+            <div class="dur-pill selected" data-dur="2 Hours" data-price="350">2 Hours — €350</div>
+            <div class="dur-pill" data-dur="Half day" data-price="600">Half day — €600</div>
+            <div class="dur-pill" data-dur="Overnight" data-price="1200">Overnight — €1,200</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="modal-btn secondary" id="bookBack1">Back</button>
+            <button class="modal-btn" id="bookNext1">Continue</button>
+          </div>
+        </div>
+
+        <!-- Step 2: Details -->
+        <div class="book-pane" id="bookPane2">
+          <div class="field">
+            <label>Meeting type</label>
+            <select id="meetType">
+              <option>Incall (at provider's location)</option>
+              <option>Outcall (provider comes to you)</option>
+            </select>
+          </div>
+          <div class="field" id="locationField">
+            <label>Your location / hotel name</label>
+            <input type="text" placeholder="e.g. Hotel Amigo, Brussels"/>
+          </div>
+          <div class="field">
+            <label>Special requests or notes <span style="color:var(--t3);font-weight:400">(optional)</span></label>
+            <textarea placeholder="Any preferences or requirements you'd like to share…"></textarea>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="modal-btn secondary" id="bookBack2">Back</button>
+            <button class="modal-btn" id="bookNext2">Continue</button>
+          </div>
+        </div>
+
+        <!-- Step 3: Confirm -->
+        <div class="book-pane" id="bookPane3">
+          <div class="book-summary">
+            <div class="book-sum-row"><span class="lbl">Listing</span><span class="val" id="sumName">Sophia A.</span></div>
+            <div class="book-sum-row"><span class="lbl">Date</span><span class="val" id="sumDate">—</span></div>
+            <div class="book-sum-row"><span class="lbl">Time</span><span class="val" id="sumTime">—</span></div>
+            <div class="book-sum-row"><span class="lbl">Duration</span><span class="val" id="sumDur">2 Hours</span></div>
+            <div class="book-sum-row total"><span class="lbl">Total</span><span class="val" id="sumPrice">€350</span></div>
+          </div>
+          <div class="field">
+            <label>Payment method</label>
+            <select>
+              <option>Credit / Debit card</option>
+              <option>Bank transfer</option>
+              <option>Crypto (BTC / ETH / USDT)</option>
+            </select>
+          </div>
+          <div style="font-size:11px;color:var(--t3);line-height:1.7;margin-bottom:1rem">Your booking request is sent to the provider for approval. No payment is charged until they confirm. All transactions are encrypted and discreet.</div>
+          <div style="display:flex;gap:8px">
+            <button class="modal-btn secondary" id="bookBack3">Back</button>
+            <button class="modal-btn" id="bookSubmit">Send booking request</button>
+          </div>
+          <div class="modal-success" id="bookSuccess">
+            <i class="ti ti-calendar-check"></i>
+            <h3>Booking request sent!</h3>
+            <p>Your request has been sent to the provider. You'll receive a confirmation message once they accept — usually within 30 minutes.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MESSAGING MODAL ══ -->
+  <div class="modal-overlay" id="msgModal" role="dialog" aria-modal="true" aria-label="Messages">
+    <div class="modal">
+      <button class="modal-close" id="msgClose" aria-label="Close"><i class="ti ti-x"></i></button>
+
+      <!-- Thread list + chat side by side on desktop -->
+      <div style="display:flex;height:100%;flex:1;overflow:hidden;min-height:0">
+
+        <!-- Thread list -->
+        <div style="width:220px;border-right:0.5px solid var(--b);display:flex;flex-direction:column;flex-shrink:0" id="threadPanel">
+          <div style="padding:.85rem 1rem;border-bottom:0.5px solid var(--b);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);font-weight:600">Messages</div>
+          <div class="msg-thread-list" style="flex:1">
+            <div class="msg-thread active" data-thread="sophia">
+              <div class="msg-thread-av" style="background:rgba(100,80,200,.2);color:#b0a0f8">SA</div>
+              <div class="msg-thread-info">
+                <div class="msg-thread-name">Sophia A.</div>
+                <div class="msg-thread-preview">Looking forward to Thursday!</div>
+              </div>
+              <div class="msg-thread-meta">
+                <div class="msg-thread-time">2m</div>
+                <div class="msg-unread">2</div>
+              </div>
+            </div>
+            <div class="msg-thread" data-thread="luna">
+              <div class="msg-thread-av" style="background:rgba(26,143,106,.15);color:#1dc9a0">LC</div>
+              <div class="msg-thread-info">
+                <div class="msg-thread-name">Luna Creative</div>
+                <div class="msg-thread-preview">Custom content is ready ✓</div>
+              </div>
+              <div class="msg-thread-meta"><div class="msg-thread-time">1h</div></div>
+            </div>
+            <div class="msg-thread" data-thread="elise">
+              <div class="msg-thread-av" style="background:rgba(197,160,90,.15);color:var(--gold)">EV</div>
+              <div class="msg-thread-info">
+                <div class="msg-thread-name">Elise V.</div>
+                <div class="msg-thread-preview">What dates work for you?</div>
+              </div>
+              <div class="msg-thread-meta"><div class="msg-thread-time">Yesterday</div></div>
+            </div>
+            <div class="msg-thread" data-thread="support">
+              <div class="msg-thread-av" style="background:var(--gbg);color:var(--gold)">SX</div>
+              <div class="msg-thread-info">
+                <div class="msg-thread-name">SecretXperience Support</div>
+                <div class="msg-thread-preview">How can we help you today?</div>
+              </div>
+              <div class="msg-thread-meta"><div class="msg-thread-time">3d</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat area -->
+        <div class="msg-chat" id="chatArea">
+          <!-- Chat header -->
+          <div class="msg-header">
+            <div class="msg-header-av" id="chatAv">SA</div>
+            <div class="msg-header-info">
+              <div class="mhn" id="chatName">Sophia A.</div>
+              <div class="mhs"><span class="msg-online"></span> Online now · Escort · Private</div>
+            </div>
+            <div style="margin-left:auto;display:flex;gap:6px">
+              <button class="dp-action" aria-label="Book"><i class="ti ti-calendar-plus"></i></button>
+              <button class="dp-action" aria-label="View profile"><i class="ti ti-user"></i></button>
+            </div>
+          </div>
+
+          <!-- Messages -->
+          <div class="msg-chat-body" id="chatBody">
+            <div class="msg-date-sep">Today</div>
+            <div class="msg-bubble them">Hi! Thanks for reaching out through SecretXperience. Happy to answer any questions you have.<div class="msg-bubble-time">14:02</div></div>
+            <div class="msg-bubble me">Hi Sophia, I saw your profile — I'm interested in booking you for Thursday evening.<div class="msg-bubble-time">14:05</div></div>
+            <div class="msg-bubble them">Thursday works for me! I'm available from 18:00. What duration are you thinking?<div class="msg-bubble-time">14:06</div></div>
+            <div class="msg-bubble me">Probably 2–3 hours, starting around 19:00. Is outcall possible?<div class="msg-bubble-time">14:08</div></div>
+            <div class="msg-bubble them">Yes, outcall is fine. I'm in Brussels — where would you like to meet? A hotel or private address works for me.<div class="msg-bubble-time">14:09</div></div>
+            <div class="msg-bubble me">Hotel Amigo in the centre. Does that work?<div class="msg-bubble-time">14:11</div></div>
+            <div class="msg-bubble them">Perfect, I know it well. Looking forward to Thursday! Use the booking button above when you're ready to confirm.<div class="msg-bubble-time">14:12</div></div>
+          </div>
+
+          <!-- Quick replies -->
+          <div class="msg-quick-btns">
+            <button class="msg-quick">Send booking request</button>
+            <button class="msg-quick">What are your rates?</button>
+            <button class="msg-quick">Are you available this week?</button>
+            <button class="msg-quick">Confirm meeting details</button>
+          </div>
+
+          <!-- Input -->
+          <div class="msg-input-bar">
+            <button class="msg-attach-btn" aria-label="Attach file"><i class="ti ti-paperclip"></i></button>
+            <textarea class="msg-input" id="msgInput" rows="1" placeholder="Type a message…" aria-label="Message input"></textarea>
+            <button class="msg-send-btn" id="msgSend" aria-label="Send message"><i class="ti ti-send"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ BACKEND PANEL ══ -->
+  <div class="modal-overlay" id="backendModal" role="dialog" aria-modal="true" aria-label="Backend architecture">
+    <div class="modal">
+      <button class="modal-close" id="backendClose" aria-label="Close"><i class="ti ti-x"></i></button>
+      <div class="backend-body">
+        <div class="modal-logo">Secret<span>Xperience</span>.eu · Backend Architecture</div>
+
+        <div class="backend-section">
+          <div class="backend-section-title">Recommended tech stack</div>
+          <div class="backend-desc">A modern, scalable, privacy-first stack built for adult platforms — handling auth, payments, file storage, real-time messaging, and compliance in one cohesive system.</div>
+          <div class="stack-grid">
+            <div class="stack-card highlight"><div class="stack-card-label">Frontend</div><div class="stack-card-name">Next.js 14</div><div class="stack-card-note">App router, SSR, SEO-ready</div></div>
+            <div class="stack-card highlight"><div class="stack-card-label">Backend / DB</div><div class="stack-card-name">Supabase</div><div class="stack-card-note">Postgres, Auth, Realtime, Storage</div></div>
+            <div class="stack-card highlight"><div class="stack-card-label">Payments</div><div class="stack-card-name">Stripe</div><div class="stack-card-note">Cards, crypto via Strike, payouts</div></div>
+            <div class="stack-card highlight"><div class="stack-card-label">Hosting</div><div class="stack-card-name">Vercel</div><div class="stack-card-note">Edge network, EU region</div></div>
+            <div class="stack-card"><div class="stack-card-label">Email</div><div class="stack-card-name">Resend</div><div class="stack-card-note">Transactional, templates</div></div>
+            <div class="stack-card"><div class="stack-card-label">Search</div><div class="stack-card-name">Algolia</div><div class="stack-card-note">Instant listing search &amp; filters</div></div>
+            <div class="stack-card"><div class="stack-card-label">Media</div><div class="stack-card-name">Cloudflare R2</div><div class="stack-card-note">Profile images, video, docs</div></div>
+            <div class="stack-card"><div class="stack-card-label">Age verify</div><div class="stack-card-name">AgeID / Yoti</div><div class="stack-card-note">EU-compliant ID verification</div></div>
+            <div class="stack-card"><div class="stack-card-label">Analytics</div><div class="stack-card-name">Plausible</div><div class="stack-card-note">Privacy-first, GDPR-compliant</div></div>
+            <div class="stack-card"><div class="stack-card-label">Moderation</div><div class="stack-card-name">Hive AI</div><div class="stack-card-note">Adult content classification</div></div>
+            <div class="stack-card"><div class="stack-card-label">Realtime</div><div class="stack-card-name">Supabase Channels</div><div class="stack-card-note">Messaging, presence, notifications</div></div>
+            <div class="stack-card"><div class="stack-card-label">Maps</div><div class="stack-card-name">Mapbox</div><div class="stack-card-note">Listing locations, privacy blur</div></div>
+          </div>
+        </div>
+
+        <div class="backend-section">
+          <div class="backend-section-title">Database schema (core tables)</div>
+          <div class="stack-grid">
+            <div class="stack-card"><div class="stack-card-label">Table</div><div class="stack-card-name">users</div><div class="stack-card-note">id, role, email, tier, verified, created_at</div></div>
+            <div class="stack-card"><div class="stack-card-label">Table</div><div class="stack-card-name">listings</div><div class="stack-card-note">id, user_id, category, type, price_range, location, status</div></div>
+            <div class="stack-card"><div class="stack-card-label">Table</div><div class="stack-card-name">bookings</div><div class="stack-card-note">id, client_id, listing_id, date, duration, status, amount</div></div>
+            <div class="stack-card"><div class="stack-card-label">Table</div><div class="stack-card-name">messages</div><div class="stack-card-note">id, thread_id, sender_id, body, read_at, created_at</div></div>
+            <div class="stack-card"><div class="stack-card-label">Table</div><div class="stack-card-name">reviews</div><div class="stack-card-note">id, listing_id, author_id, rating, body, verified</div></div>
+            <div class="stack-card"><div class="stack-card-label">Table</div><div class="stack-card-name">memberships</div><div class="stack-card-note">id, user_id, tier, stripe_sub_id, expires_at</div></div>
+          </div>
+        </div>
+
+        <div class="backend-section">
+          <div class="backend-section-title">Compliance &amp; legal (EU / Belgium)</div>
+          <div class="backend-desc">Operating an adult platform in Belgium and the EU requires specific legal and technical measures. Here's what needs to be in place before go-live:</div>
+          <div class="stack-grid">
+            <div class="stack-card"><div class="stack-card-label">Required</div><div class="stack-card-name">Age verification</div><div class="stack-card-note">EU DSA Article 28 — robust age verification for adult content</div></div>
+            <div class="stack-card"><div class="stack-card-label">Required</div><div class="stack-card-name">GDPR compliance</div><div class="stack-card-note">Data processing agreements, right to erasure, DPA registration</div></div>
+            <div class="stack-card"><div class="stack-card-label">Required</div><div class="stack-card-name">2257 record-keeping</div><div class="stack-card-note">US / international: keep producer records if hosting US-origin content</div></div>
+            <div class="stack-card"><div class="stack-card-label">Required</div><div class="stack-card-name">Payment processor</div><div class="stack-card-note">Adult-friendly processor: Stripe (with approval), CCBill, Segpay</div></div>
+            <div class="stack-card"><div class="stack-card-label">Advised</div><div class="stack-card-name">Legal entity</div><div class="stack-card-note">BV (Belgium) or BV/VOF. Register with CBE. VAT registration required.</div></div>
+            <div class="stack-card"><div class="stack-card-label">Advised</div><div class="stack-card-name">Terms of Service</div><div class="stack-card-note">Explicit consent, provider liability limits, DMCA takedown policy</div></div>
+          </div>
+        </div>
+
+        <div class="backend-section">
+          <div class="backend-section-title">Launch roadmap</div>
+          <div class="roadmap">
+            <div class="rm-row now"><div class="rm-phase">Now</div><div class="rm-items"><span class="rm-item">UI / frontend</span><span class="rm-item">Auth flow</span><span class="rm-item">Listing detail</span><span class="rm-item">Booking UI</span><span class="rm-item">Messaging UI</span></div></div>
+            <div class="rm-row next"><div class="rm-phase">Week 1–2</div><div class="rm-items"><span class="rm-item">Supabase setup</span><span class="rm-item">Auth integration</span><span class="rm-item">DB schema</span><span class="rm-item">Listing CRUD</span><span class="rm-item">Image upload</span></div></div>
+            <div class="rm-row"><div class="rm-phase">Week 3–4</div><div class="rm-items"><span class="rm-item">Realtime chat</span><span class="rm-item">Booking system</span><span class="rm-item">Stripe payments</span><span class="rm-item">Email notifications</span><span class="rm-item">Admin panel</span></div></div>
+            <div class="rm-row"><div class="rm-phase">Week 5–6</div><div class="rm-items"><span class="rm-item">Age verification</span><span class="rm-item">Content moderation</span><span class="rm-item">Reviews</span><span class="rm-item">Search / Algolia</span><span class="rm-item">Membership billing</span></div></div>
+            <div class="rm-row"><div class="rm-phase">Go-live</div><div class="rm-items"><span class="rm-item">Legal review</span><span class="rm-item">GDPR DPA</span><span class="rm-item">Domain setup</span><span class="rm-item">CDN</span><span class="rm-item">Soft launch</span></div></div>
+          </div>
+        </div>
+
+        <div class="backend-section">
+          <div class="backend-section-title">Estimated monthly running costs (MVP)</div>
+          <table class="cost-table">
+            <tr><th>Service</th><th>Plan</th><th>Cost/mo</th></tr>
+            <tr><td>Supabase</td><td>Pro</td><td>€25</td></tr>
+            <tr><td>Vercel</td><td>Pro</td><td>€20</td></tr>
+            <tr><td>Cloudflare R2</td><td>Pay-as-you-go</td><td>~€10</td></tr>
+            <tr><td>Resend</td><td>Starter</td><td>€0–20</td></tr>
+            <tr><td>Algolia</td><td>Starter</td><td>€0–50</td></tr>
+            <tr><td>Hive AI moderation</td><td>Usage</td><td>~€30</td></tr>
+            <tr><td>AgeID verification</td><td>Per-verify</td><td>~€50</td></tr>
+            <tr><td>Domain + SSL</td><td>Annual</td><td>~€5</td></tr>
+            <tr class="total-row"><td colspan="2"><strong>Total MVP</strong></td><td><strong>~€160–210/mo</strong></td></tr>
+          </table>
+        </div>
+
+        <button class="modal-btn" id="closeBackend">Got it — let's build it</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast"><i class="ti ti-check"></i> <span id="toastMsg">Done</span></div>
+
+  <!-- ══ LISTING DETAIL PANEL ══ -->
+  <div id="detail-overlay" aria-hidden="true"></div>
+  <div id="detail-panel" role="dialog" aria-modal="true" aria-label="Listing detail">
+
+    <!-- Panel header -->
+    <div class="dp-header">
+      <button class="dp-back" id="dpClose"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back to listings</button>
+      <div class="dp-actions">
+        <button class="dp-action" id="dpShare" aria-label="Share listing"><i class="ti ti-share"></i></button>
+        <button class="dp-action" id="dpSave" aria-label="Save listing"><i class="ti ti-heart"></i></button>
+        <button class="dp-action" id="dpReport" aria-label="Report listing"><i class="ti ti-flag"></i></button>
+      </div>
+    </div>
+
+    <!-- Scrollable body -->
+    <div class="dp-body" id="dpBody">
+
+      <!-- Hero -->
+      <div class="dp-hero" id="dpHero">
+        <i class="ti ti-user" id="dpHeroIcon" aria-hidden="true"></i>
+        <div class="dp-hero-grad"></div>
+        <div class="dp-hero-badges" id="dpHeroBadges"></div>
+      </div>
+
+      <!-- Identity -->
+      <div class="dp-identity">
+        <div class="dp-cat-row">
+          <div class="dp-cat" id="dpCat">Escort · Independent</div>
+          <div class="dp-type-pill" id="dpTypePill">Private</div>
+        </div>
+        <div class="dp-name" id="dpName">Sophia A.</div>
+        <div class="dp-meta-row">
+          <span class="dp-meta-item gold"><i class="ti ti-star-filled"></i> <span id="dpRating">4.9</span> (128 reviews)</span>
+          <span class="dp-meta-item"><i class="ti ti-map-pin"></i> <span id="dpCity">Brussels, BE</span></span>
+          <span class="dp-meta-item"><i class="ti ti-circle-check" style="color:#26d4a0"></i> ID Verified</span>
+          <span class="dp-meta-item"><i class="ti ti-clock"></i> Replies within 30 min</span>
+        </div>
+      </div>
+
+      <!-- Quick stats -->
+      <div class="dp-stats">
+        <div class="dp-stat"><div class="dp-stat-v" id="dpS1">128</div><div class="dp-stat-l">Reviews</div></div>
+        <div class="dp-stat"><div class="dp-stat-v" id="dpS2">4.9</div><div class="dp-stat-l">Rating</div></div>
+        <div class="dp-stat"><div class="dp-stat-v" id="dpS3">3 yrs</div><div class="dp-stat-l">On platform</div></div>
+        <div class="dp-stat"><div class="dp-stat-v" id="dpS4">2.1k</div><div class="dp-stat-l">Profile views</div></div>
+      </div>
+
+      <!-- About -->
+      <div class="dp-section">
+        <div class="dp-section-title">About</div>
+        <div class="dp-desc" id="dpDesc">A discreet, elegant companion based in Brussels. Available for private meetings, dinner dates, and overnight bookings. Fluent in English, French, and Dutch. All interactions are confidential and handled with the utmost professionalism.</div>
+      </div>
+
+      <!-- Services -->
+      <div class="dp-section">
+        <div class="dp-section-title">Services offered</div>
+        <div class="dp-tags" id="dpTags">
+          <span class="dp-tag highlight">Dinner date</span>
+          <span class="dp-tag highlight">Overnight</span>
+          <span class="dp-tag">Travel companion</span>
+          <span class="dp-tag">Social events</span>
+          <span class="dp-tag">Private meetings</span>
+          <span class="dp-tag">GFE</span>
+          <span class="dp-tag">Role play</span>
+          <span class="dp-tag">Massage</span>
+        </div>
+      </div>
+
+      <!-- Pricing -->
+      <div class="dp-section">
+        <div class="dp-section-title">Pricing</div>
+        <div class="dp-price-cards" id="dpPricing">
+          <div class="dp-price-card">
+            <div class="dp-price-dur">1 Hour</div>
+            <div class="dp-price-amt">€200</div>
+            <div class="dp-price-note">Incall or outcall</div>
+          </div>
+          <div class="dp-price-card featured">
+            <div class="dp-price-dur">2 Hours</div>
+            <div class="dp-price-amt">€350</div>
+            <div class="dp-price-note">Most popular</div>
+          </div>
+          <div class="dp-price-card">
+            <div class="dp-price-dur">Half day</div>
+            <div class="dp-price-amt">€600</div>
+            <div class="dp-price-note">4 hrs · flexible</div>
+          </div>
+          <div class="dp-price-card">
+            <div class="dp-price-dur">Overnight</div>
+            <div class="dp-price-amt">€1,200</div>
+            <div class="dp-price-note">10pm – 8am</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Availability -->
+      <div class="dp-section">
+        <div class="dp-section-title">Availability this week</div>
+        <div class="dp-avail-grid">
+          <div class="dp-avail-item avail"><div class="dp-avail-day">Mon</div><div class="dp-avail-time">14:00–22:00</div></div>
+          <div class="dp-avail-item"><div class="dp-avail-day">Tue</div><div class="dp-avail-time">Unavailable</div></div>
+          <div class="dp-avail-item avail"><div class="dp-avail-day">Wed</div><div class="dp-avail-time">18:00–02:00</div></div>
+          <div class="dp-avail-item avail"><div class="dp-avail-day">Thu</div><div class="dp-avail-time">All day</div></div>
+          <div class="dp-avail-item avail"><div class="dp-avail-day">Fri</div><div class="dp-avail-time">18:00–04:00</div></div>
+          <div class="dp-avail-item avail"><div class="dp-avail-day">Sat</div><div class="dp-avail-time">All day</div></div>
+          <div class="dp-avail-item"><div class="dp-avail-day">Sun</div><div class="dp-avail-time">Unavailable</div></div>
+        </div>
+      </div>
+
+      <!-- Reviews -->
+      <div class="dp-section">
+        <div class="dp-section-title">Reviews <span style="color:var(--t3);font-weight:400;letter-spacing:0">(128)</span></div>
+        <div class="dp-reviews">
+          <div class="dp-review">
+            <div class="dp-review-top">
+              <span class="dp-review-author">M.R. · Gold Member</span>
+              <span class="dp-review-stars">★★★★★</span>
+            </div>
+            <div class="dp-review-date" style="margin-bottom:.35rem">2 days ago</div>
+            <div class="dp-review-text">Absolutely exceptional. Punctual, elegant, and completely discreet. Exactly as described — highly recommend for anyone seeking genuine companionship.</div>
+          </div>
+          <div class="dp-review">
+            <div class="dp-review-top">
+              <span class="dp-review-author">T.K. · Verified User</span>
+              <span class="dp-review-stars">★★★★★</span>
+            </div>
+            <div class="dp-review-date" style="margin-bottom:.35rem">1 week ago</div>
+            <div class="dp-review-text">Made my business trip to Brussels far more enjoyable. Great conversation, beautiful presence, total discretion. Will book again.</div>
+          </div>
+          <div class="dp-review">
+            <div class="dp-review-top">
+              <span class="dp-review-author">A.L. · Platinum Member</span>
+              <span class="dp-review-stars">★★★★☆</span>
+            </div>
+            <div class="dp-review-date" style="margin-bottom:.35rem">2 weeks ago</div>
+            <div class="dp-review-text">Very professional, responded quickly and was flexible with scheduling. The experience was exactly what I was looking for.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Similar listings -->
+      <div class="dp-section" style="border-bottom:none">
+        <div class="dp-section-title">Similar listings</div>
+        <div class="dp-similar">
+          <div class="dp-sim-card">
+            <div class="dp-sim-img"><i class="ti ti-user" aria-hidden="true"></i><div class="card-badges" style="position:absolute;top:5px;left:5px"><span class="badge bv" style="font-size:8px">✓</span></div></div>
+            <div class="dp-sim-body"><div class="dp-sim-cat">Escort · Private</div><div class="dp-sim-name">Elena M.</div><div class="dp-sim-price">From €180/hr · Antwerp</div></div>
+          </div>
+          <div class="dp-sim-card">
+            <div class="dp-sim-img"><i class="ti ti-user" aria-hidden="true"></i><div class="card-badges" style="position:absolute;top:5px;left:5px"><span class="badge be" style="font-size:8px">VIP</span></div></div>
+            <div class="dp-sim-body"><div class="dp-sim-cat">Escort · Elite</div><div class="dp-sim-name">Chloe D.</div><div class="dp-sim-price">From €450/hr · Brussels</div></div>
+          </div>
+          <div class="dp-sim-card">
+            <div class="dp-sim-img"><i class="ti ti-user" aria-hidden="true"></i><div class="card-badges" style="position:absolute;top:5px;left:5px"><span class="badge bv" style="font-size:8px">✓</span></div></div>
+            <div class="dp-sim-body"><div class="dp-sim-cat">Companionship</div><div class="dp-sim-name">Isabelle V.</div><div class="dp-sim-price">From €150/hr · Ghent</div></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /dp-body -->
+
+    <!-- Sticky CTA -->
+    <div class="dp-cta">
+      <button class="dp-cta-msg"><i class="ti ti-message-circle" aria-hidden="true"></i> Send message</button>
+      <button class="dp-cta-book"><i class="ti ti-calendar-plus" aria-hidden="true"></i> Request booking</button>
+    </div>
+
+  </div><!-- /detail-panel -->
+
+  <!-- ══ MOBILE BOTTOM NAV ══ -->
+  <nav class="bnav" aria-label="Mobile navigation">
+    <div class="bnav-items">
+      <button class="bni active" aria-label="Home"><i class="ti ti-home"></i><span>Home</span></button>
+      <button class="bni" aria-label="Search"><i class="ti ti-search"></i><span>Search</span></button>
+      <button class="bni" aria-label="Saves"><i class="ti ti-heart"></i><span>Saves</span></button>
+      <button class="bni" aria-label="Messages"><i class="ti ti-message-circle"></i><span>Messages</span></button>
+      <button class="bni" aria-label="Profile"><i class="ti ti-user-circle"></i><span>Profile</span></button>
+    </div>
+  </nav>
+
+</div><!-- #app -->` }} />
+  )
+}
