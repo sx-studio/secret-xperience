@@ -78,15 +78,15 @@ function StepIndicator({ current }: { current: number }) {
               height: '28px',
               borderRadius: '50%',
               background: done
-                ? 'linear-gradient(135deg,#c5a05a,#a0803d)'
+                ? 'var(--grad-gold, linear-gradient(135deg,#c5a05a,#a0803d))'
                 : active
                 ? 'transparent'
                 : 'transparent',
               border: done
                 ? 'none'
                 : active
-                ? '1px solid #c5a05a'
-                : '0.5px solid rgba(255,255,255,0.12)',
+                ? '1px solid var(--gold, #c5a05a)'
+                : '0.5px solid var(--b2, rgba(255,255,255,0.12))',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -100,9 +100,9 @@ function StepIndicator({ current }: { current: number }) {
               ) : (
                 <span style={{
                   fontSize: '12px',
-                  fontFamily: "'Jost', sans-serif",
+                  fontFamily: 'var(--sans, "Jost", sans-serif)',
                   fontWeight: active ? 500 : 400,
-                  color: active ? '#c5a05a' : 'rgba(255,255,255,0.2)',
+                  color: active ? 'var(--gold, #c5a05a)' : 'var(--t3, rgba(255,255,255,0.2))',
                   lineHeight: 1,
                 }}>
                   {idx}
@@ -114,8 +114,8 @@ function StepIndicator({ current }: { current: number }) {
                 width: '32px',
                 height: '0.5px',
                 background: done
-                  ? 'linear-gradient(90deg,#c5a05a,rgba(197,160,90,0.3))'
-                  : 'rgba(255,255,255,0.08)',
+                  ? 'linear-gradient(90deg,var(--gold,#c5a05a),rgba(197,160,90,0.3))'
+                  : 'var(--b, rgba(255,255,255,0.08))',
                 transition: 'background 0.3s',
               }} />
             )}
@@ -295,29 +295,32 @@ export default function CreateListingPage() {
   /* ── Shared input style ── */
   const inp: React.CSSProperties = {
     width: '100%',
-    padding: '11px 14px',
-    background: 'rgba(255,255,255,0.03)',
-    border: '0.5px solid rgba(255,255,255,0.12)',
-    borderRadius: '9px',
-    color: '#ece8e1',
+    background: 'var(--bg3, rgba(255,255,255,0.03))',
+    border: '0.5px solid var(--b2, rgba(255,255,255,0.12))',
+    borderRadius: 'var(--r, 8px)',
+    color: 'var(--t, #ece8e1)',
     fontSize: '14px',
     outline: 'none',
-    fontFamily: "'Jost', sans-serif",
+    fontFamily: 'var(--sans, "Jost", sans-serif)',
     fontWeight: 300,
     letterSpacing: '0.02em',
-    transition: 'border-color 0.2s',
+    transition: 'border-color var(--t-fast, 0.15s), box-shadow var(--t-fast, 0.15s)',
     boxSizing: 'border-box' as const,
+  }
+
+  const inpField: React.CSSProperties = {
+    ...inp,
+    height: '44px',
+    padding: '0 14px',
   }
 
   const label: React.CSSProperties = {
     display: 'block',
-    fontSize: '10px',
-    letterSpacing: '0.14em',
+    font: '600 10px/1 var(--sans, "Jost", sans-serif)',
+    letterSpacing: '0.16em',
     textTransform: 'uppercase' as const,
-    color: 'rgba(255,255,255,0.3)',
-    marginBottom: '8px',
-    fontWeight: 600,
-    fontFamily: "'Jost', sans-serif",
+    color: 'var(--t3, rgba(255,255,255,0.3))',
+    marginBottom: '6px',
   }
 
   const fieldWrap: React.CSSProperties = { marginBottom: '1.25rem' }
@@ -325,17 +328,19 @@ export default function CreateListingPage() {
   /* ─── Success screen ─── */
   if (success) return (
     <>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap');`}</style>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap');
+        @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+      `}</style>
       <div style={{
         minHeight: '100vh',
-        background: '#050505',
+        background: 'var(--bg, #050505)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontFamily: "'Jost', sans-serif",
+        fontFamily: 'var(--sans, "Jost", sans-serif)',
       }}>
-        <div style={{ textAlign: 'center', color: '#ece8e1', animation: 'fadeUp 0.5s ease' }}>
-          <style>{`@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}`}</style>
+        <div style={{ textAlign: 'center', color: 'var(--t, #ece8e1)', animation: 'fadeUp 0.5s ease' }}>
           <div style={{
             width: '64px', height: '64px',
             borderRadius: '50%',
@@ -349,17 +354,17 @@ export default function CreateListingPage() {
             </svg>
           </div>
           <h2 style={{
-            fontFamily: "'Cormorant Garamond', serif",
+            fontFamily: 'var(--serif, "Cormorant Garamond", serif)',
             fontWeight: 300,
             fontSize: '32px',
-            color: '#c5a05a',
+            color: 'var(--gold, #c5a05a)',
             marginBottom: '0.75rem',
             letterSpacing: '-0.01em',
           }}>
             Listing published
           </h2>
           <p style={{
-            color: 'rgba(255,255,255,0.3)',
+            color: 'var(--t2, rgba(255,255,255,0.4))',
             fontSize: '14px',
             fontWeight: 300,
             letterSpacing: '0.03em',
@@ -369,7 +374,7 @@ export default function CreateListingPage() {
           </p>
           <span style={{
             fontSize: '12px',
-            color: 'rgba(255,255,255,0.18)',
+            color: 'var(--t3, rgba(255,255,255,0.18))',
             fontWeight: 300,
             letterSpacing: '0.06em',
           }}>
@@ -385,20 +390,21 @@ export default function CreateListingPage() {
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap');
+        @import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: #050505; }
 
         @keyframes fadeUp {
           from { opacity: 0; transform: translateY(10px); }
           to   { opacity: 1; transform: translateY(0); }
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         .cl-category-card {
           position: relative;
           padding: 1.25rem 1rem;
-          background: rgba(255,255,255,0.02);
-          border: 0.5px solid rgba(255,255,255,0.08);
-          border-radius: 12px;
+          background: var(--bg2, rgba(255,255,255,0.02));
+          border: 0.5px solid var(--b2, rgba(255,255,255,0.08));
+          border-radius: var(--r, 8px);
           cursor: pointer;
           text-align: center;
           transition: border-color 0.2s, background 0.2s, transform 0.15s;
@@ -409,29 +415,29 @@ export default function CreateListingPage() {
           user-select: none;
         }
         .cl-category-card:hover {
-          border-color: rgba(197,160,90,0.3);
-          background: rgba(197,160,90,0.04);
+          border-color: var(--gbrd, rgba(197,160,90,0.3));
+          background: var(--gbg, rgba(197,160,90,0.04));
           transform: translateY(-2px);
         }
         .cl-category-card.selected {
-          border-color: rgba(197,160,90,0.7);
-          background: rgba(197,160,90,0.07);
+          border-color: var(--gbrd, rgba(197,160,90,0.7));
+          background: var(--gbg, rgba(197,160,90,0.07));
         }
         .cl-category-card.selected .cl-cat-icon {
-          color: #c5a05a;
+          color: var(--gold, #c5a05a);
         }
 
         .cl-inp:focus {
-          border-color: rgba(197,160,90,0.5) !important;
-          background: rgba(197,160,90,0.03) !important;
+          border-color: var(--gold, rgba(197,160,90,0.5)) !important;
+          box-shadow: 0 0 0 3px var(--gbg, rgba(197,160,90,0.06)) !important;
         }
 
         .cl-meet-btn {
           flex: 1;
           padding: 12px 10px;
-          background: rgba(255,255,255,0.02);
-          border: 0.5px solid rgba(255,255,255,0.1);
-          border-radius: 10px;
+          background: var(--bg2, rgba(255,255,255,0.02));
+          border: 0.5px solid var(--b2, rgba(255,255,255,0.1));
+          border-radius: var(--r, 8px);
           cursor: pointer;
           display: flex;
           flex-direction: column;
@@ -441,27 +447,26 @@ export default function CreateListingPage() {
           user-select: none;
         }
         .cl-meet-btn:hover {
-          border-color: rgba(197,160,90,0.3);
-          background: rgba(197,160,90,0.04);
+          border-color: var(--gbrd, rgba(197,160,90,0.3));
+          background: var(--gbg, rgba(197,160,90,0.04));
         }
         .cl-meet-btn.selected {
-          border-color: rgba(197,160,90,0.65);
-          background: rgba(197,160,90,0.07);
+          border-color: var(--gbrd, rgba(197,160,90,0.65));
+          background: var(--gbg, rgba(197,160,90,0.07));
         }
 
         .cl-btn-gold {
-          background: linear-gradient(135deg,#c5a05a 0%,#a0803d 100%);
+          background: var(--grad-gold, linear-gradient(135deg,#c5a05a 0%,#a0803d 100%));
           border: none;
-          border-radius: 9px;
-          color: #080808;
+          border-radius: var(--r, 8px);
+          color: var(--t-on-gold, #080808);
           padding: 12px 28px;
           cursor: pointer;
-          font-family: 'Jost', sans-serif;
-          font-size: 13px;
-          font-weight: 600;
+          font: 600 13px/1 var(--sans, 'Jost', sans-serif);
           letter-spacing: 0.06em;
           text-transform: uppercase;
-          transition: opacity 0.2s, transform 0.15s;
+          box-shadow: var(--shadow-gold, 0 4px 24px rgba(197,160,90,0.25));
+          transition: opacity 0.2s, transform 0.15s, box-shadow 0.15s;
           position: relative;
           overflow: hidden;
         }
@@ -472,45 +477,51 @@ export default function CreateListingPage() {
           background: linear-gradient(135deg,rgba(255,255,255,0.14) 0%,transparent 60%);
           pointer-events: none;
         }
-        .cl-btn-gold:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
+        .cl-btn-gold:hover:not(:disabled) {
+          opacity: 0.88;
+          transform: translateY(-1px);
+          box-shadow: var(--shadow-gold-h, 0 8px 32px rgba(197,160,90,0.35));
+        }
         .cl-btn-gold:disabled { opacity: 0.35; cursor: not-allowed; }
 
         .cl-btn-ghost {
           background: transparent;
-          border: 0.5px solid rgba(255,255,255,0.1);
-          border-radius: 9px;
-          color: rgba(255,255,255,0.4);
+          border: 0.5px solid var(--b2, rgba(255,255,255,0.1));
+          border-radius: var(--r, 8px);
+          color: var(--t2, rgba(255,255,255,0.4));
           padding: 12px 24px;
           cursor: pointer;
-          font-family: 'Jost', sans-serif;
-          font-size: 13px;
-          font-weight: 400;
+          font: 400 13px/1 var(--sans, 'Jost', sans-serif);
           letter-spacing: 0.04em;
           transition: border-color 0.2s, color 0.2s;
         }
-        .cl-btn-ghost:hover { border-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.65); }
+        .cl-btn-ghost:hover {
+          border-color: var(--b3, rgba(255,255,255,0.2));
+          color: var(--t, rgba(255,255,255,0.65));
+        }
 
-        select option { background: #1a1a1a; color: #ece8e1; }
+        select option { background: var(--bg2, #1a1a1a); color: var(--t, #ece8e1); }
 
         .cl-upload-zone {
-          border: 1.5px dashed rgba(197,160,90,0.25);
-          border-radius: 14px;
-          background: rgba(197,160,90,0.02);
-          padding: 2.5rem 1.5rem;
+          border: 0.5px dashed var(--b3, rgba(197,160,90,0.25));
+          border-radius: var(--rl, 13px);
+          padding: 3rem;
+          text-align: center;
+          background: var(--bg2, rgba(197,160,90,0.02));
+          cursor: pointer;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          cursor: pointer;
-          transition: border-color 0.2s, background 0.2s;
-          text-align: center;
           gap: 10px;
+          transition: border-color 0.2s, background 0.2s;
         }
         .cl-upload-zone:hover,
         .cl-upload-zone.dragging {
-          border-color: rgba(197,160,90,0.7);
-          background: rgba(197,160,90,0.05);
+          border-color: var(--gbrd, rgba(197,160,90,0.7));
+          background: var(--gbg, rgba(197,160,90,0.05));
         }
+
         .cl-thumb-grid {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
@@ -522,7 +533,7 @@ export default function CreateListingPage() {
           aspect-ratio: 1;
           border-radius: 10px;
           overflow: hidden;
-          border: 0.5px solid rgba(255,255,255,0.1);
+          border: 0.5px solid var(--b2, rgba(255,255,255,0.1));
         }
         .cl-thumb img {
           width: 100%; height: 100%; object-fit: cover;
@@ -542,7 +553,17 @@ export default function CreateListingPage() {
           line-height: 1;
         }
         .cl-thumb-remove:hover { background: rgba(180,60,80,0.85); }
-        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Section headings */
+        .cl-section-heading {
+          font-family: var(--serif, 'Cormorant Garamond', serif);
+          font-size: 26px;
+          font-weight: 500;
+          color: var(--t, #ece8e1);
+          margin: 2.5rem 0 1rem;
+          padding-bottom: 0.75rem;
+          border-bottom: 0.5px solid var(--b, rgba(255,255,255,0.07));
+        }
 
         @media (max-width: 480px) {
           .cl-category-grid { grid-template-columns: repeat(2, 1fr) !important; }
@@ -551,12 +572,12 @@ export default function CreateListingPage() {
         }
       `}</style>
 
-      <div style={{ minHeight: '100vh', background: '#050505', color: '#ece8e1' }}>
+      <div style={{ minHeight: '100vh', background: 'var(--bg, #050505)', color: 'var(--t, #ece8e1)' }}>
 
         {/* ── Nav ── */}
         <nav style={{
           background: 'rgba(5,5,5,0.95)',
-          borderBottom: '0.5px solid rgba(255,255,255,0.06)',
+          borderBottom: '0.5px solid var(--b, rgba(255,255,255,0.06))',
           height: '60px',
           padding: '0 2rem',
           display: 'flex',
@@ -570,10 +591,10 @@ export default function CreateListingPage() {
         }}>
           <a href="/" style={{ textDecoration: 'none' }}>
             <span style={{
-              fontFamily: "'Cormorant Garamond', serif",
+              fontFamily: 'var(--serif, "Cormorant Garamond", serif)',
               fontSize: '20px',
               fontWeight: 400,
-              color: '#c5a05a',
+              color: 'var(--gold, #c5a05a)',
               letterSpacing: '0.04em',
             }}>
               Secret<em style={{ fontStyle: 'italic', fontWeight: 300 }}>Xperience</em>
@@ -581,17 +602,8 @@ export default function CreateListingPage() {
           </a>
           <button
             onClick={() => window.location.href = '/dashboard'}
-            style={{
-              background: 'transparent',
-              border: '0.5px solid rgba(255,255,255,0.1)',
-              borderRadius: '8px',
-              color: 'rgba(255,255,255,0.4)',
-              padding: '7px 16px',
-              cursor: 'pointer',
-              fontSize: '12px',
-              fontFamily: "'Jost', sans-serif",
-              letterSpacing: '0.06em',
-            }}
+            className="cl-btn-ghost"
+            style={{ padding: '7px 16px', fontSize: '12px', letterSpacing: '0.06em' }}
           >
             Dashboard
           </button>
@@ -599,39 +611,36 @@ export default function CreateListingPage() {
 
         {/* ── Body ── */}
         <div style={{
-          maxWidth: '600px',
+          maxWidth: '860px',
           margin: '0 auto',
-          padding: '3rem 1.5rem 6rem',
+          padding: '2rem 1.5rem 6rem',
           animation: 'fadeUp 0.35s ease',
         }}>
 
-          {/* Header */}
-          <div style={{ marginBottom: '2rem' }}>
+          {/* Page title */}
+          <h1 style={{
+            fontFamily: 'var(--serif, "Cormorant Garamond", serif)',
+            fontSize: '36px',
+            fontWeight: 500,
+            color: 'var(--t, #ece8e1)',
+            marginBottom: '2rem',
+          }}>
+            Create a listing
+          </h1>
+
+          {/* Header sub */}
+          <div style={{ marginBottom: '1.5rem' }}>
             <p style={{
-              fontFamily: "'Jost', sans-serif",
+              fontFamily: 'var(--sans, "Jost", sans-serif)',
               fontSize: '10px',
               letterSpacing: '0.18em',
               textTransform: 'uppercase',
-              color: 'rgba(197,160,90,0.5)',
+              color: 'var(--gold, rgba(197,160,90,0.5))',
               marginBottom: '10px',
               fontWeight: 500,
             }}>
               New listing — Step {step} of {TOTAL_STEPS}
             </p>
-            <h1 style={{
-              fontFamily: "'Cormorant Garamond', serif",
-              fontSize: 'clamp(26px,5vw,36px)',
-              fontWeight: 300,
-              color: '#ece8e1',
-              letterSpacing: '-0.01em',
-              lineHeight: 1.15,
-            }}>
-              {step === 1 && 'Choose a category'}
-              {step === 2 && 'Describe your service'}
-              {step === 3 && 'Location & pricing'}
-              {step === 4 && 'Add photos'}
-              {step === 5 && 'Review & publish'}
-            </h1>
           </div>
 
           {/* Step indicator */}
@@ -641,15 +650,15 @@ export default function CreateListingPage() {
           {draftBanner && (
             <div style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              background: 'rgba(197,160,90,0.07)',
-              border: '0.5px solid rgba(197,160,90,0.25)',
-              borderRadius: '9px', padding: '10px 14px', marginBottom: '1.5rem',
-              fontFamily: "'Jost', sans-serif", fontSize: '13px',
+              background: 'var(--gbg, rgba(197,160,90,0.07))',
+              border: '0.5px solid var(--gbrd, rgba(197,160,90,0.25))',
+              borderRadius: 'var(--r, 8px)', padding: '10px 14px', marginBottom: '1.5rem',
+              fontFamily: 'var(--sans, "Jost", sans-serif)', fontSize: '13px',
             }}>
-              <span style={{ color: 'rgba(255,255,255,0.55)', fontWeight: 300 }}>You have a saved draft.</span>
+              <span style={{ color: 'var(--t2, rgba(255,255,255,0.55))', fontWeight: 300 }}>You have a saved draft.</span>
               <div style={{ display: 'flex', gap: '12px' }}>
-                <button type="button" onClick={restoreDraft} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#c5a05a', fontSize: '13px', fontFamily: "'Jost', sans-serif", fontWeight: 500, padding: 0 }}>Restore</button>
-                <button type="button" onClick={() => { localStorage.removeItem('sx_listing_draft'); setDraftBanner(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.25)', fontSize: '13px', fontFamily: "'Jost', sans-serif", fontWeight: 300, padding: 0 }}>Discard</button>
+                <button type="button" onClick={restoreDraft} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--gold, #c5a05a)', fontSize: '13px', fontFamily: 'var(--sans, "Jost", sans-serif)', fontWeight: 500, padding: 0 }}>Restore</button>
+                <button type="button" onClick={() => { localStorage.removeItem('sx_listing_draft'); setDraftBanner(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--t3, rgba(255,255,255,0.25))', fontSize: '13px', fontFamily: 'var(--sans, "Jost", sans-serif)', fontWeight: 300, padding: 0 }}>Discard</button>
               </div>
             </div>
           )}
@@ -657,6 +666,7 @@ export default function CreateListingPage() {
           {/* ─── Step 1: Category ─── */}
           {step === 1 && (
             <div>
+              <h2 className="cl-section-heading">Choose a category</h2>
               <div
                 className="cl-category-grid"
                 style={{
@@ -676,7 +686,7 @@ export default function CreateListingPage() {
                       className="cl-cat-icon"
                       style={{
                         fontSize: '18px',
-                        color: form.category === cat.value ? '#c5a05a' : 'rgba(255,255,255,0.18)',
+                        color: form.category === cat.value ? 'var(--gold, #c5a05a)' : 'var(--t3, rgba(255,255,255,0.18))',
                         lineHeight: 1,
                         transition: 'color 0.2s',
                       }}
@@ -684,10 +694,10 @@ export default function CreateListingPage() {
                       {cat.icon}
                     </span>
                     <span style={{
-                      fontFamily: "'Jost', sans-serif",
+                      fontFamily: 'var(--sans, "Jost", sans-serif)',
                       fontSize: '12px',
                       fontWeight: form.category === cat.value ? 500 : 400,
-                      color: form.category === cat.value ? '#c5a05a' : 'rgba(255,255,255,0.5)',
+                      color: form.category === cat.value ? 'var(--gold, #c5a05a)' : 'var(--t2, rgba(255,255,255,0.5))',
                       letterSpacing: '0.04em',
                       lineHeight: 1.3,
                       transition: 'color 0.2s',
@@ -700,7 +710,7 @@ export default function CreateListingPage() {
                         top: '8px', right: '8px',
                         width: '7px', height: '7px',
                         borderRadius: '50%',
-                        background: '#c5a05a',
+                        background: 'var(--gold, #c5a05a)',
                       }} />
                     )}
                   </div>
@@ -715,7 +725,7 @@ export default function CreateListingPage() {
                     value={form.subcategory}
                     onChange={e => set('subcategory', e.target.value)}
                     className="cl-inp"
-                    style={{ ...inp }}
+                    style={{ ...inpField }}
                   >
                     <option value="">Select type…</option>
                     {ESCORT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
@@ -728,11 +738,12 @@ export default function CreateListingPage() {
           {/* ─── Step 2: Basic info ─── */}
           {step === 2 && (
             <div>
+              <h2 className="cl-section-heading">Describe your service</h2>
               <div style={fieldWrap}>
                 <label style={label}>Title *</label>
                 <input
                   className="cl-inp"
-                  style={inp}
+                  style={inpField}
                   value={form.title}
                   onChange={e => set('title', e.target.value)}
                   placeholder="e.g. Sophia A. — Independent Escort Brussels"
@@ -740,8 +751,8 @@ export default function CreateListingPage() {
                 />
                 <div style={{
                   fontSize: '11px',
-                  color: 'rgba(255,255,255,0.18)',
-                  fontFamily: "'Jost', sans-serif",
+                  color: 'var(--t3, rgba(255,255,255,0.18))',
+                  fontFamily: 'var(--sans, "Jost", sans-serif)',
                   marginTop: '6px',
                   fontWeight: 300,
                 }}>
@@ -753,7 +764,7 @@ export default function CreateListingPage() {
                 <label style={label}>Description</label>
                 <textarea
                   className="cl-inp"
-                  style={{ ...inp, resize: 'vertical', lineHeight: 1.7, minHeight: '140px' }}
+                  style={{ ...inp, padding: '12px 14px', resize: 'vertical', lineHeight: 1.7, minHeight: '120px' }}
                   value={form.description}
                   onChange={e => set('description', e.target.value)}
                   placeholder="Describe your service, availability, and what clients can expect…"
@@ -767,13 +778,14 @@ export default function CreateListingPage() {
           {step === 3 && (
             <div>
               {/* Location */}
+              <h2 className="cl-section-heading">Location &amp; Pricing</h2>
               <div style={{ marginBottom: '1.75rem' }}>
                 <p style={{
-                  fontFamily: "'Jost', sans-serif",
+                  fontFamily: 'var(--sans, "Jost", sans-serif)',
                   fontSize: '10px',
                   letterSpacing: '0.14em',
                   textTransform: 'uppercase',
-                  color: 'rgba(255,255,255,0.2)',
+                  color: 'var(--t3, rgba(255,255,255,0.2))',
                   fontWeight: 600,
                   marginBottom: '1rem',
                 }}>
@@ -787,7 +799,7 @@ export default function CreateListingPage() {
                     <label style={label}>City *</label>
                     <input
                       className="cl-inp"
-                      style={inp}
+                      style={inpField}
                       value={form.city}
                       onChange={e => set('city', e.target.value)}
                       placeholder="Brussels"
@@ -797,7 +809,7 @@ export default function CreateListingPage() {
                     <label style={label}>Country</label>
                     <select
                       className="cl-inp"
-                      style={inp}
+                      style={inpField}
                       value={form.country}
                       onChange={e => set('country', e.target.value)}
                     >
@@ -810,43 +822,51 @@ export default function CreateListingPage() {
               {/* Pricing */}
               <div style={{ marginBottom: '1.75rem' }}>
                 <p style={{
-                  fontFamily: "'Jost', sans-serif",
+                  fontFamily: 'var(--sans, "Jost", sans-serif)',
                   fontSize: '10px',
                   letterSpacing: '0.14em',
                   textTransform: 'uppercase',
-                  color: 'rgba(255,255,255,0.2)',
+                  color: 'var(--t3, rgba(255,255,255,0.2))',
                   fontWeight: 600,
                   marginBottom: '1rem',
                 }}>
                   Pricing (EUR)
                 </p>
-                <div
-                  className="cl-price-grid"
-                  style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}
-                >
-                  <div>
-                    <label style={label}>Starting from (€)</label>
-                    <input
-                      type="number"
-                      min="0"
-                      className="cl-inp"
-                      style={inp}
-                      value={form.price_from}
-                      onChange={e => set('price_from', e.target.value)}
-                      placeholder="200"
-                    />
-                  </div>
-                  <div>
-                    <label style={label}>Up to (€)</label>
-                    <input
-                      type="number"
-                      min="0"
-                      className="cl-inp"
-                      style={inp}
-                      value={form.price_to}
-                      onChange={e => set('price_to', e.target.value)}
-                      placeholder="1 200"
-                    />
+                {/* Pricing tier card */}
+                <div style={{
+                  background: 'var(--bg2, rgba(255,255,255,0.02))',
+                  border: '0.5px solid var(--b2, rgba(255,255,255,0.08))',
+                  borderRadius: 'var(--rl, 13px)',
+                  padding: '1.25rem',
+                }}>
+                  <div
+                    className="cl-price-grid"
+                    style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}
+                  >
+                    <div>
+                      <label style={label}>Starting from (€)</label>
+                      <input
+                        type="number"
+                        min="0"
+                        className="cl-inp"
+                        style={inpField}
+                        value={form.price_from}
+                        onChange={e => set('price_from', e.target.value)}
+                        placeholder="200"
+                      />
+                    </div>
+                    <div>
+                      <label style={label}>Up to (€)</label>
+                      <input
+                        type="number"
+                        min="0"
+                        className="cl-inp"
+                        style={inpField}
+                        value={form.price_to}
+                        onChange={e => set('price_to', e.target.value)}
+                        placeholder="1 200"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -854,11 +874,11 @@ export default function CreateListingPage() {
               {/* Meet type */}
               <div style={{ marginBottom: '1rem' }}>
                 <p style={{
-                  fontFamily: "'Jost', sans-serif",
+                  fontFamily: 'var(--sans, "Jost", sans-serif)',
                   fontSize: '10px',
                   letterSpacing: '0.14em',
                   textTransform: 'uppercase',
-                  color: 'rgba(255,255,255,0.2)',
+                  color: 'var(--t3, rgba(255,255,255,0.2))',
                   fontWeight: 600,
                   marginBottom: '1rem',
                 }}>
@@ -873,19 +893,19 @@ export default function CreateListingPage() {
                       onClick={() => set('meet_type', mt.value)}
                     >
                       <span style={{
-                        fontFamily: "'Jost', sans-serif",
+                        fontFamily: 'var(--sans, "Jost", sans-serif)',
                         fontSize: '13px',
                         fontWeight: 500,
-                        color: form.meet_type === mt.value ? '#c5a05a' : 'rgba(255,255,255,0.55)',
+                        color: form.meet_type === mt.value ? 'var(--gold, #c5a05a)' : 'var(--t2, rgba(255,255,255,0.55))',
                         letterSpacing: '0.04em',
                         transition: 'color 0.2s',
                       }}>
                         {mt.label}
                       </span>
                       <span style={{
-                        fontFamily: "'Jost', sans-serif",
+                        fontFamily: 'var(--sans, "Jost", sans-serif)',
                         fontSize: '10px',
-                        color: 'rgba(255,255,255,0.22)',
+                        color: 'var(--t3, rgba(255,255,255,0.22))',
                         fontWeight: 300,
                         letterSpacing: '0.03em',
                       }}>
@@ -901,6 +921,7 @@ export default function CreateListingPage() {
           {/* ─── Step 4: Photo upload ─── */}
           {step === 4 && (
             <div>
+              <h2 className="cl-section-heading">Add Photos</h2>
               {/* Hidden file input */}
               <input
                 ref={fileInputRef}
@@ -926,44 +947,31 @@ export default function CreateListingPage() {
                   handleFiles(e.dataTransfer.files)
                 }}
               >
-                {/* Camera icon */}
-                <div style={{
-                  width: '52px', height: '52px',
-                  borderRadius: '50%',
-                  background: 'rgba(197,160,90,0.07)',
-                  border: '0.5px solid rgba(197,160,90,0.25)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  flexShrink: 0,
-                }}>
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(197,160,90,0.7)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                    <circle cx="12" cy="13" r="4"/>
-                  </svg>
-                </div>
+                <i className="ti ti-cloud-upload" style={{ fontSize: 48, color: 'var(--t3, rgba(255,255,255,0.25))', display: 'block', marginBottom: '1rem' }} />
                 <span style={{
-                  fontFamily: "'Jost', sans-serif",
+                  fontFamily: 'var(--sans, "Jost", sans-serif)',
                   fontSize: '14px',
                   fontWeight: 500,
-                  color: 'rgba(255,255,255,0.65)',
+                  color: 'var(--t2, rgba(255,255,255,0.65))',
                   letterSpacing: '0.03em',
                 }}>
                   Add Photos
                 </span>
                 <span style={{
-                  fontFamily: "'Jost', sans-serif",
+                  fontFamily: 'var(--sans, "Jost", sans-serif)',
                   fontSize: '12px',
                   fontWeight: 300,
-                  color: 'rgba(255,255,255,0.25)',
+                  color: 'var(--t2, rgba(255,255,255,0.25))',
                   letterSpacing: '0.04em',
                 }}>
                   Up to 5 photos · JPEG, PNG, WebP · 10 MB each
                 </span>
                 {form.images.length + uploadingImages.filter(u => u.loading).length >= 5 && (
                   <span style={{
-                    fontFamily: "'Jost', sans-serif",
+                    fontFamily: 'var(--sans, "Jost", sans-serif)',
                     fontSize: '11px',
                     fontWeight: 400,
-                    color: 'rgba(197,160,90,0.5)',
+                    color: 'var(--gold, rgba(197,160,90,0.5))',
                     letterSpacing: '0.06em',
                   }}>
                     Maximum reached
@@ -990,7 +998,7 @@ export default function CreateListingPage() {
                   ))}
                   {/* Uploading / errored */}
                   {uploadingImages.map(u => (
-                    <div key={u.id} className="cl-thumb" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                    <div key={u.id} className="cl-thumb" style={{ background: 'var(--bg2, rgba(255,255,255,0.03))' }}>
                       <img src={u.preview} alt={u.name} style={{ opacity: 0.4 }} />
                       <div style={{
                         position: 'absolute', inset: 0,
@@ -1026,9 +1034,9 @@ export default function CreateListingPage() {
 
               {/* Count indicator */}
               <p style={{
-                fontFamily: "'Jost', sans-serif",
+                fontFamily: 'var(--sans, "Jost", sans-serif)',
                 fontSize: '11px',
-                color: 'rgba(255,255,255,0.2)',
+                color: 'var(--t3, rgba(255,255,255,0.2))',
                 fontWeight: 300,
                 marginTop: '1rem',
                 textAlign: 'right',
@@ -1042,11 +1050,12 @@ export default function CreateListingPage() {
           {/* ─── Step 5: Review & Submit ─── */}
           {step === 5 && (
             <div>
+              <h2 className="cl-section-heading">Review &amp; Publish</h2>
               {/* Review card */}
               <div style={{
-                background: 'rgba(255,255,255,0.02)',
-                border: '0.5px solid rgba(255,255,255,0.08)',
-                borderRadius: '14px',
+                background: 'var(--bg2, rgba(255,255,255,0.02))',
+                border: '0.5px solid var(--b2, rgba(255,255,255,0.08))',
+                borderRadius: 'var(--rl, 13px)',
                 padding: '1.5rem',
                 marginBottom: '2rem',
               }}>
@@ -1057,11 +1066,11 @@ export default function CreateListingPage() {
                     alignItems: 'center',
                     padding: '3px 10px',
                     borderRadius: '20px',
-                    background: 'rgba(197,160,90,0.08)',
-                    border: '0.5px solid rgba(197,160,90,0.25)',
-                    color: 'rgba(197,160,90,0.7)',
+                    background: 'var(--gbg, rgba(197,160,90,0.08))',
+                    border: '0.5px solid var(--gbrd, rgba(197,160,90,0.25))',
+                    color: 'var(--gold, rgba(197,160,90,0.7))',
                     fontSize: '10px',
-                    fontFamily: "'Jost', sans-serif",
+                    fontFamily: 'var(--sans, "Jost", sans-serif)',
                     fontWeight: 500,
                     letterSpacing: '0.1em',
                     textTransform: 'uppercase',
@@ -1073,22 +1082,22 @@ export default function CreateListingPage() {
 
                 {/* Title */}
                 <h3 style={{
-                  fontFamily: "'Cormorant Garamond', serif",
+                  fontFamily: 'var(--serif, "Cormorant Garamond", serif)',
                   fontSize: '22px',
                   fontWeight: 400,
-                  color: '#ece8e1',
+                  color: 'var(--t, #ece8e1)',
                   marginBottom: '0.75rem',
                   letterSpacing: '0.01em',
                 }}>
-                  {form.title || <span style={{ color: 'rgba(255,255,255,0.2)', fontStyle: 'italic' }}>No title</span>}
+                  {form.title || <span style={{ color: 'var(--t3, rgba(255,255,255,0.2))', fontStyle: 'italic' }}>No title</span>}
                 </h3>
 
                 {/* Description preview */}
                 {form.description && (
                   <p style={{
-                    fontFamily: "'Jost', sans-serif",
+                    fontFamily: 'var(--sans, "Jost", sans-serif)',
                     fontSize: '13px',
-                    color: 'rgba(255,255,255,0.4)',
+                    color: 'var(--t2, rgba(255,255,255,0.4))',
                     fontWeight: 300,
                     lineHeight: 1.65,
                     marginBottom: '1.25rem',
@@ -1107,13 +1116,13 @@ export default function CreateListingPage() {
                   flexWrap: 'wrap',
                   gap: '16px',
                   paddingTop: '1rem',
-                  borderTop: '0.5px solid rgba(255,255,255,0.07)',
+                  borderTop: '0.5px solid var(--b, rgba(255,255,255,0.07))',
                 }}>
                   {form.city && (
                     <span style={{
-                      fontFamily: "'Jost', sans-serif",
+                      fontFamily: 'var(--sans, "Jost", sans-serif)',
                       fontSize: '12px',
-                      color: 'rgba(255,255,255,0.35)',
+                      color: 'var(--t2, rgba(255,255,255,0.35))',
                       fontWeight: 300,
                     }}>
                       📍 {form.city}, {form.country}
@@ -1121,9 +1130,9 @@ export default function CreateListingPage() {
                   )}
                   {(form.price_from || form.price_to) && (
                     <span style={{
-                      fontFamily: "'Jost', sans-serif",
+                      fontFamily: 'var(--sans, "Jost", sans-serif)',
                       fontSize: '12px',
-                      color: 'rgba(197,160,90,0.6)',
+                      color: 'var(--gold, rgba(197,160,90,0.6))',
                       fontWeight: 400,
                     }}>
                       {form.price_from && form.price_to
@@ -1134,9 +1143,9 @@ export default function CreateListingPage() {
                     </span>
                   )}
                   <span style={{
-                    fontFamily: "'Jost', sans-serif",
+                    fontFamily: 'var(--sans, "Jost", sans-serif)',
                     fontSize: '12px',
-                    color: 'rgba(255,255,255,0.28)',
+                    color: 'var(--t3, rgba(255,255,255,0.28))',
                     fontWeight: 300,
                     textTransform: 'capitalize',
                   }}>
@@ -1144,9 +1153,9 @@ export default function CreateListingPage() {
                   </span>
                   {form.images.length > 0 && (
                     <span style={{
-                      fontFamily: "'Jost', sans-serif",
+                      fontFamily: 'var(--sans, "Jost", sans-serif)',
                       fontSize: '12px',
-                      color: 'rgba(255,255,255,0.28)',
+                      color: 'var(--t3, rgba(255,255,255,0.28))',
                       fontWeight: 300,
                     }}>
                       {form.images.length} photo{form.images.length !== 1 ? 's' : ''}
@@ -1173,7 +1182,7 @@ export default function CreateListingPage() {
                           height: '60px',
                           objectFit: 'cover',
                           borderRadius: '8px',
-                          border: '0.5px solid rgba(255,255,255,0.1)',
+                          border: '0.5px solid var(--b2, rgba(255,255,255,0.1))',
                           flexShrink: 0,
                         }}
                       />
@@ -1185,27 +1194,27 @@ export default function CreateListingPage() {
               {/* Admin toggles — only for admins */}
               {profile?.role === 'admin' && (
                 <div style={{
-                  background: 'rgba(197,160,90,0.04)',
-                  border: '0.5px solid rgba(197,160,90,0.18)',
-                  borderRadius: '12px',
+                  background: 'var(--gbg, rgba(197,160,90,0.04))',
+                  border: '0.5px solid var(--gbrd, rgba(197,160,90,0.18))',
+                  borderRadius: 'var(--r, 8px)',
                   padding: '1.25rem',
                   marginBottom: '1.75rem',
                 }}>
                   <p style={{
-                    fontFamily: "'Jost', sans-serif",
+                    fontFamily: 'var(--sans, "Jost", sans-serif)',
                     fontSize: '10px',
                     letterSpacing: '0.14em',
                     textTransform: 'uppercase',
-                    color: 'rgba(197,160,90,0.5)',
+                    color: 'var(--gold, rgba(197,160,90,0.5))',
                     fontWeight: 600,
                     marginBottom: '1rem',
                   }}>
                     Admin flags
                   </p>
                   <p style={{
-                    fontFamily: "'Jost', sans-serif",
+                    fontFamily: 'var(--sans, "Jost", sans-serif)',
                     fontSize: '12px',
-                    color: 'rgba(255,255,255,0.25)',
+                    color: 'var(--t3, rgba(255,255,255,0.25))',
                     fontWeight: 300,
                   }}>
                     Verified, Premium and Trending flags can be toggled from the admin panel after publishing.
@@ -1215,14 +1224,14 @@ export default function CreateListingPage() {
 
               {error && (
                 <div style={{
-                  background: 'rgba(184,77,114,0.08)',
+                  background: 'var(--pbg, rgba(184,77,114,0.08))',
                   border: '0.5px solid rgba(184,77,114,0.3)',
-                  borderRadius: '9px',
+                  borderRadius: 'var(--r, 8px)',
                   padding: '12px 16px',
                   marginBottom: '1.25rem',
-                  fontFamily: "'Jost', sans-serif",
+                  fontFamily: 'var(--sans, "Jost", sans-serif)',
                   fontSize: '13px',
-                  color: '#d45f72',
+                  color: 'var(--pink, #d45f72)',
                   fontWeight: 400,
                 }}>
                   {error}
@@ -1239,7 +1248,7 @@ export default function CreateListingPage() {
             gap: '12px',
             marginTop: '2.5rem',
             paddingTop: '2rem',
-            borderTop: '0.5px solid rgba(255,255,255,0.06)',
+            borderTop: '0.5px solid var(--b, rgba(255,255,255,0.06))',
           }}>
             {step > 1 && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -1255,8 +1264,8 @@ export default function CreateListingPage() {
                   onClick={saveDraft}
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                    fontFamily: "'Jost', sans-serif", fontSize: '12px', fontWeight: 300,
-                    color: draftSaved ? '#c5a05a' : 'rgba(255,255,255,0.22)',
+                    fontFamily: 'var(--sans, "Jost", sans-serif)', fontSize: '12px', fontWeight: 300,
+                    color: draftSaved ? 'var(--gold, #c5a05a)' : 'var(--t3, rgba(255,255,255,0.22))',
                     letterSpacing: '0.04em', transition: 'color 0.2s',
                   }}
                 >
@@ -1288,6 +1297,41 @@ export default function CreateListingPage() {
           </div>
 
         </div>
+      </div>
+
+      {/* ── Sticky footer (Save draft / Publish) ── */}
+      <div style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        padding: '1rem 1.5rem',
+        background: 'linear-gradient(0deg, var(--bg, #050505) 60%, transparent 100%)',
+        display: 'flex',
+        justifyContent: 'flex-end',
+        gap: '0.75rem',
+        zIndex: 50,
+        pointerEvents: 'none',
+      }}>
+        <button
+          type="button"
+          className="cl-btn-ghost"
+          style={{ pointerEvents: 'auto' }}
+          onClick={saveDraft}
+        >
+          {draftSaved ? 'Saved ✓' : 'Save draft'}
+        </button>
+        {step === TOTAL_STEPS && (
+          <button
+            type="button"
+            className="cl-btn-gold"
+            disabled={loading || !canAdvance()}
+            onClick={handleSubmit}
+            style={{ pointerEvents: 'auto', minWidth: '140px' }}
+          >
+            {loading ? 'Publishing…' : 'Publish listing'}
+          </button>
+        )}
       </div>
     </>
   )

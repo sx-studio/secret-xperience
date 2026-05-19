@@ -86,10 +86,9 @@ export default function LoginPage() {
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Jost:wght@300;400;500;600&display=swap');
+        @import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css');
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body { background: #050505; }
 
         @keyframes shake {
           0%,100% { transform: translateX(0); }
@@ -111,118 +110,145 @@ export default function LoginPage() {
           to   { opacity: 1; transform: scale(1) translateY(0); }
         }
 
-        @keyframes glowPulse {
-          0%, 100% { opacity: 0.4; }
-          50%       { opacity: 0.7; }
-        }
-
         @keyframes checkDraw {
           from { stroke-dashoffset: 30; }
           to   { stroke-dashoffset: 0; }
         }
 
         .lx-page {
+          background: var(--grad-velvet, linear-gradient(160deg,#0b0b0b 0%,#060606 55%,#0e0b02 100%));
           min-height: 100vh;
-          background: #050505;
           display: flex;
-          font-family: 'Jost', sans-serif;
+          align-items: center;
+          justify-content: center;
+          font-family: var(--sans, 'Jost', sans-serif);
         }
 
-        /* ── Left panel ── */
-        .lx-left {
-          display: none;
-          flex: 1 1 0;
-          background: linear-gradient(160deg, #0b0b0b 0%, #060606 55%, #0e0b02 100%);
-          border-right: 0.5px solid rgba(255,255,255,0.055);
-          flex-direction: column;
-          justify-content: space-between;
-          padding: 4rem 3.5rem;
+        .lx-card {
+          max-width: 420px;
+          width: 100%;
+          padding: 2.5rem 2rem;
+          background: var(--bg1, #111111);
+          border: 0.5px solid var(--b3, rgba(255,255,255,0.09));
+          border-radius: var(--rxl, 20px);
+          box-shadow: var(--shadow-modal, 0 24px 80px rgba(0,0,0,0.6));
           position: relative;
           overflow: hidden;
+          animation: scaleIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        @media (min-width: 768px) {
-          .lx-left { display: flex !important; }
-        }
-
-        .lx-glow-orb {
+        .lx-glow-top {
           position: absolute;
-          width: 600px;
-          height: 600px;
-          border-radius: 50%;
-          background: radial-gradient(circle, rgba(197,160,90,0.055) 0%, transparent 68%);
-          top: 50%;
+          top: -60px;
           left: 50%;
-          transform: translate(-50%, -50%);
-          pointer-events: none;
-          animation: glowPulse 4s ease-in-out infinite;
-        }
-
-        .lx-glow-orb-2 {
-          position: absolute;
-          width: 280px;
-          height: 280px;
-          border-radius: 50%;
-          background: radial-gradient(circle, rgba(197,160,90,0.04) 0%, transparent 70%);
-          bottom: 10%;
-          right: -60px;
+          transform: translateX(-50%);
+          width: 200px;
+          height: 200px;
+          background: radial-gradient(circle, rgba(197,160,90,0.15) 0%, transparent 70%);
           pointer-events: none;
         }
 
-        .lx-left-grid {
-          position: absolute;
-          inset: 0;
-          background-image:
-            linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
-          background-size: 60px 60px;
-          pointer-events: none;
-        }
-
-        /* ── Right panel ── */
-        .lx-right {
-          flex: 0 0 auto;
-          width: 100%;
-          max-width: 500px;
-          margin: 0 auto;
+        /* ── Tabs ── */
+        .lx-tabs-row {
+          background: var(--bg2, rgba(0,0,0,0.5));
+          border-radius: var(--r, 8px);
+          padding: 4px;
           display: flex;
-          flex-direction: column;
-          justify-content: center;
-          padding: 2.5rem 2rem;
-          min-height: 100vh;
+          margin-bottom: 1.5rem;
         }
 
-        @media (min-width: 768px) {
-          .lx-right {
-            max-width: 460px;
-            padding: 3rem 2.5rem;
-          }
+        .lx-tab {
+          flex: 1;
+          height: 40px;
+          border: none;
+          background: transparent;
+          color: var(--t2, rgba(255,255,255,0.5));
+          font: 600 12px/1 var(--sans, 'Jost', sans-serif);
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          border-radius: 6px;
+          cursor: pointer;
+          transition: color 0.2s, background 0.2s;
+        }
+
+        .lx-tab.active {
+          background: var(--bg3, rgba(255,255,255,0.06));
+          color: var(--gold, #c5a05a);
+          border-bottom: 2px solid var(--gold, #c5a05a);
+        }
+
+        /* ── Social buttons ── */
+        .lx-social-btn {
+          width: 100%;
+          height: 44px;
+          background: var(--bg2, rgba(255,255,255,0.03));
+          border: 0.5px solid var(--b2, rgba(255,255,255,0.12));
+          border-radius: var(--r, 8px);
+          color: var(--t, #ece8e1);
+          font: 500 13px/1 var(--sans, 'Jost', sans-serif);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          margin-bottom: 0.75rem;
+          cursor: pointer;
+          transition: border-color 0.22s, background 0.22s;
+        }
+        .lx-social-btn:hover {
+          border-color: var(--b3, rgba(255,255,255,0.22));
+          background: var(--bg3, rgba(255,255,255,0.055));
+        }
+        .lx-social-btn i { font-size: 16px; }
+
+        /* ── OR divider ── */
+        .lx-divider {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin: 1.25rem 0;
+        }
+        .lx-divider-line {
+          flex: 1;
+          height: 0.5px;
+          background: var(--b, rgba(255,255,255,0.07));
+        }
+        .lx-divider-label {
+          font: 600 9px var(--sans, 'Jost', sans-serif);
+          letter-spacing: 0.12em;
+          color: var(--t3, rgba(255,255,255,0.2));
+          text-transform: uppercase;
+        }
+
+        /* ── Field labels ── */
+        .lx-label {
+          font: 600 10px/1 var(--sans, 'Jost', sans-serif);
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: var(--t3, rgba(255,255,255,0.3));
+          margin-bottom: 6px;
+          display: block;
         }
 
         /* ── Inputs ── */
         .lx-input {
+          height: 44px;
+          padding: 0 14px;
+          background: var(--bg3, rgba(255,255,255,0.025));
+          color: var(--t, #ece8e1);
+          border: 0.5px solid var(--b2, rgba(255,255,255,0.10));
+          border-radius: var(--r, 8px);
+          font: 400 14px var(--sans, 'Jost', sans-serif);
           width: 100%;
-          padding: 13px 16px;
-          background: rgba(255,255,255,0.025);
-          border: 0.5px solid rgba(255,255,255,0.10);
-          border-radius: 10px;
-          color: #ece8e1;
-          font-family: 'Jost', sans-serif;
-          font-size: 14px;
-          font-weight: 400;
-          letter-spacing: 0.02em;
           outline: none;
-          transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
+          transition: border-color var(--t-fast, 0.15s), box-shadow var(--t-fast, 0.15s);
           appearance: none;
           -webkit-appearance: none;
         }
-        .lx-input::placeholder { color: rgba(255,255,255,0.22); }
+        .lx-input::placeholder { color: var(--t3, rgba(255,255,255,0.22)); }
         .lx-input:focus {
-          border-color: rgba(197,160,90,0.5);
-          background: rgba(197,160,90,0.03);
-          box-shadow: 0 0 0 3px rgba(197,160,90,0.06);
+          border-color: var(--gold, rgba(197,160,90,0.5));
+          box-shadow: 0 0 0 3px var(--gbg, rgba(197,160,90,0.08));
         }
-        .lx-input:hover:not(:focus) { border-color: rgba(255,255,255,0.17); }
 
         /* ── Password wrap ── */
         .lx-pass-wrap { position: relative; }
@@ -230,102 +256,62 @@ export default function LoginPage() {
 
         .lx-eye-btn {
           position: absolute;
-          right: 14px;
+          right: 0;
           top: 50%;
           transform: translateY(-50%);
+          width: 34px;
+          height: 34px;
           background: none;
           border: none;
           cursor: pointer;
-          color: rgba(255,255,255,0.28);
-          padding: 4px;
-          line-height: 1;
-          transition: color 0.2s;
-          display: flex;
-          align-items: center;
-        }
-        .lx-eye-btn:hover { color: rgba(197,160,90,0.7); }
-
-        /* ── Tabs ── */
-        .lx-tab {
-          flex: 1;
-          padding: 10px 0;
-          background: transparent;
-          border: none;
-          cursor: pointer;
-          font-family: 'Jost', sans-serif;
-          font-size: 13px;
-          font-weight: 500;
-          letter-spacing: 0.07em;
-          transition: color 0.2s, background 0.2s;
-          border-radius: 8px;
-          text-transform: uppercase;
-        }
-
-        /* ── Role cards ── */
-        .role-card {
-          padding: 14px 12px;
-          background: rgba(255,255,255,0.02);
-          border: 0.5px solid rgba(255,255,255,0.08);
-          border-radius: 10px;
-          cursor: pointer;
-          transition: border-color 0.22s, background 0.22s, transform 0.15s;
-          text-align: left;
-          width: 100%;
-        }
-        .role-card:hover {
-          border-color: rgba(197,160,90,0.28);
-          background: rgba(197,160,90,0.03);
-          transform: translateY(-1px);
-        }
-        .role-card.selected {
-          border-color: rgba(197,160,90,0.6);
-          background: rgba(197,160,90,0.07);
-          box-shadow: 0 0 0 3px rgba(197,160,90,0.06);
-        }
-        .role-card.selected:hover { transform: none; }
-
-        /* ── Google button ── */
-        .lx-google-btn {
-          width: 100%;
-          padding: 12px 16px;
-          background: rgba(255,255,255,0.03);
-          border: 0.5px solid rgba(255,255,255,0.12);
-          border-radius: 10px;
-          color: #ece8e1;
-          font-family: 'Jost', sans-serif;
-          font-size: 14px;
-          font-weight: 400;
-          letter-spacing: 0.03em;
-          cursor: pointer;
+          color: var(--t3, rgba(255,255,255,0.28));
+          padding: 0;
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 10px;
-          transition: border-color 0.22s, background 0.22s;
+          font-size: 16px;
+          transition: color 0.2s;
         }
-        .lx-google-btn:hover {
-          border-color: rgba(255,255,255,0.22);
-          background: rgba(255,255,255,0.055);
+        .lx-eye-btn:hover { color: var(--gold, rgba(197,160,90,0.7)); }
+
+        /* ── Role cards ── */
+        .lx-role-card {
+          background: var(--bg2, rgba(255,255,255,0.02));
+          border: 0.5px solid var(--b2, rgba(255,255,255,0.08));
+          border-radius: var(--r, 8px);
+          padding: 14px;
+          cursor: pointer;
+          transition: all var(--t-fast, 0.15s);
+          text-align: left;
+          width: 100%;
+        }
+        .lx-role-card:hover {
+          border-color: var(--gbrd, rgba(197,160,90,0.4));
+          background: var(--gbg, rgba(197,160,90,0.04));
+        }
+        .lx-role-card.selected {
+          border-color: var(--gbrd, rgba(197,160,90,0.6));
+          background: var(--gbg, rgba(197,160,90,0.07));
+          color: var(--gold, #c5a05a);
         }
 
         /* ── Submit button ── */
         .lx-submit-btn {
           width: 100%;
-          padding: 14px;
-          background: linear-gradient(135deg, #c5a05a 0%, #a0803d 100%);
+          padding: 14px 24px;
+          background: var(--grad-gold, linear-gradient(135deg,#c5a05a 0%,#a0803d 100%));
+          color: var(--t-on-gold, #080808);
           border: none;
-          border-radius: 10px;
-          color: #06040100;
-          font-family: 'Jost', sans-serif;
-          font-size: 14px;
-          font-weight: 600;
+          border-radius: var(--r, 8px);
+          font: 600 13px/1 var(--sans, 'Jost', sans-serif);
           letter-spacing: 0.06em;
           text-transform: uppercase;
+          box-shadow: var(--shadow-gold, 0 4px 24px rgba(197,160,90,0.25));
           cursor: pointer;
-          transition: opacity 0.2s, transform 0.15s;
-          color: #080808;
+          margin-top: 1.25rem;
           position: relative;
           overflow: hidden;
+          transition: transform var(--t-fast, 0.15s), box-shadow var(--t-fast, 0.15s);
         }
         .lx-submit-btn::after {
           content: '';
@@ -335,340 +321,220 @@ export default function LoginPage() {
           pointer-events: none;
         }
         .lx-submit-btn:disabled { opacity: 0.48; cursor: default; }
-        .lx-submit-btn:not(:disabled):hover { opacity: 0.88; transform: translateY(-1px); }
-        .lx-submit-btn:not(:disabled):active { transform: translateY(0); opacity: 0.95; }
+        .lx-submit-btn:not(:disabled):hover {
+          transform: translateY(-2px);
+          box-shadow: var(--shadow-gold-h, 0 8px 32px rgba(197,160,90,0.35));
+        }
+        .lx-submit-btn:not(:disabled):active { transform: translateY(0); }
 
-        /* ── Divider ── */
-        .lx-divider {
-          display: flex;
-          align-items: center;
-          gap: 14px;
-          margin: 0 0 22px;
-        }
-        .lx-divider-line {
-          flex: 1;
-          height: 0.5px;
-          background: rgba(255,255,255,0.07);
-        }
-        .lx-divider-label {
-          color: rgba(255,255,255,0.2);
-          font-size: 10px;
-          letter-spacing: 0.14em;
-          text-transform: uppercase;
-          font-weight: 500;
+        /* ── Error pill ── */
+        .lx-error {
+          background: var(--pbg, rgba(212,95,114,0.07));
+          color: var(--pink, #d45f72);
+          border-radius: var(--r, 8px);
+          padding: 12px 14px;
+          font: 400 13px var(--sans, 'Jost', sans-serif);
+          margin-bottom: 1rem;
+          width: 100%;
         }
       `}</style>
 
       <div className="lx-page">
+        <div className="lx-card">
 
-        {/* ── Left decorative panel ── */}
-        <div className="lx-left">
-          <div className="lx-glow-orb" />
-          <div className="lx-glow-orb-2" />
-          <div className="lx-left-grid" />
+          {/* Gold glow at top */}
+          <div className="lx-glow-top" />
 
-          {/* Top wordmark */}
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{
-              fontFamily: "'Cormorant Garamond', serif",
-              fontSize: '26px',
-              fontWeight: 400,
-              color: '#c5a05a',
-              letterSpacing: '0.04em',
-              marginBottom: '14px',
-            }}>
-              Secret<em style={{ fontStyle: 'italic', fontWeight: 300 }}>Xperience</em>
-            </div>
-            <div style={{
-              width: '32px',
-              height: '0.5px',
-              background: 'linear-gradient(90deg, rgba(197,160,90,0.8), transparent)',
-            }} />
-          </div>
-
-          {/* Centre tagline */}
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <p style={{
-              fontFamily: "'Cormorant Garamond', serif",
-              fontSize: '42px',
-              fontWeight: 300,
-              color: '#ece8e1',
-              lineHeight: 1.28,
-              letterSpacing: '-0.01em',
-              marginBottom: '1.75rem',
-            }}>
-              Where desire<br />meets{' '}
-              <em style={{ color: '#c5a05a', fontStyle: 'italic' }}>discretion.</em>
-            </p>
-
-            <p style={{
-              color: 'rgba(255,255,255,0.28)',
-              fontSize: '13px',
-              fontWeight: 300,
-              lineHeight: 1.75,
-              maxWidth: '310px',
-              letterSpacing: '0.04em',
-            }}>
-              A curated platform for extraordinary experiences,
-              exclusive venues, and unforgettable connections.
-            </p>
-
-            {/* Feature list */}
-            <div style={{ marginTop: '2.5rem', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {[
-                'Verified service providers & venues',
-                'End-to-end booking & payments',
-                'Complete discretion guaranteed',
-              ].map(feat => (
-                <div key={feat} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{
-                    width: '4px',
-                    height: '4px',
-                    borderRadius: '50%',
-                    background: '#c5a05a',
-                    opacity: 0.7,
-                    flexShrink: 0,
-                  }} />
-                  <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '12px', letterSpacing: '0.04em', fontWeight: 300 }}>
-                    {feat}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Bottom badge */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', position: 'relative', zIndex: 1 }}>
-            <div style={{
-              padding: '5px 12px',
-              border: '0.5px solid rgba(197,160,90,0.2)',
-              borderRadius: '20px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '7px',
-            }}>
-              <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#c5a05a', opacity: 0.6 }} />
-              <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase' }}>
-                Members only · 18+
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* ── Right form panel ── */}
-        <div className="lx-right">
-
-          {/* Mobile wordmark */}
-          <div style={{ textAlign: 'center', marginBottom: '2.75rem' }}>
+          {/* Header */}
+          <div style={{ textAlign: 'center', marginBottom: '1.75rem', position: 'relative', zIndex: 1 }}>
             <a href="/" style={{ textDecoration: 'none' }}>
-              <span style={{
-                fontFamily: "'Cormorant Garamond', serif",
-                fontSize: '28px',
-                fontWeight: 400,
-                color: '#c5a05a',
-                letterSpacing: '0.04em',
+              <div style={{
+                fontFamily: 'var(--serif, "Cormorant Garamond", serif)',
+                fontSize: '22px',
+                fontWeight: 500,
+                color: 'var(--gold, #c5a05a)',
+                letterSpacing: '0.02em',
               }}>
                 Secret<em style={{ fontStyle: 'italic', fontWeight: 300 }}>Xperience</em>
-              </span>
+              </div>
             </a>
+            <div style={{
+              font: '600 10px/1 var(--sans, "Jost", sans-serif)',
+              letterSpacing: '0.16em',
+              color: 'var(--t3, rgba(255,255,255,0.3))',
+              textTransform: 'uppercase',
+              marginTop: '0.5rem',
+            }}>
+              Log in to SecretXperience
+            </div>
           </div>
 
-          {/* Card */}
-          <div style={{
-            background: 'linear-gradient(145deg, #111111 0%, #0d0d0d 100%)',
-            border: '0.5px solid rgba(255,255,255,0.09)',
-            borderRadius: '16px',
-            padding: '2rem 1.875rem 1.875rem',
-            animation: 'scaleIn 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
-            boxShadow: '0 24px 80px rgba(0,0,0,0.6), 0 0 0 0.5px rgba(255,255,255,0.04) inset',
-          }}>
+          {/* Segmented tabs */}
+          <div className="lx-tabs-row">
+            {(['login', 'signup'] as const).map(m => (
+              <button
+                key={m}
+                className={`lx-tab${mode === m ? ' active' : ''}`}
+                onClick={() => switchMode(m)}
+              >
+                {m === 'login' ? 'Log In' : 'Sign Up'}
+              </button>
+            ))}
+          </div>
 
-            {/* Tab switcher */}
-            <div style={{
-              display: 'flex',
-              background: 'rgba(0,0,0,0.5)',
-              border: '0.5px solid rgba(255,255,255,0.07)',
-              borderRadius: '11px',
-              padding: '4px',
-              marginBottom: '1.875rem',
-              gap: '2px',
-            }}>
-              {(['login', 'signup'] as const).map(m => (
-                <button
-                  key={m}
-                  className="lx-tab"
-                  onClick={() => switchMode(m)}
-                  style={{
-                    color: mode === m ? '#c5a05a' : 'rgba(255,255,255,0.28)',
-                    background: mode === m
-                      ? 'linear-gradient(135deg, rgba(197,160,90,0.12) 0%, rgba(197,160,90,0.06) 100%)'
-                      : 'transparent',
-                    boxShadow: mode === m ? '0 0 0 0.5px rgba(197,160,90,0.2) inset' : 'none',
-                  }}
-                >
-                  {m === 'login' ? 'Log in' : 'Create account'}
-                </button>
-              ))}
-            </div>
-
-            {/* ── Success state ── */}
-            {success ? (
-              <div style={{ textAlign: 'center', padding: '2.25rem 0 1.5rem', animation: 'fadeUp 0.45s ease' }}>
-                <div style={{
-                  width: '64px',
-                  height: '64px',
-                  borderRadius: '50%',
-                  background: 'radial-gradient(circle, rgba(197,160,90,0.12) 0%, transparent 70%)',
-                  border: '0.5px solid rgba(197,160,90,0.35)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  margin: '0 auto 1.5rem',
-                  boxShadow: '0 0 30px rgba(197,160,90,0.1)',
-                }}>
-                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M5 12.5l4.5 4.5L19 7"
-                      stroke="#c5a05a"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeDasharray="30"
-                      style={{ animation: 'checkDraw 0.5s ease 0.15s forwards', strokeDashoffset: 30 }}
-                    />
-                  </svg>
-                </div>
-                <p style={{
-                  fontFamily: "'Cormorant Garamond', serif",
-                  fontSize: '24px',
-                  fontWeight: 400,
-                  color: '#ece8e1',
-                  marginBottom: '0.65rem',
-                  letterSpacing: '0.01em',
-                }}>
-                  Check your email
-                </p>
-                <p style={{
-                  color: 'rgba(255,255,255,0.32)',
-                  fontSize: '13px',
-                  lineHeight: 1.7,
-                  fontWeight: 300,
-                }}>
-                  We sent a confirmation link to{' '}
-                  <span style={{ color: 'rgba(255,255,255,0.55)' }}>{email}</span>.
-                  <br />Click it to activate your account.
-                </p>
+          {/* ── Success state ── */}
+          {success ? (
+            <div style={{ textAlign: 'center', padding: '2.25rem 0 1.5rem', animation: 'fadeUp 0.45s ease' }}>
+              <div style={{
+                width: '64px',
+                height: '64px',
+                borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(197,160,90,0.12) 0%, transparent 70%)',
+                border: '0.5px solid rgba(197,160,90,0.35)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 1.5rem',
+                boxShadow: '0 0 30px rgba(197,160,90,0.1)',
+              }}>
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M5 12.5l4.5 4.5L19 7"
+                    stroke="#c5a05a"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeDasharray="30"
+                    style={{ animation: 'checkDraw 0.5s ease 0.15s forwards', strokeDashoffset: 30 }}
+                  />
+                </svg>
               </div>
-            ) : (
-              <div style={{ animation: 'fadeUp 0.3s ease' }}>
+              <p style={{
+                fontFamily: 'var(--serif, "Cormorant Garamond", serif)',
+                fontSize: '24px',
+                fontWeight: 400,
+                color: 'var(--t, #ece8e1)',
+                marginBottom: '0.65rem',
+                letterSpacing: '0.01em',
+              }}>
+                Check your email
+              </p>
+              <p style={{
+                color: 'var(--t2, rgba(255,255,255,0.4))',
+                fontSize: '13px',
+                lineHeight: 1.7,
+                fontWeight: 300,
+              }}>
+                We sent a confirmation link to{' '}
+                <span style={{ color: 'var(--t, rgba(255,255,255,0.7))' }}>{email}</span>.
+                <br />Click it to activate your account.
+              </p>
+            </div>
+          ) : (
+            <div style={{ animation: 'fadeUp 0.3s ease' }}>
 
-                {/* Google OAuth */}
-                <button className="lx-google-btn" onClick={handleGoogle} style={{ marginBottom: '20px' }}>
-                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                    <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
-                    <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
-                    <path d="M3.964 10.707A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.039l3.007-2.332z" fill="#FBBC05"/>
-                    <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.96l3.007 2.333C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
-                  </svg>
-                  Continue with Google
-                </button>
+              {/* Social buttons */}
+              <button className="lx-social-btn" onClick={handleGoogle}>
+                <i className="ti ti-brand-google" />
+                Continue with Google
+              </button>
+              <button className="lx-social-btn" type="button" onClick={() => {}}>
+                <i className="ti ti-brand-apple" />
+                Continue with Apple
+              </button>
 
-                <div className="lx-divider">
-                  <div className="lx-divider-line" />
-                  <span className="lx-divider-label">or</span>
-                  <div className="lx-divider-line" />
+              {/* OR divider */}
+              <div className="lx-divider">
+                <div className="lx-divider-line" />
+                <span className="lx-divider-label">or</span>
+                <div className="lx-divider-line" />
+              </div>
+
+              {/* Form */}
+              <form
+                onSubmit={handleSubmit}
+                style={{ animation: shake ? 'shake 0.45s ease' : 'none' }}
+              >
+                {mode === 'signup' && (
+                  <>
+                    {/* Full name */}
+                    <div style={{ marginBottom: '12px' }}>
+                      <label className="lx-label">Full Name</label>
+                      <input
+                        className="lx-input"
+                        placeholder="Full name"
+                        value={fullName}
+                        onChange={e => setFullName(e.target.value)}
+                        required
+                        autoComplete="name"
+                      />
+                    </div>
+
+                    {/* Role selector 2×2 */}
+                    <div style={{ marginBottom: '14px' }}>
+                      <label className="lx-label">I am a…</label>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                        {ROLES.map(r => (
+                          <button
+                            key={r.value}
+                            type="button"
+                            className={`lx-role-card${role === r.value ? ' selected' : ''}`}
+                            onClick={() => setRole(r.value)}
+                          >
+                            <div style={{
+                              fontSize: '16px',
+                              color: role === r.value ? 'var(--gold, #c5a05a)' : 'var(--t3, rgba(255,255,255,0.25))',
+                              marginBottom: '6px',
+                              transition: 'color 0.2s',
+                              lineHeight: 1,
+                            }}>
+                              {r.icon}
+                            </div>
+                            <div style={{
+                              fontSize: '12px',
+                              fontWeight: 600,
+                              color: role === r.value ? 'var(--gold, #c5a05a)' : 'var(--t, #ece8e1)',
+                              marginBottom: '3px',
+                              fontFamily: 'var(--sans, "Jost", sans-serif)',
+                              letterSpacing: '0.03em',
+                              transition: 'color 0.2s',
+                            }}>
+                              {r.label}
+                            </div>
+                            <div style={{
+                              fontSize: '10.5px',
+                              color: 'var(--t2, rgba(255,255,255,0.4))',
+                              fontFamily: 'var(--sans, "Jost", sans-serif)',
+                              lineHeight: 1.4,
+                              fontWeight: 300,
+                            }}>
+                              {r.description}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Email */}
+                <div style={{ marginBottom: '12px' }}>
+                  <label className="lx-label">Email</label>
+                  <input
+                    className="lx-input"
+                    type="email"
+                    placeholder="Email address"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    required
+                    autoComplete="email"
+                  />
                 </div>
 
-                {/* Form */}
-                <form
-                  onSubmit={handleSubmit}
-                  style={{ animation: shake ? 'shake 0.45s ease' : 'none' }}
-                >
-                  {mode === 'signup' && (
-                    <>
-                      {/* Full name */}
-                      <div style={{ marginBottom: '12px' }}>
-                        <input
-                          className="lx-input"
-                          placeholder="Full name"
-                          value={fullName}
-                          onChange={e => setFullName(e.target.value)}
-                          required
-                          autoComplete="name"
-                        />
-                      </div>
-
-                      {/* Role selector 2×2 */}
-                      <div style={{ marginBottom: '14px' }}>
-                        <p style={{
-                          fontSize: '10px',
-                          color: 'rgba(255,255,255,0.25)',
-                          letterSpacing: '0.14em',
-                          textTransform: 'uppercase',
-                          fontWeight: 500,
-                          marginBottom: '10px',
-                        }}>
-                          I am a…
-                        </p>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                          {ROLES.map(r => (
-                            <button
-                              key={r.value}
-                              type="button"
-                              className={`role-card${role === r.value ? ' selected' : ''}`}
-                              onClick={() => setRole(r.value)}
-                            >
-                              <div style={{
-                                fontSize: '16px',
-                                color: role === r.value ? '#c5a05a' : 'rgba(255,255,255,0.25)',
-                                marginBottom: '6px',
-                                transition: 'color 0.2s',
-                                lineHeight: 1,
-                              }}>
-                                {r.icon}
-                              </div>
-                              <div style={{
-                                fontSize: '12px',
-                                fontWeight: 600,
-                                color: role === r.value ? '#c5a05a' : '#ece8e1',
-                                marginBottom: '3px',
-                                fontFamily: "'Jost', sans-serif",
-                                letterSpacing: '0.03em',
-                                transition: 'color 0.2s',
-                              }}>
-                                {r.label}
-                              </div>
-                              <div style={{
-                                fontSize: '10.5px',
-                                color: 'rgba(255,255,255,0.28)',
-                                fontFamily: "'Jost', sans-serif",
-                                lineHeight: 1.4,
-                                fontWeight: 300,
-                              }}>
-                                {r.description}
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </>
-                  )}
-
-                  {/* Email */}
-                  <div style={{ marginBottom: '12px' }}>
-                    <input
-                      className="lx-input"
-                      type="email"
-                      placeholder="Email address"
-                      value={email}
-                      onChange={e => setEmail(e.target.value)}
-                      required
-                      autoComplete="email"
-                    />
-                  </div>
-
-                  {/* Password */}
-                  <div className="lx-pass-wrap" style={{ marginBottom: error ? '12px' : '16px' }}>
+                {/* Password */}
+                <div style={{ marginBottom: error ? '0' : '4px' }}>
+                  <label className="lx-label">Password</label>
+                  <div className="lx-pass-wrap">
                     <input
                       className="lx-input"
                       type={showPass ? 'text' : 'password'}
@@ -684,58 +550,24 @@ export default function LoginPage() {
                       onClick={() => setShowPass(v => !v)}
                       aria-label={showPass ? 'Hide password' : 'Show password'}
                     >
-                      {showPass ? (
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/>
-                          <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/>
-                          <line x1="1" y1="1" x2="23" y2="23"/>
-                        </svg>
-                      ) : (
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                          <circle cx="12" cy="12" r="3"/>
-                        </svg>
-                      )}
+                      <i className={showPass ? 'ti ti-eye-off' : 'ti ti-eye'} />
                     </button>
                   </div>
+                </div>
 
-                  {/* Inline error */}
-                  {error && (
-                    <div style={{
-                      color: '#d45f72',
-                      fontSize: '12.5px',
-                      marginBottom: '14px',
-                      padding: '10px 13px',
-                      background: 'rgba(212,95,114,0.07)',
-                      border: '0.5px solid rgba(212,95,114,0.25)',
-                      borderRadius: '8px',
-                      lineHeight: 1.55,
-                      letterSpacing: '0.02em',
-                    }}>
-                      {error}
-                    </div>
-                  )}
+                {/* Inline error */}
+                {error && (
+                  <div className="lx-error" style={{ marginTop: '0.75rem' }}>
+                    {error}
+                  </div>
+                )}
 
-                  <button className="lx-submit-btn" type="submit" disabled={loading}>
-                    {loading ? 'Please wait…' : mode === 'login' ? 'Log in' : 'Create account'}
-                  </button>
-                </form>
-              </div>
-            )}
-          </div>
-
-          {/* Footer */}
-          <p style={{
-            textAlign: 'center',
-            color: 'rgba(255,255,255,0.18)',
-            fontSize: '11px',
-            marginTop: '1.5rem',
-            letterSpacing: '0.05em',
-            lineHeight: 1.7,
-            fontWeight: 300,
-          }}>
-            By continuing you confirm you are 18 or older.
-          </p>
+                <button className="lx-submit-btn" type="submit" disabled={loading}>
+                  {loading ? 'Please wait…' : mode === 'login' ? 'Log In' : 'Create Account'}
+                </button>
+              </form>
+            </div>
+          )}
         </div>
       </div>
     </>

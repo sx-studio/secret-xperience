@@ -203,105 +203,443 @@ export default function MessagesPage() {
   const fmt = (iso: string) => new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
 
   if (loading) return (
-    <div style={{ minHeight: '100vh', background: '#050505', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4c4a47', fontFamily: 'sans-serif', fontSize: '13px' }}>Loading messages…</div>
+    <div style={{ minHeight: '100vh', background: 'var(--bg, #050505)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--t3, #4c4a47)', fontFamily: 'var(--sans, sans-serif)', fontSize: '13px' }}>Loading messages…</div>
   )
 
   const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams()
   const hasProviderParam = params.get('provider_id')
 
   return (
-    <div style={{ minHeight: '100vh', background: '#050505', color: '#ece8e1', fontFamily: "'Jost', sans-serif", display: 'flex', flexDirection: 'column' }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=Jost:wght@300;400;500&display=swap');*{box-sizing:border-box}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:rgba(197,160,90,0.15);border-radius:4px}@media(max-width:640px){.conv-list{width:100%!important;display:var(--conv-list-display,flex)!important;flex-direction:column}.thread-panel{display:var(--thread-panel-display,none)!important}}`}</style>
-      <nav style={{ background: '#080808', borderBottom: '0.5px solid rgba(255,255,255,0.06)', padding: '0.9rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', flexShrink: 0 }}>
-        <button onClick={() => window.location.href = '/'} style={{ background: 'none', border: 'none', color: '#4c4a47', cursor: 'pointer', fontSize: '18px' }}>←</button>
-        <span style={{ fontFamily: "'Cormorant Garamond', serif", color: '#c5a05a', fontSize: '18px' }}>Messages</span>
-      </nav>
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        {/* Conversation list — hidden on mobile when a thread is open */}
-        <div
-          className="conv-list"
-          style={{
-            width: '280px',
-            borderRight: '0.5px solid rgba(255,255,255,0.06)',
-            overflowY: 'auto',
-            flexShrink: 0,
-            display: activeConv ? undefined : 'flex',
-            flexDirection: 'column' as const,
-          }}
-        >
-          {/* Fix 5: empty state onboarding */}
-          {conversations.length === 0 && !hasProviderParam ? (
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem 1.5rem', textAlign: 'center', gap: '1rem' }}>
-              <div style={{ fontSize: '36px', color: '#c5a05a', lineHeight: 1 }}>✉</div>
-              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '18px', color: '#ece8e1' }}>No conversations yet</div>
-              <div style={{ fontSize: '13px', color: '#4c4a47', lineHeight: 1.6 }}>Browse listings and message a provider to get started</div>
-              <button onClick={() => window.location.href = '/'} style={{ marginTop: '0.5rem', padding: '9px 20px', background: '#c5a05a', border: 'none', borderRadius: '8px', color: '#080808', fontWeight: 600, fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' }}>Browse Listings</button>
+    <div style={{ display: 'flex', height: 'calc(100vh - var(--nav-h, 60px))', overflow: 'hidden', fontFamily: 'var(--sans, "Jost", sans-serif)', color: 'var(--t, #ece8e1)' }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=Jost:wght@300;400;500&display=swap');
+        @import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css');
+        *, *::before, *::after { box-sizing: border-box; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(197,160,90,0.15); border-radius: 4px; }
+
+        .msg-left-pane {
+          width: 320px;
+          flex-shrink: 0;
+          border-right: 0.5px solid var(--b, rgba(255,255,255,0.06));
+          overflow-y: auto;
+          background: var(--bg, #050505);
+          display: flex;
+          flex-direction: column;
+        }
+
+        .msg-search-wrap {
+          position: relative;
+          flex-shrink: 0;
+        }
+        .msg-search-icon {
+          position: absolute;
+          left: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          color: var(--t3, rgba(255,255,255,0.3));
+          font-size: 15px;
+          pointer-events: none;
+        }
+        .msg-search-input {
+          width: 100%;
+          height: 44px;
+          padding: 0 14px 0 38px;
+          background: var(--bg2, rgba(255,255,255,0.03));
+          border: none;
+          border-bottom: 0.5px solid var(--b, rgba(255,255,255,0.06));
+          color: var(--t, #ece8e1);
+          font: 400 13px var(--sans, 'Jost', sans-serif);
+          outline: none;
+        }
+        .msg-search-input::placeholder { color: var(--t3, rgba(255,255,255,0.3)); }
+
+        .msg-thread-row {
+          height: 72px;
+          padding: 0 1rem;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          cursor: pointer;
+          border-bottom: 0.5px solid var(--b, rgba(255,255,255,0.04));
+          transition: background var(--t-fast, 0.15s);
+          flex-shrink: 0;
+        }
+        .msg-thread-row:hover { background: var(--bg2, rgba(255,255,255,0.03)); }
+        .msg-thread-row.active { background: var(--bg2, rgba(197,160,90,0.06)); border-left: 2px solid var(--gold, #c5a05a); }
+
+        .msg-avatar {
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          background: var(--bg3, rgba(255,255,255,0.06));
+          flex-shrink: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--t3, rgba(255,255,255,0.3));
+          font: 500 16px var(--serif, 'Cormorant Garamond', serif);
+        }
+
+        .msg-unread-badge {
+          background: var(--grad-gold, linear-gradient(135deg,#c5a05a,#a0803d));
+          color: var(--t-on-gold, #080808);
+          border-radius: 50%;
+          min-width: 18px;
+          height: 18px;
+          font: 700 10px/18px var(--sans, 'Jost', sans-serif);
+          text-align: center;
+          padding: 0 4px;
+          flex-shrink: 0;
+        }
+
+        .msg-right-pane {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+        }
+
+        .msg-chat-header {
+          height: 58px;
+          padding: 0 1.25rem;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          border-bottom: 0.5px solid var(--b, rgba(255,255,255,0.06));
+          flex-shrink: 0;
+          background: var(--bg, #050505);
+        }
+
+        .msg-messages-list {
+          flex: 1;
+          overflow-y: auto;
+          padding: 1.5rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+        }
+
+        .msg-bubble-mine {
+          align-self: flex-end;
+          background: var(--grad-gold, linear-gradient(135deg,#c5a05a,#a0803d));
+          color: var(--t-on-gold, #080808);
+          border-radius: 14px 14px 4px 14px;
+          padding: 10px 14px;
+          max-width: 70%;
+          font: 400 13px var(--sans, 'Jost', sans-serif);
+        }
+
+        .msg-bubble-theirs {
+          align-self: flex-start;
+          background: var(--bg2, rgba(255,255,255,0.05));
+          color: var(--t, #ece8e1);
+          border-radius: 14px 14px 14px 4px;
+          padding: 10px 14px;
+          max-width: 70%;
+          font: 400 13px var(--sans, 'Jost', sans-serif);
+        }
+
+        .msg-composer {
+          padding: 1rem 1.25rem;
+          border-top: 0.5px solid var(--b, rgba(255,255,255,0.06));
+          display: flex;
+          gap: 0.75rem;
+          align-items: flex-end;
+          flex-shrink: 0;
+          background: var(--bg, #050505);
+        }
+
+        .msg-compose-textarea {
+          flex: 1;
+          min-height: 44px;
+          max-height: 120px;
+          background: var(--bg2, rgba(255,255,255,0.04));
+          border: 0.5px solid var(--b2, rgba(255,255,255,0.1));
+          border-radius: var(--r, 8px);
+          padding: 10px 14px;
+          color: var(--t, #ece8e1);
+          font: 400 13px var(--sans, 'Jost', sans-serif);
+          resize: none;
+          outline: none;
+          line-height: 1.5;
+          overflow: hidden;
+          transition: border-color var(--t-fast, 0.15s), box-shadow var(--t-fast, 0.15s);
+        }
+        .msg-compose-textarea::placeholder { color: var(--t3, rgba(255,255,255,0.3)); }
+        .msg-compose-textarea:focus {
+          border-color: var(--gold, rgba(197,160,90,0.5));
+          box-shadow: 0 0 0 3px var(--gbg, rgba(197,160,90,0.06));
+        }
+
+        .msg-attach-btn {
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          background: transparent;
+          border: 0.5px solid var(--b2, rgba(255,255,255,0.1));
+          color: var(--t3, rgba(255,255,255,0.3));
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          font-size: 16px;
+          flex-shrink: 0;
+          transition: border-color 0.2s, color 0.2s;
+        }
+        .msg-attach-btn:hover { border-color: var(--b3, rgba(255,255,255,0.2)); color: var(--t2, rgba(255,255,255,0.5)); }
+
+        .msg-send-btn {
+          width: 36px;
+          height: 36px;
+          background: var(--grad-gold, linear-gradient(135deg,#c5a05a,#a0803d));
+          color: var(--t-on-gold, #080808);
+          border: none;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: var(--shadow-gold, 0 4px 16px rgba(197,160,90,0.25));
+          cursor: pointer;
+          font-size: 16px;
+          flex-shrink: 0;
+          transition: opacity 0.2s, transform 0.15s;
+        }
+        .msg-send-btn:disabled { opacity: 0.4; cursor: default; }
+        .msg-send-btn:not(:disabled):hover { opacity: 0.88; transform: scale(1.05); }
+
+        .msg-empty-state {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 1rem;
+          text-align: center;
+          padding: 2rem;
+        }
+
+        @media (max-width: 640px) {
+          .msg-left-pane { width: 100%; display: var(--conv-list-display, flex) !important; }
+          .msg-right-pane { display: var(--thread-panel-display, none) !important; }
+          .mobile-back-btn { display: inline-block !important; }
+        }
+      `}</style>
+
+      {/* ── Left pane (thread list) ── */}
+      <div className="msg-left-pane">
+        {/* Search */}
+        <div className="msg-search-wrap">
+          <i className="ti ti-search msg-search-icon" />
+          <input
+            className="msg-search-input"
+            placeholder="Search conversations…"
+            type="search"
+          />
+        </div>
+
+        {/* Fix 5: empty state onboarding */}
+        {conversations.length === 0 && !hasProviderParam ? (
+          <div className="msg-empty-state">
+            <i className="ti ti-message-circle" style={{ fontSize: '48px', color: 'var(--t3, rgba(255,255,255,0.2))' }} />
+            <div style={{ fontFamily: 'var(--serif, "Cormorant Garamond", serif)', fontSize: '22px', color: 'var(--t, #ece8e1)' }}>No conversations yet</div>
+            <div style={{ fontSize: '13px', color: 'var(--t2, rgba(255,255,255,0.4))', lineHeight: 1.6 }}>Browse listings and message a provider to get started</div>
+            <button
+              onClick={() => window.location.href = '/'}
+              style={{
+                marginTop: '0.5rem', padding: '9px 20px',
+                background: 'var(--grad-gold, linear-gradient(135deg,#c5a05a,#a0803d))',
+                border: 'none', borderRadius: 'var(--r, 8px)',
+                color: 'var(--t-on-gold, #080808)', fontWeight: 600, fontSize: '13px',
+                cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >
+              Browse Listings
+            </button>
+          </div>
+        ) : (
+          conversations.map(c => (
+            <div
+              key={c.other_id}
+              className={`msg-thread-row${activeConv?.other_id === c.other_id ? ' active' : ''}`}
+              onClick={() => openConversation(c, messages, userId!)}
+            >
+              {/* Avatar */}
+              <div className="msg-avatar">
+                {c.other_name.charAt(0).toUpperCase()}
+              </div>
+
+              {/* Info */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3px' }}>
+                  <div style={{
+                    fontFamily: 'var(--serif, "Cormorant Garamond", serif)',
+                    fontSize: '16px',
+                    fontWeight: 400,
+                    color: 'var(--t, #ece8e1)',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}>
+                    {c.other_name}
+                  </div>
+                  <div style={{
+                    font: '400 11px var(--sans, "Jost", sans-serif)',
+                    color: 'var(--t3, rgba(255,255,255,0.3))',
+                    flexShrink: 0,
+                    marginLeft: '8px',
+                  }}>
+                    {fmt(c.last_at)}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                  <div style={{
+                    fontSize: '12px',
+                    color: 'var(--t2, rgba(255,255,255,0.4))',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    flex: 1,
+                  }}>
+                    {c.listing_title ? (
+                      <span style={{ color: 'var(--gold, #c5a05a)' }}>{c.listing_title} · </span>
+                    ) : null}
+                    {c.last_message}
+                  </div>
+                  {c.unread > 0 && (
+                    <span className="msg-unread-badge">{c.unread}</span>
+                  )}
+                </div>
+              </div>
             </div>
-          ) : (
-            conversations.map(c => (
-              <div key={c.other_id} onClick={() => openConversation(c, messages, userId!)}
-                style={{ padding: '1rem 1.25rem', borderBottom: '0.5px solid rgba(255,255,255,0.04)', cursor: 'pointer', background: activeConv?.other_id === c.other_id ? 'rgba(197,160,90,0.06)' : 'transparent', borderLeft: activeConv?.other_id === c.other_id ? '2px solid #c5a05a' : '2px solid transparent' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                  <div style={{ fontWeight: 500, fontSize: '13px' }}>{c.other_name}</div>
-                  {c.unread > 0 && <span style={{ background: '#c5a05a', color: '#080808', borderRadius: '20px', padding: '1px 7px', fontSize: '11px', fontWeight: 700 }}>{c.unread}</span>}
-                </div>
-                {c.listing_title && <div style={{ fontSize: '12px', color: '#c5a05a', marginBottom: '3px' }}>{c.listing_title}</div>}
-                <div style={{ fontSize: '13px', color: '#4c4a47', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.last_message}</div>
+          ))
+        )}
+      </div>
+
+      {/* ── Right pane (chat) ── */}
+      <div className="msg-right-pane">
+        {!activeConv ? (
+          <div className="msg-empty-state">
+            <i className="ti ti-message-circle" style={{ fontSize: '48px', color: 'var(--t3, rgba(255,255,255,0.2))' }} />
+            <div style={{
+              fontFamily: 'var(--serif, "Cormorant Garamond", serif)',
+              fontSize: '22px',
+              color: 'var(--t, #ece8e1)',
+            }}>
+              No conversations yet
+            </div>
+            <div style={{ fontSize: '13px', color: 'var(--t2, rgba(255,255,255,0.4))' }}>
+              Messages from providers will appear here.
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Chat header */}
+            <div className="msg-chat-header">
+              {/* Mobile back button */}
+              <button
+                onClick={() => setActiveConv(null)}
+                aria-label="Back to conversations"
+                style={{
+                  background: 'none', border: 'none', color: 'var(--t3, rgba(255,255,255,0.4))',
+                  cursor: 'pointer', fontSize: '18px', lineHeight: 1, padding: 0, display: 'none',
+                }}
+                className="mobile-back-btn"
+              >←</button>
+
+              {/* Avatar */}
+              <div className="msg-avatar" style={{ width: 36, height: 36, fontSize: '14px' }}>
+                {activeConv.other_name.charAt(0).toUpperCase()}
               </div>
-            ))
-          )}
-        </div>
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          {!activeConv ? (
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4c4a47', fontSize: '13px' }}>Select a conversation</div>
-          ) : (
-            <>
-              <div style={{ padding: '1rem 1.5rem', borderBottom: '0.5px solid rgba(255,255,255,0.06)', background: '#080808', flexShrink: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
-                {/* Fix 7: mobile back button */}
-                <button
-                  onClick={() => setActiveConv(null)}
-                  aria-label="Back to conversations"
-                  style={{ background: 'none', border: 'none', color: '#4c4a47', cursor: 'pointer', fontSize: '18px', lineHeight: 1, padding: 0, display: 'none' }}
-                  className="mobile-back-btn"
-                >←</button>
-                <style>{`@media(max-width:640px){.mobile-back-btn{display:inline-block!important}}`}</style>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 500 }}>{activeConv.other_name}</div>
-                  {activeConv.listing_title && <div style={{ fontSize: '13px', color: '#c5a05a', marginTop: '2px' }}>{activeConv.listing_title}</div>}
+
+              {/* Name + listing */}
+              <div style={{ flex: 1 }}>
+                <div style={{
+                  fontFamily: 'var(--serif, "Cormorant Garamond", serif)',
+                  fontSize: '16px',
+                  fontWeight: 400,
+                  color: 'var(--t, #ece8e1)',
+                }}>
+                  {activeConv.other_name}
+                  {/* Verified badge placeholder */}
                 </div>
+                {activeConv.listing_title && (
+                  <div style={{ fontSize: '12px', color: 'var(--gold, #c5a05a)', marginTop: '1px' }}>
+                    {activeConv.listing_title}
+                  </div>
+                )}
               </div>
-              <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {messages.length === 0 && <div style={{ color: '#4c4a47', fontSize: '13px', textAlign: 'center', marginTop: '2rem' }}>No messages yet. Say hello!</div>}
-                {messages.map(m => {
-                  const mine = m.sender_id === userId
-                  return (
-                    <div key={m.id} style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start' }}>
-                      <div style={{ maxWidth: '65%', background: mine ? 'rgba(197,160,90,0.15)' : 'rgba(255,255,255,0.05)', border: mine ? '0.5px solid rgba(197,160,90,0.3)' : '0.5px solid rgba(255,255,255,0.08)', borderRadius: mine ? '16px 16px 4px 16px' : '16px 16px 16px 4px', padding: '10px 14px' }}>
-                        <div style={{ fontSize: '13px', lineHeight: 1.5 }}>{m.body}</div>
-                        <div style={{ fontSize: '11px', color: '#4c4a47', marginTop: '4px', textAlign: 'right' }}>{fmt(m.created_at)}</div>
-                      </div>
+
+              {/* Menu icon */}
+              <button style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                color: 'var(--t3, rgba(255,255,255,0.3))', fontSize: '20px',
+                display: 'flex', alignItems: 'center',
+              }}>
+                <i className="ti ti-dots-vertical" />
+              </button>
+            </div>
+
+            {/* Messages list */}
+            <div className="msg-messages-list">
+              {messages.length === 0 && (
+                <div style={{ color: 'var(--t3, rgba(255,255,255,0.3))', fontSize: '13px', textAlign: 'center', marginTop: '2rem' }}>
+                  No messages yet. Say hello!
+                </div>
+              )}
+              {messages.map(m => {
+                const mine = m.sender_id === userId
+                return (
+                  <div key={m.id} style={{ display: 'flex', flexDirection: 'column' }}>
+                    <div className={mine ? 'msg-bubble-mine' : 'msg-bubble-theirs'}>
+                      <div style={{ lineHeight: 1.5 }}>{m.body}</div>
                     </div>
-                  )
-                })}
-                <div ref={bottomRef} />
-              </div>
-              <div style={{ padding: '1rem 1.5rem', borderTop: '0.5px solid rgba(255,255,255,0.06)', background: '#080808', display: 'flex', gap: '10px', alignItems: 'flex-end', flexShrink: 0 }}>
-                {/* Fix 4: auto-resize textarea */}
-                <textarea
-                  ref={textareaRef}
-                  value={body}
-                  onChange={e => setBody(e.target.value)}
-                  onInput={handleTextareaInput}
-                  onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }}
-                  placeholder="Type a message…"
-                  rows={1}
-                  style={{ flex: 1, background: '#111', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '10px 14px', color: '#ece8e1', fontSize: '13px', resize: 'none', fontFamily: 'inherit', lineHeight: 1.5, outline: 'none', overflow: 'hidden' }}
-                />
-                <button onClick={sendMessage} disabled={!body.trim() || sending} style={{ padding: '10px 18px', background: body.trim() ? '#c5a05a' : '#222', border: 'none', borderRadius: '10px', color: body.trim() ? '#080808' : '#4c4a47', cursor: body.trim() ? 'pointer' : 'default', fontWeight: 600, fontSize: '13px', flexShrink: 0 }}>Send</button>
-              </div>
-            </>
-          )}
-        </div>
+                    <div style={{
+                      fontSize: '11px',
+                      color: 'var(--t3, rgba(255,255,255,0.3))',
+                      marginTop: '4px',
+                      textAlign: mine ? 'right' : 'left',
+                      font: '400 11px var(--sans, "Jost", sans-serif)',
+                    }}>
+                      {fmt(m.created_at)}
+                    </div>
+                  </div>
+                )
+              })}
+              <div ref={bottomRef} />
+            </div>
+
+            {/* Composer */}
+            <div className="msg-composer">
+              {/* Attach button */}
+              <button className="msg-attach-btn" type="button" aria-label="Attach file">
+                <i className="ti ti-paperclip" />
+              </button>
+
+              {/* Textarea */}
+              <textarea
+                ref={textareaRef}
+                className="msg-compose-textarea"
+                value={body}
+                onChange={e => setBody(e.target.value)}
+                onInput={handleTextareaInput}
+                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }}
+                placeholder="Type a message…"
+                rows={1}
+              />
+
+              {/* Send button */}
+              <button
+                className="msg-send-btn"
+                onClick={sendMessage}
+                disabled={!body.trim() || sending}
+                aria-label="Send message"
+              >
+                <i className="ti ti-send" />
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   )
