@@ -922,8 +922,6 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
   if(this.classList.contains('open'))loadThread('sophia');
 });
 
-renderHow('escorts');
-
     // Sign out handler
     document.querySelectorAll('[data-action="logout"]').forEach(function(btn) {
       btn.addEventListener('click', async function() {
