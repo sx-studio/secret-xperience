@@ -10,7 +10,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     supabase.from('profiles').select('id, created_at').neq('role', 'user'),
   ])
   const staticRoutes = ['/', '/login'].map(path => ({ url: BASE + path, lastModified: new Date(), changeFrequency: 'daily' as const, priority: path === '/' ? 1 : 0.5 }))
+  const categoryRoutes = ['escorts', 'companionship', 'nightlife', 'creators', 'rentals', 'hotels', 'events', 'photo', 'adult', 'experiences', 'memberships'].map(cat => ({ url: `${BASE}/${cat}`, lastModified: new Date(), changeFrequency: 'daily' as const, priority: 0.9 }))
   const listingRoutes = (listings || []).map(l => ({ url: `${BASE}/listings/${l.id}`, lastModified: new Date(l.created_at), changeFrequency: 'weekly' as const, priority: 0.8 }))
   const profileRoutes = (profiles || []).map(p => ({ url: `${BASE}/profile/${p.id}`, lastModified: new Date(p.created_at), changeFrequency: 'weekly' as const, priority: 0.7 }))
-  return [...staticRoutes, ...listingRoutes, ...profileRoutes]
+  return [...staticRoutes, ...categoryRoutes, ...listingRoutes, ...profileRoutes]
 }

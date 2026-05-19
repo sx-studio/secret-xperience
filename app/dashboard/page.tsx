@@ -154,6 +154,7 @@ export default function DashboardPage() {
     const updates: any = {
       full_name: profileDraft.full_name,
       bio: profileDraft.bio,
+      availability: profileDraft.availability,
       city: profileDraft.city,
       country: profileDraft.country,
       phone: profileDraft.phone,
@@ -968,7 +969,7 @@ export default function DashboardPage() {
               </button>
               <button
                 className="db-quick-btn-dark"
-                onClick={() => { setProfileDraft({ full_name: profile?.full_name || '', bio: profile?.bio || '', city: profile?.city || '', country: profile?.country || '', phone: profile?.phone || '', age: profile?.age || '', languages: (profile?.languages || []).join(', ') }); setEditingProfile(true) }}
+                onClick={() => { setProfileDraft({ full_name: profile?.full_name || '', bio: profile?.bio || '', availability: profile?.availability || '', city: profile?.city || '', country: profile?.country || '', phone: profile?.phone || '', age: profile?.age || '', languages: (profile?.languages || []).join(', ') }); setEditingProfile(true) }}
               >
                 Edit profile
               </button>
@@ -1056,10 +1057,16 @@ export default function DashboardPage() {
                   style={{ width:'100%',background:'#0a0a0a',border:'0.5px solid rgba(255,255,255,0.1)',borderRadius:'8px',padding:'10px 14px',color:'#ece8e1',fontSize:'14px',fontFamily:'inherit',outline:'none' }} />
               </div>
             ))}
-            <div style={{ marginBottom:'1.5rem' }}>
+            <div style={{ marginBottom:'1rem' }}>
               <label style={{ display:'block',fontSize:'13px',color:'#c5a05a',letterSpacing:'0.08em',marginBottom:'6px',textTransform:'uppercase' }}>Bio</label>
               <textarea value={profileDraft.bio || ''} onChange={e => setProfileDraft((d: any) => ({ ...d, bio: e.target.value }))} placeholder="Tell clients about yourself…" rows={4}
                 style={{ width:'100%',background:'#0a0a0a',border:'0.5px solid rgba(255,255,255,0.1)',borderRadius:'8px',padding:'10px 14px',color:'#ece8e1',fontSize:'14px',fontFamily:'inherit',resize:'vertical',outline:'none' }} />
+            </div>
+            <div style={{ marginBottom:'1.5rem' }}>
+              <label style={{ display:'block',fontSize:'13px',color:'#c5a05a',letterSpacing:'0.08em',marginBottom:'6px',textTransform:'uppercase' }}>Availability</label>
+              <input type="text" value={profileDraft.availability || ''} onChange={e => setProfileDraft((d: any) => ({ ...d, availability: e.target.value }))} placeholder="e.g. Mon–Fri 10:00–22:00, weekends on request"
+                style={{ width:'100%',background:'#0a0a0a',border:'0.5px solid rgba(255,255,255,0.1)',borderRadius:'8px',padding:'10px 14px',color:'#ece8e1',fontSize:'14px',fontFamily:'inherit',outline:'none' }} />
+              <div style={{ fontSize:'11px',color:'#4c4a47',marginTop:'4px' }}>Shown on your public profile</div>
             </div>
             <div style={{ display:'flex',gap:'10px',justifyContent:'flex-end' }}>
               <button onClick={() => setEditingProfile(false)} style={{ padding:'10px 20px',background:'transparent',border:'0.5px solid rgba(255,255,255,0.15)',borderRadius:'8px',color:'#9a8a7a',cursor:'pointer',fontSize:'13px',fontFamily:'inherit' }}>Cancel</button>

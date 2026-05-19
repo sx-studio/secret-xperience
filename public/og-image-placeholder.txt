@@ -1,0 +1,2 @@
+Place a 1200x630 JPG at /public/og-image.jpg for Open Graph social sharing.
+Recommended: dark luxury aesthetic with SecretXperience wordmark in gold.

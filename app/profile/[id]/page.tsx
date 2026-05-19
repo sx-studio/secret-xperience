@@ -12,6 +12,7 @@ interface Profile {
   username: string | null
   avatar_url: string | null
   bio: string | null
+  availability: string | null
   role: string | null
   country: string | null
   city: string | null
@@ -435,7 +436,7 @@ export default function ProfilePage() {
         supabase.auth.getSession(),
         supabase
           .from('profiles')
-          .select('id, full_name, username, avatar_url, bio, role, country, city, verified, premium, created_at, age, languages')
+          .select('id, full_name, username, avatar_url, bio, availability, role, country, city, verified, premium, created_at, age, languages')
           .eq('id', id)
           .single(),
         supabase
@@ -709,6 +710,24 @@ export default function ProfilePage() {
               }}>
                 {profile.bio}
               </p>
+              {profile.availability && (
+                <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '14px' }}>🕐</span>
+                  <span style={{ fontFamily: "'Jost', sans-serif", fontSize: '13px', color: '#8c8880' }}>{profile.availability}</span>
+                </div>
+              )}
+            </div>
+          )}
+          {!profile.bio && profile.availability && (
+            <div style={{
+              marginTop: '28px',
+              paddingTop: '24px',
+              borderTop: `0.5px solid ${BORDER_SUBTLE}`,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '14px' }}>🕐</span>
+                <span style={{ fontFamily: "'Jost', sans-serif", fontSize: '13px', color: '#8c8880' }}>{profile.availability}</span>
+              </div>
             </div>
           )}
 

@@ -2,18 +2,43 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: { default: 'SecretXperience — Premium Adult Services & Experiences', template: '%s | SecretXperience' },
-  description: 'Discover and book exclusive adult services, escorts, massage, companionship and experiences across Europe. Verified providers, discreet & secure.',
-  keywords: ['adult services', 'escort', 'massage', 'companionship', 'experiences', 'Belgium', 'Europe', 'discreet'],
+  title: {
+    default: 'SecretXperience — Premium Adult Services Marketplace',
+    template: '%s | SecretXperience',
+  },
+  description: 'Discover verified adult services, escorts, companionship, nightlife and more. Discreet, premium, and exclusive. Adults only (18+).',
+  keywords: ['adult services', 'escorts Belgium', 'companionship', 'adult entertainment', 'nightlife Belgium'],
+  metadataBase: new URL('https://secret-xperience.vercel.app'),
   openGraph: {
     type: 'website',
-    siteName: 'SecretXperience',
-    title: 'SecretXperience — Premium Adult Services',
-    description: 'Discover and book exclusive adult services and experiences across Europe.',
+    locale: 'en_US',
     url: 'https://secret-xperience.vercel.app',
+    siteName: 'SecretXperience',
+    title: 'SecretXperience — Premium Adult Services Marketplace',
+    description: 'Discover verified adult services, escorts, companionship, and premium experiences. Discreet and exclusive.',
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'SecretXperience' }],
   },
-  robots: { index: true, follow: true },
-  icons: { icon: '/favicon.ico' },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'SecretXperience',
+    description: 'Premium adult services marketplace.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
+  },
+  manifest: '/manifest.json',
+  themeColor: '#080808',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+  },
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/icon-192.png',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

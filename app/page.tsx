@@ -9,14 +9,15 @@ export default function Home() {
 
 // ── Age Gate ──
 var gate = document.getElementById('gate');
-if (localStorage.getItem('sx_age') === '1') {
-  gate.classList.add('gone');
+// Skip gate if already verified
+if (localStorage.getItem('sx_age_ok') === '1') {
+  if (gate) gate.classList.add('gone');
 } else {
   document.body.style.overflow = 'hidden';
 }
 document.getElementById('gyes').addEventListener('click', function(){
-  localStorage.setItem('sx_age', '1');
   gate.classList.add('gone');
+  localStorage.setItem('sx_age_ok', '1');
   document.body.style.overflow = '';
 });
 document.getElementById('gno').addEventListener('click', function(){
@@ -379,6 +380,19 @@ function openDetail(data) {
       document.getElementById('dpHeroIcon').style.display = '';
     }
   }
+  // Gallery strip
+  var galleryEl = document.getElementById('dpGallery');
+  if (galleryEl) {
+    if (data.images && data.images.length > 1) {
+      galleryEl.style.display = 'flex';
+      galleryEl.innerHTML = (data.images as string[]).map(function(img: string, i: number) {
+        return '<div class="dp-thumb'+(i===0?' active':'')+'" data-src="'+img+'" onclick="(window as any).updateHeroImage(\''+img+'\')" style="flex-shrink:0;width:56px;height:56px;border-radius:8px;background-image:url(\''+img+'\');background-size:cover;background-position:center;cursor:pointer;border:2px solid '+(i===0?'rgba(197,160,90,0.8)':'rgba(255,255,255,0.15)')+'"></div>';
+      }).join('');
+    } else {
+      galleryEl.style.display = 'none';
+      galleryEl.innerHTML = '';
+    }
+  }
   var badgesEl = document.getElementById('dpHeroBadges');
   badgesEl.innerHTML = '';
   (data.badges||[]).forEach(function(b){
@@ -431,6 +445,14 @@ function closeDetail() {
   dpOverlay.classList.remove('open');
   dpPanel.classList.remove('open');
   document.body.style.overflow = '';
+}
+
+;(window as any).updateHeroImage = function(src: string) {
+  var heroEl = document.getElementById('dpHero');
+  if (heroEl) { heroEl.style.backgroundImage = "url('"+src+"')"; }
+  document.querySelectorAll('.dp-thumb').forEach(function(t: any){ t.classList.remove('active'); });
+  var thumbs = document.querySelectorAll('.dp-thumb');
+  thumbs.forEach(function(t: any){ if(t.dataset.src===src) t.classList.add('active'); });
 }
 
 // Expose to global scope so inline onclick handlers on dynamic cards can call these
@@ -564,7 +586,7 @@ document.getElementById('signupSubmit').addEventListener('click',function(){
 // ══ BOOKING MODAL ══
 var bookStep=0,selDate='',selTime='',selDur='2 Hours',selPrice=350;
 var calYear=new Date().getFullYear(),calMonth=new Date().getMonth();
-var availDays=[1,3,4,5,6]; // Mon, Wed, Thu, Fri, Sat (0=Sun)
+var availDays=[0,1,2,3,4,5,6]; // All days available
 var currentListingId=null;
 
 function openBookModal(name,cat,listingId,basePrice){
@@ -963,6 +985,9 @@ renderHow('escorts');
 
     // ── Real listings from Supabase ──
     const activeFilters: any = { category: 'all', verified: false, premium: false, trending: false, minRating: 0, priceMax: null }
+    let currentPage = 0
+    const PAGE_SIZE = 12
+    let totalListings: any[] = []
 
     const getCategoryIcon = (cat: string) => {
       const icons: any = {
@@ -1064,7 +1089,13 @@ renderHow('escorts');
       else query = query.order('created_at', { ascending: false })
       const { data } = await query
       ;(window as any).__sxCacheListings?.(data || [])
-      renderCards(data || [])
+      totalListings = data || []
+      currentPage = 0
+      renderCards(totalListings.slice(0, PAGE_SIZE))
+      const loadMoreBtn = document.getElementById('loadMoreBtn')
+      if (loadMoreBtn) {
+        loadMoreBtn.style.display = totalListings.length > PAGE_SIZE ? 'block' : 'none'
+      }
       // Update featured banner with top featured listing
       const topFeatured = (data || []).find((l: any) => l.featured_until && new Date(l.featured_until) > new Date())
       const banner = document.getElementById('featuredBanner')
@@ -1146,6 +1177,19 @@ renderHow('escorts');
       } catch(e) {}
     }
     loadStats()
+
+    ;(window as any).__loadMore = function() {
+      currentPage++
+      const start = currentPage * PAGE_SIZE
+      const slice = totalListings.slice(0, start + PAGE_SIZE)
+      renderCards(slice)
+      const loadMoreBtn = document.getElementById('loadMoreBtn')
+      if (loadMoreBtn) {
+        loadMoreBtn.style.display = slice.length < totalListings.length ? 'block' : 'none'
+      }
+      // Scroll to show new cards
+      document.getElementById('listingCards')?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    }
 
     // Wire category bar to real data
     document.querySelectorAll('.cat').forEach(function(cat) {
@@ -1261,7 +1305,9 @@ renderHow('escorts');
   }, [])
 
   return (
-    <div dangerouslySetInnerHTML={{ __html: `<!-- ══ AGE GATE ══ -->
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebSite', name: 'SecretXperience', url: 'https://secret-xperience.vercel.app', description: 'Premium adult services marketplace in Belgium.', potentialAction: { '@type': 'SearchAction', target: 'https://secret-xperience.vercel.app/?q={search_term_string}', 'query-input': 'required name=search_term_string' } }) }} />
+      <div dangerouslySetInnerHTML={{ __html: `<!-- ══ AGE GATE ══ -->
 <div id="gate" role="dialog" aria-modal="true" aria-label="Age verification">
   <div class="gate-box">
     <div class="gate-wordmark">SecretXperience · Age Verification</div>
@@ -1273,7 +1319,7 @@ renderHow('escorts');
       <button class="g-no" id="gno">No — Exit</button>
     </div>
     <div class="gate-legal">
-      By entering you confirm you have read and agree to our <a href="#">Terms of Use</a> and <a href="#">Privacy Policy</a>. This site uses cookies for enhanced experience.
+      By entering you confirm you have read and agree to our <a href="/terms">Terms of Use</a> and <a href="/privacy">Privacy Policy</a>. This site uses cookies for enhanced experience.
     </div>
   </div>
 </div>
@@ -1556,6 +1602,10 @@ renderHow('escorts');
 
       </div>
 
+      <div style="text-align:center;padding:1.5rem 0">
+        <button id="loadMoreBtn" style="display:none;padding:10px 28px;background:transparent;border:0.5px solid rgba(197,160,90,0.4);border-radius:10px;color:#c5a05a;font-size:13px;cursor:pointer;font-family:inherit;letter-spacing:0.06em" onclick="(window as any).__loadMore()">Load more listings</button>
+      </div>
+
       <!-- User Profiles -->
       <div class="sec-title">User profiles</div>
       <div class="profiles">
@@ -1669,8 +1719,8 @@ renderHow('escorts');
       </div>
       <div class="footer-col">
         <div class="footer-col-title">Legal</div>
-        <a href="#">Terms of Use</a>
-        <a href="#">Privacy Policy</a>
+        <a href="/terms">Terms of Use</a>
+        <a href="/privacy">Privacy Policy</a>
         <a href="#">Cookie Policy</a>
         <a href="#">DMCA</a>
         <a href="#">18 U.S.C. § 2257</a>
@@ -1754,7 +1804,7 @@ renderHow('escorts');
           </div>
           <div class="terms-row">
             <input type="checkbox" id="termsCheck"/>
-            <label for="termsCheck">I am 18+ and agree to the <a href="#">Terms of Use</a>, <a href="#">Privacy Policy</a>, and confirm all content I post is legal and consensual.</label>
+            <label for="termsCheck">I am 18+ and agree to the <a href="/terms">Terms of Use</a>, <a href="/privacy">Privacy Policy</a>, and confirm all content I post is legal and consensual.</label>
           </div>
           <button class="modal-btn" id="signupSubmit">Create my account</button>
           <div class="modal-switch">Already have an account? <a id="switchToLogin">Log in</a></div>
@@ -2097,6 +2147,7 @@ renderHow('escorts');
         <div class="dp-hero-grad"></div>
         <div class="dp-hero-badges" id="dpHeroBadges"></div>
       </div>
+      <div id="dpGallery" style="display:none;flex-direction:row;gap:6px;padding:8px 14px;overflow-x:auto;scrollbar-width:thin;background:rgba(0,0,0,0.4)"></div>
 
       <!-- Identity -->
       <div class="dp-identity">
@@ -2259,5 +2310,6 @@ renderHow('escorts');
   </nav>
 
 </div><!-- #app -->` }} />
+    </>
   )
 }
