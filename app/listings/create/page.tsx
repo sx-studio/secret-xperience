@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '../../lib/supabase'
 
 /* ─── Data ─────────────────────────────────────────────── */
@@ -33,7 +33,7 @@ const COUNTRIES = [
 
 const MEET_TYPES = [
   { value: 'incall',  label: 'Incall',   desc: 'At your location' },
-  { value: 'outcall', label: 'Outcall',  desc: 'At client's location' },
+  { value: 'outcall', label: 'Outcall',  desc: "At client's location" },
   { value: 'both',    label: 'Both',     desc: 'Either works' },
 ]
 
@@ -49,11 +49,20 @@ interface FormState {
   price_from:  string
   price_to:    string
   meet_type:   string
+  images:      string[]
+}
+
+interface UploadingImage {
+  id:       string
+  name:     string
+  preview:  string
+  loading:  boolean
+  error?:   string
 }
 
 /* ─── Helpers ───────────────────────────────────────────── */
 
-const TOTAL_STEPS = 4
+const TOTAL_STEPS = 5
 
 function StepIndicator({ current }: { current: number }) {
   return (
@@ -137,7 +146,12 @@ export default function CreateListingPage() {
     price_from:  '',
     price_to:    '',
     meet_type:   'both',
+    images:      [],
   })
+
+  const [uploadingImages, setUploadingImages] = useState<UploadingImage[]>([])
+  const [isDragging, setIsDragging]           = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     async function load() {
@@ -154,6 +168,61 @@ export default function CreateListingPage() {
 
   const set = (field: keyof FormState, value: string) =>
     setForm(f => ({ ...f, [field]: value }))
+
+  /* ── Image upload ── */
+  const uploadFile = useCallback(async (file: File) => {
+    if (form.images.length + uploadingImages.filter(u => u.loading).length >= 5) return
+    if (file.size > 10 * 1024 * 1024) {
+      alert(`${file.name} exceeds the 10 MB limit.`)
+      return
+    }
+    const allowed = ['image/jpeg', 'image/png', 'image/webp']
+    if (!allowed.includes(file.type)) {
+      alert(`${file.name} is not a supported format (JPEG, PNG, WebP).`)
+      return
+    }
+
+    const uid     = Math.random().toString(36).slice(2)
+    const preview = URL.createObjectURL(file)
+    setUploadingImages(prev => [...prev, { id: uid, name: file.name, preview, loading: true }])
+
+    try {
+      const res = await fetch('/api/upload', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ filename: file.name, contentType: file.type, size: file.size }),
+      })
+      if (!res.ok) throw new Error('Failed to get upload URL')
+      const { presignedUrl, publicUrl } = await res.json()
+
+      const put = await fetch(presignedUrl, {
+        method:  'PUT',
+        headers: { 'Content-Type': file.type },
+        body:    file,
+      })
+      if (!put.ok) throw new Error('Upload failed')
+
+      setForm(f => ({ ...f, images: [...f.images, publicUrl] }))
+      setUploadingImages(prev => prev.filter(u => u.id !== uid))
+      URL.revokeObjectURL(preview)
+    } catch (err: any) {
+      setUploadingImages(prev =>
+        prev.map(u => u.id === uid ? { ...u, loading: false, error: err.message } : u)
+      )
+    }
+  }, [form.images, uploadingImages])
+
+  const handleFiles = useCallback((files: FileList | null) => {
+    if (!files) return
+    const remaining = 5 - form.images.length - uploadingImages.filter(u => u.loading).length
+    Array.from(files).slice(0, remaining).forEach(uploadFile)
+  }, [form.images.length, uploadingImages, uploadFile])
+
+  const removeImage = (url: string) =>
+    setForm(f => ({ ...f, images: f.images.filter(u => u !== url) }))
+
+  const removeUploading = (id: string) =>
+    setUploadingImages(prev => prev.filter(u => u.id !== id))
 
   /* ── Submit ── */
   async function handleSubmit() {
@@ -174,6 +243,7 @@ export default function CreateListingPage() {
       city:        form.city,
       country:     form.country,
       meet_type:   form.meet_type,
+      images:      form.images.length > 0 ? form.images : null,
       active:      true,
     })
 
@@ -187,6 +257,7 @@ export default function CreateListingPage() {
     if (step === 1) return !!form.category
     if (step === 2) return form.title.trim().length >= 3
     if (step === 3) return !!form.city.trim()
+    if (step === 4) return true  // photos optional
     return true
   }
 
@@ -390,6 +461,58 @@ export default function CreateListingPage() {
 
         select option { background: #1a1a1a; color: #ece8e1; }
 
+        .cl-upload-zone {
+          border: 1.5px dashed rgba(197,160,90,0.25);
+          border-radius: 14px;
+          background: rgba(197,160,90,0.02);
+          padding: 2.5rem 1.5rem;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: border-color 0.2s, background 0.2s;
+          text-align: center;
+          gap: 10px;
+        }
+        .cl-upload-zone:hover,
+        .cl-upload-zone.dragging {
+          border-color: rgba(197,160,90,0.7);
+          background: rgba(197,160,90,0.05);
+        }
+        .cl-thumb-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+          gap: 10px;
+          margin-top: 1rem;
+        }
+        .cl-thumb {
+          position: relative;
+          aspect-ratio: 1;
+          border-radius: 10px;
+          overflow: hidden;
+          border: 0.5px solid rgba(255,255,255,0.1);
+        }
+        .cl-thumb img {
+          width: 100%; height: 100%; object-fit: cover;
+        }
+        .cl-thumb-remove {
+          position: absolute;
+          top: 5px; right: 5px;
+          width: 22px; height: 22px;
+          border-radius: 50%;
+          background: rgba(5,5,5,0.85);
+          border: 0.5px solid rgba(255,255,255,0.2);
+          color: rgba(255,255,255,0.7);
+          font-size: 13px;
+          display: flex; align-items: center; justify-content: center;
+          cursor: pointer;
+          transition: background 0.15s;
+          line-height: 1;
+        }
+        .cl-thumb-remove:hover { background: rgba(180,60,80,0.85); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
         @media (max-width: 480px) {
           .cl-category-grid { grid-template-columns: repeat(2, 1fr) !important; }
           .cl-price-grid    { grid-template-columns: 1fr !important; }
@@ -475,7 +598,8 @@ export default function CreateListingPage() {
               {step === 1 && 'Choose a category'}
               {step === 2 && 'Describe your service'}
               {step === 3 && 'Location & pricing'}
-              {step === 4 && 'Review & publish'}
+              {step === 4 && 'Add photos'}
+              {step === 5 && 'Review & publish'}
             </h1>
           </div>
 
@@ -726,8 +850,149 @@ export default function CreateListingPage() {
             </div>
           )}
 
-          {/* ─── Step 4: Review & Submit ─── */}
+          {/* ─── Step 4: Photo upload ─── */}
           {step === 4 && (
+            <div>
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                style={{ display: 'none' }}
+                onChange={e => handleFiles(e.target.files)}
+              />
+
+              {/* Upload zone */}
+              <div
+                className={`cl-upload-zone${isDragging ? ' dragging' : ''}`}
+                onClick={() => {
+                  if (form.images.length + uploadingImages.filter(u => u.loading).length < 5)
+                    fileInputRef.current?.click()
+                }}
+                onDragOver={e => { e.preventDefault(); setIsDragging(true) }}
+                onDragLeave={() => setIsDragging(false)}
+                onDrop={e => {
+                  e.preventDefault()
+                  setIsDragging(false)
+                  handleFiles(e.dataTransfer.files)
+                }}
+              >
+                {/* Camera icon */}
+                <div style={{
+                  width: '52px', height: '52px',
+                  borderRadius: '50%',
+                  background: 'rgba(197,160,90,0.07)',
+                  border: '0.5px solid rgba(197,160,90,0.25)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0,
+                }}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(197,160,90,0.7)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                    <circle cx="12" cy="13" r="4"/>
+                  </svg>
+                </div>
+                <span style={{
+                  fontFamily: "'Jost', sans-serif",
+                  fontSize: '14px',
+                  fontWeight: 500,
+                  color: 'rgba(255,255,255,0.65)',
+                  letterSpacing: '0.03em',
+                }}>
+                  Add Photos
+                </span>
+                <span style={{
+                  fontFamily: "'Jost', sans-serif",
+                  fontSize: '12px',
+                  fontWeight: 300,
+                  color: 'rgba(255,255,255,0.25)',
+                  letterSpacing: '0.04em',
+                }}>
+                  Up to 5 photos · JPEG, PNG, WebP · 10 MB each
+                </span>
+                {form.images.length + uploadingImages.filter(u => u.loading).length >= 5 && (
+                  <span style={{
+                    fontFamily: "'Jost', sans-serif",
+                    fontSize: '11px',
+                    fontWeight: 400,
+                    color: 'rgba(197,160,90,0.5)',
+                    letterSpacing: '0.06em',
+                  }}>
+                    Maximum reached
+                  </span>
+                )}
+              </div>
+
+              {/* Thumbnails */}
+              {(form.images.length > 0 || uploadingImages.length > 0) && (
+                <div className="cl-thumb-grid">
+                  {/* Uploaded images */}
+                  {form.images.map(url => (
+                    <div key={url} className="cl-thumb">
+                      <img src={url} alt="listing photo" />
+                      <button
+                        type="button"
+                        className="cl-thumb-remove"
+                        onClick={() => removeImage(url)}
+                        aria-label="Remove photo"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                  {/* Uploading / errored */}
+                  {uploadingImages.map(u => (
+                    <div key={u.id} className="cl-thumb" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                      <img src={u.preview} alt={u.name} style={{ opacity: 0.4 }} />
+                      <div style={{
+                        position: 'absolute', inset: 0,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        flexDirection: 'column', gap: '6px',
+                      }}>
+                        {u.loading ? (
+                          <div style={{
+                            width: '24px', height: '24px',
+                            border: '2px solid rgba(197,160,90,0.25)',
+                            borderTop: '2px solid #c5a05a',
+                            borderRadius: '50%',
+                            animation: 'spin 0.8s linear infinite',
+                          }} />
+                        ) : (
+                          <>
+                            <span style={{ fontSize: '18px' }}>⚠</span>
+                            <button
+                              type="button"
+                              className="cl-thumb-remove"
+                              style={{ position: 'relative', top: 'unset', right: 'unset' }}
+                              onClick={() => removeUploading(u.id)}
+                            >
+                              ×
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Count indicator */}
+              <p style={{
+                fontFamily: "'Jost', sans-serif",
+                fontSize: '11px',
+                color: 'rgba(255,255,255,0.2)',
+                fontWeight: 300,
+                marginTop: '1rem',
+                textAlign: 'right',
+                letterSpacing: '0.04em',
+              }}>
+                {form.images.length} / 5 photos added
+              </p>
+            </div>
+          )}
+
+          {/* ─── Step 5: Review & Submit ─── */}
+          {step === 5 && (
             <div>
               {/* Review card */}
               <div style={{
@@ -829,7 +1094,44 @@ export default function CreateListingPage() {
                   }}>
                     {MEET_TYPES.find(m => m.value === form.meet_type)?.label}
                   </span>
+                  {form.images.length > 0 && (
+                    <span style={{
+                      fontFamily: "'Jost', sans-serif",
+                      fontSize: '12px',
+                      color: 'rgba(255,255,255,0.28)',
+                      fontWeight: 300,
+                    }}>
+                      {form.images.length} photo{form.images.length !== 1 ? 's' : ''}
+                    </span>
+                  )}
                 </div>
+
+                {/* Photo strip preview */}
+                {form.images.length > 0 && (
+                  <div style={{
+                    display: 'flex',
+                    gap: '8px',
+                    marginTop: '1rem',
+                    overflowX: 'auto',
+                    paddingBottom: '4px',
+                  }}>
+                    {form.images.map(url => (
+                      <img
+                        key={url}
+                        src={url}
+                        alt=""
+                        style={{
+                          width: '60px',
+                          height: '60px',
+                          objectFit: 'cover',
+                          borderRadius: '8px',
+                          border: '0.5px solid rgba(255,255,255,0.1)',
+                          flexShrink: 0,
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Admin toggles — only for admins */}
