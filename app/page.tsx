@@ -5,6 +5,7 @@ import { createClient } from './lib/supabase'
 export default function Home() {
   useEffect(() => {
     const supabase = createClient()
+    let currentSession: any = null
 
 // ── Age Gate ──
 var gate = document.getElementById('gate');
@@ -714,6 +715,20 @@ document.getElementById('bookSubmit').addEventListener('click',async function(){
   }
 });
 
+// ── Wire share button in detail panel ──
+document.querySelector('.dp-cta-share').addEventListener('click', function(){
+  var panel = document.getElementById('detail-panel')
+  var lid = panel ? panel.dataset.listingId : null
+  if (lid) {
+    var url = window.location.origin + '/listings/' + lid
+    navigator.clipboard.writeText(url).then(function(){
+      showToast('Link copied to clipboard')
+    }).catch(function(){
+      showToast('Link: ' + url)
+    })
+  }
+})
+
 // ── Wire booking CTA in detail panel ──
 document.querySelector('.dp-cta-book').addEventListener('click',function(){
   var name=document.getElementById('dpName').textContent;
@@ -732,6 +747,7 @@ document.querySelector('.dp-cta-msg').addEventListener('click',function(){
   var title=document.getElementById('dpName').textContent;
   closeDetail();
   if(pid){
+    if(!currentSession){ window.location.href='/login?next=/'; return; }
     setTimeout(function(){window.location.href='/messages?provider_id='+pid+(lid?'&listing_id='+lid:'')+'&listing_title='+encodeURIComponent(title);},200);
   } else {
     setTimeout(function(){openModal('msgModal');},200);
@@ -870,6 +886,7 @@ renderHow('escorts');
     // ── Auth-aware nav ──
     ;(async () => {
       const { data: { session } } = await supabase.auth.getSession()
+      currentSession = session
       const loginBtn = document.getElementById('loginBtn') as HTMLButtonElement | null
       const signupBtn = document.getElementById('signupBtn') as HTMLButtonElement | null
       if (session) {
@@ -1039,9 +1056,13 @@ renderHow('escorts');
       if (filters.trending) query = query.eq('trending', true)
       if (filters.minRating > 0) query = query.gte('rating', filters.minRating)
       if (filters.priceMax) query = query.lte('price_from', filters.priceMax)
+      query = query.order('featured_until', { ascending: false, nullsFirst: false })
+      const sort = (filters.sort || 'relevance')
+      if (sort === 'rating') query = query.order('rating', { ascending: false })
+      else if (sort === 'price_asc') query = query.order('price_from', { ascending: true, nullsFirst: false })
+      else if (sort === 'price_desc') query = query.order('price_from', { ascending: false, nullsFirst: false })
+      else query = query.order('created_at', { ascending: false })
       const { data } = await query
-        .order('featured_until', { ascending: false, nullsFirst: false })
-        .order('created_at', { ascending: false })
       ;(window as any).__sxCacheListings?.(data || [])
       renderCards(data || [])
       // Update featured banner with top featured listing
@@ -1171,6 +1192,15 @@ renderHow('escorts');
         else activeFilters.priceMax = null
         fetchListings(activeFilters)
       })
+    })
+
+    document.getElementById('sortSel')?.addEventListener('change', function() {
+      const val = (this as HTMLSelectElement).value
+      if (val.includes('Rating')) activeFilters.sort = 'rating'
+      else if (val.includes('Price ↑')) activeFilters.sort = 'price_asc'
+      else if (val.includes('Price ↓')) activeFilters.sort = 'price_desc'
+      else activeFilters.sort = 'relevance'
+      fetchListings(activeFilters)
     })
 
     // ── Search bar ──
@@ -1399,7 +1429,7 @@ renderHow('escorts');
 
       <div class="res-row">
         <div class="res-count">248 listings found</div>
-        <select class="sort-sel" aria-label="Sort listings">
+        <select class="sort-sel" id="sortSel" aria-label="Sort listings">
           <option>Sort: Relevance</option>
           <option>Sort: Rating ↓</option>
           <option>Sort: Price ↑</option>
@@ -2208,6 +2238,9 @@ renderHow('escorts');
 
     <!-- Sticky CTA -->
     <div class="dp-cta">
+      <button class="dp-cta-share" title="Copy link" aria-label="Copy listing link" style="flex-shrink:0;width:40px;height:40px;border-radius:10px;border:0.5px solid rgba(255,255,255,0.12);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#8c8880;font-size:16px">
+        <i class="ti ti-link" aria-hidden="true"></i>
+      </button>
       <button class="dp-cta-msg"><i class="ti ti-message-circle" aria-hidden="true"></i> Send message</button>
       <button class="dp-cta-book"><i class="ti ti-calendar-plus" aria-hidden="true"></i> Request booking</button>
     </div>
