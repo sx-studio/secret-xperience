@@ -184,7 +184,7 @@ export default function DashboardPage() {
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         <span style={{
           color: 'rgba(255,255,255,0.2)',
-          fontSize: '12px',
+          fontSize: '13px',
           fontFamily: "'Jost', sans-serif",
           letterSpacing: '0.1em',
           textTransform: 'uppercase',
@@ -300,7 +300,7 @@ export default function DashboardPage() {
           padding: 5px 12px;
           cursor: pointer;
           font-family: 'Jost', sans-serif;
-          font-size: 11px;
+          font-size: 12px;
           letter-spacing: 0.06em;
           text-transform: uppercase;
           transition: border-color 0.2s, color 0.2s;
@@ -319,7 +319,7 @@ export default function DashboardPage() {
           background: rgba(197,160,90,0.07);
           border: 0.5px solid rgba(197,160,90,0.2);
           color: rgba(197,160,90,0.7);
-          font-size: 10px;
+          font-size: 11px;
           letter-spacing: 0.08em;
           text-transform: uppercase;
           font-weight: 500;
@@ -370,7 +370,7 @@ export default function DashboardPage() {
         }
 
         .db-section-title {
-          font-size: 10px;
+          font-size: 12px;
           letter-spacing: 0.14em;
           text-transform: uppercase;
           color: rgba(255,255,255,0.22);
@@ -460,7 +460,7 @@ export default function DashboardPage() {
                 href="/admin"
                 style={{
                   color: 'rgba(197,160,90,0.65)',
-                  fontSize: '12px',
+                  fontSize: '13px',
                   letterSpacing: '0.08em',
                   textTransform: 'uppercase',
                   textDecoration: 'none',
@@ -503,7 +503,7 @@ export default function DashboardPage() {
             >
               <span style={{
                 fontFamily: "'Jost', sans-serif",
-                fontSize: '12px',
+                fontSize: '13px',
                 fontWeight: 600,
                 color: '#c5a05a',
                 letterSpacing: '0.04em',
