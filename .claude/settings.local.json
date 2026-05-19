@@ -15,7 +15,11 @@
       "PowerShell(Get-ChildItem \"C:\\\\Users\\\\Dries\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.8\\\\resources\\\\app\" | ForEach-Object { Write-Output $_.Name })",
       "PowerShell(Get-ChildItem \"C:\\\\Users\\\\Dries\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.8\\\\resources\\\\app\\\\git\" | ForEach-Object { Write-Output $_.Name })",
       "PowerShell(& \"C:\\\\Users\\\\Dries\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.8\\\\resources\\\\app\\\\git\\\\mingw64\\\\bin\\\\git.exe\" --version)",
-      "PowerShell(git *)"
+      "PowerShell(git *)",
+      "mcp__1e794605-26ef-4b6f-b176-ae888a1f2024__list_projects",
+      "mcp__1e794605-26ef-4b6f-b176-ae888a1f2024__list_tables",
+      "mcp__1e794605-26ef-4b6f-b176-ae888a1f2024__execute_sql",
+      "mcp__1e794605-26ef-4b6f-b176-ae888a1f2024__apply_migration"
     ]
   }
 }
