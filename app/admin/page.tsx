@@ -82,10 +82,10 @@ export default function AdminPage() {
   )
 
   if (loading) return (
-    <div style={{ minHeight: '100vh', background: '#050505', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg, #050505)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ textAlign: 'center' }}>
-        <div style={{ width: '40px', height: '40px', border: '1px solid rgba(197,160,90,0.2)', borderTop: '1px solid #c5a05a', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 1rem' }} />
-        <div style={{ color: '#4c4a47', fontSize: '13px', fontFamily: 'sans-serif' }}>Loading admin panel…</div>
+        <div style={{ width: '40px', height: '40px', border: '0.5px solid rgba(197,160,90,0.2)', borderTop: '0.5px solid var(--gold, #c5a05a)', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 1rem' }} />
+        <div style={{ color: 'var(--t3, #4c4a47)', fontSize: '13px', fontFamily: 'var(--sans)' }}>Loading admin panel…</div>
       </div>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
@@ -94,102 +94,187 @@ export default function AdminPage() {
   if (!isAdmin) return null
 
   return (
-    <div style={{ minHeight: '100vh', background: '#050505', color: '#ece8e1', fontFamily: "'Jost', sans-serif", display: 'flex' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg, #050505)', color: 'var(--t, #ece8e1)', fontFamily: 'var(--sans)', display: 'flex' }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=Jost:wght@300;400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Cormorant+Garamond:wght@300;400&family=DM+Sans:wght@300;400;500;600&family=Jost:wght@300;400;500;600&display=swap');
+        @import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css');
         @keyframes spin{to{transform:rotate(360deg)}}
         *{box-sizing:border-box}
         ::-webkit-scrollbar{width:4px}
         ::-webkit-scrollbar-track{background:transparent}
-        ::-webkit-scrollbar-thumb{background:rgba(197,160,90,0.2);border-radius:4px}
-        tr:hover td{background:rgba(255,255,255,0.02)}
-        .action-btn:hover{opacity:0.8}
-        .tab-btn:hover{color:#c5a05a!important}
+        ::-webkit-scrollbar-thumb{background:var(--gbrd, rgba(197,160,90,0.2));border-radius:4px}
+        .adm-tr:hover td { background: var(--bg2, rgba(255,255,255,0.02)); }
+        .adm-action-btn { transition: opacity var(--t-fast, 0.15s); }
+        .adm-action-btn:hover { opacity: 0.8; }
+        .adm-tab-btn:hover { color: var(--gold, #c5a05a) !important; }
+        .adm-search-input {
+          height: 44px;
+          padding: 0 14px;
+          background: var(--bg3, #111);
+          border: 0.5px solid var(--b2, rgba(255,255,255,0.08));
+          border-radius: var(--r, 8px);
+          color: var(--t, #ece8e1);
+          font: 400 13px/1 var(--sans);
+          width: 240px;
+          outline: none;
+          transition: border-color var(--t-fast, 0.15s), box-shadow var(--t-fast, 0.15s);
+        }
+        .adm-search-input:focus {
+          border-color: var(--gold, #c5a05a);
+          box-shadow: 0 0 0 3px var(--gbg, rgba(197,160,90,0.12));
+        }
+        .adm-action-icon-btn {
+          background: transparent;
+          border: 0.5px solid var(--b2, rgba(255,255,255,0.12));
+          border-radius: var(--r, 8px);
+          padding: 6px 10px;
+          cursor: pointer;
+          font-size: 13px;
+          transition: opacity var(--t-fast, 0.15s), background var(--t-fast, 0.15s), border-color var(--t-fast, 0.15s);
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+        }
+        .adm-action-icon-btn:hover { opacity: 0.85; }
       `}</style>
 
-      <div style={{ width: '220px', background: '#080808', borderRight: '0.5px solid rgba(255,255,255,0.06)', display: 'flex', flexDirection: 'column', flexShrink: 0, position: 'sticky', top: 0, height: '100vh' }}>
-        <div style={{ padding: '1.5rem', borderBottom: '0.5px solid rgba(255,255,255,0.06)' }}>
-          <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", color: '#c5a05a', fontSize: '18px', marginBottom: '4px' }}>SecretXperience</div>
-          <div style={{ fontSize: '10px', letterSpacing: '.15em', textTransform: 'uppercase', color: '#4c4a47', fontWeight: 600 }}>Admin Console</div>
+      {/* ── Sidebar ── */}
+      <div style={{ width: '220px', background: 'var(--bg1, #080808)', borderRight: '0.5px solid var(--b, rgba(255,255,255,0.06))', display: 'flex', flexDirection: 'column', flexShrink: 0, position: 'sticky', top: 0, height: '100vh' }}>
+        <div style={{ padding: '1.5rem', borderBottom: '0.5px solid var(--b, rgba(255,255,255,0.06))' }}>
+          <div style={{ fontFamily: 'var(--serif)', color: 'var(--gold, #c5a05a)', fontSize: '18px', marginBottom: '6px' }}>SecretXperience</div>
+          <div style={{ display: 'inline-block', background: 'var(--gbg)', color: 'var(--gold)', border: '0.5px solid var(--gbrd)', borderRadius: '20px', padding: '3px 10px', font: '600 10px/1 var(--sans)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Admin</div>
         </div>
         <nav style={{ flex: 1, padding: '1rem 0' }}>
           {TABS.map(t => (
-            <button key={t} className="tab-btn" onClick={() => setTab(t)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '0.75rem 1.5rem', background: tab === t ? 'rgba(197,160,90,0.08)' : 'transparent', border: 'none', borderLeft: tab === t ? '2px solid #c5a05a' : '2px solid transparent', color: tab === t ? '#c5a05a' : '#8c8880', cursor: 'pointer', fontSize: '13px', fontWeight: tab === t ? 600 : 400, textAlign: 'left', transition: 'all .15s' }}>
-              <span style={{ fontSize: '16px' }}>{t === 'Listings' ? '▤' : t === 'Users' ? '◎' : '◈'}</span>
+            <button key={t} className="adm-tab-btn" onClick={() => setTab(t)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '0.75rem 1.5rem', background: tab === t ? 'var(--gbg, rgba(197,160,90,0.08))' : 'transparent', border: 'none', borderLeft: tab === t ? '2px solid var(--gold, #c5a05a)' : '2px solid transparent', color: tab === t ? 'var(--gold, #c5a05a)' : 'var(--t2, #8c8880)', cursor: 'pointer', font: `${tab === t ? 600 : 400} 13px/1 var(--sans)`, textAlign: 'left', transition: 'all var(--t-fast, .15s) var(--ease-out)' }}>
+              <i className={`ti ti-${t === 'Listings' ? 'layout-list' : t === 'Users' ? 'users' : 'calendar-event'}`} style={{ fontSize: '16px' }} aria-hidden="true" />
               {t}
             </button>
           ))}
         </nav>
-        <div style={{ padding: '1rem 1.5rem', borderTop: '0.5px solid rgba(255,255,255,0.06)' }}>
-          <button onClick={() => window.location.href = '/'} style={{ width: '100%', padding: '0.6rem', background: 'transparent', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#4c4a47', cursor: 'pointer', fontSize: '12px' }}>← Back to site</button>
+        <div style={{ padding: '1rem 1.5rem', borderTop: '0.5px solid var(--b, rgba(255,255,255,0.06))' }}>
+          <button onClick={() => window.location.href = '/'} style={{ width: '100%', padding: '0.6rem', background: 'transparent', border: '0.5px solid var(--b2, rgba(255,255,255,0.1))', borderRadius: 'var(--r, 8px)', color: 'var(--t3, #4c4a47)', cursor: 'pointer', font: '400 12px/1 var(--sans)' }}>← Back to site</button>
         </div>
       </div>
 
+      {/* ── Main ── */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        <div style={{ background: '#080808', borderBottom: '0.5px solid rgba(255,255,255,0.06)', padding: '1rem 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+
+        {/* ── Page header ── */}
+        <div style={{ background: 'var(--bg1, #080808)', borderBottom: '0.5px solid var(--b, rgba(255,255,255,0.06))', padding: '1rem 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
           <div>
-            <h1 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: '24px', color: '#ece8e1', margin: 0 }}>{tab}</h1>
-            <div style={{ fontSize: '11px', color: '#4c4a47', marginTop: '2px' }}>
+            <h1 style={{ fontFamily: 'var(--serif)', fontWeight: 500, fontSize: '36px', color: 'var(--t, #ece8e1)', margin: 0, lineHeight: 1.1 }}>{tab}</h1>
+            <div style={{ font: '300 11px/1 var(--sans)', color: 'var(--t3, #4c4a47)', marginTop: '4px', letterSpacing: '0.04em' }}>
               {tab === 'Listings' ? `${filteredListings.length} listings` : tab === 'Users' ? `${filteredUsers.length} users` : `${filteredBookings.length} bookings`}
             </div>
           </div>
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder={`Search ${tab.toLowerCase()}…`} style={{ background: '#111', border: '0.5px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '8px 14px', color: '#ece8e1', fontSize: '13px', outline: 'none', width: '240px' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{ background: 'var(--gbg)', color: 'var(--gold)', border: '0.5px solid var(--gbrd)', borderRadius: '20px', padding: '3px 10px', font: '600 10px/1 var(--sans)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>ADMIN</span>
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder={`Search ${tab.toLowerCase()}…`}
+              className="adm-search-input"
+            />
+          </div>
         </div>
 
         <div style={{ flex: 1, overflow: 'auto', padding: '2rem' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+
+          {/* ── Stats row ── */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
             {[
-              { icon: '▤', label: 'Active Listings', value: stats.listings, color: '#c5a05a' },
-              { icon: '◎', label: 'Total Users', value: stats.users, color: '#1dc9a0' },
-              { icon: '◈', label: 'Bookings', value: stats.bookings, color: '#b0a0f8' },
-              { icon: '€', label: 'Revenue', value: `€${(stats.revenue / 100).toLocaleString()}`, color: '#c5a05a' },
-              { icon: '◉', label: 'Providers', value: stats.providers, color: '#f5a826' },
-              { icon: '⚑', label: 'Hidden', value: stats.pendingListings, color: '#b84d72' },
+              { icon: 'ti-layout-list', label: 'Active Listings', value: stats.listings, sub: 'total listings' },
+              { icon: 'ti-users',       label: 'Total Users',     value: stats.users,    sub: 'registered' },
+              { icon: 'ti-calendar-event', label: 'Bookings',     value: stats.bookings, sub: 'all time' },
+              { icon: 'ti-coin-euro',   label: 'Revenue',         value: `€${(stats.revenue / 100).toLocaleString()}`, sub: 'confirmed bookings' },
             ].map(stat => (
-              <div key={stat.label} style={{ background: '#0a0a0a', border: '0.5px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '1.25rem 1.5rem', position: 'relative', overflow: 'hidden' }}>
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: `linear-gradient(90deg, transparent, ${stat.color}40, transparent)` }} />
-                <div style={{ fontSize: '11px', color: '#4c4a47', letterSpacing: '.1em', textTransform: 'uppercase', fontWeight: 600, marginBottom: '8px' }}>{stat.icon} {stat.label}</div>
-                <div style={{ fontSize: '28px', fontWeight: 700, color: stat.color, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>{stat.value}</div>
+              <div key={stat.label} style={{ background: 'var(--bg1, #0a0a0a)', border: '0.5px solid var(--b, rgba(255,255,255,0.06))', borderRadius: 'var(--rl, 13px)', padding: '1.25rem', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ font: '600 9px/1 var(--sans)', color: 'var(--t3, #4c4a47)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '10px' }}>
+                  <i className={`ti ${stat.icon}`} style={{ marginRight: '5px', fontSize: '10px' }} aria-hidden="true" />
+                  {stat.label}
+                </div>
+                <div style={{ fontFamily: 'var(--serif)', fontSize: '32px', fontWeight: 500, color: 'var(--gold, #c5a05a)', lineHeight: 1, letterSpacing: '-0.01em', marginBottom: '6px' }}>{stat.value}</div>
+                <div style={{ font: '300 11px/1 var(--sans)', color: 'var(--t3, #4c4a47)', letterSpacing: '0.04em' }}>{stat.sub}</div>
               </div>
             ))}
           </div>
 
+          {/* ── Listings table ── */}
           {tab === 'Listings' && (
-            <div style={{ background: '#0a0a0a', border: '0.5px solid rgba(255,255,255,0.06)', borderRadius: '12px', overflow: 'hidden' }}>
+            <div style={{ background: 'var(--bg1, #0a0a0a)', border: '0.5px solid var(--b, rgba(255,255,255,0.06))', borderRadius: 'var(--rl, 13px)', overflow: 'hidden' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                 <thead>
-                  <tr style={{ borderBottom: '0.5px solid rgba(255,255,255,0.06)' }}>
+                  <tr style={{ background: 'var(--bg2, rgba(255,255,255,0.02))' }}>
                     {['Title', 'Category', 'Provider', 'Price', 'Status', 'Actions'].map(h => (
-                      <th key={h} style={{ textAlign: 'left', padding: '12px 16px', fontSize: '10px', letterSpacing: '.1em', textTransform: 'uppercase', color: '#4c4a47', fontWeight: 600 }}>{h}</th>
+                      <th key={h} style={{ textAlign: 'left', padding: '12px 16px', font: '600 9px/1 var(--sans)', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--t3, #4c4a47)' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredListings.length === 0 && <tr><td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: '#4c4a47' }}>No listings found</td></tr>}
+                  {filteredListings.length === 0 && <tr><td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: 'var(--t3, #4c4a47)', fontFamily: 'var(--sans)' }}>No listings found</td></tr>}
                   {filteredListings.map(l => (
-                    <tr key={l.id} style={{ borderBottom: '0.5px solid rgba(255,255,255,0.04)', transition: 'background .1s' }}>
+                    <tr key={l.id} className="adm-tr" style={{ borderTop: '0.5px solid var(--b, rgba(255,255,255,0.04))', color: 'var(--t, #ece8e1)', transition: 'background var(--t-fast, .1s)' }}>
                       <td style={{ padding: '14px 16px' }}>
-                        <div style={{ fontWeight: 500, color: l.active ? '#ece8e1' : '#4c4a47' }}>{l.title}</div>
-                        {!l.active && <div style={{ fontSize: '10px', color: '#b84d72', marginTop: '2px' }}>● Hidden</div>}
+                        <div style={{ fontWeight: 500, color: l.active ? 'var(--t, #ece8e1)' : 'var(--t3, #4c4a47)' }}>{l.title}</div>
+                        {!l.active && <div style={{ font: '500 10px/1 var(--sans)', color: 'var(--wine, #b84d72)', marginTop: '3px', letterSpacing: '0.06em' }}>● Hidden</div>}
                       </td>
-                      <td style={{ padding: '14px 16px' }}><span style={{ background: 'rgba(255,255,255,0.05)', padding: '3px 8px', borderRadius: '20px', fontSize: '11px', color: '#8c8880' }}>{l.category}</span></td>
-                      <td style={{ padding: '14px 16px', color: '#8c8880', fontSize: '12px' }}>{l.profiles?.full_name || l.profiles?.username || '—'}</td>
-                      <td style={{ padding: '14px 16px', color: '#c5a05a', fontSize: '12px' }}>{l.price_from ? `€${l.price_from}` : '—'}</td>
+                      <td style={{ padding: '14px 16px' }}><span style={{ background: 'rgba(255,255,255,0.05)', padding: '3px 8px', borderRadius: '20px', font: '500 11px/1 var(--sans)', color: 'var(--t2, #8c8880)', letterSpacing: '0.06em' }}>{l.category}</span></td>
+                      <td style={{ padding: '14px 16px', color: 'var(--t2, #8c8880)', fontSize: '12px' }}>{l.profiles?.full_name || l.profiles?.username || '—'}</td>
+                      <td style={{ padding: '14px 16px', color: 'var(--gold, #c5a05a)', fontSize: '12px', fontWeight: 500 }}>{l.price_from ? `€${l.price_from}` : '—'}</td>
                       <td style={{ padding: '14px 16px' }}>
                         <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-                          {l.verified && <span style={{ background: 'rgba(29,201,160,0.12)', color: '#1dc9a0', padding: '2px 7px', borderRadius: '20px', fontSize: '10px', fontWeight: 600 }}>Verified</span>}
-                          {l.premium && <span style={{ background: 'rgba(197,160,90,0.12)', color: '#c5a05a', padding: '2px 7px', borderRadius: '20px', fontSize: '10px', fontWeight: 600 }}>Premium</span>}
-                          {l.trending && <span style={{ background: 'rgba(176,160,248,0.12)', color: '#b0a0f8', padding: '2px 7px', borderRadius: '20px', fontSize: '10px', fontWeight: 600 }}>Trending</span>}
+                          {l.verified && <span style={{ background: 'rgba(38,212,160,0.12)', color: 'var(--verified, #1dc9a0)', padding: '2px 7px', borderRadius: '20px', font: '600 10px/1 var(--sans)', letterSpacing: '0.08em' }}>Verified</span>}
+                          {l.premium && <span style={{ background: 'var(--gbg)', color: 'var(--gold)', padding: '2px 7px', borderRadius: '20px', font: '600 10px/1 var(--sans)', letterSpacing: '0.08em' }}>Premium</span>}
+                          {l.trending && <span style={{ background: 'rgba(176,160,248,0.12)', color: '#b0a0f8', padding: '2px 7px', borderRadius: '20px', font: '600 10px/1 var(--sans)', letterSpacing: '0.08em' }}>Trending</span>}
                         </div>
                       </td>
                       <td style={{ padding: '14px 16px' }}>
-                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                          <button className="action-btn" onClick={() => toggleListing(l.id, 'verified', l.verified)} style={{ padding: '4px 10px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: 600, background: l.verified ? 'rgba(255,255,255,0.06)' : 'rgba(29,201,160,0.12)', color: l.verified ? '#8c8880' : '#1dc9a0' }}>{l.verified ? 'Unverify' : 'Verify'}</button>
-                          <button className="action-btn" onClick={() => toggleListing(l.id, 'premium', l.premium)} style={{ padding: '4px 10px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: 600, background: l.premium ? 'rgba(255,255,255,0.06)' : 'rgba(197,160,90,0.12)', color: l.premium ? '#8c8880' : '#c5a05a' }}>{l.premium ? 'Unpremium' : 'Premium'}</button>
-                          <button className="action-btn" onClick={() => toggleListing(l.id, 'trending', l.trending)} style={{ padding: '4px 10px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: 600, background: l.trending ? 'rgba(255,255,255,0.06)' : 'rgba(176,160,248,0.12)', color: l.trending ? '#8c8880' : '#b0a0f8' }}>{l.trending ? 'Untrend' : 'Trending'}</button>
-                          <button className="action-btn" onClick={() => featureListing(l.id, 30)} style={{ padding: '4px 10px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: 600, background: 'rgba(197,160,90,0.12)', color: '#c5a05a' }}>Feature 30d</button>
-                          <button className="action-btn" onClick={() => toggleListing(l.id, 'active', l.active)} style={{ padding: '4px 10px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: 600, background: 'rgba(184,77,114,0.1)', color: '#b84d72' }}>{l.active ? 'Hide' : 'Show'}</button>
-                          <button className="action-btn" onClick={() => deleteListing(l.id)} style={{ padding: '4px 10px', borderRadius: '6px', border: '0.5px solid rgba(184,77,114,0.3)', cursor: 'pointer', fontSize: '11px', fontWeight: 600, background: 'transparent', color: '#b84d72' }}>Delete</button>
+                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+                          <button
+                            className="adm-action-icon-btn adm-action-btn"
+                            onClick={() => toggleListing(l.id, 'verified', l.verified)}
+                            style={{ color: l.verified ? 'var(--t2, #8c8880)' : 'var(--verified, #1dc9a0)', borderColor: l.verified ? 'var(--b2)' : 'rgba(38,212,160,0.3)' }}
+                            title={l.verified ? 'Unverify' : 'Verify'}
+                          >
+                            <i className={`ti ${l.verified ? 'ti-x' : 'ti-circle-check'}`} aria-hidden="true" />
+                            <span style={{ font: '600 10px/1 var(--sans)', letterSpacing: '0.06em' }}>{l.verified ? 'Unverify' : 'Verify'}</span>
+                          </button>
+                          <button
+                            className="adm-action-icon-btn adm-action-btn"
+                            onClick={() => toggleListing(l.id, 'premium', l.premium)}
+                            style={{ color: l.premium ? 'var(--t2, #8c8880)' : 'var(--gold, #c5a05a)', borderColor: l.premium ? 'var(--b2)' : 'var(--gbrd)' }}
+                            title={l.premium ? 'Unpremium' : 'Premium'}
+                          >
+                            <i className={`ti ${l.premium ? 'ti-star-off' : 'ti-star'}`} aria-hidden="true" />
+                            <span style={{ font: '600 10px/1 var(--sans)', letterSpacing: '0.06em' }}>{l.premium ? 'Unpremium' : 'Premium'}</span>
+                          </button>
+                          <button
+                            className="adm-action-icon-btn adm-action-btn"
+                            onClick={() => featureListing(l.id, 30)}
+                            style={{ color: 'var(--gold, #c5a05a)', borderColor: 'var(--gbrd)' }}
+                            title="Feature for 30 days"
+                          >
+                            <i className="ti ti-sparkles" aria-hidden="true" />
+                            <span style={{ font: '600 10px/1 var(--sans)', letterSpacing: '0.06em' }}>Feature 30d</span>
+                          </button>
+                          <button
+                            className="adm-action-icon-btn adm-action-btn"
+                            onClick={() => toggleListing(l.id, 'active', l.active)}
+                            style={{ color: l.active ? 'var(--wine, #b84d72)' : 'var(--verified, #1dc9a0)', borderColor: l.active ? 'rgba(184,77,114,0.3)' : 'rgba(38,212,160,0.3)' }}
+                            title={l.active ? 'Hide listing' : 'Show listing'}
+                          >
+                            <i className={`ti ${l.active ? 'ti-eye-off' : 'ti-eye'}`} aria-hidden="true" />
+                            <span style={{ font: '600 10px/1 var(--sans)', letterSpacing: '0.06em' }}>{l.active ? 'Hide' : 'Show'}</span>
+                          </button>
+                          <button
+                            className="adm-action-icon-btn adm-action-btn"
+                            onClick={() => deleteListing(l.id)}
+                            style={{ color: 'var(--danger, #e2536b)', borderColor: 'rgba(226,83,107,0.3)' }}
+                            title="Delete listing"
+                          >
+                            <i className="ti ti-trash" aria-hidden="true" />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -199,40 +284,55 @@ export default function AdminPage() {
             </div>
           )}
 
+          {/* ── Users table ── */}
           {tab === 'Users' && (
-            <div style={{ background: '#0a0a0a', border: '0.5px solid rgba(255,255,255,0.06)', borderRadius: '12px', overflow: 'hidden' }}>
+            <div style={{ background: 'var(--bg1, #0a0a0a)', border: '0.5px solid var(--b, rgba(255,255,255,0.06))', borderRadius: 'var(--rl, 13px)', overflow: 'hidden' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                 <thead>
-                  <tr style={{ borderBottom: '0.5px solid rgba(255,255,255,0.06)' }}>
+                  <tr style={{ background: 'var(--bg2, rgba(255,255,255,0.02))' }}>
                     {['User', 'Role', 'Joined', 'Badges', 'Actions'].map(h => (
-                      <th key={h} style={{ textAlign: 'left', padding: '12px 16px', fontSize: '10px', letterSpacing: '.1em', textTransform: 'uppercase', color: '#4c4a47', fontWeight: 600 }}>{h}</th>
+                      <th key={h} style={{ textAlign: 'left', padding: '12px 16px', font: '600 9px/1 var(--sans)', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--t3, #4c4a47)' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredUsers.length === 0 && <tr><td colSpan={5} style={{ padding: '3rem', textAlign: 'center', color: '#4c4a47' }}>No users found</td></tr>}
+                  {filteredUsers.length === 0 && <tr><td colSpan={5} style={{ padding: '3rem', textAlign: 'center', color: 'var(--t3, #4c4a47)', fontFamily: 'var(--sans)' }}>No users found</td></tr>}
                   {filteredUsers.map(u => (
-                    <tr key={u.id} style={{ borderBottom: '0.5px solid rgba(255,255,255,0.04)' }}>
+                    <tr key={u.id} className="adm-tr" style={{ borderTop: '0.5px solid var(--b, rgba(255,255,255,0.04))', color: 'var(--t, #ece8e1)', transition: 'background var(--t-fast, .1s)' }}>
                       <td style={{ padding: '14px 16px' }}>
                         <div style={{ fontWeight: 500 }}>{u.full_name || u.username || 'Anonymous'}</div>
-                        <div style={{ fontSize: '10px', color: '#4c4a47', marginTop: '2px', fontFamily: 'monospace' }}>{u.id.slice(0, 12)}…</div>
+                        <div style={{ font: '400 10px/1 monospace', color: 'var(--t3, #4c4a47)', marginTop: '3px' }}>{u.id.slice(0, 12)}…</div>
                       </td>
                       <td style={{ padding: '14px 16px' }}>
-                        <select value={u.role || 'user'} onChange={e => setUserRole(u.id, e.target.value)} style={{ background: '#151515', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: '6px', color: '#ece8e1', padding: '5px 10px', fontSize: '12px', cursor: 'pointer', outline: 'none' }}>
+                        <select value={u.role || 'user'} onChange={e => setUserRole(u.id, e.target.value)} style={{ background: 'var(--bg2, #151515)', border: '0.5px solid var(--b2, rgba(255,255,255,0.1))', borderRadius: 'var(--r, 6px)', color: 'var(--t, #ece8e1)', padding: '5px 10px', font: '400 12px/1 var(--sans)', cursor: 'pointer', outline: 'none' }}>
                           {['user', 'provider', 'venue', 'creator', 'admin'].map(r => <option key={r} value={r}>{r}</option>)}
                         </select>
                       </td>
-                      <td style={{ padding: '14px 16px', color: '#8c8880', fontSize: '12px' }}>{new Date(u.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
+                      <td style={{ padding: '14px 16px', color: 'var(--t2, #8c8880)', fontSize: '12px' }}>{new Date(u.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
                       <td style={{ padding: '14px 16px' }}>
                         <div style={{ display: 'flex', gap: '4px' }}>
-                          {u.verified && <span style={{ background: 'rgba(29,201,160,0.12)', color: '#1dc9a0', padding: '2px 7px', borderRadius: '20px', fontSize: '10px', fontWeight: 600 }}>Verified</span>}
-                          {u.premium && <span style={{ background: 'rgba(197,160,90,0.12)', color: '#c5a05a', padding: '2px 7px', borderRadius: '20px', fontSize: '10px', fontWeight: 600 }}>Premium</span>}
+                          {u.verified && <span style={{ background: 'rgba(38,212,160,0.12)', color: 'var(--verified, #1dc9a0)', padding: '2px 7px', borderRadius: '20px', font: '600 10px/1 var(--sans)', letterSpacing: '0.08em' }}>Verified</span>}
+                          {u.premium && <span style={{ background: 'var(--gbg)', color: 'var(--gold)', padding: '2px 7px', borderRadius: '20px', font: '600 10px/1 var(--sans)', letterSpacing: '0.08em' }}>Premium</span>}
                         </div>
                       </td>
                       <td style={{ padding: '14px 16px' }}>
-                        <div style={{ display: 'flex', gap: '6px' }}>
-                          <button className="action-btn" onClick={() => toggleUser(u.id, 'verified', u.verified)} style={{ padding: '4px 10px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: 600, background: u.verified ? 'rgba(255,255,255,0.06)' : 'rgba(29,201,160,0.12)', color: u.verified ? '#8c8880' : '#1dc9a0' }}>{u.verified ? 'Unverify' : 'Verify'}</button>
-                          <button className="action-btn" onClick={() => toggleUser(u.id, 'premium', u.premium)} style={{ padding: '4px 10px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: 600, background: u.premium ? 'rgba(255,255,255,0.06)' : 'rgba(197,160,90,0.12)', color: u.premium ? '#8c8880' : '#c5a05a' }}>{u.premium ? 'Unpremium' : 'Premium'}</button>
+                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                          <button
+                            className="adm-action-icon-btn adm-action-btn"
+                            onClick={() => toggleUser(u.id, 'verified', u.verified)}
+                            style={{ color: u.verified ? 'var(--t2, #8c8880)' : 'var(--verified, #1dc9a0)', borderColor: u.verified ? 'var(--b2)' : 'rgba(38,212,160,0.3)' }}
+                          >
+                            <i className={`ti ${u.verified ? 'ti-x' : 'ti-circle-check'}`} aria-hidden="true" />
+                            <span style={{ font: '600 10px/1 var(--sans)', letterSpacing: '0.06em' }}>{u.verified ? 'Unverify' : 'Verify'}</span>
+                          </button>
+                          <button
+                            className="adm-action-icon-btn adm-action-btn"
+                            onClick={() => toggleUser(u.id, 'premium', u.premium)}
+                            style={{ color: u.premium ? 'var(--t2, #8c8880)' : 'var(--gold, #c5a05a)', borderColor: u.premium ? 'var(--b2)' : 'var(--gbrd)' }}
+                          >
+                            <i className={`ti ${u.premium ? 'ti-star-off' : 'ti-star'}`} aria-hidden="true" />
+                            <span style={{ font: '600 10px/1 var(--sans)', letterSpacing: '0.06em' }}>{u.premium ? 'Unpremium' : 'Premium'}</span>
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -242,34 +342,43 @@ export default function AdminPage() {
             </div>
           )}
 
+          {/* ── Bookings table ── */}
           {tab === 'Bookings' && (
-            <div style={{ background: '#0a0a0a', border: '0.5px solid rgba(255,255,255,0.06)', borderRadius: '12px', overflow: 'hidden' }}>
+            <div style={{ background: 'var(--bg1, #0a0a0a)', border: '0.5px solid var(--b, rgba(255,255,255,0.06))', borderRadius: 'var(--rl, 13px)', overflow: 'hidden' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                 <thead>
-                  <tr style={{ borderBottom: '0.5px solid rgba(255,255,255,0.06)' }}>
+                  <tr style={{ background: 'var(--bg2, rgba(255,255,255,0.02))' }}>
                     {['Listing', 'Client', 'Date', 'Duration', 'Amount', 'Status'].map(h => (
-                      <th key={h} style={{ textAlign: 'left', padding: '12px 16px', fontSize: '10px', letterSpacing: '.1em', textTransform: 'uppercase', color: '#4c4a47', fontWeight: 600 }}>{h}</th>
+                      <th key={h} style={{ textAlign: 'left', padding: '12px 16px', font: '600 9px/1 var(--sans)', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--t3, #4c4a47)' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredBookings.length === 0 && <tr><td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: '#4c4a47' }}>No bookings yet</td></tr>}
+                  {filteredBookings.length === 0 && <tr><td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: 'var(--t3, #4c4a47)', fontFamily: 'var(--sans)' }}>No bookings yet</td></tr>}
                   {filteredBookings.map(b => (
-                    <tr key={b.id} style={{ borderBottom: '0.5px solid rgba(255,255,255,0.04)' }}>
+                    <tr key={b.id} className="adm-tr" style={{ borderTop: '0.5px solid var(--b, rgba(255,255,255,0.04))', color: 'var(--t, #ece8e1)', transition: 'background var(--t-fast, .1s)' }}>
                       <td style={{ padding: '14px 16px', fontWeight: 500 }}>{b.listings?.title || '—'}</td>
-                      <td style={{ padding: '14px 16px', color: '#8c8880', fontSize: '12px' }}>{b.profiles?.full_name || b.profiles?.username || '—'}</td>
+                      <td style={{ padding: '14px 16px', color: 'var(--t2, #8c8880)', fontSize: '12px' }}>{b.profiles?.full_name || b.profiles?.username || '—'}</td>
                       <td style={{ padding: '14px 16px', fontSize: '12px' }}>{b.date}</td>
-                      <td style={{ padding: '14px 16px', color: '#8c8880', fontSize: '12px' }}>{b.duration_hours}h</td>
-                      <td style={{ padding: '14px 16px', color: '#c5a05a', fontWeight: 600 }}>{b.total_amount ? `€${b.total_amount}` : '—'}</td>
+                      <td style={{ padding: '14px 16px', color: 'var(--t2, #8c8880)', fontSize: '12px' }}>{b.duration_hours}h</td>
+                      <td style={{ padding: '14px 16px', color: 'var(--gold, #c5a05a)', fontWeight: 600 }}>{b.total_amount ? `€${b.total_amount}` : '—'}</td>
                       <td style={{ padding: '14px 16px' }}>
                         <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
-                          <span style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 600, background: b.status === 'confirmed' ? 'rgba(29,201,160,0.12)' : b.status === 'cancelled' ? 'rgba(184,77,114,0.12)' : b.status === 'completed' ? 'rgba(197,160,90,0.12)' : 'rgba(255,255,255,0.06)', color: b.status === 'confirmed' ? '#1dc9a0' : b.status === 'cancelled' ? '#b84d72' : b.status === 'completed' ? '#c5a05a' : '#8c8880' }}>{b.status}</span>
+                          <span style={{ padding: '3px 10px', borderRadius: '20px', font: '600 10px/1 var(--sans)', letterSpacing: '0.1em', textTransform: 'uppercase', background: b.status === 'confirmed' ? 'rgba(38,212,160,0.12)' : b.status === 'cancelled' ? 'rgba(184,77,114,0.12)' : b.status === 'completed' ? 'var(--gbg)' : 'rgba(255,255,255,0.06)', color: b.status === 'confirmed' ? 'var(--verified, #1dc9a0)' : b.status === 'cancelled' ? 'var(--wine, #b84d72)' : b.status === 'completed' ? 'var(--gold, #c5a05a)' : 'var(--t2, #8c8880)' }}>{b.status}</span>
                           {b.status === 'pending' && (
-                            <button className="action-btn" onClick={async () => {
-                              const supabase = createClient()
-                              await supabase.from('bookings').update({ status: 'cancelled' }).eq('id', b.id)
-                              setBookings(prev => prev.map(x => x.id === b.id ? { ...x, status: 'cancelled' } : x))
-                            }} style={{ padding: '4px 10px', borderRadius: '6px', border: '0.5px solid rgba(184,77,114,0.3)', cursor: 'pointer', fontSize: '11px', fontWeight: 600, background: 'transparent', color: '#b84d72' }}>Cancel</button>
+                            <button
+                              className="adm-action-icon-btn adm-action-btn"
+                              onClick={async () => {
+                                const supabase = createClient()
+                                await supabase.from('bookings').update({ status: 'cancelled' }).eq('id', b.id)
+                                setBookings(prev => prev.map(x => x.id === b.id ? { ...x, status: 'cancelled' } : x))
+                              }}
+                              style={{ color: 'var(--danger, #e2536b)', borderColor: 'rgba(226,83,107,0.3)' }}
+                              title="Cancel booking"
+                            >
+                              <i className="ti ti-x" aria-hidden="true" />
+                              <span style={{ font: '600 10px/1 var(--sans)', letterSpacing: '0.06em' }}>Cancel</span>
+                            </button>
                           )}
                         </div>
                       </td>
