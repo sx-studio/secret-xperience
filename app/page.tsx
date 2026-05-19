@@ -368,15 +368,24 @@ function openDetail(data) {
   document.getElementById('dpHeroIcon').className = 'ti ' + data.icon;
   var heroEl = document.getElementById('dpHero');
   if (heroEl) {
+    // Apply category gradient class
+    var catClassMap = {escorts:'cat-escort',escort:'cat-escort',companionship:'cat-companion',companion:'cat-companion',nightlife:'cat-nightlife',creators:'cat-creator',creator:'cat-creator',adult:'cat-shop',rentals:'cat-rental',rental:'cat-rental',hotels:'cat-hotel',hotel:'cat-hotel',events:'cat-event',event:'cat-event',shop:'cat-shop'};
+    var rawCat = (data.cat || data.type || '').toLowerCase().split(' · ')[0].trim();
+    var dpCatClass = catClassMap[rawCat] || 'cat-escort';
+    heroEl.className = 'dp-hero ' + dpCatClass;
+    // Set monogram
+    var monoEl = document.getElementById('dpHeroMonogram');
+    if (monoEl) monoEl.textContent = (data.name || 'Sx').slice(0,2);
     if (data.images && data.images.length > 0) {
-      heroEl.style.backgroundImage = "url('" + data.images[0] + "')";
-      heroEl.style.backgroundSize = 'cover';
-      heroEl.style.backgroundPosition = 'center top';
-      heroEl.style.backgroundColor = '#111';
+      // Show image inside hero as absolute positioned img
+      var existingImg = heroEl.querySelector('img.dp-hero-photo');
+      if (!existingImg) { existingImg = document.createElement('img'); existingImg.className='dp-hero-photo'; existingImg.style.cssText='width:100%;height:100%;object-fit:cover;position:absolute;inset:0;'; heroEl.insertBefore(existingImg, heroEl.firstChild); }
+      existingImg.src = data.images[0];
+      existingImg.style.display = '';
       document.getElementById('dpHeroIcon').style.display = 'none';
     } else {
-      heroEl.style.backgroundImage = '';
-      heroEl.style.backgroundColor = '';
+      var oldImg = heroEl.querySelector('img.dp-hero-photo');
+      if (oldImg) oldImg.style.display = 'none';
       document.getElementById('dpHeroIcon').style.display = '';
     }
   }
@@ -449,7 +458,10 @@ function closeDetail() {
 
 ;(window as any).updateHeroImage = function(src: string) {
   var heroEl = document.getElementById('dpHero');
-  if (heroEl) { heroEl.style.backgroundImage = "url('"+src+"')"; }
+  if (heroEl) {
+    var img = heroEl.querySelector('img.dp-hero-photo') as HTMLImageElement | null;
+    if (img) { img.src = src; img.style.display = ''; }
+  }
   document.querySelectorAll('.dp-thumb').forEach(function(t: any){ t.classList.remove('active'); });
   var thumbs = document.querySelectorAll('.dp-thumb');
   thumbs.forEach(function(t: any){ if(t.dataset.src===src) t.classList.add('active'); });
@@ -494,6 +506,20 @@ document.querySelectorAll('.dp-sim-card').forEach(function(sc){
     if(data) openDetail(data);
   });
 });
+
+// ══ THEME CYCLE ══
+window.__cycleTheme = function() {
+  var order = ['velvet','dark','light'];
+  var cur = document.documentElement.dataset.theme || 'velvet';
+  var next = order[(order.indexOf(cur)+1)%order.length];
+  document.documentElement.dataset.theme = next;
+  try { localStorage.theme = next; } catch(e) {}
+  var labels = {velvet:'Switched to Velvet mode',dark:'Switched to Dark mode',light:'Switched to Light mode'};
+  showToast(labels[next]);
+  var iconMap = {velvet:'ti-sparkles',dark:'ti-moon-stars',light:'ti-sun'};
+  var iconEl = document.getElementById('themeIcon');
+  if (iconEl) iconEl.className = 'ti ' + (iconMap[next] || 'ti-moon-stars');
+};
 
 // ══ TOAST ══
 function showToast(msg){
@@ -1034,6 +1060,9 @@ renderHow('escorts');
           pricing
         }
         const dStr = JSON.stringify(d).replace(/\\/g,'\\\\').replace(/`/g,'\\`')
+        const catClassMap: any = {escorts:'cat-escort',companionship:'cat-companion',nightlife:'cat-nightlife',creators:'cat-creator',creator:'cat-creator',adult:'cat-shop',rentals:'cat-rental',hotels:'cat-hotel',events:'cat-event',shop:'cat-shop'}
+        const catClass = catClassMap[(l.category||'').toLowerCase()] || 'cat-escort'
+        const monogram = (l.title || 'Xx').slice(0,2)
         return `<div class="card" role="listitem" tabindex="0"
           data-lid="${l.id||''}" data-pid="${l.profile_id||''}"
           onclick="openDetail(JSON.parse(decodeURIComponent('${encodeURIComponent(JSON.stringify({
@@ -1050,14 +1079,16 @@ renderHow('escorts');
             featured_until: l.featured_until||null,
             images: l.images||[]
           }))}'))">
-          <div class="card-img" ${l.images && l.images.length > 0 ? `style="background-image:url('${l.images[0]}');background-size:cover;background-position:center top;background-color:#111"` : ''}>
-            ${l.images && l.images.length > 0 ? '' : `<i class="ti ${getCategoryIcon(l.category)}" aria-hidden="true"></i>`}
-            <div class="card-badges">
+          <div class="card-hero ${catClass}" style="height:180px;position:relative;display:flex;align-items:flex-end;padding:1rem;">
+            ${l.images && l.images.length > 0 ? `<img src="${l.images[0]}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" alt="" />` : ''}
+            <div style="position:absolute;top:0.6rem;right:0.6rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.30);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:2;"><i class="ti ti-heart" style="color:#fff;font-size:15px;"></i></div>
+            <div class="card-badges" style="position:relative;z-index:2;">
               ${isFeatured ? '<span class="badge bf">✦ Featured</span>' : ''}
               ${l.verified ? '<span class="badge bv">✓ Verified</span>' : ''}
               ${l.premium ? '<span class="badge bp">Premium</span>' : ''}
               ${l.trending ? '<span class="badge bt">Trending</span>' : ''}
             </div>
+            <span style="font-family:var(--serif);font-size:72px;font-style:italic;font-weight:400;color:rgba(197,160,90,0.30);line-height:1;position:absolute;bottom:0.25rem;left:1rem;">${monogram}</span>
           </div>
           <div class="card-body">
             <div class="card-cat">${l.category}${l.subcategory ? ' · ' + l.subcategory : ''}</div>
@@ -1125,6 +1156,20 @@ renderHow('escorts');
           banner.style.display = 'none'
         }
       }
+      // Populate editorial hero card
+      const heroSource = topFeatured || (data && data[0])
+      if (heroSource) {
+        const hName = document.getElementById('heroCardName')
+        const hSub = document.getElementById('heroCardSub')
+        const hPrice = document.getElementById('heroCardPrice')
+        const hRating = document.getElementById('heroCardRating')
+        const hMonogram = document.getElementById('heroMonogram')
+        if (hName) hName.textContent = heroSource.title || '—'
+        if (hSub) hSub.textContent = [(heroSource.category || ''), (heroSource.subcategory || ''), (heroSource.city || '')].filter(Boolean).join(' · ')
+        if (hPrice) hPrice.textContent = heroSource.price_from ? '€' + heroSource.price_from + '/hr' : 'POA'
+        if (hRating) hRating.textContent = heroSource.rating ? '★ ' + Number(heroSource.rating).toFixed(1) : '★ —'
+        if (hMonogram) hMonogram.textContent = (heroSource.title || 'Sx').slice(0, 2)
+      }
     }
 
     // ── Recently Viewed row ──
@@ -1170,7 +1215,9 @@ renderHow('escorts');
           (supabase as any).from('profiles').select('id', { count: 'exact', head: true }).in('role', ['provider','venue','creator']),
         ])
         const el = (id: string) => document.getElementById(id)
-        if (el('statListings')) el('statListings')!.textContent = (listingCount || 0).toLocaleString()
+        const countStr = (listingCount || 0).toLocaleString()
+        if (el('statListings')) el('statListings')!.textContent = countStr
+        if (el('statListingsAdmin')) el('statListingsAdmin')!.textContent = countStr
         if (el('statProviders')) el('statProviders')!.textContent = (providerCount || 0).toLocaleString()
         if (el('statUsers')) el('statUsers')!.textContent = (userCount || 0).toLocaleString()
         if (el('statRevenue')) el('statRevenue')!.textContent = '—'
@@ -1308,17 +1355,18 @@ renderHow('escorts');
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebSite', name: 'SecretXperience', url: 'https://secret-xperience.vercel.app', description: 'Premium adult services marketplace in Belgium.', potentialAction: { '@type': 'SearchAction', target: 'https://secret-xperience.vercel.app/?q={search_term_string}', 'query-input': 'required name=search_term_string' } }) }} />
       <div dangerouslySetInnerHTML={{ __html: `<!-- ══ AGE GATE ══ -->
-<div id="gate" role="dialog" aria-modal="true" aria-label="Age verification">
-  <div class="gate-box">
-    <div class="gate-wordmark">SecretXperience · Age Verification</div>
-    <i class="ti ti-shield-lock gate-emblem" aria-hidden="true"></i>
-    <h2>Are you 18 or older?</h2>
-    <p>This website contains adult content and services intended for adults only. You must be at least 18 years of age — or the age of majority in your jurisdiction — to enter.</p>
-    <div class="gate-btns">
-      <button class="g-yes" id="gyes">Yes, I am 18+ — Enter Site</button>
-      <button class="g-no" id="gno">No — Exit</button>
+<div id="gate" role="dialog" aria-modal="true" aria-label="Age verification" style="background:rgba(4,4,4,0.93);backdrop-filter:blur(14px);">
+  <div class="gate-box" style="max-width:400px;padding:2.5rem 2rem;background:var(--grad-velvet);border:0.5px solid var(--b3);border-radius:var(--rxl);box-shadow:var(--shadow-modal);position:relative;overflow:hidden;animation:gateIn .4s var(--ease-out) both;">
+    <div style="position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:200px;height:200px;background:radial-gradient(circle,rgba(197,160,90,0.15) 0%,transparent 70%);pointer-events:none;"></div>
+    <div style="font:600 11px/1 var(--sans);letter-spacing:0.32em;color:var(--gold);text-align:center;margin-bottom:1.5rem;text-transform:uppercase;position:relative;z-index:2;">SECRETXPERIENCE</div>
+    <i class="ti ti-shield-lock" style="font-size:44px;color:var(--gold);filter:drop-shadow(0 0 18px rgba(197,160,90,0.35));display:block;text-align:center;margin-bottom:1rem;position:relative;z-index:2;" aria-hidden="true"></i>
+    <h2 style="font-family:var(--serif);font-size:28px;font-weight:300;text-align:center;margin:0 0 0.75rem;position:relative;z-index:2;">Are you 18 or older?</h2>
+    <p class="t-body-sm" style="max-width:300px;text-align:center;margin:0 auto 1.5rem;color:var(--t2);position:relative;z-index:2;">This website contains adult content and services intended for adults only. You must be at least 18 years of age — or the age of majority in your jurisdiction — to enter.</p>
+    <div class="gate-btns" style="position:relative;z-index:2;">
+      <button class="g-yes" id="gyes" style="width:100%;padding:14px 20px;background:var(--grad-gold);border:none;border-radius:var(--r);color:#080808;font-weight:600;font-size:14px;cursor:pointer;font-family:var(--sans);letter-spacing:0.04em;margin-bottom:0.75rem;">Yes, I am 18+ — Enter Site</button>
+      <button class="g-no" id="gno" style="width:100%;padding:10px 20px;background:transparent;border:0.5px solid var(--b2);border-radius:var(--r);color:var(--t2);font-size:12px;cursor:pointer;font-family:var(--sans);">No — Exit</button>
     </div>
-    <div class="gate-legal">
+    <div class="gate-legal" style="position:relative;z-index:2;">
       By entering you confirm you have read and agree to our <a href="/terms">Terms of Use</a> and <a href="/privacy">Privacy Policy</a>. This site uses cookies for enhanced experience.
     </div>
   </div>
@@ -1331,14 +1379,15 @@ renderHow('escorts');
 <div id="app">
 
   <!-- NAV -->
-  <nav role="navigation" aria-label="Main navigation">
-    <div class="nav-logo">Secret<span>Xperience</span></div>
-    <div class="nav-search">
-      <i class="ti ti-search" aria-hidden="true"></i>
-      <input type="text" placeholder="Search listings, companions, venues…" aria-label="Search"/>
+  <nav role="navigation" aria-label="Main navigation" style="background:rgba(8,6,18,0.92);backdrop-filter:blur(18px);border-bottom:0.5px solid var(--b);">
+    <div class="nav-logo"><span style="font-family:var(--serif);font-size:22px;color:var(--gold);letter-spacing:.02em;filter:drop-shadow(0 0 12px rgba(197,160,90,0.30))">Secret<em style="font-style:italic;font-weight:300">Xperience</em></span></div>
+    <div class="nav-search" style="position:relative;">
+      <i class="ti ti-search" aria-hidden="true" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:15px;pointer-events:none;"></i>
+      <input type="text" placeholder="Search listings, companions, venues…" aria-label="Search" style="border-radius:20px;border:0.5px solid var(--b2);background:var(--bg2);padding:8px 14px 8px 38px;"/>
     </div>
     <div class="nav-right">
       <button class="nb" id="locBtn" aria-label="Location"><i class="ti ti-map-pin" aria-hidden="true"></i> Brussels</button>
+      <button onclick="__cycleTheme()" aria-label="Toggle theme" style="width:34px;height:34px;background:var(--bg2);border:0.5px solid var(--b2);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--t2);font-size:16px;flex-shrink:0;"><i class="ti ti-moon-stars" id="themeIcon"></i></button>
       <button class="nb" id="loginBtn">Log in</button>
       <button class="nb pri" id="signupBtn">Sign up</button>
       <button class="nb nav-menu-btn" id="menuBtn" aria-label="Open menu"><i class="ti ti-menu-2"></i></button>
@@ -1347,21 +1396,73 @@ renderHow('escorts');
 
   <!-- CATEGORY BAR -->
   <div class="catbar" role="navigation" aria-label="Categories" id="catBar">
-    <div class="cat active" data-cat="all">All</div>
-    <div class="cat" data-cat="escorts">Escorts</div>
-    <div class="cat" data-cat="companionship">Companionship</div>
-    <div class="cat" data-cat="nightlife">Nightlife</div>
-    <div class="cat" data-cat="creators">Creators</div>
-    <div class="cat" data-cat="adult">Adult Services</div>
-    <div class="cat" data-cat="rentals">Rentals</div>
-    <div class="cat" data-cat="hotels">Hotels</div>
-    <div class="cat" data-cat="events">Event Spaces</div>
-    <div class="cat" data-cat="photo">Photo / Video</div>
-    <div class="cat" data-cat="affiliate">Affiliate</div>
-    <div class="cat" data-cat="memberships">Memberships</div>
-    <div class="cat" data-cat="experiences">Experiences</div>
-    <div class="cat" data-cat="shop">Adult Shop</div>
+    <div class="cat active" data-cat="all" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:var(--gbg);color:var(--gold);border-color:var(--gbrd);font-weight:500;display:inline-flex;align-items:center;">All</div>
+    <div class="cat" data-cat="escorts" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Escorts</div>
+    <div class="cat" data-cat="companionship" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Companionship</div>
+    <div class="cat" data-cat="nightlife" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Nightlife</div>
+    <div class="cat" data-cat="creators" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Creators</div>
+    <div class="cat" data-cat="adult" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Adult Services</div>
+    <div class="cat" data-cat="rentals" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Rentals</div>
+    <div class="cat" data-cat="hotels" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Hotels</div>
+    <div class="cat" data-cat="events" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Event Spaces</div>
+    <div class="cat" data-cat="photo" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Photo / Video</div>
+    <div class="cat" data-cat="affiliate" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Affiliate</div>
+    <div class="cat" data-cat="memberships" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Memberships</div>
+    <div class="cat" data-cat="experiences" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Experiences</div>
+    <div class="cat" data-cat="shop" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Adult Shop</div>
   </div>
+
+  <!-- ══ EDITORIAL HERO ══ -->
+  <section id="editorialHero" style="width:100%;background:var(--grad-candle);border-top:0.5px solid var(--b);border-bottom:0.5px solid var(--b);padding:4rem 1.5rem;">
+    <div style="max-width:1200px;margin:0 auto;display:grid;grid-template-columns:48% 22% 30%;gap:2rem;align-items:center;">
+      <!-- LEFT: text -->
+      <div>
+        <p class="t-eyebrow-gold" style="margin-bottom:1rem;">EU · DISCREET · VERIFIED</p>
+        <h1 style="font-family:var(--serif);font-size:56px;font-weight:500;line-height:1.04;letter-spacing:-0.005em;margin:0 0 1.25rem;">
+          Where the night begins<br>
+          <em style="font-style:italic;background:var(--grad-gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;color:transparent;">with someone discreet</em>
+        </h1>
+        <p class="t-body" style="color:var(--t2);max-width:480px;margin-bottom:1.5rem;">A members-only marketplace for escorts, companions, nightlife, creators, rentals, and the after-hours.</p>
+        <div style="position:relative;max-width:480px;margin-bottom:1.5rem;">
+          <i class="ti ti-search" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:16px;"></i>
+          <input type="text" id="heroSearch" placeholder="Search listings, companions, venues…" style="width:100%;height:52px;padding:0 14px 0 42px;background:var(--bg2);border:0.5px solid var(--gbrd);border-radius:20px;color:var(--t);font:400 14px var(--sans);" onkeydown="if(event.key==='Enter'){var q=this.value.trim();if(q){showToast('Searching for: '+q)}}" />
+          <i class="ti ti-map-pin" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:16px;"></i>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;">
+          <div><div id="statListings" style="font-family:var(--serif);font-size:28px;color:var(--gold);">4,200+</div><div class="t-meta" style="color:var(--t3);">LISTINGS</div></div>
+          <div><div style="font-family:var(--serif);font-size:28px;color:var(--gold);">38</div><div class="t-meta" style="color:var(--t3);">CITIES</div></div>
+          <div><div style="font-family:var(--serif);font-size:28px;color:var(--gold);">€38.2k</div><div class="t-meta" style="color:var(--t3);">AVG MONTHLY VOL</div></div>
+          <div><div style="font-family:var(--serif);font-size:28px;color:var(--gold);">4.9 ★</div><div class="t-meta" style="color:var(--t3);">RATING</div></div>
+        </div>
+      </div>
+      <!-- MIDDLE: neon-X mascot -->
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;">
+        <div style="position:relative;background:var(--grad-silk);border-radius:var(--rl);padding:1rem;">
+          <img src="/brand/logo-neon-x.jpg" alt="XperienceNights" style="width:260px;border-radius:var(--rl);mix-blend-mode:screen;filter:drop-shadow(0 0 60px rgba(123,78,179,0.40));" />
+        </div>
+        <p class="t-meta" style="color:var(--t3);margin-top:0.75rem;text-align:center;letter-spacing:0.16em;">XPERIENCE · NIGHTS</p>
+      </div>
+      <!-- RIGHT: featured listing card -->
+      <div id="heroFeaturedCard" style="width:100%;max-width:320px;border-radius:var(--rl);border:0.5px solid var(--b2);box-shadow:var(--shadow-card-h);overflow:hidden;cursor:pointer;" onclick="document.getElementById('heroFeaturedCard').style.transform='translateY(-3px)'">
+        <div class="cat-escort" style="height:240px;position:relative;display:flex;align-items:flex-end;padding:1.25rem;">
+          <div style="position:absolute;top:0.75rem;right:0.75rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.30);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;"><i class="ti ti-heart-filled" style="color:var(--pink);font-size:15px;"></i></div>
+          <span style="font-family:var(--serif);font-size:96px;font-style:italic;font-weight:400;color:rgba(197,160,90,0.30);line-height:1;position:absolute;bottom:0.5rem;left:1.25rem;" id="heroMonogram">Sa</span>
+        </div>
+        <div style="background:var(--bg1);padding:1rem 1.25rem;">
+          <div class="t-card-title" id="heroCardName">Sophia A.</div>
+          <div class="t-body-sm" style="color:var(--t2);margin:0.25rem 0 0.75rem;" id="heroCardSub">Escort · Independent · Brussels</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-family:var(--serif);font-size:18px;color:var(--gold);" id="heroCardPrice">€280/hr</span>
+            <span class="t-body-sm" style="color:var(--t2);" id="heroCardRating">★ 4.9</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <style>
+    @media(max-width:960px){#editorialHero>div{grid-template-columns:1fr 1fr!important}}
+    @media(max-width:640px){#editorialHero>div{grid-template-columns:1fr!important;gap:1.5rem}}
+    </style>
+  </section>
 
   <div class="layout">
 
@@ -1442,7 +1543,7 @@ renderHow('escorts');
           <div class="live-dot"><span></span> Live · Brussels</div>
         </div>
         <div class="admin-stats">
-          <div class="astat"><div class="astat-v" id="statListings">—</div><div class="astat-l">Active listings</div></div>
+          <div class="astat"><div class="astat-v" id="statListingsAdmin">—</div><div class="astat-l">Active listings</div></div>
           <div class="astat"><div class="astat-v" id="statProviders">—</div><div class="astat-l">Providers</div></div>
           <div class="astat"><div class="astat-v" id="statUsers">—</div><div class="astat-l">Registered users</div></div>
           <div class="astat"><div class="astat-v" id="statRevenue">—</div><div class="astat-l">Revenue this month</div></div>
@@ -1461,11 +1562,11 @@ renderHow('escorts');
 
       <!-- Tabs -->
       <div class="tabs" role="tablist">
-        <div class="tab active" role="tab">All listings</div>
-        <div class="tab" role="tab">Near me</div>
-        <div class="tab" role="tab">New</div>
-        <div class="tab" role="tab">Top rated</div>
-        <div class="tab" role="tab">My saves</div>
+        <div class="tab active" role="tab" style="font-family:var(--serif);font-size:15px;">All listings</div>
+        <div class="tab" role="tab" style="font-family:var(--serif);font-size:15px;">Near me</div>
+        <div class="tab" role="tab" style="font-family:var(--serif);font-size:15px;">New</div>
+        <div class="tab" role="tab" style="font-family:var(--serif);font-size:15px;">Top rated</div>
+        <div class="tab" role="tab" style="font-family:var(--serif);font-size:15px;">My saves</div>
       </div>
 
       <!-- Filter toggle (mobile) -->
@@ -1494,9 +1595,10 @@ renderHow('escorts');
       <div class="cards" id="listingCards" role="list">
 
         <div class="card" role="listitem" tabindex="0">
-          <div class="card-img">
-            <i class="ti ti-user" aria-hidden="true"></i>
-            <div class="card-badges"><span class="badge bv">✓ Verified</span><span class="badge bp">Premium</span></div>
+          <div class="card-hero cat-escort" style="height:180px;position:relative;display:flex;align-items:flex-end;padding:1rem;">
+            <div style="position:absolute;top:0.6rem;right:0.6rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.30);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:2;"><i class="ti ti-heart" style="color:#fff;font-size:15px;"></i></div>
+            <div class="card-badges" style="position:relative;z-index:2;"><span class="badge bv">✓ Verified</span><span class="badge bp">Premium</span></div>
+            <span style="font-family:var(--serif);font-size:72px;font-style:italic;font-weight:400;color:rgba(197,160,90,0.30);line-height:1;position:absolute;bottom:0.25rem;left:1rem;">So</span>
           </div>
           <div class="card-body">
             <div class="card-cat">Escort · Independent</div>
@@ -1508,9 +1610,10 @@ renderHow('escorts');
         </div>
 
         <div class="card" role="listitem" tabindex="0">
-          <div class="card-img">
-            <i class="ti ti-user" aria-hidden="true"></i>
-            <div class="card-badges"><span class="badge bv">✓ Verified</span><span class="badge be">VIP</span></div>
+          <div class="card-hero cat-escort" style="height:180px;position:relative;display:flex;align-items:flex-end;padding:1rem;">
+            <div style="position:absolute;top:0.6rem;right:0.6rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.30);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:2;"><i class="ti ti-heart" style="color:#fff;font-size:15px;"></i></div>
+            <div class="card-badges" style="position:relative;z-index:2;"><span class="badge bv">✓ Verified</span><span class="badge be">VIP</span></div>
+            <span style="font-family:var(--serif);font-size:72px;font-style:italic;font-weight:400;color:rgba(197,160,90,0.30);line-height:1;position:absolute;bottom:0.25rem;left:1rem;">El</span>
           </div>
           <div class="card-body">
             <div class="card-cat">Escort · Agency</div>
@@ -1522,9 +1625,10 @@ renderHow('escorts');
         </div>
 
         <div class="card" role="listitem" tabindex="0">
-          <div class="card-img">
-            <i class="ti ti-user" aria-hidden="true"></i>
-            <div class="card-badges"><span class="badge bv">✓ Verified</span></div>
+          <div class="card-hero cat-escort" style="height:180px;position:relative;display:flex;align-items:flex-end;padding:1rem;">
+            <div style="position:absolute;top:0.6rem;right:0.6rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.30);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:2;"><i class="ti ti-heart" style="color:#fff;font-size:15px;"></i></div>
+            <div class="card-badges" style="position:relative;z-index:2;"><span class="badge bv">✓ Verified</span></div>
+            <span style="font-family:var(--serif);font-size:72px;font-style:italic;font-weight:400;color:rgba(197,160,90,0.30);line-height:1;position:absolute;bottom:0.25rem;left:1rem;">Na</span>
           </div>
           <div class="card-body">
             <div class="card-cat">Escort · Touring</div>
@@ -1536,9 +1640,10 @@ renderHow('escorts');
         </div>
 
         <div class="card" role="listitem" tabindex="0">
-          <div class="card-img">
-            <i class="ti ti-building" aria-hidden="true"></i>
-            <div class="card-badges"><span class="badge bt">Trending</span></div>
+          <div class="card-hero cat-nightlife" style="height:180px;position:relative;display:flex;align-items:flex-end;padding:1rem;">
+            <div style="position:absolute;top:0.6rem;right:0.6rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.30);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:2;"><i class="ti ti-heart" style="color:#fff;font-size:15px;"></i></div>
+            <div class="card-badges" style="position:relative;z-index:2;"><span class="badge bt">Trending</span></div>
+            <span style="font-family:var(--serif);font-size:72px;font-style:italic;font-weight:400;color:rgba(197,160,90,0.30);line-height:1;position:absolute;bottom:0.25rem;left:1rem;">Cl</span>
           </div>
           <div class="card-body">
             <div class="card-cat">Nightlife</div>
@@ -1549,9 +1654,10 @@ renderHow('escorts');
         </div>
 
         <div class="card" role="listitem" tabindex="0">
-          <div class="card-img">
-            <i class="ti ti-camera" aria-hidden="true"></i>
-            <div class="card-badges"><span class="badge bv">✓ Verified</span></div>
+          <div class="card-hero cat-creator" style="height:180px;position:relative;display:flex;align-items:flex-end;padding:1rem;">
+            <div style="position:absolute;top:0.6rem;right:0.6rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.30);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:2;"><i class="ti ti-heart" style="color:#fff;font-size:15px;"></i></div>
+            <div class="card-badges" style="position:relative;z-index:2;"><span class="badge bv">✓ Verified</span></div>
+            <span style="font-family:var(--serif);font-size:72px;font-style:italic;font-weight:400;color:rgba(197,160,90,0.30);line-height:1;position:absolute;bottom:0.25rem;left:1rem;">Lu</span>
           </div>
           <div class="card-body">
             <div class="card-cat">Creators</div>
@@ -1562,9 +1668,10 @@ renderHow('escorts');
         </div>
 
         <div class="card" role="listitem" tabindex="0">
-          <div class="card-img">
-            <i class="ti ti-home" aria-hidden="true"></i>
-            <div class="card-badges"><span class="badge bp">Premium</span></div>
+          <div class="card-hero cat-rental" style="height:180px;position:relative;display:flex;align-items:flex-end;padding:1rem;">
+            <div style="position:absolute;top:0.6rem;right:0.6rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.30);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:2;"><i class="ti ti-heart" style="color:#fff;font-size:15px;"></i></div>
+            <div class="card-badges" style="position:relative;z-index:2;"><span class="badge bp">Premium</span></div>
+            <span style="font-family:var(--serif);font-size:72px;font-style:italic;font-weight:400;color:rgba(197,160,90,0.30);line-height:1;position:absolute;bottom:0.25rem;left:1rem;">Le</span>
           </div>
           <div class="card-body">
             <div class="card-cat">Rentals</div>
@@ -1575,9 +1682,10 @@ renderHow('escorts');
         </div>
 
         <div class="card" role="listitem" tabindex="0">
-          <div class="card-img">
-            <i class="ti ti-map" aria-hidden="true"></i>
-            <div class="card-badges"><span class="badge bv">✓ Verified</span><span class="badge bt">Trending</span></div>
+          <div class="card-hero cat-creator" style="height:180px;position:relative;display:flex;align-items:flex-end;padding:1rem;">
+            <div style="position:absolute;top:0.6rem;right:0.6rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.30);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:2;"><i class="ti ti-heart" style="color:#fff;font-size:15px;"></i></div>
+            <div class="card-badges" style="position:relative;z-index:2;"><span class="badge bv">✓ Verified</span><span class="badge bt">Trending</span></div>
+            <span style="font-family:var(--serif);font-size:72px;font-style:italic;font-weight:400;color:rgba(197,160,90,0.30);line-height:1;position:absolute;bottom:0.25rem;left:1rem;">St</span>
           </div>
           <div class="card-body">
             <div class="card-cat">Photo / Video</div>
@@ -1588,9 +1696,10 @@ renderHow('escorts');
         </div>
 
         <div class="card" role="listitem" tabindex="0">
-          <div class="card-img">
-            <i class="ti ti-shopping-bag" aria-hidden="true"></i>
-            <div class="card-badges"><span class="badge bt">Trending</span></div>
+          <div class="card-hero cat-shop" style="height:180px;position:relative;display:flex;align-items:flex-end;padding:1rem;">
+            <div style="position:absolute;top:0.6rem;right:0.6rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.30);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:2;"><i class="ti ti-heart" style="color:#fff;font-size:15px;"></i></div>
+            <div class="card-badges" style="position:relative;z-index:2;"><span class="badge bt">Trending</span></div>
+            <span style="font-family:var(--serif);font-size:72px;font-style:italic;font-weight:400;color:rgba(197,160,90,0.30);line-height:1;position:absolute;bottom:0.25rem;left:1rem;">No</span>
           </div>
           <div class="card-body">
             <div class="card-cat">Adult Shop</div>
@@ -1607,7 +1716,7 @@ renderHow('escorts');
       </div>
 
       <!-- User Profiles -->
-      <div class="sec-title">User profiles</div>
+      <div class="sec-title" style="font-family:var(--serif);font-size:26px;font-weight:500;letter-spacing:0.01em;color:var(--t);">User profiles</div>
       <div class="profiles">
 
         <div class="pcard" tabindex="0">
@@ -1665,8 +1774,32 @@ renderHow('escorts');
   </div>
 
   <!-- ══ HOW IT WORKS ══ -->
+  <section style="padding:4rem 1.5rem;background:var(--bg1);border-top:0.5px solid var(--b);">
+    <div style="max-width:1200px;margin:0 auto;">
+      <h2 style="font-family:var(--serif);font-size:26px;font-weight:500;color:var(--t);margin-bottom:2.5rem;">How it works</h2>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;">
+        <div>
+          <div style="font-family:var(--serif);font-size:64px;font-style:italic;font-weight:400;color:var(--gold);line-height:1;margin-bottom:0.75rem;">01</div>
+          <h3 style="font-family:var(--serif);font-size:19px;font-weight:500;color:var(--t);margin-bottom:0.5rem;">Browse discreetly</h3>
+          <p class="t-body" style="color:var(--t2);">Filter by city, type, and tier. No account needed to browse.</p>
+        </div>
+        <div>
+          <div style="font-family:var(--serif);font-size:64px;font-style:italic;font-weight:400;color:var(--gold);line-height:1;margin-bottom:0.75rem;">02</div>
+          <h3 style="font-family:var(--serif);font-size:19px;font-weight:500;color:var(--t);margin-bottom:0.5rem;">Request access</h3>
+          <p class="t-body" style="color:var(--t2);">Send a booking request to a provider. They confirm — usually within 30 minutes.</p>
+        </div>
+        <div>
+          <div style="font-family:var(--serif);font-size:64px;font-style:italic;font-weight:400;color:var(--gold);line-height:1;margin-bottom:0.75rem;">03</div>
+          <h3 style="font-family:var(--serif);font-size:19px;font-weight:500;color:var(--t);margin-bottom:0.5rem;">Meet on your terms</h3>
+          <p class="t-body" style="color:var(--t2);">All interactions are confidential. Verified profiles only.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ HOW IT WORKS (interactive) ══ -->
   <section class="how-wrap" aria-label="How SecretXperience works">
-    <div class="how-hd">How SecretXperience works</div>
+    <div class="how-hd" style="font-family:var(--serif);font-size:26px;font-weight:500;color:var(--t);">Explore by category</div>
     <div class="how-sub">Select a category below for an animated walk-through</div>
     <div class="how-cats" id="howCats" role="tablist">
       <div class="hcat active" data-how="escorts" role="tab">Escorts</div>
@@ -1691,44 +1824,51 @@ renderHow('escorts');
   </section>
 
   <!-- ══ FOOTER ══ -->
-  <footer>
-    <div class="footer-grid">
-      <div class="footer-col">
-        <div class="footer-col-title">Discover</div>
-        <a href="#">Escorts</a>
-        <a href="#">Companionship</a>
-        <a href="#">Nightlife</a>
-        <a href="#">Creators</a>
-        <a href="#">Adult Services</a>
+  <footer style="background:var(--bg1);border-top:0.5px solid var(--b);padding:4rem 1.5rem 2rem;">
+    <div style="max-width:1200px;margin:0 auto;">
+      <div style="margin-bottom:2.5rem;">
+        <div style="font-family:var(--serif);font-size:22px;color:var(--gold);letter-spacing:.02em;filter:drop-shadow(0 0 12px rgba(197,160,90,0.30));margin-bottom:0.75rem;">Secret<em style="font-style:italic;font-weight:300">Xperience</em></div>
+        <p class="t-body" style="color:var(--t2);max-width:360px;">Discreet, verified, premium adult experiences across Europe.</p>
       </div>
-      <div class="footer-col">
-        <div class="footer-col-title">Venues</div>
-        <a href="#">Rentals</a>
-        <a href="#">Hotels</a>
-        <a href="#">Event Spaces</a>
-        <a href="#">Photo / Video</a>
-        <a href="#">Adult Shop</a>
+      <div class="footer-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;margin-bottom:2.5rem;">
+        <div class="footer-col">
+          <div class="footer-col-title">About</div>
+          <a href="#">Our story</a>
+          <a href="#">How it works</a>
+          <a href="#">Trust &amp; safety</a>
+          <a href="#">Press</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-title">Browse</div>
+          <a href="#">Escorts</a>
+          <a href="#">Companionship</a>
+          <a href="#">Nightlife</a>
+          <a href="#">Creators</a>
+          <a href="#">Rentals</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-title">Help</div>
+          <a href="#">FAQ</a>
+          <a href="#">Contact support</a>
+          <a href="#">Report a listing</a>
+          <a href="#">List a service</a>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-title">Legal</div>
+          <a href="/terms">Terms of Use</a>
+          <a href="/privacy">Privacy Policy</a>
+          <a href="#">Cookie Policy</a>
+          <a href="#">DMCA</a>
+          <a href="#">18 U.S.C. § 2257</a>
+        </div>
       </div>
-      <div class="footer-col">
-        <div class="footer-col-title">Account</div>
-        <a href="#">Sign up</a>
-        <a href="#">Log in</a>
-        <a href="#">Memberships</a>
-        <a href="#">Verified badge</a>
-        <a href="#">List a service</a>
+      <div class="footer-bottom" style="border-top:0.5px solid var(--b);padding-top:1.5rem;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:1rem;">
+        <div class="footer-legal t-meta" style="color:var(--t3);">© 2025 SecretXperience.eu — All rights reserved. Adults only (18+). All listed providers are independent contractors.</div>
+        <div style="display:flex;align-items:center;gap:1rem;">
+          <span class="t-meta" style="color:var(--t3);">EN · FR · NL · DE</span>
+          <span class="t-meta" style="color:var(--t3);">💳 VISA · MC · AMEX · CRYPTO</span>
+        </div>
       </div>
-      <div class="footer-col">
-        <div class="footer-col-title">Legal</div>
-        <a href="/terms">Terms of Use</a>
-        <a href="/privacy">Privacy Policy</a>
-        <a href="#">Cookie Policy</a>
-        <a href="#">DMCA</a>
-        <a href="#">18 U.S.C. § 2257</a>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <div class="footer-logo">Secret<span>Xperience</span>.eu</div>
-      <div class="footer-legal">© 2025 SecretXperience.eu — All rights reserved. Adults only (18+). All listed providers are independent contractors. SecretXperience.eu is not responsible for third-party content.</div>
     </div>
   </footer>
 
@@ -2129,9 +2269,9 @@ renderHow('escorts');
   <div id="detail-panel" role="dialog" aria-modal="true" aria-label="Listing detail">
 
     <!-- Panel header -->
-    <div class="dp-header">
-      <button class="dp-back" id="dpClose"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back to listings</button>
-      <div class="dp-actions">
+    <div class="dp-header" style="display:flex;align-items:center;gap:0.5rem;">
+      <button class="dp-back" id="dpClose" style="display:flex;align-items:center;gap:6px;"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back</button>
+      <div class="dp-actions" style="margin-left:auto;display:flex;gap:6px;">
         <button class="dp-action" id="dpShare" aria-label="Share listing"><i class="ti ti-share"></i></button>
         <button class="dp-action" id="dpSave" aria-label="Save listing"><i class="ti ti-heart"></i></button>
         <button class="dp-action" id="dpReport" aria-label="Report listing"><i class="ti ti-flag"></i></button>
@@ -2142,10 +2282,11 @@ renderHow('escorts');
     <div class="dp-body" id="dpBody">
 
       <!-- Hero -->
-      <div class="dp-hero" id="dpHero">
-        <i class="ti ti-user" id="dpHeroIcon" aria-hidden="true"></i>
+      <div class="dp-hero cat-escort" id="dpHero" style="height:280px;position:relative;display:flex;align-items:flex-end;padding:1.25rem;">
+        <i class="ti ti-user" id="dpHeroIcon" aria-hidden="true" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:48px;color:rgba(255,255,255,0.15);"></i>
         <div class="dp-hero-grad"></div>
-        <div class="dp-hero-badges" id="dpHeroBadges"></div>
+        <div class="dp-hero-badges" id="dpHeroBadges" style="position:relative;z-index:2;display:flex;gap:4px;flex-wrap:wrap;"></div>
+        <span id="dpHeroMonogram" style="font-family:var(--serif);font-size:96px;font-style:italic;font-weight:400;color:rgba(197,160,90,0.25);line-height:1;position:absolute;bottom:0.75rem;left:1.25rem;z-index:1;">Sx</span>
       </div>
       <div id="dpGallery" style="display:none;flex-direction:row;gap:6px;padding:8px 14px;overflow-x:auto;scrollbar-width:thin;background:rgba(0,0,0,0.4)"></div>
 
@@ -2166,11 +2307,11 @@ renderHow('escorts');
       </div>
 
       <!-- Quick stats -->
-      <div class="dp-stats">
-        <div class="dp-stat"><div class="dp-stat-v" id="dpS1">128</div><div class="dp-stat-l">Reviews</div></div>
-        <div class="dp-stat"><div class="dp-stat-v" id="dpS2">4.9</div><div class="dp-stat-l">Rating</div></div>
-        <div class="dp-stat"><div class="dp-stat-v" id="dpS3">3 yrs</div><div class="dp-stat-l">On platform</div></div>
-        <div class="dp-stat"><div class="dp-stat-v" id="dpS4">2.1k</div><div class="dp-stat-l">Profile views</div></div>
+      <div class="dp-stats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem;padding:1rem 1.25rem;">
+        <div class="dp-stat" style="background:var(--bg2);border-radius:var(--r);padding:0.75rem;text-align:center;"><div class="dp-stat-v" id="dpS1" style="font-family:var(--serif);font-size:20px;color:var(--gold);">128</div><div class="dp-stat-l" style="font-size:11px;color:var(--t3);margin-top:2px;">Reviews</div></div>
+        <div class="dp-stat" style="background:var(--bg2);border-radius:var(--r);padding:0.75rem;text-align:center;"><div class="dp-stat-v" id="dpS2" style="font-family:var(--serif);font-size:20px;color:var(--gold);">4.9</div><div class="dp-stat-l" style="font-size:11px;color:var(--t3);margin-top:2px;">Rating</div></div>
+        <div class="dp-stat" style="background:var(--bg2);border-radius:var(--r);padding:0.75rem;text-align:center;"><div class="dp-stat-v" id="dpS3" style="font-family:var(--serif);font-size:20px;color:var(--gold);">3 yrs</div><div class="dp-stat-l" style="font-size:11px;color:var(--t3);margin-top:2px;">On platform</div></div>
+        <div class="dp-stat" style="background:var(--bg2);border-radius:var(--r);padding:0.75rem;text-align:center;"><div class="dp-stat-v" id="dpS4" style="font-family:var(--serif);font-size:20px;color:var(--gold);">2.1k</div><div class="dp-stat-l" style="font-size:11px;color:var(--t3);margin-top:2px;">Profile views</div></div>
       </div>
 
       <!-- About -->
@@ -2288,9 +2429,9 @@ renderHow('escorts');
     </div><!-- /dp-body -->
 
     <!-- Sticky CTA -->
-    <div class="dp-cta">
+    <div class="dp-cta" style="background:linear-gradient(0deg, var(--bg1) 60%, transparent 100%);">
       <button class="dp-cta-share" title="Copy link" aria-label="Copy listing link" style="flex-shrink:0;width:40px;height:40px;border-radius:10px;border:0.5px solid rgba(255,255,255,0.12);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#8c8880;font-size:16px">
-        <i class="ti ti-link" aria-hidden="true"></i>
+        <i class="ti ti-share" aria-hidden="true"></i>
       </button>
       <button class="dp-cta-msg"><i class="ti ti-message-circle" aria-hidden="true"></i> Send message</button>
       <button class="dp-cta-book"><i class="ti ti-calendar-plus" aria-hidden="true"></i> Request booking</button>
