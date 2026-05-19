@@ -2,7 +2,18 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'SecretXperience.eu — Premium Adult Services Platform',
+  title: { default: 'SecretXperience — Premium Adult Services & Experiences', template: '%s | SecretXperience' },
+  description: 'Discover and book exclusive adult services, escorts, massage, companionship and experiences across Europe. Verified providers, discreet & secure.',
+  keywords: ['adult services', 'escort', 'massage', 'companionship', 'experiences', 'Belgium', 'Europe', 'discreet'],
+  openGraph: {
+    type: 'website',
+    siteName: 'SecretXperience',
+    title: 'SecretXperience — Premium Adult Services',
+    description: 'Discover and book exclusive adult services and experiences across Europe.',
+    url: 'https://secret-xperience.vercel.app',
+  },
+  robots: { index: true, follow: true },
+  icons: { icon: '/favicon.ico' },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

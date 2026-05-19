@@ -107,6 +107,10 @@ export default function ListingDetailPage() {
       } else {
         setListing(data as any)
         if (data.images?.length) setActiveImg(data.images[0])
+        document.title = `${data.title} | SecretXperience`
+        let meta = document.querySelector('meta[name="description"]')
+        if (!meta) { meta = document.createElement('meta'); meta.setAttribute('name', 'description'); document.head.appendChild(meta) }
+        meta.setAttribute('content', data.description?.slice(0, 160) || `Book ${data.title} in ${data.city}`)
       }
       setPageLoading(false)
     }

@@ -424,8 +424,13 @@ export default function ProfilePage() {
         return
       }
 
-      setProfile(profileResult.data as Profile)
+      const prof = profileResult.data as Profile
+      setProfile(prof)
       setListings((listingsResult.data ?? []) as Listing[])
+      document.title = `${prof.full_name || prof.username} | SecretXperience`
+      let meta = document.querySelector('meta[name="description"]')
+      if (!meta) { meta = document.createElement('meta'); meta.setAttribute('name', 'description'); document.head.appendChild(meta) }
+      meta.setAttribute('content', prof.bio?.slice(0, 160) || `View the profile of ${prof.full_name || prof.username} on SecretXperience`)
       setLoading(false)
     }
 
