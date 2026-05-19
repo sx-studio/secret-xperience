@@ -1,6 +1,7 @@
 'use client'
 import { useEffect } from 'react'
 import { createClient } from './lib/supabase'
+import CategoryAnimations from './components/CategoryAnimations/CategoryAnimations'
 
 export default function Home() {
   useEffect(() => {
@@ -1797,32 +1798,6 @@ renderHow('escorts');
     </div>
   </section>
 
-  <!-- ══ HOW IT WORKS (interactive) ══ -->
-  <section class="how-wrap" aria-label="How SecretXperience works">
-    <div class="how-hd" style="font-family:var(--serif);font-size:26px;font-weight:500;color:var(--t);">Explore by category</div>
-    <div class="how-sub">Select a category below for an animated walk-through</div>
-    <div class="how-cats" id="howCats" role="tablist">
-      <div class="hcat active" data-how="escorts" role="tab">Escorts</div>
-      <div class="hcat" data-how="companionship" role="tab">Companionship</div>
-      <div class="hcat" data-how="nightlife" role="tab">Nightlife</div>
-      <div class="hcat" data-how="creators" role="tab">Creators</div>
-      <div class="hcat" data-how="rentals" role="tab">Rentals</div>
-      <div class="hcat" data-how="hotels" role="tab">Hotels</div>
-      <div class="hcat" data-how="events" role="tab">Event Spaces</div>
-      <div class="hcat" data-how="photo" role="tab">Photo / Video</div>
-      <div class="hcat" data-how="shop" role="tab">Adult Shop</div>
-      <div class="hcat" data-how="memberships" role="tab">Memberships</div>
-    </div>
-    <div class="exp-panel">
-      <div class="exp-demo" id="expDemo" aria-live="polite"></div>
-      <div class="exp-body">
-        <div class="exp-name" id="expName"></div>
-        <div class="exp-desc" id="expDesc"></div>
-        <div class="exp-steps" id="expSteps"></div>
-      </div>
-    </div>
-  </section>
-
   <!-- ══ FOOTER ══ -->
   <footer style="background:var(--bg1);border-top:0.5px solid var(--b);padding:4rem 1.5rem 2rem;">
     <div style="max-width:1200px;margin:0 auto;">
@@ -2451,6 +2426,7 @@ renderHow('escorts');
   </nav>
 
 </div><!-- #app -->` }} />
+      <CategoryAnimations />
     </>
   )
 }

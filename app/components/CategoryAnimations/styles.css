@@ -1,0 +1,194 @@
+/* ════════════════════════════════════════════════════════════════
+   Category Explainer Animations — section styles
+   Sits on the noir/velvet base; uses tokens from colors_and_type.css.
+   ════════════════════════════════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--t);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* grain overlay — keeps the section on the noir mood */
+body::before {
+  content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image: var(--grain-url);
+  opacity: .4; mix-blend-mode: overlay;
+}
+
+.cat-anim-section {
+  position: relative;
+  z-index: 1;
+  padding: 6rem 1.5rem 5rem;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(197,160,90,0.06) 0%, transparent 60%),
+    var(--bg);
+  border-top: 0.5px solid var(--b);
+}
+
+.section-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ── Section header ─────────────────────────────────────────── */
+.section-head {
+  text-align: center;
+  margin-bottom: 4.5rem;
+  max-width: 760px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.section-head .t-eyebrow-gold {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  font-size: 12px;
+  letter-spacing: 0.20em;
+}
+.section-title {
+  font-size: clamp(40px, 5.4vw, 64px);
+  line-height: 1.06;
+  margin-bottom: 1.5rem;
+}
+.section-title em {
+  font-style: italic;
+  font-weight: 500;
+  background: var(--grad-gold);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.section-sub {
+  max-width: 580px;
+  margin: 0 auto;
+  color: var(--t2);
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+/* ── Grid ───────────────────────────────────────────────────── */
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+@media (max-width: 980px) { .cat-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .cat-grid { grid-template-columns: 1fr; } }
+
+/* ── Card ───────────────────────────────────────────────────── */
+.cat-card {
+  position: relative;
+  background: var(--bg1);
+  border: 0.5px solid var(--b);
+  border-radius: var(--rl);
+  overflow: hidden;
+  transition:
+    transform var(--t-base) var(--ease-out),
+    box-shadow var(--t-base) var(--ease-out),
+    border-color var(--t-fast);
+  cursor: pointer;
+}
+.cat-card::before {
+  /* faint per-card gradient backdrop — matches the noir card system */
+  content: ''; position: absolute; inset: 0;
+  background: var(--grad-noir);
+  opacity: .6;
+  pointer-events: none;
+  z-index: 0;
+}
+.cat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-card-h);
+  border-color: var(--b3);
+}
+.cat-card:hover .cat-canvas { background: rgba(255,255,255,0.015); }
+
+/* per-category accent (subtle — drives the inner-glow tint) */
+#cat-escorts::after,
+#cat-companions::after,
+#cat-nightlife::after,
+#cat-creators::after,
+#cat-rentals::after,
+#cat-hotels::after,
+#cat-events::after,
+#cat-shop::after {
+  content: ''; position: absolute; inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  transition: opacity var(--t-slow) var(--ease-out);
+}
+#cat-escorts::after    { background: radial-gradient(ellipse at 50% 30%, rgba(197,160,90,0.10), transparent 60%); }
+#cat-companions::after { background: radial-gradient(ellipse at 50% 40%, rgba(197,160,90,0.08), transparent 60%); }
+#cat-nightlife::after  { background: radial-gradient(ellipse at 50% 50%, rgba(139,43,63,0.12), transparent 60%); }
+#cat-creators::after   { background: radial-gradient(ellipse at 50% 50%, rgba(109,58,92,0.12), transparent 60%); }
+#cat-rentals::after    { background: radial-gradient(ellipse at 50% 60%, rgba(197,160,90,0.08), transparent 60%); }
+#cat-hotels::after     { background: radial-gradient(ellipse at 50% 30%, rgba(38,212,160,0.08), transparent 60%); }
+#cat-events::after     { background: radial-gradient(ellipse at 50% 30%, rgba(197,160,90,0.12), transparent 60%); }
+#cat-shop::after       { background: radial-gradient(ellipse at 50% 50%, rgba(232,212,168,0.10), transparent 60%); }
+.cat-card:hover::after { opacity: 1; }
+
+/* ── Canvas area ────────────────────────────────────────────── */
+.cat-canvas {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 220px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  transition: background var(--t-slow);
+}
+.cat-canvas svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ── Meta block ─────────────────────────────────────────────── */
+.cat-meta {
+  position: relative;
+  z-index: 1;
+  padding: 1.5rem 1.4rem 1.75rem;
+  border-top: 0.5px solid var(--b);
+  background: linear-gradient(0deg, var(--bg1) 0%, transparent 100%);
+}
+.cat-title {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 500;
+  font-style: italic;
+  color: var(--gold);
+  margin-bottom: 0.6rem;
+  letter-spacing: 0.005em;
+  line-height: 1.15;
+}
+.cat-desc {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--t2);
+  text-wrap: pretty;
+  min-height: 2.6em;
+}
+
+/* ── Section foot ───────────────────────────────────────────── */
+.section-foot {
+  margin-top: 3.5rem;
+  text-align: center;
+  color: var(--t3);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* ── Respect reduced motion ─────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .cat-canvas svg * { animation: none !important; transition: none !important; }
+}
