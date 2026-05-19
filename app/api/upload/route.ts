@@ -1,23 +1,12 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
+import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif']
 const MAX_SIZE = 10 * 1024 * 1024 // 10 MB
 
-const r2 = new S3Client({
-  region: 'auto',
-  endpoint: `https://${process.env.CLOUDFLARE_R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-  credentials: {
-    accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY!,
-  },
-})
-
 export async function POST(req: NextRequest) {
-  // Verify authenticated session
   const cookieStore = cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -27,26 +16,29 @@ export async function POST(req: NextRequest) {
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { filename, contentType, size } = await req.json()
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
 
-  if (!ALLOWED_TYPES.includes(contentType)) {
-    return NextResponse.json({ error: 'File type not allowed' }, { status: 400 })
-  }
-  if (size > MAX_SIZE) {
-    return NextResponse.json({ error: 'File exceeds 10 MB limit' }, { status: 400 })
-  }
+  const formData = await req.formData()
+  const file = formData.get('file') as File | null
 
-  const ext = filename.split('.').pop()?.toLowerCase() ?? 'jpg'
+  if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 })
+  if (!ALLOWED_TYPES.includes(file.type)) return NextResponse.json({ error: 'File type not allowed' }, { status: 400 })
+  if (file.size > MAX_SIZE) return NextResponse.json({ error: 'File exceeds 10 MB limit' }, { status: 400 })
+
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg'
   const key = `listings/${session.user.id}/${crypto.randomUUID()}.${ext}`
 
-  const command = new PutObjectCommand({
-    Bucket: process.env.CLOUDFLARE_R2_BUCKET_NAME!,
-    Key: key,
-    ContentType: contentType,
-  })
+  const buffer = await file.arrayBuffer()
+  const { error } = await supabaseAdmin.storage
+    .from('listings')
+    .upload(key, buffer, { contentType: file.type, upsert: false })
 
-  const presignedUrl = await getSignedUrl(r2, command, { expiresIn: 300 })
-  const publicUrl = `${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${key}`
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  return NextResponse.json({ presignedUrl, publicUrl, key })
+  const { data: { publicUrl } } = supabaseAdmin.storage.from('listings').getPublicUrl(key)
+
+  return NextResponse.json({ publicUrl, key })
 }

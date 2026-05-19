@@ -187,20 +187,11 @@ export default function CreateListingPage() {
     setUploadingImages(prev => [...prev, { id: uid, name: file.name, preview, loading: true }])
 
     try {
-      const res = await fetch('/api/upload', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ filename: file.name, contentType: file.type, size: file.size }),
-      })
-      if (!res.ok) throw new Error('Failed to get upload URL')
-      const { presignedUrl, publicUrl } = await res.json()
-
-      const put = await fetch(presignedUrl, {
-        method:  'PUT',
-        headers: { 'Content-Type': file.type },
-        body:    file,
-      })
-      if (!put.ok) throw new Error('Upload failed')
+      const fd = new FormData()
+      fd.append('file', file)
+      const res = await fetch('/api/upload', { method: 'POST', body: fd })
+      if (!res.ok) throw new Error('Failed to upload image')
+      const { publicUrl } = await res.json()
 
       setForm(f => ({ ...f, images: [...f.images, publicUrl] }))
       setUploadingImages(prev => prev.filter(u => u.id !== uid))
