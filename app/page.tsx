@@ -787,6 +787,34 @@ renderHow('escorts');
       })
     })
 
+    // ── Auth-aware nav ──
+    ;(async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      const loginBtn = document.getElementById('loginBtn') as HTMLButtonElement | null
+      const signupBtn = document.getElementById('signupBtn') as HTMLButtonElement | null
+      if (session) {
+        const { data: profile } = await supabase.from('profiles').select('full_name, username, role').eq('id', session.user.id).single()
+        const name = profile?.full_name || profile?.username || 'Account'
+        if (loginBtn) { loginBtn.textContent = name; loginBtn.onclick = () => { window.location.href = '/dashboard' } }
+        if (signupBtn) {
+          if (profile?.role === 'admin') {
+            signupBtn.textContent = 'Admin'; signupBtn.onclick = () => { window.location.href = '/admin' }
+          } else {
+            signupBtn.textContent = 'List service'; signupBtn.onclick = () => { window.location.href = '/listings/create' }
+          }
+        }
+      } else {
+        if (loginBtn) loginBtn.onclick = () => { window.location.href = '/login' }
+        if (signupBtn) signupBtn.onclick = () => { window.location.href = '/login' }
+      }
+
+      // ── Mobile bottom nav ──
+      const bnis = document.querySelectorAll('.bni')
+      const navTargets = ['/', null, null, '/messages', session ? '/dashboard' : '/login']
+      bnis.forEach(function(btn, i) {
+        if (navTargets[i]) btn.addEventListener('click', function() { window.location.href = navTargets[i]! })
+      })
+    })()
 
     // ── Real listings from Supabase ──
     const activeFilters: any = { category: 'all', verified: false, premium: false, trending: false, minRating: 0, priceMax: null }
