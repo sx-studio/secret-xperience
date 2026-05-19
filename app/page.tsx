@@ -316,8 +316,8 @@ var dpPanel = document.getElementById('detail-panel');
 var dpSaved = false;
 
 function openDetail(data) {
-  // Store IDs on panel for CTAs
-  var panel=document.getElementById('dpPanel');
+  // Store IDs on panel for CTAs (panel id is 'detail-panel')
+  var panel=document.getElementById('detail-panel');
   if(panel){panel.dataset.listingId=data.id||'';panel.dataset.profileId=data.profile_id||'';}
   // Populate hero
   document.getElementById('dpHeroIcon').className = 'ti ' + data.icon;
@@ -639,14 +639,14 @@ document.getElementById('bookSubmit').addEventListener('click',async function(){
 document.querySelector('.dp-cta-book').addEventListener('click',function(){
   var name=document.getElementById('dpName').textContent;
   var cat=document.getElementById('dpCat').textContent;
-  var panel=document.getElementById('dpPanel');
+  var panel=document.getElementById('detail-panel');
   var lid=panel?panel.dataset.listingId:null;
   closeDetail();
   setTimeout(function(){openBookModal(name,cat+' · '+document.getElementById('dpCity').textContent,lid);},200);
 });
 
 document.querySelector('.dp-cta-msg').addEventListener('click',function(){
-  var panel=document.getElementById('dpPanel');
+  var panel=document.getElementById('detail-panel');
   var pid=panel?panel.dataset.profileId:null;
   var lid=panel?panel.dataset.listingId:null;
   var title=document.getElementById('dpName').textContent;
@@ -810,9 +810,33 @@ renderHow('escorts');
 
       // ── Mobile bottom nav ──
       const bnis = document.querySelectorAll('.bni')
-      const navTargets = ['/', null, null, '/messages', session ? '/dashboard' : '/login']
       bnis.forEach(function(btn, i) {
-        if (navTargets[i]) btn.addEventListener('click', function() { window.location.href = navTargets[i]! })
+        if (i === 0) {
+          // Home
+          btn.addEventListener('click', function() { window.location.href = '/' })
+        } else if (i === 1) {
+          // Search — toggles the filter sidebar
+          btn.addEventListener('click', function() {
+            var sb = document.getElementById('sidebar')
+            var so = document.getElementById('sov')
+            if (sb && so) {
+              if (sb.classList.contains('open')) {
+                sb.classList.remove('open'); so.classList.remove('show'); so.setAttribute('aria-hidden','true')
+              } else {
+                sb.classList.add('open'); so.classList.add('show'); so.setAttribute('aria-hidden','false')
+              }
+            }
+          })
+        } else if (i === 2) {
+          // Favourites placeholder — show toast
+          btn.addEventListener('click', function() { showToast('Saves coming soon — create an account to save listings') })
+        } else if (i === 3) {
+          // Messages
+          btn.addEventListener('click', function() { window.location.href = '/messages' })
+        } else if (i === 4) {
+          // Account
+          btn.addEventListener('click', function() { window.location.href = session ? '/dashboard' : '/login' })
+        }
       })
     })()
 
@@ -927,12 +951,12 @@ renderHow('escorts');
       fetchListings(activeFilters)
     })
 
-    // Wire rating slider
+    // Wire rating slider (re-wire to ensure activeFilters.minRating is always in sync)
     document.getElementById('rsl')?.addEventListener('input', function(e) {
-      const val = (e.target as HTMLInputElement).value
-      activeFilters.minRating = parseFloat(val)
+      const val = parseFloat((e.target as HTMLInputElement).value)
+      activeFilters.minRating = val
       const rval = document.getElementById('rval')
-      if (rval) rval.textContent = val
+      if (rval) rval.textContent = val === 0 ? 'Any' : val.toFixed(1)
       fetchListings(activeFilters)
     })
 
@@ -952,6 +976,11 @@ renderHow('escorts');
       })
     })
 
+    // ── Search bar ──
+    let allListings: any[] = []
+    // Cache must be wired before initial fetchListings call so search has data
+    ;(window as any).__sxCacheListings = (data: any[]) => { allListings = data }
+
     // Initial load
     fetchListings(activeFilters)
 
@@ -959,16 +988,12 @@ renderHow('escorts');
     const navLogo = document.querySelector('.nav-logo') as HTMLElement | null
     if (navLogo) { navLogo.style.cursor = 'pointer'; navLogo.addEventListener('click', () => { window.location.href = '/' }) }
 
-    // ── Search bar ──
-    let allListings: any[] = []
     const origFetch = fetchListings
     const searchInput = document.querySelector('.nav-search input') as HTMLInputElement | null
     if (searchInput) {
       searchInput.addEventListener('input', function() {
         const q = this.value.toLowerCase().trim()
         if (!q) { origFetch(activeFilters); return }
-        const container = document.getElementById('listingCards')
-        if (!container) return
         const filtered = allListings.filter((l: any) =>
           (l.title || '').toLowerCase().includes(q) ||
           (l.city || '').toLowerCase().includes(q) ||
@@ -978,9 +1003,6 @@ renderHow('escorts');
         renderCards(filtered)
       })
     }
-    // Intercept fetchListings to cache results for search
-    const origRenderCards = renderCards
-    ;(window as any).__sxCacheListings = (data: any[]) => { allListings = data }
 
   }, [])
 
