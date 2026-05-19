@@ -82,6 +82,9 @@ export default function DashboardPage() {
   const [editingProfile, setEditingProfile] = useState(false)
   const [profileDraft, setProfileDraft]     = useState<any>({})
   const [savingProfile, setSavingProfile]   = useState(false)
+  const [editingListing, setEditingListing] = useState<any | null>(null)
+  const [listingDraft, setListingDraft]     = useState<any>({})
+  const [savingListing, setSavingListing]   = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -132,6 +135,27 @@ export default function DashboardPage() {
     setProfile((p: any) => ({ ...p, ...updates }))
     setEditingProfile(false)
     setSavingProfile(false)
+  }
+
+  async function saveListing() {
+    if (!editingListing) return
+    setSavingListing(true)
+    const supabase = createClient()
+    const updates: any = {
+      title:      listingDraft.title,
+      description: listingDraft.description,
+      category:   listingDraft.category,
+      city:       listingDraft.city,
+      country:    listingDraft.country,
+      meet_type:  listingDraft.meet_type,
+      active:     listingDraft.active,
+    }
+    if (listingDraft.price_from !== '' && listingDraft.price_from !== undefined) updates.price_from = parseFloat(listingDraft.price_from) || null
+    if (listingDraft.price_to !== '' && listingDraft.price_to !== undefined) updates.price_to = parseFloat(listingDraft.price_to) || null
+    await supabase.from('listings').update(updates).eq('id', editingListing.id)
+    setListings((prev: any[]) => prev.map(l => l.id === editingListing.id ? { ...l, ...updates } : l))
+    setEditingListing(null)
+    setSavingListing(false)
   }
 
   const displayName: string = profile?.full_name || user?.email?.split('@')[0] || 'there'
@@ -723,7 +747,7 @@ export default function DashboardPage() {
                           {listing.active ? 'Live' : 'Inactive'}
                         </span>
                       </div>
-                      <button className="db-edit-btn">Edit</button>
+                      <button className="db-edit-btn" onClick={() => { setListingDraft({ title: listing.title || '', description: listing.description || '', category: listing.category || '', city: listing.city || '', country: listing.country || '', price_from: listing.price_from ?? '', price_to: listing.price_to ?? '', meet_type: listing.meet_type || '', active: listing.active ?? true }); setEditingListing(listing) }}>Edit</button>
                     </div>
                   </div>
                 ))}
@@ -842,6 +866,57 @@ export default function DashboardPage() {
 
         </div>
       </div>
+
+      {/* ── Listing edit modal ── */}
+      {editingListing && (
+        <div onClick={() => setEditingListing(null)} style={{ position:'fixed',inset:0,background:'rgba(0,0,0,0.75)',backdropFilter:'blur(6px)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:'1rem' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background:'#111',border:'0.5px solid rgba(197,160,90,0.25)',borderRadius:'16px',padding:'2rem',width:'100%',maxWidth:'520px',maxHeight:'90vh',overflowY:'auto' }}>
+            <div style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:'22px',color:'#ece8e1',marginBottom:'1.5rem' }}>Edit Listing</div>
+            {[
+              { label:'Title', key:'title', type:'text', placeholder:'Listing title' },
+              { label:'City', key:'city', type:'text', placeholder:'e.g. Brussels' },
+              { label:'Country', key:'country', type:'text', placeholder:'e.g. Belgium' },
+              { label:'Price from (€)', key:'price_from', type:'number', placeholder:'e.g. 150' },
+              { label:'Price to (€, optional)', key:'price_to', type:'number', placeholder:'e.g. 300' },
+            ].map(f => (
+              <div key={f.key} style={{ marginBottom:'1rem' }}>
+                <label style={{ display:'block',fontSize:'11px',color:'#c5a05a',letterSpacing:'0.08em',marginBottom:'6px',textTransform:'uppercase' }}>{f.label}</label>
+                <input type={f.type} value={listingDraft[f.key] ?? ''} onChange={e => setListingDraft((d: any) => ({ ...d, [f.key]: e.target.value }))} placeholder={f.placeholder}
+                  style={{ width:'100%',background:'#0a0a0a',border:'0.5px solid rgba(255,255,255,0.1)',borderRadius:'8px',padding:'10px 14px',color:'#ece8e1',fontSize:'14px',fontFamily:'inherit',outline:'none' }} />
+              </div>
+            ))}
+            <div style={{ marginBottom:'1rem' }}>
+              <label style={{ display:'block',fontSize:'11px',color:'#c5a05a',letterSpacing:'0.08em',marginBottom:'6px',textTransform:'uppercase' }}>Category</label>
+              <select value={listingDraft.category || ''} onChange={e => setListingDraft((d: any) => ({ ...d, category: e.target.value }))}
+                style={{ width:'100%',background:'#0a0a0a',border:'0.5px solid rgba(255,255,255,0.1)',borderRadius:'8px',padding:'10px 14px',color:'#ece8e1',fontSize:'14px',fontFamily:'inherit',outline:'none' }}>
+                {['escorts','massage','companionship','domination','adult','creators','nightlife','experiences','rentals','events','photo','memberships'].map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase()+c.slice(1)}</option>)}
+              </select>
+            </div>
+            <div style={{ marginBottom:'1rem' }}>
+              <label style={{ display:'block',fontSize:'11px',color:'#c5a05a',letterSpacing:'0.08em',marginBottom:'6px',textTransform:'uppercase' }}>Meet type</label>
+              <select value={listingDraft.meet_type || ''} onChange={e => setListingDraft((d: any) => ({ ...d, meet_type: e.target.value }))}
+                style={{ width:'100%',background:'#0a0a0a',border:'0.5px solid rgba(255,255,255,0.1)',borderRadius:'8px',padding:'10px 14px',color:'#ece8e1',fontSize:'14px',fontFamily:'inherit',outline:'none' }}>
+                <option value="incall">Incall</option>
+                <option value="outcall">Outcall</option>
+                <option value="both">Both</option>
+              </select>
+            </div>
+            <div style={{ marginBottom:'1rem' }}>
+              <label style={{ display:'block',fontSize:'11px',color:'#c5a05a',letterSpacing:'0.08em',marginBottom:'6px',textTransform:'uppercase' }}>Description</label>
+              <textarea value={listingDraft.description || ''} onChange={e => setListingDraft((d: any) => ({ ...d, description: e.target.value }))} rows={4}
+                style={{ width:'100%',background:'#0a0a0a',border:'0.5px solid rgba(255,255,255,0.1)',borderRadius:'8px',padding:'10px 14px',color:'#ece8e1',fontSize:'14px',fontFamily:'inherit',resize:'vertical',outline:'none' }} />
+            </div>
+            <div style={{ marginBottom:'1.5rem',display:'flex',alignItems:'center',gap:'10px' }}>
+              <input type="checkbox" id="listingActive" checked={!!listingDraft.active} onChange={e => setListingDraft((d: any) => ({ ...d, active: e.target.checked }))} style={{ accentColor:'#c5a05a',width:'16px',height:'16px',cursor:'pointer' }} />
+              <label htmlFor="listingActive" style={{ fontSize:'13px',color:'#ece8e1',cursor:'pointer' }}>Listing is active and visible to clients</label>
+            </div>
+            <div style={{ display:'flex',gap:'10px',justifyContent:'flex-end' }}>
+              <button onClick={() => setEditingListing(null)} style={{ padding:'10px 20px',background:'transparent',border:'0.5px solid rgba(255,255,255,0.15)',borderRadius:'8px',color:'#9a8a7a',cursor:'pointer',fontSize:'13px',fontFamily:'inherit' }}>Cancel</button>
+              <button onClick={saveListing} disabled={savingListing} style={{ padding:'10px 24px',background:'linear-gradient(135deg,#c5a05a,#a0803d)',border:'none',borderRadius:'8px',color:'#080808',cursor:'pointer',fontSize:'13px',fontWeight:600,fontFamily:'inherit' }}>{savingListing ? 'Saving…' : 'Save changes'}</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Profile edit modal ── */}
       {editingProfile && (
