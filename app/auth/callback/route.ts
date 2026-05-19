@@ -3,9 +3,10 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url)
+  const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!
+  // Use request origin so OAuth works on preview deployments, not just production
+  const siteUrl = origin
 
   if (code) {
     const cookieStore = cookies()
@@ -43,5 +44,5 @@ export async function GET(request: Request) {
     }
   }
 
-  return NextResponse.redirect(`${siteUrl}/login`)
+  return NextResponse.redirect(`${origin}/login`)
 }
