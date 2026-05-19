@@ -1876,6 +1876,7 @@ renderHow('escorts');
           <div class="dp-type-pill" id="dpTypePill">Private</div>
         </div>
         <div class="dp-name" id="dpName">Sophia A.</div>
+        <a id="dpProfileLink" href="#" onclick="event.preventDefault();var pid=document.getElementById('detail-panel').dataset.profileId;if(pid)window.location.href='/profile/'+pid;" style="display:inline-block;font-size:11px;color:#c5a05a;text-decoration:none;margin-bottom:4px;opacity:0.8;letter-spacing:0.05em">View full profile →</a>
         <div class="dp-meta-row">
           <span class="dp-meta-item gold"><i class="ti ti-star-filled"></i> <span id="dpRating">4.9</span> (128 reviews)</span>
           <span class="dp-meta-item"><i class="ti ti-map-pin"></i> <span id="dpCity">Brussels, BE</span></span>
