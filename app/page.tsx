@@ -862,8 +862,13 @@ renderHow('escorts');
       if (!container) return
       const countEl = document.querySelector('.res-count')
       if (listings.length === 0) {
-        container.innerHTML = '<p style="color:var(--t3);grid-column:1/-1;text-align:center;padding:2rem 0">No listings found</p>'
-        if (countEl) countEl.textContent = '0 listings found'
+        container.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:4rem 2rem;display:flex;flex-direction:column;align-items:center;gap:1.25rem">
+          <div style="width:64px;height:64px;border-radius:50%;background:rgba(197,160,90,0.08);border:0.5px solid rgba(197,160,90,0.2);display:flex;align-items:center;justify-content:center;font-size:26px">✦</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:#ece8e1">Be among the first</div>
+          <div style="font-size:13px;color:#6a6560;max-width:320px;line-height:1.6">SecretXperience is just launching. Be an early provider and reach clients from day one.</div>
+          <button onclick="window.location.href='/listings/create'" style="margin-top:0.5rem;padding:12px 28px;background:linear-gradient(135deg,#c5a05a,#a0803d);border:none;border-radius:10px;color:#080808;font-weight:600;font-size:13px;cursor:pointer;font-family:inherit;letter-spacing:0.04em">List your service →</button>
+        </div>`
+        if (countEl) countEl.textContent = '0 listings'
         return
       }
       container.innerHTML = listings.map((l: any) => {
