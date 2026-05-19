@@ -290,7 +290,7 @@ export default function ListingDetailPage() {
           display: inline-flex; align-items: center;
           padding: 3px 10px;
           border-radius: 20px;
-          font-size: 10px;
+          font-size: 12px;
           font-family: 'Jost', sans-serif;
           font-weight: 500;
           letter-spacing: 0.1em;
@@ -303,7 +303,7 @@ export default function ListingDetailPage() {
           background: rgba(255,255,255,0.03);
           border: 0.5px solid rgba(255,255,255,0.1);
           color: rgba(255,255,255,0.45);
-          font-size: 11px;
+          font-size: 12px;
           font-family: 'Jost', sans-serif;
           font-weight: 400;
           letter-spacing: 0.05em;
@@ -588,7 +588,7 @@ export default function ListingDetailPage() {
                       {meetLabel && (
                         <span style={{
                           fontFamily: "'Jost', sans-serif",
-                          fontSize: '12px',
+                          fontSize: '13px',
                           color: 'rgba(197,160,90,0.55)',
                           fontWeight: 400,
                           letterSpacing: '0.05em',
@@ -627,7 +627,7 @@ export default function ListingDetailPage() {
                     </span>
                     <span style={{
                       fontFamily: "'Jost', sans-serif",
-                      fontSize: '11px',
+                      fontSize: '12px',
                       color: 'rgba(197,160,90,0.45)',
                       fontWeight: 300,
                     }}>
@@ -1011,7 +1011,7 @@ export default function ListingDetailPage() {
               }}>
                 <p style={{
                   fontFamily: "'Jost', sans-serif",
-                  fontSize: '10px',
+                  fontSize: '12px',
                   letterSpacing: '0.14em',
                   textTransform: 'uppercase',
                   color: 'rgba(255,255,255,0.2)',

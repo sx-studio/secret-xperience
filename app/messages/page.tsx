@@ -234,7 +234,7 @@ export default function MessagesPage() {
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem 1.5rem', textAlign: 'center', gap: '1rem' }}>
               <div style={{ fontSize: '36px', color: '#c5a05a', lineHeight: 1 }}>✉</div>
               <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '18px', color: '#ece8e1' }}>No conversations yet</div>
-              <div style={{ fontSize: '12px', color: '#4c4a47', lineHeight: 1.6 }}>Browse listings and message a provider to get started</div>
+              <div style={{ fontSize: '13px', color: '#4c4a47', lineHeight: 1.6 }}>Browse listings and message a provider to get started</div>
               <button onClick={() => window.location.href = '/'} style={{ marginTop: '0.5rem', padding: '9px 20px', background: '#c5a05a', border: 'none', borderRadius: '8px', color: '#080808', fontWeight: 600, fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' }}>Browse Listings</button>
             </div>
           ) : (
@@ -243,10 +243,10 @@ export default function MessagesPage() {
                 style={{ padding: '1rem 1.25rem', borderBottom: '0.5px solid rgba(255,255,255,0.04)', cursor: 'pointer', background: activeConv?.other_id === c.other_id ? 'rgba(197,160,90,0.06)' : 'transparent', borderLeft: activeConv?.other_id === c.other_id ? '2px solid #c5a05a' : '2px solid transparent' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                   <div style={{ fontWeight: 500, fontSize: '13px' }}>{c.other_name}</div>
-                  {c.unread > 0 && <span style={{ background: '#c5a05a', color: '#080808', borderRadius: '20px', padding: '1px 7px', fontSize: '10px', fontWeight: 700 }}>{c.unread}</span>}
+                  {c.unread > 0 && <span style={{ background: '#c5a05a', color: '#080808', borderRadius: '20px', padding: '1px 7px', fontSize: '11px', fontWeight: 700 }}>{c.unread}</span>}
                 </div>
-                {c.listing_title && <div style={{ fontSize: '10px', color: '#c5a05a', marginBottom: '3px' }}>{c.listing_title}</div>}
-                <div style={{ fontSize: '12px', color: '#4c4a47', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.last_message}</div>
+                {c.listing_title && <div style={{ fontSize: '12px', color: '#c5a05a', marginBottom: '3px' }}>{c.listing_title}</div>}
+                <div style={{ fontSize: '13px', color: '#4c4a47', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.last_message}</div>
               </div>
             ))
           )}
@@ -267,7 +267,7 @@ export default function MessagesPage() {
                 <style>{`@media(max-width:640px){.mobile-back-btn{display:inline-block!important}}`}</style>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 500 }}>{activeConv.other_name}</div>
-                  {activeConv.listing_title && <div style={{ fontSize: '11px', color: '#c5a05a', marginTop: '2px' }}>{activeConv.listing_title}</div>}
+                  {activeConv.listing_title && <div style={{ fontSize: '13px', color: '#c5a05a', marginTop: '2px' }}>{activeConv.listing_title}</div>}
                 </div>
               </div>
               <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -278,7 +278,7 @@ export default function MessagesPage() {
                     <div key={m.id} style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start' }}>
                       <div style={{ maxWidth: '65%', background: mine ? 'rgba(197,160,90,0.15)' : 'rgba(255,255,255,0.05)', border: mine ? '0.5px solid rgba(197,160,90,0.3)' : '0.5px solid rgba(255,255,255,0.08)', borderRadius: mine ? '16px 16px 4px 16px' : '16px 16px 16px 4px', padding: '10px 14px' }}>
                         <div style={{ fontSize: '13px', lineHeight: 1.5 }}>{m.body}</div>
-                        <div style={{ fontSize: '10px', color: '#4c4a47', marginTop: '4px', textAlign: 'right' }}>{fmt(m.created_at)}</div>
+                        <div style={{ fontSize: '11px', color: '#4c4a47', marginTop: '4px', textAlign: 'right' }}>{fmt(m.created_at)}</div>
                       </div>
                     </div>
                   )

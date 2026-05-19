@@ -44,7 +44,7 @@ function BookingBadge({ status }: { status: string }) {
   const s = map[status?.toLowerCase()] ?? map['pending']
   return (
     <span style={{
-      fontSize: '11px',
+      fontSize: '12px',
       fontWeight: 500,
       letterSpacing: '0.06em',
       textTransform: 'uppercase',
@@ -738,7 +738,7 @@ export default function DashboardPage() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <StatusDot active={!!listing.active} />
                         <span style={{
-                          fontSize: '11px',
+                          fontSize: '13px',
                           color: listing.active ? 'rgba(62,207,142,0.75)' : 'rgba(255,255,255,0.25)',
                           fontFamily: "'Jost', sans-serif",
                           fontWeight: 400,
@@ -800,7 +800,7 @@ export default function DashboardPage() {
                       </div>
                       {booking.created_at && (
                         <div style={{
-                          fontSize: '11px',
+                          fontSize: '13px',
                           color: 'rgba(255,255,255,0.25)',
                           fontFamily: "'Jost', sans-serif",
                           fontWeight: 300,
@@ -880,20 +880,20 @@ export default function DashboardPage() {
               { label:'Price to (€, optional)', key:'price_to', type:'number', placeholder:'e.g. 300' },
             ].map(f => (
               <div key={f.key} style={{ marginBottom:'1rem' }}>
-                <label style={{ display:'block',fontSize:'11px',color:'#c5a05a',letterSpacing:'0.08em',marginBottom:'6px',textTransform:'uppercase' }}>{f.label}</label>
+                <label style={{ display:'block',fontSize:'13px',color:'#c5a05a',letterSpacing:'0.08em',marginBottom:'6px',textTransform:'uppercase' }}>{f.label}</label>
                 <input type={f.type} value={listingDraft[f.key] ?? ''} onChange={e => setListingDraft((d: any) => ({ ...d, [f.key]: e.target.value }))} placeholder={f.placeholder}
                   style={{ width:'100%',background:'#0a0a0a',border:'0.5px solid rgba(255,255,255,0.1)',borderRadius:'8px',padding:'10px 14px',color:'#ece8e1',fontSize:'14px',fontFamily:'inherit',outline:'none' }} />
               </div>
             ))}
             <div style={{ marginBottom:'1rem' }}>
-              <label style={{ display:'block',fontSize:'11px',color:'#c5a05a',letterSpacing:'0.08em',marginBottom:'6px',textTransform:'uppercase' }}>Category</label>
+              <label style={{ display:'block',fontSize:'13px',color:'#c5a05a',letterSpacing:'0.08em',marginBottom:'6px',textTransform:'uppercase' }}>Category</label>
               <select value={listingDraft.category || ''} onChange={e => setListingDraft((d: any) => ({ ...d, category: e.target.value }))}
                 style={{ width:'100%',background:'#0a0a0a',border:'0.5px solid rgba(255,255,255,0.1)',borderRadius:'8px',padding:'10px 14px',color:'#ece8e1',fontSize:'14px',fontFamily:'inherit',outline:'none' }}>
                 {['escorts','massage','companionship','domination','adult','creators','nightlife','experiences','rentals','events','photo','memberships'].map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase()+c.slice(1)}</option>)}
               </select>
             </div>
             <div style={{ marginBottom:'1rem' }}>
-              <label style={{ display:'block',fontSize:'11px',color:'#c5a05a',letterSpacing:'0.08em',marginBottom:'6px',textTransform:'uppercase' }}>Meet type</label>
+              <label style={{ display:'block',fontSize:'13px',color:'#c5a05a',letterSpacing:'0.08em',marginBottom:'6px',textTransform:'uppercase' }}>Meet type</label>
               <select value={listingDraft.meet_type || ''} onChange={e => setListingDraft((d: any) => ({ ...d, meet_type: e.target.value }))}
                 style={{ width:'100%',background:'#0a0a0a',border:'0.5px solid rgba(255,255,255,0.1)',borderRadius:'8px',padding:'10px 14px',color:'#ece8e1',fontSize:'14px',fontFamily:'inherit',outline:'none' }}>
                 <option value="incall">Incall</option>
@@ -902,7 +902,7 @@ export default function DashboardPage() {
               </select>
             </div>
             <div style={{ marginBottom:'1rem' }}>
-              <label style={{ display:'block',fontSize:'11px',color:'#c5a05a',letterSpacing:'0.08em',marginBottom:'6px',textTransform:'uppercase' }}>Description</label>
+              <label style={{ display:'block',fontSize:'13px',color:'#c5a05a',letterSpacing:'0.08em',marginBottom:'6px',textTransform:'uppercase' }}>Description</label>
               <textarea value={listingDraft.description || ''} onChange={e => setListingDraft((d: any) => ({ ...d, description: e.target.value }))} rows={4}
                 style={{ width:'100%',background:'#0a0a0a',border:'0.5px solid rgba(255,255,255,0.1)',borderRadius:'8px',padding:'10px 14px',color:'#ece8e1',fontSize:'14px',fontFamily:'inherit',resize:'vertical',outline:'none' }} />
             </div>
@@ -932,13 +932,13 @@ export default function DashboardPage() {
               { label:'Languages (comma-separated)', key:'languages', type:'text', placeholder:'English, French, Dutch' },
             ].map(f => (
               <div key={f.key} style={{ marginBottom:'1rem' }}>
-                <label style={{ display:'block',fontSize:'11px',color:'#c5a05a',letterSpacing:'0.08em',marginBottom:'6px',textTransform:'uppercase' }}>{f.label}</label>
+                <label style={{ display:'block',fontSize:'13px',color:'#c5a05a',letterSpacing:'0.08em',marginBottom:'6px',textTransform:'uppercase' }}>{f.label}</label>
                 <input type={f.type} value={profileDraft[f.key] || ''} onChange={e => setProfileDraft((d: any) => ({ ...d, [f.key]: e.target.value }))} placeholder={f.placeholder}
                   style={{ width:'100%',background:'#0a0a0a',border:'0.5px solid rgba(255,255,255,0.1)',borderRadius:'8px',padding:'10px 14px',color:'#ece8e1',fontSize:'14px',fontFamily:'inherit',outline:'none' }} />
               </div>
             ))}
             <div style={{ marginBottom:'1.5rem' }}>
-              <label style={{ display:'block',fontSize:'11px',color:'#c5a05a',letterSpacing:'0.08em',marginBottom:'6px',textTransform:'uppercase' }}>Bio</label>
+              <label style={{ display:'block',fontSize:'13px',color:'#c5a05a',letterSpacing:'0.08em',marginBottom:'6px',textTransform:'uppercase' }}>Bio</label>
               <textarea value={profileDraft.bio || ''} onChange={e => setProfileDraft((d: any) => ({ ...d, bio: e.target.value }))} placeholder="Tell clients about yourself…" rows={4}
                 style={{ width:'100%',background:'#0a0a0a',border:'0.5px solid rgba(255,255,255,0.1)',borderRadius:'8px',padding:'10px 14px',color:'#ece8e1',fontSize:'14px',fontFamily:'inherit',resize:'vertical',outline:'none' }} />
             </div>

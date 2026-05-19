@@ -177,7 +177,7 @@ function VerifiedBadge() {
       display: 'inline-flex',
       alignItems: 'center',
       gap: '4px',
-      fontSize: '11px',
+      fontSize: '12px',
       fontFamily: SANS,
       fontWeight: 500,
       letterSpacing: '0.08em',
@@ -199,7 +199,7 @@ function PremiumBadge() {
       display: 'inline-flex',
       alignItems: 'center',
       gap: '4px',
-      fontSize: '11px',
+      fontSize: '12px',
       fontFamily: SANS,
       fontWeight: 500,
       letterSpacing: '0.08em',
@@ -275,7 +275,7 @@ function ListingCard({ listing }: { listing: Listing }) {
             position: 'absolute',
             top: '10px',
             left: '10px',
-            fontSize: '10px',
+            fontSize: '11px',
             fontFamily: SANS,
             fontWeight: 500,
             letterSpacing: '0.08em',
@@ -311,7 +311,7 @@ function ListingCard({ listing }: { listing: Listing }) {
 
         {listing.city && (
           <div style={{
-            fontSize: '12px',
+            fontSize: '13px',
             fontFamily: SANS,
             color: TEXT_MUTED,
             marginBottom: '10px',
@@ -342,7 +342,7 @@ function ListingCard({ listing }: { listing: Listing }) {
             {/* Rating */}
             {listing.rating != null && (
               <span style={{
-                fontSize: '12px',
+                fontSize: '13px',
                 fontFamily: SANS,
                 color: TEXT_DIM,
                 display: 'flex',
@@ -359,7 +359,7 @@ function ListingCard({ listing }: { listing: Listing }) {
             {/* Meet type */}
             {listing.meet_type && (
               <span style={{
-                fontSize: '10px',
+                fontSize: '11px',
                 fontFamily: SANS,
                 fontWeight: 500,
                 letterSpacing: '0.06em',
@@ -618,7 +618,7 @@ export default function ProfilePage() {
               {/* Age */}
               {profile.age != null && (
                 <div style={{
-                  fontSize: '12px',
+                  fontSize: '13px',
                   fontFamily: SANS,
                   color: TEXT_MUTED,
                   marginBottom: '8px',
@@ -638,7 +638,7 @@ export default function ProfilePage() {
                 }}>
                   {profile.languages.map(lang => (
                     <span key={lang} style={{
-                      fontSize: '11px',
+                      fontSize: '12px',
                       fontFamily: SANS,
                       color: TEXT_MUTED,
                       background: 'rgba(255,255,255,0.05)',
