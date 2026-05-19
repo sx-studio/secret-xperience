@@ -151,6 +151,8 @@ export default function CreateListingPage() {
 
   const [uploadingImages, setUploadingImages] = useState<UploadingImage[]>([])
   const [isDragging, setIsDragging]           = useState(false)
+  const [draftBanner, setDraftBanner]         = useState(false)
+  const [draftSaved, setDraftSaved]           = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -162,9 +164,33 @@ export default function CreateListingPage() {
       const { data: prof } = await supabase
         .from('profiles').select('*').eq('id', session.user.id).single()
       setProfile(prof)
+      // Check for saved draft
+      try {
+        const saved = localStorage.getItem('sx_listing_draft')
+        if (saved) setDraftBanner(true)
+      } catch(e) {}
     }
     load()
   }, [])
+
+  function saveDraft() {
+    try {
+      localStorage.setItem('sx_listing_draft', JSON.stringify({ step, form }))
+      setDraftSaved(true)
+      setTimeout(() => setDraftSaved(false), 2000)
+    } catch(e) {}
+  }
+
+  function restoreDraft() {
+    try {
+      const saved = localStorage.getItem('sx_listing_draft')
+      if (!saved) return
+      const { step: savedStep, form: savedForm } = JSON.parse(saved)
+      setForm(savedForm)
+      setStep(savedStep || 1)
+      setDraftBanner(false)
+    } catch(e) { setDraftBanner(false) }
+  }
 
   const set = (field: keyof FormState, value: string) =>
     setForm(f => ({ ...f, [field]: value }))
@@ -239,6 +265,7 @@ export default function CreateListingPage() {
     })
 
     if (err) { setError(err.message); setLoading(false); return }
+    try { localStorage.removeItem('sx_listing_draft') } catch(e) {}
     setSuccess(true)
     setTimeout(() => { window.location.href = '/dashboard' }, 1800)
   }
@@ -596,6 +623,23 @@ export default function CreateListingPage() {
 
           {/* Step indicator */}
           <StepIndicator current={step} />
+
+          {/* Draft restore banner */}
+          {draftBanner && (
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              background: 'rgba(197,160,90,0.07)',
+              border: '0.5px solid rgba(197,160,90,0.25)',
+              borderRadius: '9px', padding: '10px 14px', marginBottom: '1.5rem',
+              fontFamily: "'Jost', sans-serif", fontSize: '13px',
+            }}>
+              <span style={{ color: 'rgba(255,255,255,0.55)', fontWeight: 300 }}>You have a saved draft.</span>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button type="button" onClick={restoreDraft} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#c5a05a', fontSize: '13px', fontFamily: "'Jost', sans-serif", fontWeight: 500, padding: 0 }}>Restore</button>
+                <button type="button" onClick={() => { localStorage.removeItem('sx_listing_draft'); setDraftBanner(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.25)', fontSize: '13px', fontFamily: "'Jost', sans-serif", fontWeight: 300, padding: 0 }}>Discard</button>
+              </div>
+            </div>
+          )}
 
           {/* ─── Step 1: Category ─── */}
           {step === 1 && (
@@ -1185,13 +1229,27 @@ export default function CreateListingPage() {
             borderTop: '0.5px solid rgba(255,255,255,0.06)',
           }}>
             {step > 1 && (
-              <button
-                type="button"
-                className="cl-btn-ghost"
-                onClick={() => { setError(''); setStep(s => s - 1) }}
-              >
-                Back
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <button
+                  type="button"
+                  className="cl-btn-ghost"
+                  onClick={() => { setError(''); setStep(s => s - 1) }}
+                >
+                  Back
+                </button>
+                <button
+                  type="button"
+                  onClick={saveDraft}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                    fontFamily: "'Jost', sans-serif", fontSize: '12px', fontWeight: 300,
+                    color: draftSaved ? '#c5a05a' : 'rgba(255,255,255,0.22)',
+                    letterSpacing: '0.04em', transition: 'color 0.2s',
+                  }}
+                >
+                  {draftSaved ? 'Saved ✓' : 'Save progress'}
+                </button>
+              </div>
             )}
 
             {step < TOTAL_STEPS ? (

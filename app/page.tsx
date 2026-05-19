@@ -316,6 +316,8 @@ var dpPanel = document.getElementById('detail-panel');
 var dpSaved = false;
 
 function openDetail(data) {
+  // Track recently viewed (max 10, deduplicated, newest first)
+  if (data.id) { try { var rv = JSON.parse(localStorage.getItem('sx_recently_viewed') || '[]'); rv = [data.id].concat(rv.filter(function(x){return x!==data.id;})).slice(0,10); localStorage.setItem('sx_recently_viewed', JSON.stringify(rv)); } catch(e){} }
   // Store IDs on panel for CTAs
   var panel=document.getElementById('detail-panel');
   if(panel){panel.dataset.listingId=data.id||'';panel.dataset.profileId=data.profile_id||'';}
@@ -805,6 +807,17 @@ renderHow('escorts');
             signupBtn.textContent = 'Admin'; signupBtn.onclick = () => { window.location.href = '/admin' }
           } else {
             signupBtn.textContent = 'List service'; signupBtn.onclick = () => { window.location.href = '/listings/create' }
+            // Check if provider has 0 listings and add a subtle gold dot nudge
+            if (['provider','venue','creator'].includes(profile?.role)) {
+              const { count } = await (supabase as any).from('listings').select('id', { count: 'exact', head: true }).eq('profile_id', session.user.id)
+              if (count === 0 && signupBtn) {
+                signupBtn.style.position = 'relative'
+                const dot = document.createElement('span')
+                dot.title = 'You have no listings yet — create one!'
+                dot.style.cssText = 'position:absolute;top:-4px;right:-4px;width:8px;height:8px;border-radius:50%;background:#c5a05a;border:1.5px solid #080808;pointer-events:none;'
+                signupBtn.appendChild(dot)
+              }
+            }
           }
         }
       } else {
