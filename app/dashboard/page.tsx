@@ -85,6 +85,10 @@ export default function DashboardPage() {
   const [editingListing, setEditingListing] = useState<any | null>(null)
   const [listingDraft, setListingDraft]     = useState<any>({})
   const [savingListing, setSavingListing]   = useState(false)
+  const [boostingListing, setBoostingListing] = useState<any | null>(null)
+  const [boostPlan, setBoostPlan]             = useState<'week' | 'month'>('month')
+  const [boostLoading, setBoostLoading]       = useState(false)
+  const [notification, setNotification]       = useState<string | null>(null)
 
   useEffect(() => {
     async function load() {
@@ -108,6 +112,15 @@ export default function DashboardPage() {
       setListings(listings || [])
       setBookings(bookings || [])
       setLoading(false)
+
+      const params = new URLSearchParams(window.location.search)
+      if (params.get('booking') === 'success') {
+        setNotification('Booking confirmed! Payment received.')
+        window.history.replaceState({}, '', '/dashboard')
+      } else if (params.get('boost') === 'success') {
+        setNotification('✦ Your listing is now featured! It will appear at the top of results.')
+        window.history.replaceState({}, '', '/dashboard')
+      }
     }
     load()
   }, [])
@@ -156,6 +169,19 @@ export default function DashboardPage() {
     setListings((prev: any[]) => prev.map(l => l.id === editingListing.id ? { ...l, ...updates } : l))
     setEditingListing(null)
     setSavingListing(false)
+  }
+
+  async function startBoost() {
+    if (!boostingListing) return
+    setBoostLoading(true)
+    const res = await fetch('/api/featured-boost', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ listing_id: boostingListing.id, plan: boostPlan }),
+    })
+    const json = await res.json()
+    if (json.url) { window.location.href = json.url }
+    else { setBoostLoading(false) }
   }
 
   const displayName: string = profile?.full_name || user?.email?.split('@')[0] || 'there'
@@ -422,6 +448,14 @@ export default function DashboardPage() {
       `}</style>
 
       <div style={{ minHeight: '100vh', background: '#080808', color: '#ece8e1' }}>
+
+        {/* ── Notification banner ── */}
+        {notification && (
+          <div style={{ background: 'linear-gradient(90deg, rgba(197,160,90,0.15), rgba(197,160,90,0.08))', borderBottom: '0.5px solid rgba(197,160,90,0.3)', padding: '12px 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+            <span style={{ fontSize: '13px', color: '#c5a05a', fontFamily: "'Jost', sans-serif" }}>{notification}</span>
+            <button onClick={() => setNotification(null)} style={{ background: 'none', border: 'none', color: '#c5a05a', cursor: 'pointer', fontSize: '16px', lineHeight: 1 }}>×</button>
+          </div>
+        )}
 
         {/* ── Navigation ── */}
         <nav style={{
@@ -720,6 +754,11 @@ export default function DashboardPage() {
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+                      {listing.featured_until && new Date(listing.featured_until) > new Date() && (
+                        <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '20px', background: 'rgba(197,160,90,0.12)', color: '#c5a05a', border: '0.5px solid rgba(197,160,90,0.3)', fontFamily: "'Jost', sans-serif", fontWeight: 500 }}>
+                          ✦ Featured · {new Date(listing.featured_until).toLocaleDateString('en-GB', { day:'numeric', month:'short' })}
+                        </span>
+                      )}
                       {listing.verified && (
                         <span style={{
                           fontSize: '12px',
@@ -747,6 +786,12 @@ export default function DashboardPage() {
                           {listing.active ? 'Live' : 'Inactive'}
                         </span>
                       </div>
+                      <button
+                        onClick={() => { setBoostPlan('month'); setBoostingListing(listing) }}
+                        style={{ padding: '5px 12px', borderRadius: '8px', border: '0.5px solid rgba(197,160,90,0.4)', background: 'transparent', color: '#c5a05a', cursor: 'pointer', fontSize: '12px', fontWeight: 500, fontFamily: "'Jost', sans-serif", letterSpacing: '0.04em', transition: 'all .15s' }}
+                        onMouseOver={e => { (e.target as HTMLElement).style.background = 'rgba(197,160,90,0.1)' }}
+                        onMouseOut={e => { (e.target as HTMLElement).style.background = 'transparent' }}
+                      >✦ Boost</button>
                       <button className="db-edit-btn" onClick={() => { setListingDraft({ title: listing.title || '', description: listing.description || '', category: listing.category || '', city: listing.city || '', country: listing.country || '', price_from: listing.price_from ?? '', price_to: listing.price_to ?? '', meet_type: listing.meet_type || '', active: listing.active ?? true }); setEditingListing(listing) }}>Edit</button>
                     </div>
                   </div>
@@ -945,6 +990,36 @@ export default function DashboardPage() {
             <div style={{ display:'flex',gap:'10px',justifyContent:'flex-end' }}>
               <button onClick={() => setEditingProfile(false)} style={{ padding:'10px 20px',background:'transparent',border:'0.5px solid rgba(255,255,255,0.15)',borderRadius:'8px',color:'#9a8a7a',cursor:'pointer',fontSize:'13px',fontFamily:'inherit' }}>Cancel</button>
               <button onClick={saveProfile} disabled={savingProfile} style={{ padding:'10px 24px',background:'linear-gradient(135deg,#c5a05a,#a0803d)',border:'none',borderRadius:'8px',color:'#080808',cursor:'pointer',fontSize:'13px',fontWeight:600,fontFamily:'inherit' }}>{savingProfile ? 'Saving…' : 'Save changes'}</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ── Boost listing modal ── */}
+      {boostingListing && (
+        <div onClick={() => setBoostingListing(null)} style={{ position:'fixed',inset:0,background:'rgba(0,0,0,0.8)',backdropFilter:'blur(8px)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:'1rem' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background:'#0f0f0f',border:'0.5px solid rgba(197,160,90,0.2)',borderRadius:'16px',padding:'2rem',width:'100%',maxWidth:'440px',fontFamily:"'Jost', sans-serif" }}>
+            <div style={{ marginBottom:'1.5rem' }}>
+              <div style={{ fontFamily:"'Cormorant Garamond', serif",fontSize:'22px',color:'#c5a05a',fontWeight:300,marginBottom:'6px' }}>✦ Boost Listing</div>
+              <div style={{ fontSize:'13px',color:'#8c8880',lineHeight:1.5 }}>Feature <strong style={{ color:'#ece8e1' }}>{boostingListing.title}</strong> at the top of search results.</div>
+            </div>
+            <div style={{ display:'flex',gap:'10px',marginBottom:'1.5rem' }}>
+              {([
+                { key:'week',  label:'7 Days',  price:'€29', note:'Quick boost' },
+                { key:'month', label:'30 Days', price:'€79', note:'Best value' },
+              ] as const).map(p => (
+                <div key={p.key} onClick={() => setBoostPlan(p.key)} style={{ flex:1,padding:'1rem',borderRadius:'10px',border:`1px solid ${boostPlan===p.key?'rgba(197,160,90,0.6)':'rgba(255,255,255,0.08)'}`,background:boostPlan===p.key?'rgba(197,160,90,0.07)':'transparent',cursor:'pointer',textAlign:'center',transition:'all .15s' }}>
+                  <div style={{ fontSize:'13px',color:'#8c8880',marginBottom:'4px' }}>{p.label}</div>
+                  <div style={{ fontSize:'22px',fontFamily:"'Cormorant Garamond', serif",color:'#c5a05a',fontWeight:400 }}>{p.price}</div>
+                  <div style={{ fontSize:'11px',color:'#4c4a47',marginTop:'3px' }}>{p.note}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ background:'rgba(197,160,90,0.06)',border:'0.5px solid rgba(197,160,90,0.15)',borderRadius:'8px',padding:'0.875rem 1rem',marginBottom:'1.5rem',fontSize:'12px',color:'#8c8880',lineHeight:1.6 }}>
+              Your listing will appear at the top of all search results and category pages with a ✦ Featured badge for the selected duration.
+            </div>
+            <div style={{ display:'flex',gap:'10px',justifyContent:'flex-end' }}>
+              <button onClick={() => setBoostingListing(null)} style={{ padding:'10px 20px',background:'transparent',border:'0.5px solid rgba(255,255,255,0.15)',borderRadius:'8px',color:'#9a8a7a',cursor:'pointer',fontSize:'13px',fontFamily:'inherit' }}>Cancel</button>
+              <button onClick={startBoost} disabled={boostLoading} style={{ padding:'10px 28px',background:'linear-gradient(135deg,#c5a05a,#a0803d)',border:'none',borderRadius:'8px',color:'#080808',cursor:'pointer',fontSize:'13px',fontWeight:600,fontFamily:'inherit' }}>{boostLoading ? 'Redirecting…' : `Boost for ${boostPlan==='week'?'€29':'€79'}`}</button>
             </div>
           </div>
         </div>

@@ -320,7 +320,7 @@ function openDetail(data) {
   if (data.id) { try { var rv = JSON.parse(localStorage.getItem('sx_recently_viewed') || '[]'); rv = [data.id].concat(rv.filter(function(x){return x!==data.id;})).slice(0,10); localStorage.setItem('sx_recently_viewed', JSON.stringify(rv)); } catch(e){} }
   // Store IDs on panel for CTAs
   var panel=document.getElementById('detail-panel');
-  if(panel){panel.dataset.listingId=data.id||'';panel.dataset.profileId=data.profile_id||'';}
+  if(panel){panel.dataset.listingId=data.id||'';panel.dataset.profileId=data.profile_id||'';panel.dataset.priceFrom=String(data.price_from||0);}
   // Populate hero
   document.getElementById('dpHeroIcon').className = 'ti ' + data.icon;
   var badgesEl = document.getElementById('dpHeroBadges');
@@ -510,12 +510,28 @@ var calYear=new Date().getFullYear(),calMonth=new Date().getMonth();
 var availDays=[1,3,4,5,6]; // Mon, Wed, Thu, Fri, Sat (0=Sun)
 var currentListingId=null;
 
-function openBookModal(name,cat,listingId){
+function openBookModal(name,cat,listingId,basePrice){
   currentListingId=listingId||null;
   document.getElementById('bookListingName').textContent=name||'Sophia A.';
   document.getElementById('bookListingCat').textContent=cat||'Escort · Independent · Brussels';
   document.getElementById('sumName').textContent=name||'Sophia A.';
-  selDate='';selTime='';selDur='2 Hours';selPrice=350;bookStep=0;
+  selDate='';selTime='';selDur='2 Hours';
+  // Dynamically price duration pills from listing's base rate
+  if(basePrice&&basePrice>0){
+    var mults=[1,1.6,2.5,4.5];
+    var labels=['1 Hour','2 Hours','Half day','Overnight'];
+    document.querySelectorAll('.dur-pill').forEach(function(dp,i){
+      var p=Math.round(basePrice*mults[i]);
+      dp.dataset.dur=labels[i];dp.dataset.price=String(p);
+      dp.textContent=labels[i]+' — €'+p.toLocaleString();
+    });
+    selPrice=Math.round(basePrice*mults[1]);
+  } else {
+    selPrice=350;
+  }
+  document.getElementById('sumDur').textContent=selDur;
+  document.getElementById('sumPrice').textContent='€'+selPrice.toLocaleString();
+  bookStep=0;
   updateBookSteps();
   renderCal();
   openModal('bookModal');
@@ -647,8 +663,9 @@ document.querySelector('.dp-cta-book').addEventListener('click',function(){
   var cat=document.getElementById('dpCat').textContent;
   var panel=document.getElementById('detail-panel');
   var lid=panel?panel.dataset.listingId:null;
+  var priceFrom=parseInt(panel&&panel.dataset.priceFrom||'0')||0;
   closeDetail();
-  setTimeout(function(){openBookModal(name,cat+' · '+document.getElementById('dpCity').textContent,lid);},200);
+  setTimeout(function(){openBookModal(name,cat+' · '+document.getElementById('dpCity').textContent,lid,priceFrom);},200);
 });
 
 document.querySelector('.dp-cta-msg').addEventListener('click',function(){
@@ -886,6 +903,8 @@ renderHow('escorts');
       }
       container.innerHTML = listings.map((l: any) => {
         const badges: any[] = []
+        const isFeatured = l.featured_until && new Date(l.featured_until) > new Date()
+        if (isFeatured) badges.unshift({cls:'bf',txt:'✦ Featured'})
         if (l.verified) badges.push({cls:'bv',txt:'✓ Verified'})
         if (l.premium) badges.push({cls:'bp',txt:'Premium'})
         if (l.trending) badges.push({cls:'bt',txt:'Trending'})
@@ -914,11 +933,14 @@ renderHow('escorts');
             s1:String(l.review_count||0),s2:l.rating?l.rating.toFixed(1):'—',s3:'—',s4:'—',
             desc:l.description||'No description provided.',
             tags:l.subcategory?[l.subcategory,l.category]:[l.category],
-            pricing
+            pricing,
+            price_from: l.price_from||0,
+            featured_until: l.featured_until||null
           }))}'))">
           <div class="card-img">
             <i class="ti ${getCategoryIcon(l.category)}" aria-hidden="true"></i>
             <div class="card-badges">
+              ${isFeatured ? '<span class="badge bf">✦ Featured</span>' : ''}
               ${l.verified ? '<span class="badge bv">✓ Verified</span>' : ''}
               ${l.premium ? '<span class="badge bp">Premium</span>' : ''}
               ${l.trending ? '<span class="badge bt">Trending</span>' : ''}
@@ -946,10 +968,43 @@ renderHow('escorts');
       if (filters.trending) query = query.eq('trending', true)
       if (filters.minRating > 0) query = query.gte('rating', filters.minRating)
       if (filters.priceMax) query = query.lte('price_from', filters.priceMax)
-      const { data } = await query.order('created_at', { ascending: false })
+      const { data } = await query
+        .order('featured_until', { ascending: false, nullsFirst: false })
+        .order('created_at', { ascending: false })
       ;(window as any).__sxCacheListings?.(data || [])
       renderCards(data || [])
     }
+
+    // ── Recently Viewed row ──
+    const loadRecentlyViewed = async () => {
+      try {
+        const rvIds: string[] = JSON.parse(localStorage.getItem('sx_recently_viewed') || '[]')
+        if (!rvIds.length) return
+        const { data: rvListings } = await (supabase as any).from('listings').select('*').in('id', rvIds).eq('active', true).limit(8)
+        if (!rvListings || !rvListings.length) return
+        const section = document.getElementById('recentViewedSection')
+        const container = document.getElementById('recentViewedCards')
+        if (!section || !container) return
+        container.innerHTML = rvListings.map((l: any) => {
+          const dataStr = encodeURIComponent(JSON.stringify({
+            id:l.id||'',profile_id:l.profile_id||'',icon:getCategoryIcon(l.category),badges:[],
+            cat:l.category||'',type:l.subcategory||l.category||'',name:l.title||'',
+            rating:l.rating||'—',city:(l.city||'—')+', '+(l.country||''),
+            s1:String(l.review_count||0),s2:l.rating?l.rating.toFixed(1):'—',s3:'—',s4:'—',
+            desc:l.description||'',tags:[l.category],
+            pricing:l.price_from?[{dur:'Rate',amt:'€'+l.price_from,note:l.category,feat:true}]:[{dur:'Rate',amt:'POA',note:'',feat:true}],
+            price_from:l.price_from||0,featured_until:l.featured_until||null
+          }))
+          return `<div onclick="openDetail(JSON.parse(decodeURIComponent('${dataStr}')))" style="flex-shrink:0;width:140px;cursor:pointer;background:rgba(255,255,255,0.03);border:0.5px solid rgba(255,255,255,0.07);border-radius:10px;padding:.75rem;transition:border-color .15s" onmouseover="this.style.borderColor='rgba(197,160,90,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.07)'">
+            <div style="width:32px;height:32px;border-radius:8px;background:rgba(197,160,90,0.08);display:flex;align-items:center;justify-content:center;font-size:14px;margin-bottom:.5rem"><i class="ti ${getCategoryIcon(l.category)}"></i></div>
+            <div style="font-size:12px;color:#ece8e1;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px">${l.title||''}</div>
+            <div style="font-size:11px;color:#4c4a47">${l.price_from?'€'+l.price_from:'POA'}</div>
+          </div>`
+        }).join('')
+        section.style.display = 'block'
+      } catch(e) {}
+    }
+    loadRecentlyViewed()
 
     // Wire category bar to real data
     document.querySelectorAll('.cat').forEach(function(cat) {
@@ -1231,6 +1286,12 @@ renderHow('escorts');
           <option>Sort: Price ↓</option>
           <option>Sort: Newest</option>
         </select>
+      </div>
+
+      <!-- Recently Viewed -->
+      <div id="recentViewedSection" style="display:none;margin-bottom:1.5rem">
+        <div style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#4c4a47;font-weight:600;margin-bottom:.75rem">Recently viewed</div>
+        <div id="recentViewedCards" style="display:flex;gap:.75rem;overflow-x:auto;padding-bottom:.5rem;scrollbar-width:thin"></div>
       </div>
 
       <!-- Listing Cards -->

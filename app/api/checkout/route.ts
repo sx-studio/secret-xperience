@@ -33,8 +33,10 @@ export async function POST(req: NextRequest) {
     client_id: session.user.id,
     provider_id: listing.profile_id,
     date: date || new Date().toISOString().split('T')[0],
+    time: time || null,
     duration_hours: duration ? Math.round(parseFloat(duration)) : 1,
-    total_amount: price * 100,
+    total_amount: price,
+    notes: notes || null,
     currency: 'EUR',
     status: 'pending',
   }).select('id').single()

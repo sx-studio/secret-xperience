@@ -331,6 +331,7 @@ nav{
 .card-badges{position:absolute;top:7px;left:7px;display:flex;gap:3px;flex-wrap:wrap;z-index:1}
 .badge{font-size:10px;padding:2px 7px;border-radius:7px;font-weight:600;letter-spacing:.04em;backdrop-filter:blur(4px)}
 .bv{background:rgba(26,143,106,.22);color:#26d4a0;border:0.5px solid rgba(26,143,106,.4)}
+.bf{background:rgba(197,160,90,.18);color:#c5a05a;border:0.5px solid rgba(197,160,90,.3)}
 .bp{background:rgba(197,160,90,.18);color:#c9a86c;border:0.5px solid rgba(197,160,90,.35)}
 .bt{background:rgba(184,77,114,.18);color:#e07aa0;border:0.5px solid rgba(184,77,114,.35)}
 .be{background:rgba(100,140,220,.18);color:#7aaaee;border:0.5px solid rgba(100,140,220,.35)}

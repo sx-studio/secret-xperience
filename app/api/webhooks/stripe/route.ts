@@ -22,13 +22,29 @@ export async function POST(req: NextRequest) {
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session
-    const { booking_id } = session.metadata || {}
+    const meta = session.metadata || {}
 
-    if (booking_id) {
+    if (meta.type === 'featured_boost' && meta.listing_id) {
+      // Extend featured_until: start from now or current expiry, whichever is later
+      const days = parseInt(meta.days || '7')
+      const { data: listing } = await supabaseAdmin
+        .from('listings')
+        .select('featured_until')
+        .eq('id', meta.listing_id)
+        .single()
+      const base = listing?.featured_until && new Date(listing.featured_until) > new Date()
+        ? new Date(listing.featured_until)
+        : new Date()
+      base.setDate(base.getDate() + days)
+      await supabaseAdmin.from('listings').update({
+        featured_until: base.toISOString(),
+        premium: true,
+      }).eq('id', meta.listing_id)
+    } else if (meta.booking_id) {
       await supabaseAdmin.from('bookings').update({
         status: 'confirmed',
         stripe_payment_intent: session.payment_intent as string,
-      }).eq('id', booking_id)
+      }).eq('id', meta.booking_id)
     }
   }
 
