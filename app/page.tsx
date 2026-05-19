@@ -71,7 +71,7 @@ document.querySelectorAll('.tier').forEach(function(t){
 
 // ── Rating slider ──
 var rsl = document.getElementById('rsl');
-rsl.addEventListener('input', function(){ document.getElementById('rval').textContent = parseFloat(this.value).toFixed(1); });
+rsl.addEventListener('input', function(){ var v=parseFloat(this.value); document.getElementById('rval').textContent = v===0?'Any':v.toFixed(1); });
 
 // ── How It Works data ──
 var howData = {
@@ -887,6 +887,7 @@ renderHow('escorts');
       if (filters.minRating > 0) query = query.gte('rating', filters.minRating)
       if (filters.priceMax) query = query.lte('price_from', filters.priceMax)
       const { data } = await query.order('created_at', { ascending: false })
+      ;(window as any).__sxCacheListings?.(data || [])
       renderCards(data || [])
     }
 
@@ -939,6 +940,33 @@ renderHow('escorts');
 
     // Initial load
     fetchListings(activeFilters)
+
+    // ── Nav logo → home ──
+    const navLogo = document.querySelector('.nav-logo') as HTMLElement | null
+    if (navLogo) { navLogo.style.cursor = 'pointer'; navLogo.addEventListener('click', () => { window.location.href = '/' }) }
+
+    // ── Search bar ──
+    let allListings: any[] = []
+    const origFetch = fetchListings
+    const searchInput = document.querySelector('.nav-search input') as HTMLInputElement | null
+    if (searchInput) {
+      searchInput.addEventListener('input', function() {
+        const q = this.value.toLowerCase().trim()
+        if (!q) { origFetch(activeFilters); return }
+        const container = document.getElementById('listingCards')
+        if (!container) return
+        const filtered = allListings.filter((l: any) =>
+          (l.title || '').toLowerCase().includes(q) ||
+          (l.city || '').toLowerCase().includes(q) ||
+          (l.category || '').toLowerCase().includes(q) ||
+          (l.description || '').toLowerCase().includes(q)
+        )
+        renderCards(filtered)
+      })
+    }
+    // Intercept fetchListings to cache results for search
+    const origRenderCards = renderCards
+    ;(window as any).__sxCacheListings = (data: any[]) => { allListings = data }
 
   }, [])
 
@@ -1027,7 +1055,7 @@ renderHow('escorts');
 
       <div class="fsec">
         <div class="flbl">Features</div>
-        <div class="frow"><input type="checkbox" id="fv" checked/><label for="fv">Verified only</label></div>
+        <div class="frow"><input type="checkbox" id="fv"/><label for="fv">Verified only</label></div>
         <div class="frow"><input type="checkbox" id="fp"/><label for="fp">Premium listings</label></div>
         <div class="frow"><input type="checkbox" id="ft"/><label for="ft">Trending now</label></div>
         <div class="frow"><input type="checkbox" id="fn"/><label for="fn">Available now</label></div>
@@ -1047,10 +1075,10 @@ renderHow('escorts');
 
       <div class="fsec">
         <div class="flbl">Minimum rating</div>
-        <input type="range" class="rslider" min="0" max="5" step="0.5" value="3" id="rsl" aria-label="Minimum rating"/>
+        <input type="range" class="rslider" min="0" max="5" step="0.5" value="0" id="rsl" aria-label="Minimum rating"/>
         <div style="font-size:11px;color:var(--t3);margin-top:4px">
           <i class="ti ti-star-filled" style="color:var(--gold);font-size:12px" aria-hidden="true"></i>
-          <span id="rval">3.0</span>+ stars
+          <span id="rval">Any</span> rating
         </div>
       </div>
 
