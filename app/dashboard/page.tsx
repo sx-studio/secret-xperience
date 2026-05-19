@@ -565,7 +565,7 @@ export default function DashboardPage() {
                   {' · '}
                   <span style={{ textTransform: 'capitalize' }}>{profile.role}</span>
                   {profile?.verified && (
-                    <span style={{ marginLeft: '8px', color: '#3ecf8e', fontSize: '11px' }}>✓ Verified</span>
+                    <span style={{ marginLeft: '8px', color: '#3ecf8e', fontSize: '13px' }}>✓ Verified</span>
                   )}
                 </>
               )}
@@ -612,7 +612,7 @@ export default function DashboardPage() {
                 </div>
                 <div style={{
                   fontFamily: "'Jost', sans-serif",
-                  fontSize: '11px',
+                  fontSize: '12px',
                   color: 'rgba(255,255,255,0.2)',
                   letterSpacing: '0.04em',
                   fontWeight: 300,
@@ -694,7 +694,7 @@ export default function DashboardPage() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                         {listing.city && (
                           <span style={{
-                            fontSize: '11px',
+                            fontSize: '13px',
                             color: 'rgba(255,255,255,0.28)',
                             fontFamily: "'Jost', sans-serif",
                             fontWeight: 300,
@@ -704,7 +704,7 @@ export default function DashboardPage() {
                         )}
                         {(listing.price_min || listing.price_max) && (
                           <span style={{
-                            fontSize: '11px',
+                            fontSize: '13px',
                             color: 'rgba(197,160,90,0.5)',
                             fontFamily: "'Jost', sans-serif",
                             fontWeight: 300,
@@ -722,7 +722,7 @@ export default function DashboardPage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
                       {listing.verified && (
                         <span style={{
-                          fontSize: '10px',
+                          fontSize: '12px',
                           padding: '2px 8px',
                           borderRadius: '20px',
                           background: 'rgba(62,207,142,0.08)',
