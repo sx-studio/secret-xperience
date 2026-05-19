@@ -104,6 +104,19 @@ export default function ListingDetailPage() {
   const [submitting,     setSubmitting]     = useState(false)
   const [submitError,    setSubmitError]    = useState<string | null>(null)
 
+  async function fetchReviews() {
+    if (!id) return
+    setReviewsLoading(true)
+    const supabase = createClient()
+    const { data } = await supabase
+      .from('reviews')
+      .select('*, profiles(full_name, username)')
+      .eq('listing_id', id)
+      .order('created_at', { ascending: false })
+    setReviews((data as Review[]) || [])
+    setReviewsLoading(false)
+  }
+
   useEffect(() => {
     if (!id) return
     async function load() {
@@ -138,7 +151,48 @@ export default function ListingDetailPage() {
       setPageLoading(false)
     }
     load()
+    fetchReviews()
   }, [id])
+
+  async function submitReview() {
+    if (!session || selectedRating === 0) return
+    setSubmitting(true)
+    setSubmitError(null)
+    const supabase = createClient()
+    const { error } = await supabase.from('reviews').insert({
+      listing_id:  id,
+      reviewer_id: session.user.id,
+      rating:      selectedRating,
+      content:     reviewText.trim() || null,
+    })
+    if (error) {
+      setSubmitError(error.message)
+      setSubmitting(false)
+      return
+    }
+    // Refetch reviews to get updated list
+    const { data: updatedReviews } = await supabase
+      .from('reviews')
+      .select('*, profiles(full_name, username)')
+      .eq('listing_id', id)
+      .order('created_at', { ascending: false })
+    const revList = (updatedReviews as Review[]) || []
+    setReviews(revList)
+    // Update listing rating + review_count from aggregated client values
+    const newCount = revList.length
+    const newRating = newCount > 0
+      ? revList.reduce((sum, r) => sum + r.rating, 0) / newCount
+      : 0
+    await supabase
+      .from('listings')
+      .update({ review_count: newCount, rating: newRating })
+      .eq('id', id)
+    // Reset form
+    setSelectedRating(0)
+    setReviewText('')
+    setShowReviewForm(false)
+    setSubmitting(false)
+  }
 
   /* ── Navigate to message/book (auth guard) ── */
   function goToMessage() {
@@ -318,6 +372,71 @@ export default function ListingDetailPage() {
         @media (max-width: 480px) {
           .ld-hero-icon { font-size: 36px !important; }
         }
+        .rv-star {
+          cursor: pointer;
+          font-size: 22px;
+          color: rgba(197,160,90,0.25);
+          transition: color 0.15s, transform 0.1s;
+          line-height: 1;
+          background: none;
+          border: none;
+          padding: 0 2px;
+        }
+        .rv-star.filled { color: #c5a05a; }
+        .rv-star:hover { transform: scale(1.15); }
+        .rv-submit {
+          padding: 11px 28px;
+          background: linear-gradient(135deg,#c5a05a 0%,#a0803d 100%);
+          border: none;
+          border-radius: 10px;
+          color: #080808;
+          font-family: 'Jost', sans-serif;
+          font-size: 13px;
+          font-weight: 600;
+          letter-spacing: 0.07em;
+          text-transform: uppercase;
+          cursor: pointer;
+          transition: opacity 0.2s, transform 0.15s;
+          position: relative;
+          overflow: hidden;
+        }
+        .rv-submit::after {
+          content: '';
+          position: absolute; inset: 0;
+          background: linear-gradient(135deg,rgba(255,255,255,0.14) 0%,transparent 60%);
+          pointer-events: none;
+        }
+        .rv-submit:hover:not(:disabled) { opacity: 0.88; transform: translateY(-1px); }
+        .rv-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+        .rv-cancel {
+          padding: 11px 20px;
+          background: transparent;
+          border: 0.5px solid rgba(255,255,255,0.12);
+          border-radius: 10px;
+          color: rgba(255,255,255,0.35);
+          font-family: 'Jost', sans-serif;
+          font-size: 13px;
+          font-weight: 400;
+          letter-spacing: 0.05em;
+          cursor: pointer;
+          transition: border-color 0.2s, color 0.2s;
+        }
+        .rv-cancel:hover { border-color: rgba(255,255,255,0.25); color: rgba(255,255,255,0.6); }
+        .rv-leave-btn {
+          padding: 10px 22px;
+          background: transparent;
+          border: 0.5px solid rgba(197,160,90,0.35);
+          border-radius: 10px;
+          color: #c5a05a;
+          font-family: 'Jost', sans-serif;
+          font-size: 12px;
+          font-weight: 500;
+          letter-spacing: 0.07em;
+          text-transform: uppercase;
+          cursor: pointer;
+          transition: border-color 0.2s, background 0.2s;
+        }
+        .rv-leave-btn:hover { border-color: rgba(197,160,90,0.65); background: rgba(197,160,90,0.06); }
       `}</style>
 
       <div style={{ minHeight: '100vh', background: '#050505', color: '#ece8e1' }}>
