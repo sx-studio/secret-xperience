@@ -713,6 +713,261 @@ export default function ListingDetailPage() {
                 </div>
               )}
 
+              {/* ── Reviews section ── */}
+              {(() => {
+                const avgRating = reviews.length > 0
+                  ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
+                  : 0
+                const canReview = !!session && session.user.id !== listing.profile_id
+                return (
+                  <div style={{
+                    background: 'rgba(255,255,255,0.02)',
+                    border: '0.5px solid rgba(255,255,255,0.07)',
+                    borderRadius: '18px',
+                    padding: '1.5rem 1.75rem',
+                    marginBottom: '1.5rem',
+                  }}>
+                    {/* Section header */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '12px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                        <p style={{
+                          fontFamily: "'Jost', sans-serif",
+                          fontSize: '10px',
+                          letterSpacing: '0.14em',
+                          textTransform: 'uppercase',
+                          color: 'rgba(255,255,255,0.2)',
+                          fontWeight: 600,
+                          margin: 0,
+                        }}>
+                          Reviews
+                        </p>
+                        {reviews.length > 0 && (
+                          <>
+                            <span style={{ color: 'rgba(255,255,255,0.08)', fontSize: '10px' }}>·</span>
+                            <span style={{
+                              fontFamily: "'Jost', sans-serif",
+                              fontSize: '12px',
+                              color: '#c5a05a',
+                              fontWeight: 500,
+                              letterSpacing: '0.02em',
+                            }}>
+                              {avgRating.toFixed(1)} ★
+                            </span>
+                            <span style={{ color: 'rgba(255,255,255,0.08)', fontSize: '10px' }}>·</span>
+                            <span style={{
+                              fontFamily: "'Jost', sans-serif",
+                              fontSize: '12px',
+                              color: 'rgba(255,255,255,0.28)',
+                              fontWeight: 300,
+                            }}>
+                              {reviews.length} {reviews.length === 1 ? 'review' : 'reviews'}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                      {canReview && !showReviewForm && (
+                        <button
+                          type="button"
+                          className="rv-leave-btn"
+                          onClick={() => setShowReviewForm(true)}
+                        >
+                          Leave a Review
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Inline review form */}
+                    {showReviewForm && (
+                      <div style={{
+                        background: 'rgba(197,160,90,0.04)',
+                        border: '0.5px solid rgba(197,160,90,0.15)',
+                        borderRadius: '14px',
+                        padding: '1.25rem',
+                        marginBottom: '1.25rem',
+                      }}>
+                        <p style={{
+                          fontFamily: "'Cormorant Garamond', serif",
+                          fontSize: '18px',
+                          fontWeight: 400,
+                          color: '#ece8e1',
+                          letterSpacing: '0.01em',
+                          marginBottom: '1rem',
+                        }}>
+                          Your Rating
+                        </p>
+
+                        {/* Star selector */}
+                        <div style={{ display: 'flex', gap: '2px', marginBottom: '1rem' }}>
+                          {[1, 2, 3, 4, 5].map(star => (
+                            <button
+                              key={star}
+                              type="button"
+                              className={`rv-star${star <= (hoverRating || selectedRating) ? ' filled' : ''}`}
+                              onMouseEnter={() => setHoverRating(star)}
+                              onMouseLeave={() => setHoverRating(0)}
+                              onClick={() => setSelectedRating(star)}
+                              aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
+                            >
+                              ★
+                            </button>
+                          ))}
+                        </div>
+
+                        {/* Textarea */}
+                        <textarea
+                          value={reviewText}
+                          onChange={e => setReviewText(e.target.value)}
+                          placeholder="Share your experience (optional)…"
+                          rows={4}
+                          style={{
+                            width: '100%',
+                            background: 'rgba(255,255,255,0.03)',
+                            border: '0.5px solid rgba(255,255,255,0.1)',
+                            borderRadius: '10px',
+                            padding: '12px 14px',
+                            color: 'rgba(255,255,255,0.7)',
+                            fontFamily: "'Jost', sans-serif",
+                            fontSize: '13px',
+                            fontWeight: 300,
+                            lineHeight: 1.65,
+                            resize: 'vertical',
+                            outline: 'none',
+                            boxSizing: 'border-box',
+                            marginBottom: '0.875rem',
+                          }}
+                        />
+
+                        {submitError && (
+                          <p style={{
+                            fontFamily: "'Jost', sans-serif",
+                            fontSize: '12px',
+                            color: 'rgba(220,80,80,0.85)',
+                            fontWeight: 300,
+                            marginBottom: '0.75rem',
+                          }}>
+                            {submitError}
+                          </p>
+                        )}
+
+                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                          <button
+                            type="button"
+                            className="rv-submit"
+                            onClick={submitReview}
+                            disabled={submitting || selectedRating === 0}
+                          >
+                            {submitting ? 'Submitting…' : 'Submit Review'}
+                          </button>
+                          <button
+                            type="button"
+                            className="rv-cancel"
+                            onClick={() => {
+                              setShowReviewForm(false)
+                              setSelectedRating(0)
+                              setHoverRating(0)
+                              setReviewText('')
+                              setSubmitError(null)
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Review list */}
+                    {reviewsLoading ? (
+                      <div style={{ display: 'flex', justifyContent: 'center', padding: '1.5rem 0' }}>
+                        <div style={{
+                          width: '28px', height: '28px',
+                          border: '1.5px solid rgba(197,160,90,0.15)',
+                          borderTop: '1.5px solid #c5a05a',
+                          borderRadius: '50%',
+                          animation: 'spin 0.9s linear infinite',
+                        }} />
+                      </div>
+                    ) : reviews.length === 0 ? (
+                      <p style={{
+                        fontFamily: "'Jost', sans-serif",
+                        fontSize: '13px',
+                        color: 'rgba(255,255,255,0.25)',
+                        fontWeight: 300,
+                        fontStyle: 'italic',
+                        textAlign: 'center',
+                        padding: '1.5rem 0',
+                        lineHeight: 1.6,
+                      }}>
+                        No reviews yet. Be the first to leave one.
+                      </p>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        {reviews.map(review => {
+                          const reviewerName = review.profiles?.full_name || review.profiles?.username || 'Anonymous'
+                          const dateStr = new Date(review.created_at).toLocaleDateString('en-GB', {
+                            day: 'numeric', month: 'short', year: 'numeric',
+                          })
+                          return (
+                            <div key={review.id} style={{
+                              background: 'rgba(255,255,255,0.025)',
+                              border: '0.5px solid rgba(255,255,255,0.07)',
+                              borderRadius: '12px',
+                              padding: '1rem 1.25rem',
+                            }}>
+                              {/* Reviewer name + date row */}
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem', flexWrap: 'wrap', gap: '6px' }}>
+                                <span style={{
+                                  fontFamily: "'Cormorant Garamond', serif",
+                                  fontSize: '16px',
+                                  fontWeight: 400,
+                                  color: '#ece8e1',
+                                  letterSpacing: '0.01em',
+                                }}>
+                                  {reviewerName}
+                                </span>
+                                <span style={{
+                                  fontFamily: "'Jost', sans-serif",
+                                  fontSize: '11px',
+                                  color: 'rgba(255,255,255,0.2)',
+                                  fontWeight: 300,
+                                }}>
+                                  {dateStr}
+                                </span>
+                              </div>
+                              {/* Star rating display */}
+                              <div style={{ display: 'flex', gap: '2px', marginBottom: review.content ? '0.75rem' : '0' }}>
+                                {[1, 2, 3, 4, 5].map(star => (
+                                  <span key={star} style={{
+                                    fontSize: '14px',
+                                    color: star <= review.rating ? '#c5a05a' : 'rgba(197,160,90,0.18)',
+                                    lineHeight: 1,
+                                  }}>
+                                    ★
+                                  </span>
+                                ))}
+                              </div>
+                              {/* Review content */}
+                              {review.content && (
+                                <p style={{
+                                  fontFamily: "'Jost', sans-serif",
+                                  fontSize: '13px',
+                                  color: 'rgba(255,255,255,0.5)',
+                                  fontWeight: 300,
+                                  lineHeight: 1.7,
+                                  margin: 0,
+                                  whiteSpace: 'pre-wrap',
+                                }}>
+                                  {review.content}
+                                </p>
+                              )}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )
+              })()}
+
               {/* Tags / subcategory */}
               {listing.subcategory && (
                 <div style={{
