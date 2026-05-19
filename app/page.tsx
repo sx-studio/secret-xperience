@@ -8,6 +8,19 @@ export default function Home() {
 
 // ── Age Gate ──
 var gate = document.getElementById('gate');
+if (localStorage.getItem('sx_age') === '1') {
+  gate.classList.add('gone');
+} else {
+  document.body.style.overflow = 'hidden';
+}
+document.getElementById('gyes').addEventListener('click', function(){
+  localStorage.setItem('sx_age', '1');
+  gate.classList.add('gone');
+  document.body.style.overflow = '';
+});
+document.getElementById('gno').addEventListener('click', function(){
+  gate.innerHTML = '<div style="position:relative;z-index:2;background:var(--bg1);border:0.5px solid var(--b3);border-radius:var(--rxl);padding:2.5rem 2rem;max-width:360px;width:90%;text-align:center"><div style="font-family:var(--serif);font-size:22px;color:var(--t);margin-bottom:.75rem">Access Denied</div><div style="font-size:13px;color:var(--t2)">You must be 18 or older to access SecretXperience.eu.</div></div>';
+});
 // ── Sidebar (mobile) ──
 var sidebar = document.getElementById('sidebar');
 var sov = document.getElementById('sov');
