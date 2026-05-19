@@ -40,8 +40,21 @@ export default function LoginPage() {
 
     if (mode === 'login') {
       const { error } = await signIn(email, password)
-      if (error) setError(error.message)
-      else window.location.href = '/dashboard'
+      if (error) { setError(error.message) } else {
+        // Providers/venues/creators with no listings → onboard them straight to create
+        try {
+          const supabase = createClient()
+          const { data: { session } } = await supabase.auth.getSession()
+          if (session) {
+            const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single()
+            if (profile && ['provider','venue','creator'].includes(profile.role || '')) {
+              const { count } = await supabase.from('listings').select('id', { count: 'exact', head: true }).eq('profile_id', session.user.id)
+              if ((count ?? 0) === 0) { window.location.href = '/listings/create'; return }
+            }
+          }
+        } catch { /* fall through to dashboard */ }
+        window.location.href = '/dashboard'
+      }
     } else {
       const { error } = await signUp(email, password, fullName, role)
       if (error) setError(error.message)

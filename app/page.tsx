@@ -316,7 +316,7 @@ var dpPanel = document.getElementById('detail-panel');
 var dpSaved = false;
 
 function openDetail(data) {
-  // Store IDs on panel for CTAs (panel id is 'detail-panel')
+  // Store IDs on panel for CTAs
   var panel=document.getElementById('detail-panel');
   if(panel){panel.dataset.listingId=data.id||'';panel.dataset.profileId=data.profile_id||'';}
   // Populate hero
@@ -373,6 +373,10 @@ function closeDetail() {
   dpPanel.classList.remove('open');
   document.body.style.overflow = '';
 }
+
+// Expose to global scope so inline onclick handlers on dynamic cards can call these
+;(window as any).openDetail = openDetail
+;(window as any).closeDetail = closeDetail
 
 document.getElementById('dpClose').addEventListener('click', closeDetail);
 dpOverlay.addEventListener('click', closeDetail);
@@ -982,7 +986,34 @@ renderHow('escorts');
     ;(window as any).__sxCacheListings = (data: any[]) => { allListings = data }
 
     // Initial load
-    fetchListings(activeFilters)
+    fetchListings(activeFilters).then(async () => {
+      // Deep-link: /?listing=UUID → auto-open detail panel for that listing
+      const urlParams = new URLSearchParams(window.location.search)
+      const deepId = urlParams.get('listing')
+      if (deepId) {
+        const { data: l } = await (supabase as any).from('listings').select('*').eq('id', deepId).single()
+        if (l) {
+          const badges: any[] = []
+          if (l.verified) badges.push({cls:'bv',txt:'✓ Verified'})
+          if (l.premium) badges.push({cls:'bp',txt:'Premium'})
+          if (l.trending) badges.push({cls:'bt',txt:'Trending'})
+          const pricing: any[] = l.price_from
+            ? [{dur:'Standard rate',amt:'€'+l.price_from+(l.price_to?'–€'+l.price_to:''),note:l.subcategory||l.category,feat:true}]
+            : [{dur:'Contact for rates',amt:'POA',note:'',feat:true}]
+          openDetail({
+            id:l.id, profile_id:l.profile_id,
+            icon:getCategoryIcon(l.category), badges,
+            cat:(l.category||'')+(l.subcategory?' · '+l.subcategory:''),
+            type:l.subcategory||l.category||'', name:l.title||'',
+            rating:l.rating||'—', city:(l.city||'—')+', '+(l.country||''),
+            s1:String(l.review_count||0), s2:l.rating?l.rating.toFixed(1):'—', s3:'—', s4:'—',
+            desc:l.description||'No description provided.',
+            tags:l.subcategory?[l.subcategory,l.category]:[l.category],
+            pricing
+          })
+        }
+      }
+    })
 
     // ── Nav logo → home ──
     const navLogo = document.querySelector('.nav-logo') as HTMLElement | null
