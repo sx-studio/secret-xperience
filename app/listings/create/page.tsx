@@ -266,6 +266,19 @@ export default function CreateListingPage() {
 
     if (err) { setError(err.message); setLoading(false); return }
     try { localStorage.removeItem('sx_listing_draft') } catch(e) {}
+
+    // Check if provider has Stripe connected
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('stripe_connect_account_id, role')
+      .eq('id', session.user.id)
+      .single()
+
+    if (!profile?.stripe_connect_account_id && ['provider','venue','creator'].includes(profile?.role || '')) {
+      // Store flag to show Connect prompt after redirect
+      localStorage.setItem('sx_show_connect_prompt', '1')
+    }
+
     setSuccess(true)
     setTimeout(() => { window.location.href = '/dashboard' }, 1800)
   }

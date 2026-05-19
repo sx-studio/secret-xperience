@@ -130,6 +130,13 @@ export default function DashboardPage() {
         setTimeout(() => handleConnectStripe(), 500)
         window.history.replaceState({}, '', '/dashboard')
       }
+
+      if (localStorage.getItem('sx_show_connect_prompt') === '1') {
+        localStorage.removeItem('sx_show_connect_prompt')
+        if (!profile?.stripe_connect_account_id) {
+          setNotification('🎉 Listing created! Connect Stripe to start receiving payments from bookings.')
+        }
+      }
     }
     load()
   }, [])

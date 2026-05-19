@@ -12,7 +12,7 @@ export default function AdminPage() {
   const [listings, setListings] = useState<any[]>([])
   const [users, setUsers] = useState<any[]>([])
   const [bookings, setBookings] = useState<any[]>([])
-  const [stats, setStats] = useState({ listings: 0, users: 0, bookings: 0, revenue: 0 })
+  const [stats, setStats] = useState({ listings: 0, users: 0, bookings: 0, revenue: 0, providers: 0, pendingListings: 0 })
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
 
@@ -32,7 +32,9 @@ export default function AdminPage() {
       const ls = lr.data || [], us = ur.data || [], bs = br.data || []
       const revenue = bs.filter((b: any) => b.status === 'confirmed').reduce((s: number, b: any) => s + (b.total_amount || 0), 0)
       setListings(ls); setUsers(us); setBookings(bs)
-      setStats({ listings: ls.length, users: us.length, bookings: bs.length, revenue })
+      const providers = us.filter((u: any) => ['provider','venue','creator'].includes(u.role)).length
+      const pendingListings = ls.filter((l: any) => !l.active).length
+      setStats({ listings: ls.length, users: us.length, bookings: bs.length, revenue, providers, pendingListings })
       setLoading(false)
     }
     init()
@@ -42,6 +44,14 @@ export default function AdminPage() {
     const supabase = createClient()
     await supabase.from('listings').update({ [field]: !current }).eq('id', id)
     setListings(prev => prev.map(l => l.id === id ? { ...l, [field]: !current } : l))
+  }
+
+  async function featureListing(id: string, days: number) {
+    const supabase = createClient()
+    const until = new Date()
+    until.setDate(until.getDate() + days)
+    await supabase.from('listings').update({ featured_until: until.toISOString(), premium: true }).eq('id', id)
+    setListings(prev => prev.map(l => l.id === id ? { ...l, featured_until: until.toISOString(), premium: true } : l))
   }
 
   async function deleteListing(id: string) {
@@ -65,6 +75,11 @@ export default function AdminPage() {
 
   const filteredListings = listings.filter(l => !search || l.title?.toLowerCase().includes(search.toLowerCase()) || l.city?.toLowerCase().includes(search.toLowerCase()))
   const filteredUsers = users.filter(u => !search || u.full_name?.toLowerCase().includes(search.toLowerCase()) || u.username?.toLowerCase().includes(search.toLowerCase()))
+  const filteredBookings = bookings.filter(b => !search ||
+    b.listings?.title?.toLowerCase().includes(search.toLowerCase()) ||
+    b.profiles?.full_name?.toLowerCase().includes(search.toLowerCase()) ||
+    b.status?.toLowerCase().includes(search.toLowerCase())
+  )
 
   if (loading) return (
     <div style={{ minHeight: '100vh', background: '#050505', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -115,19 +130,21 @@ export default function AdminPage() {
           <div>
             <h1 style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 300, fontSize: '24px', color: '#ece8e1', margin: 0 }}>{tab}</h1>
             <div style={{ fontSize: '11px', color: '#4c4a47', marginTop: '2px' }}>
-              {tab === 'Listings' ? `${filteredListings.length} listings` : tab === 'Users' ? `${filteredUsers.length} users` : `${bookings.length} bookings`}
+              {tab === 'Listings' ? `${filteredListings.length} listings` : tab === 'Users' ? `${filteredUsers.length} users` : `${filteredBookings.length} bookings`}
             </div>
           </div>
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder={`Search ${tab.toLowerCase()}…`} style={{ background: '#111', border: '0.5px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '8px 14px', color: '#ece8e1', fontSize: '13px', outline: 'none', width: '240px' }} />
         </div>
 
         <div style={{ flex: 1, overflow: 'auto', padding: '2rem' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '1rem', marginBottom: '2rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
             {[
-              { icon: '▤', label: 'Listings', value: stats.listings, color: '#c5a05a' },
-              { icon: '◎', label: 'Users', value: stats.users, color: '#1dc9a0' },
+              { icon: '▤', label: 'Active Listings', value: stats.listings, color: '#c5a05a' },
+              { icon: '◎', label: 'Total Users', value: stats.users, color: '#1dc9a0' },
               { icon: '◈', label: 'Bookings', value: stats.bookings, color: '#b0a0f8' },
-              { icon: '€', label: 'Revenue', value: `€${stats.revenue.toLocaleString()}`, color: '#c5a05a' },
+              { icon: '€', label: 'Revenue', value: `€${(stats.revenue / 100).toLocaleString()}`, color: '#c5a05a' },
+              { icon: '◉', label: 'Providers', value: stats.providers, color: '#f5a826' },
+              { icon: '⚑', label: 'Hidden', value: stats.pendingListings, color: '#b84d72' },
             ].map(stat => (
               <div key={stat.label} style={{ background: '#0a0a0a', border: '0.5px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '1.25rem 1.5rem', position: 'relative', overflow: 'hidden' }}>
                 <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: `linear-gradient(90deg, transparent, ${stat.color}40, transparent)` }} />
@@ -170,6 +187,7 @@ export default function AdminPage() {
                           <button className="action-btn" onClick={() => toggleListing(l.id, 'verified', l.verified)} style={{ padding: '4px 10px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: 600, background: l.verified ? 'rgba(255,255,255,0.06)' : 'rgba(29,201,160,0.12)', color: l.verified ? '#8c8880' : '#1dc9a0' }}>{l.verified ? 'Unverify' : 'Verify'}</button>
                           <button className="action-btn" onClick={() => toggleListing(l.id, 'premium', l.premium)} style={{ padding: '4px 10px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: 600, background: l.premium ? 'rgba(255,255,255,0.06)' : 'rgba(197,160,90,0.12)', color: l.premium ? '#8c8880' : '#c5a05a' }}>{l.premium ? 'Unpremium' : 'Premium'}</button>
                           <button className="action-btn" onClick={() => toggleListing(l.id, 'trending', l.trending)} style={{ padding: '4px 10px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: 600, background: l.trending ? 'rgba(255,255,255,0.06)' : 'rgba(176,160,248,0.12)', color: l.trending ? '#8c8880' : '#b0a0f8' }}>{l.trending ? 'Untrend' : 'Trending'}</button>
+                          <button className="action-btn" onClick={() => featureListing(l.id, 30)} style={{ padding: '4px 10px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: 600, background: 'rgba(197,160,90,0.12)', color: '#c5a05a' }}>Feature 30d</button>
                           <button className="action-btn" onClick={() => toggleListing(l.id, 'active', l.active)} style={{ padding: '4px 10px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: 600, background: 'rgba(184,77,114,0.1)', color: '#b84d72' }}>{l.active ? 'Hide' : 'Show'}</button>
                           <button className="action-btn" onClick={() => deleteListing(l.id)} style={{ padding: '4px 10px', borderRadius: '6px', border: '0.5px solid rgba(184,77,114,0.3)', cursor: 'pointer', fontSize: '11px', fontWeight: 600, background: 'transparent', color: '#b84d72' }}>Delete</button>
                         </div>
@@ -235,8 +253,8 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {bookings.length === 0 && <tr><td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: '#4c4a47' }}>No bookings yet</td></tr>}
-                  {bookings.map(b => (
+                  {filteredBookings.length === 0 && <tr><td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: '#4c4a47' }}>No bookings yet</td></tr>}
+                  {filteredBookings.map(b => (
                     <tr key={b.id} style={{ borderBottom: '0.5px solid rgba(255,255,255,0.04)' }}>
                       <td style={{ padding: '14px 16px', fontWeight: 500 }}>{b.listings?.title || '—'}</td>
                       <td style={{ padding: '14px 16px', color: '#8c8880', fontSize: '12px' }}>{b.profiles?.full_name || b.profiles?.username || '—'}</td>
@@ -244,7 +262,16 @@ export default function AdminPage() {
                       <td style={{ padding: '14px 16px', color: '#8c8880', fontSize: '12px' }}>{b.duration_hours}h</td>
                       <td style={{ padding: '14px 16px', color: '#c5a05a', fontWeight: 600 }}>{b.total_amount ? `€${b.total_amount}` : '—'}</td>
                       <td style={{ padding: '14px 16px' }}>
-                        <span style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 600, background: b.status === 'confirmed' ? 'rgba(29,201,160,0.12)' : b.status === 'cancelled' ? 'rgba(184,77,114,0.12)' : b.status === 'completed' ? 'rgba(197,160,90,0.12)' : 'rgba(255,255,255,0.06)', color: b.status === 'confirmed' ? '#1dc9a0' : b.status === 'cancelled' ? '#b84d72' : b.status === 'completed' ? '#c5a05a' : '#8c8880' }}>{b.status}</span>
+                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                          <span style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: 600, background: b.status === 'confirmed' ? 'rgba(29,201,160,0.12)' : b.status === 'cancelled' ? 'rgba(184,77,114,0.12)' : b.status === 'completed' ? 'rgba(197,160,90,0.12)' : 'rgba(255,255,255,0.06)', color: b.status === 'confirmed' ? '#1dc9a0' : b.status === 'cancelled' ? '#b84d72' : b.status === 'completed' ? '#c5a05a' : '#8c8880' }}>{b.status}</span>
+                          {b.status === 'pending' && (
+                            <button className="action-btn" onClick={async () => {
+                              const supabase = createClient()
+                              await supabase.from('bookings').update({ status: 'cancelled' }).eq('id', b.id)
+                              setBookings(prev => prev.map(x => x.id === b.id ? { ...x, status: 'cancelled' } : x))
+                            }} style={{ padding: '4px 10px', borderRadius: '6px', border: '0.5px solid rgba(184,77,114,0.3)', cursor: 'pointer', fontSize: '11px', fontWeight: 600, background: 'transparent', color: '#b84d72' }}>Cancel</button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}

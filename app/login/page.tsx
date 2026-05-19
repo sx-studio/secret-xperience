@@ -42,6 +42,11 @@ export default function LoginPage() {
       const { error } = await signIn(email, password)
       if (error) { setError(error.message) } else {
         // Providers/venues/creators with no listings → onboard them straight to create
+        const nextUrl = new URLSearchParams(window.location.search).get('next')
+        if (nextUrl && nextUrl.startsWith('/')) {
+          window.location.href = nextUrl
+          return
+        }
         try {
           const supabase = createClient()
           const { data: { session } } = await supabase.auth.getSession()

@@ -34,6 +34,7 @@ interface Listing {
   review_count: number | null
   images: string[] | null
   meet_type: string | null
+  featured_until: string | null
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -214,9 +215,15 @@ function PremiumBadge() {
   )
 }
 
+function isFeatured(listing: Listing): boolean {
+  if (!listing.featured_until) return false
+  return new Date(listing.featured_until) > new Date()
+}
+
 function ListingCard({ listing }: { listing: Listing }) {
   const [hovered, setHovered] = useState(false)
   const image = listing.images?.[0] ?? null
+  const featured = isFeatured(listing)
 
   return (
     <div
@@ -288,6 +295,28 @@ function ListingCard({ listing }: { listing: Listing }) {
             backdropFilter: 'blur(6px)',
           }}>
             {listing.category}
+          </span>
+        )}
+
+        {/* Featured badge */}
+        {featured && (
+          <span style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            fontSize: '11px',
+            fontFamily: SANS,
+            fontWeight: 600,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            color: '#050505',
+            background: `linear-gradient(135deg, ${GOLD} 0%, #e8c97a 60%, #a07a3a 100%)`,
+            borderRadius: '20px',
+            padding: '3px 10px',
+            backdropFilter: 'blur(6px)',
+            boxShadow: '0 2px 8px rgba(197,160,90,0.4)',
+          }}>
+            ✦ Featured
           </span>
         )}
       </div>
@@ -411,7 +440,7 @@ export default function ProfilePage() {
           .single(),
         supabase
           .from('listings')
-          .select('id, title, category, subcategory, price_from, price_to, city, rating, review_count, images, meet_type')
+          .select('id, title, category, subcategory, price_from, price_to, city, rating, review_count, images, meet_type, featured_until')
           .eq('profile_id', id)
           .eq('active', true),
       ])
@@ -443,10 +472,15 @@ export default function ProfilePage() {
   }
 
   function handleSendMessage() {
+    const firstName = listings[0]?.title
+    const displayName = profile?.full_name || profile?.username || ''
+    const titleParam = firstName
+      ? `&listing_title=${encodeURIComponent(firstName)}`
+      : `&listing_title=${encodeURIComponent(displayName)}`
     if (session) {
-      window.location.href = `/messages?provider_id=${id}`
+      window.location.href = `/messages?provider_id=${id}${titleParam}`
     } else {
-      window.location.href = `/login?redirect=/messages?provider_id=${id}`
+      window.location.href = `/login?redirect=/messages?provider_id=${id}${titleParam}`
     }
   }
 
@@ -675,6 +709,97 @@ export default function ProfilePage() {
               }}>
                 {profile.bio}
               </p>
+            </div>
+          )}
+
+          {/* Stats row */}
+          {(() => {
+            const memberSince = profile.created_at
+              ? new Date(profile.created_at).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
+              : null
+            const activeCount = listings.length
+            const ratingsWithValues = listings.filter(l => l.rating != null)
+            const avgRating = ratingsWithValues.length > 0
+              ? ratingsWithValues.reduce((sum, l) => sum + (l.rating ?? 0), 0) / ratingsWithValues.length
+              : null
+            const stats: { label: string; value: string }[] = []
+            stats.push({ label: 'Active Listings', value: String(activeCount) })
+            if (memberSince) stats.push({ label: 'Member Since', value: memberSince })
+            if (avgRating != null) stats.push({ label: 'Avg Rating', value: `⭐ ${avgRating.toFixed(1)}` })
+            return (
+              <div style={{
+                display: 'flex',
+                gap: '0',
+                marginTop: '28px',
+                paddingTop: '24px',
+                borderTop: `0.5px solid ${BORDER_SUBTLE}`,
+                flexWrap: 'wrap',
+              }}>
+                {stats.map((s, i) => (
+                  <div key={s.label} style={{
+                    flex: '1 1 120px',
+                    padding: '0 20px',
+                    borderLeft: i > 0 ? `0.5px solid ${BORDER_SUBTLE}` : 'none',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '4px',
+                  }}>
+                    <span style={{
+                      fontSize: '11px',
+                      fontFamily: SANS,
+                      color: TEXT_MUTED,
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                    }}>{s.label}</span>
+                    <span style={{
+                      fontSize: '18px',
+                      fontFamily: SERIF,
+                      color: GOLD,
+                      fontWeight: 600,
+                    }}>{s.value}</span>
+                  </div>
+                ))}
+              </div>
+            )
+          })()}
+
+          {/* Verified Provider prominent section */}
+          {profile.verified && (
+            <div style={{
+              marginTop: '20px',
+              padding: '14px 18px',
+              background: 'rgba(197,160,90,0.06)',
+              border: `0.5px solid rgba(197,160,90,0.3)`,
+              borderRadius: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+            }}>
+              <span style={{
+                fontSize: '22px',
+                lineHeight: 1,
+                color: GOLD,
+                flexShrink: 0,
+              }}>✓</span>
+              <div>
+                <div style={{
+                  fontFamily: SANS,
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  color: GOLD,
+                  marginBottom: '2px',
+                }}>Identity Verified</div>
+                <div style={{
+                  fontFamily: SANS,
+                  fontSize: '12px',
+                  color: TEXT_MUTED,
+                  lineHeight: 1.5,
+                }}>
+                  This provider has completed identity verification with Secret Xperience.
+                </div>
+              </div>
             </div>
           )}
 

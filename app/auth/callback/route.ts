@@ -30,6 +30,15 @@ export async function GET(request: Request) {
 
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
+      // Sync email to profiles
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user?.email) {
+        await supabase
+          .from('profiles')
+          .update({ email: user.email })
+          .eq('id', user.id)
+          .is('email', null)  // only update if not already set
+      }
       return response
     }
   }

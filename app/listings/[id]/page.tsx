@@ -189,15 +189,22 @@ export default function ListingDetailPage() {
       .order('created_at', { ascending: false })
     const revList = (updatedReviews as Review[]) || []
     setReviews(revList)
-    // Update listing rating + review_count from aggregated client values
-    const newCount = revList.length
-    const newRating = newCount > 0
-      ? revList.reduce((sum, r) => sum + r.rating, 0) / newCount
-      : 0
-    await supabase
-      .from('listings')
-      .update({ review_count: newCount, rating: newRating })
-      .eq('id', id)
+    // Recalculate and update listing stats
+    const { data: allReviews } = await supabase
+      .from('reviews')
+      .select('rating')
+      .eq('listing_id', id)
+    if (allReviews && allReviews.length > 0) {
+      const avg = allReviews.reduce((s, r) => s + r.rating, 0) / allReviews.length
+      await supabase
+        .from('listings')
+        .update({
+          rating: Math.round(avg * 10) / 10,
+          review_count: allReviews.length,
+        })
+        .eq('id', id)
+      setListing(prev => prev ? { ...prev, rating: Math.round(avg * 10) / 10, review_count: allReviews.length } : prev)
+    }
     // Reset form
     setSelectedRating(0)
     setReviewText('')
@@ -207,13 +214,13 @@ export default function ListingDetailPage() {
 
   /* ── Navigate to message/book (auth guard) ── */
   function goToMessage() {
-    if (!session) { window.location.href = '/login'; return }
-    window.location.href = `/messages?provider_id=${listing!.profile_id}`
+    if (!session) { window.location.href = `/login?next=/listings/${id}`; return }
+    window.location.href = `/messages?provider_id=${listing!.profile_id}&listing_id=${listing!.id}&listing_title=${encodeURIComponent(listing!.title)}`
   }
 
   function goToBook() {
-    if (!session) { window.location.href = '/login'; return }
-    window.location.href = `/messages?provider_id=${listing!.profile_id}&listing_id=${listing!.id}`
+    // Deep-link to homepage with this listing open so the booking modal can be used
+    window.location.href = `/?listing=${listing!.id}`
   }
 
   /* ── Shared styles ── */

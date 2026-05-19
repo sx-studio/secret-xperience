@@ -344,7 +344,7 @@ async function loadSimilarListings(excludeId, category) {
         s1:String(l.review_count||0),s2:l.rating?Number(l.rating).toFixed(1):'—',s3:'—',s4:'—',
         desc:l.description||'',tags:[l.category],
         pricing:l.price_from?[{dur:'Rate',amt:'€'+l.price_from,note:l.category,feat:true}]:[{dur:'Rate',amt:'POA',note:'',feat:true}],
-        price_from:l.price_from||0,featured_until:l.featured_until||null
+        price_from:l.price_from||0,featured_until:l.featured_until||null,images:l.images||[]
       }))
       return '<div class="dp-sim-card" onclick="openDetail(JSON.parse(decodeURIComponent(\''+dStr+'\')))" style="cursor:pointer">' +
         '<div class="dp-sim-img"><i class="ti '+icon+'" aria-hidden="true"></i><div class="card-badges" style="position:absolute;top:5px;left:5px">'+badges.join('')+'</div></div>' +
@@ -364,6 +364,20 @@ function openDetail(data) {
   if(panel){panel.dataset.listingId=data.id||'';panel.dataset.profileId=data.profile_id||'';panel.dataset.priceFrom=String(data.price_from||0);}
   // Populate hero
   document.getElementById('dpHeroIcon').className = 'ti ' + data.icon;
+  var heroEl = document.getElementById('dpHero');
+  if (heroEl) {
+    if (data.images && data.images.length > 0) {
+      heroEl.style.backgroundImage = "url('" + data.images[0] + "')";
+      heroEl.style.backgroundSize = 'cover';
+      heroEl.style.backgroundPosition = 'center top';
+      heroEl.style.backgroundColor = '#111';
+      document.getElementById('dpHeroIcon').style.display = 'none';
+    } else {
+      heroEl.style.backgroundImage = '';
+      heroEl.style.backgroundColor = '';
+      document.getElementById('dpHeroIcon').style.display = '';
+    }
+  }
   var badgesEl = document.getElementById('dpHeroBadges');
   badgesEl.innerHTML = '';
   (data.badges||[]).forEach(function(b){
@@ -479,8 +493,8 @@ function closeModal(id){
 }
 
 // ══ AUTH MODAL ══
-document.getElementById('loginBtn')?.addEventListener('click',function(){window.location.href='/login'});
-document.getElementById('signupBtn')?.addEventListener('click',function(){window.location.href='/login'});
+document.getElementById('loginBtn')?.addEventListener('click',function(){window.location.href='/login?next=/'});
+document.getElementById('signupBtn')?.addEventListener('click',function(){window.location.href='/login?next=/'});
 document.getElementById('authClose').addEventListener('click',function(){closeModal('authModal')});
 document.getElementById('authModal').addEventListener('click',function(e){if(e.target===this)closeModal('authModal')});
 
@@ -682,7 +696,7 @@ document.getElementById('bookSubmit').addEventListener('click',async function(){
       var res=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({listing_id:currentListingId,date:selDate,time:selTime,duration:selDur,price:selPrice,notes:notes,meet_type:meetType,location:location})});
       var json=await res.json();
       if(json.url){window.location.href=json.url;}
-      else if(res.status===401){showToast('Please sign in to make a booking');setTimeout(function(){window.location.href='/login'},1500);btn.textContent='Confirm Booking';btn.disabled=false;}
+      else if(res.status===401){showToast('Please sign in to make a booking');setTimeout(function(){window.location.href='/login?next=/'},1500);btn.textContent='Confirm Booking';btn.disabled=false;}
       else{showToast(json.error||'Checkout failed');btn.textContent='Confirm Booking';btn.disabled=false;}
     }catch(err){showToast('Network error — please try again');btn.textContent='Confirm Booking';btn.disabled=false;}
   } else {
@@ -819,8 +833,8 @@ document.querySelectorAll('.msg-quick').forEach(function(qb){
 });
 
 // Nav login button -> open auth
-document.getElementById('loginBtn')?.addEventListener('click',function(){window.location.href='/login'});
-document.getElementById('signupBtn')?.addEventListener('click',function(){window.location.href='/login'});
+document.getElementById('loginBtn')?.addEventListener('click',function(){window.location.href='/login?next=/'});
+document.getElementById('signupBtn')?.addEventListener('click',function(){window.location.href='/login?next=/'});
 
 // ── Backend modal (wire to nav or keyboard shortcut) ──
 document.getElementById('backendClose').addEventListener('click',function(){closeModal('backendModal')});
@@ -878,6 +892,19 @@ renderHow('escorts');
                 signupBtn.appendChild(dot)
               }
             }
+          }
+        }
+        // Load unread message count
+        const { count: unreadCount } = await (supabase as any)
+          .from('messages')
+          .select('id', { count: 'exact', head: true })
+          .eq('receiver_id', session.user.id)
+          .eq('read', false)
+        if (unreadCount && unreadCount > 0) {
+          const badge = document.getElementById('navMsgBadge')
+          if (badge) {
+            badge.textContent = unreadCount > 9 ? '9+' : String(unreadCount)
+            badge.style.display = 'inline'
           }
         }
       } else {
@@ -978,10 +1005,11 @@ renderHow('escorts');
             tags:l.subcategory?[l.subcategory,l.category]:[l.category],
             pricing,
             price_from: l.price_from||0,
-            featured_until: l.featured_until||null
+            featured_until: l.featured_until||null,
+            images: l.images||[]
           }))}'))">
-          <div class="card-img">
-            <i class="ti ${getCategoryIcon(l.category)}" aria-hidden="true"></i>
+          <div class="card-img" ${l.images && l.images.length > 0 ? `style="background-image:url('${l.images[0]}');background-size:cover;background-position:center top;background-color:#111"` : ''}>
+            ${l.images && l.images.length > 0 ? '' : `<i class="ti ${getCategoryIcon(l.category)}" aria-hidden="true"></i>`}
             <div class="card-badges">
               ${isFeatured ? '<span class="badge bf">✦ Featured</span>' : ''}
               ${l.verified ? '<span class="badge bv">✓ Verified</span>' : ''}
@@ -1077,6 +1105,26 @@ renderHow('escorts');
       } catch(e) {}
     }
     loadRecentlyViewed()
+
+    const loadStats = async () => {
+      try {
+        const [
+          { count: listingCount },
+          { count: userCount },
+          { count: providerCount },
+        ] = await Promise.all([
+          (supabase as any).from('listings').select('id', { count: 'exact', head: true }).eq('active', true),
+          (supabase as any).from('profiles').select('id', { count: 'exact', head: true }),
+          (supabase as any).from('profiles').select('id', { count: 'exact', head: true }).in('role', ['provider','venue','creator']),
+        ])
+        const el = (id: string) => document.getElementById(id)
+        if (el('statListings')) el('statListings')!.textContent = (listingCount || 0).toLocaleString()
+        if (el('statProviders')) el('statProviders')!.textContent = (providerCount || 0).toLocaleString()
+        if (el('statUsers')) el('statUsers')!.textContent = (userCount || 0).toLocaleString()
+        if (el('statRevenue')) el('statRevenue')!.textContent = '—'
+      } catch(e) {}
+    }
+    loadStats()
 
     // Wire category bar to real data
     document.querySelectorAll('.cat').forEach(function(cat) {
@@ -1318,10 +1366,10 @@ renderHow('escorts');
           <div class="live-dot"><span></span> Live · Brussels</div>
         </div>
         <div class="admin-stats">
-          <div class="astat"><div class="astat-v">2,841</div><div class="astat-l">Active listings</div></div>
-          <div class="astat"><div class="astat-v">418</div><div class="astat-l">Pending review</div></div>
-          <div class="astat"><div class="astat-v">12,440</div><div class="astat-l">Registered users</div></div>
-          <div class="astat"><div class="astat-v">€38.2k</div><div class="astat-l">Revenue this month</div></div>
+          <div class="astat"><div class="astat-v" id="statListings">—</div><div class="astat-l">Active listings</div></div>
+          <div class="astat"><div class="astat-v" id="statProviders">—</div><div class="astat-l">Providers</div></div>
+          <div class="astat"><div class="astat-v" id="statUsers">—</div><div class="astat-l">Registered users</div></div>
+          <div class="astat"><div class="astat-v" id="statRevenue">—</div><div class="astat-l">Revenue this month</div></div>
         </div>
       </div>
 
@@ -2172,7 +2220,7 @@ renderHow('escorts');
       <button class="bni active" aria-label="Home"><i class="ti ti-home"></i><span>Home</span></button>
       <button class="bni" aria-label="Search"><i class="ti ti-search"></i><span>Search</span></button>
       <button class="bni" aria-label="Saves"><i class="ti ti-heart"></i><span>Saves</span></button>
-      <button class="bni" aria-label="Messages"><i class="ti ti-message-circle"></i><span>Messages</span></button>
+      <button class="bni" id="navMsgBtn" aria-label="Messages"><i class="ti ti-message-circle"></i><span>Messages</span><span id="navMsgBadge" style="display:none;background:#c5a05a;color:#080808;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;margin-left:4px;vertical-align:middle"></span></button>
       <button class="bni" aria-label="Profile"><i class="ti ti-user-circle"></i><span>Profile</span></button>
     </div>
   </nav>
