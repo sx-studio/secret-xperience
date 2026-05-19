@@ -838,24 +838,38 @@ renderHow('escorts');
         if (countEl) countEl.textContent = '0 listings found'
         return
       }
-      container.innerHTML = listings.map((l: any) => `
-        <div class="card" role="listitem" tabindex="0"
+      container.innerHTML = listings.map((l: any) => {
+        const badges: any[] = []
+        if (l.verified) badges.push({cls:'bv',txt:'✓ Verified'})
+        if (l.premium) badges.push({cls:'bp',txt:'Premium'})
+        if (l.trending) badges.push({cls:'bt',txt:'Trending'})
+        const pricing: any[] = []
+        if (l.price_from) pricing.push({dur:'Standard rate',amt:'€'+l.price_from+(l.price_to?'–€'+l.price_to:''),note:l.subcategory||l.category,feat:true})
+        else pricing.push({dur:'Contact for rates',amt:'POA',note:'',feat:true})
+        const d = {
+          id: l.id||'', profile_id: l.profile_id||'',
+          icon: '${getCategoryIcon(l.category)}',
+          badges, cat: (l.category||'')+(l.subcategory?' · '+l.subcategory:''),
+          type: l.subcategory||l.category||'', name: l.title||'',
+          rating: l.rating||'—', city: (l.city||'—')+', '+(l.country||''),
+          s1: l.review_count||'0', s2: l.rating?l.rating.toFixed(1):'—', s3:'—', s4:'—',
+          desc: l.description||'', tags: l.subcategory?[l.subcategory,l.category]:[l.category],
+          pricing
+        }
+        const dStr = JSON.stringify(d).replace(/\\/g,'\\\\').replace(/`/g,'\\`')
+        return `<div class="card" role="listitem" tabindex="0"
           data-lid="${l.id||''}" data-pid="${l.profile_id||''}"
-          data-title="${(l.title||'').replace(/"/g,'&quot;')}"
-          data-cat="${(l.category||'').replace(/"/g,'&quot;')}"
-          data-city="${(l.city||'').replace(/"/g,'&quot;')}"
-          data-price="${l.price_from||0}"
-          onclick="(function(el){
-            var d={id:el.dataset.lid,profile_id:el.dataset.pid,
-              icon:'ti-user',badges:[],
-              cat:el.dataset.cat,type:el.dataset.cat,
-              name:el.dataset.title,rating:'—',city:el.dataset.city,
-              s1:'—',s2:'—',s3:'—',s4:'—',
-              desc:'',tags:[],
-              pricing:[{dur:'Standard',amt:el.dataset.price?'€'+el.dataset.price:'Contact',note:'',feat:true}]
-            };
-            openDetail(d);
-          })(this)">
+          onclick="openDetail(JSON.parse(decodeURIComponent('${encodeURIComponent(JSON.stringify({
+            id:l.id||'',profile_id:l.profile_id||'',
+            icon:getCategoryIcon(l.category),badges,
+            cat:(l.category||'')+(l.subcategory?' · '+l.subcategory:''),
+            type:l.subcategory||l.category||'',name:l.title||'',
+            rating:l.rating||'—',city:(l.city||'—')+', '+(l.country||''),
+            s1:String(l.review_count||0),s2:l.rating?l.rating.toFixed(1):'—',s3:'—',s4:'—',
+            desc:l.description||'No description provided.',
+            tags:l.subcategory?[l.subcategory,l.category]:[l.category],
+            pricing
+          }))}'))">
           <div class="card-img">
             <i class="ti ${getCategoryIcon(l.category)}" aria-hidden="true"></i>
             <div class="card-badges">
@@ -873,8 +887,8 @@ renderHow('escorts');
             </div>
             <div class="card-loc"><i class="ti ti-map-pin" aria-hidden="true"></i> ${l.city || '—'}, ${l.country || ''}</div>
           </div>
-        </div>
-      `).join('')
+        </div>`
+      }).join('')
       if (countEl) countEl.textContent = listings.length + ' listings found'
     }
 

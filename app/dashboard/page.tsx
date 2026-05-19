@@ -4,12 +4,81 @@ import { useEffect, useState } from 'react'
 import { signOut } from '../lib/auth'
 import { createClient } from '../lib/supabase'
 
+function getGreeting(): string {
+  const h = new Date().getHours()
+  if (h < 12) return 'Good morning'
+  if (h < 18) return 'Good afternoon'
+  return 'Good evening'
+}
+
+function getInitials(name: string): string {
+  if (!name) return '?'
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(w => w[0].toUpperCase())
+    .join('')
+}
+
+function StatusDot({ active }: { active: boolean }) {
+  return (
+    <span style={{
+      display: 'inline-block',
+      width: '7px',
+      height: '7px',
+      borderRadius: '50%',
+      background: active ? '#3ecf8e' : 'rgba(255,255,255,0.2)',
+      boxShadow: active ? '0 0 6px rgba(62,207,142,0.5)' : 'none',
+      flexShrink: 0,
+    }} />
+  )
+}
+
+function BookingBadge({ status }: { status: string }) {
+  const map: Record<string, { bg: string; color: string; border: string; label: string }> = {
+    pending:   { bg: 'rgba(245,168,38,0.1)',  color: '#f5a826', border: 'rgba(245,168,38,0.3)',  label: 'Pending'   },
+    confirmed: { bg: 'rgba(62,207,142,0.1)',  color: '#3ecf8e', border: 'rgba(62,207,142,0.3)',  label: 'Confirmed' },
+    cancelled: { bg: 'rgba(212,95,114,0.1)',  color: '#d45f72', border: 'rgba(212,95,114,0.3)',  label: 'Cancelled' },
+  }
+  const s = map[status?.toLowerCase()] ?? map['pending']
+  return (
+    <span style={{
+      fontSize: '11px',
+      fontWeight: 500,
+      letterSpacing: '0.06em',
+      textTransform: 'uppercase',
+      padding: '3px 10px',
+      borderRadius: '20px',
+      background: s.bg,
+      color: s.color,
+      border: `0.5px solid ${s.border}`,
+      fontFamily: "'Jost', sans-serif",
+    }}>
+      {s.label}
+    </span>
+  )
+}
+
+function TrendIcon({ up }: { up?: boolean }) {
+  if (up === undefined) return null
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ opacity: 0.6 }}>
+      {up ? (
+        <path d="M2 9l3.5-3.5L8 8l3.5-3.5" stroke="#3ecf8e" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+      ) : (
+        <path d="M2 3l3.5 3.5L8 4l3.5 3.5" stroke="rgba(255,255,255,0.3)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+      )}
+    </svg>
+  )
+}
+
 export default function DashboardPage() {
-  const [user, setUser] = useState<any>(null)
-  const [profile, setProfile] = useState<any>(null)
+  const [user, setUser]         = useState<any>(null)
+  const [profile, setProfile]   = useState<any>(null)
   const [listings, setListings] = useState<any[]>([])
   const [bookings, setBookings] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading]   = useState(true)
 
   useEffect(() => {
     async function load() {
@@ -42,121 +111,700 @@ export default function DashboardPage() {
     window.location.href = '/login'
   }
 
+  const displayName: string = profile?.full_name || user?.email?.split('@')[0] || 'there'
+  const initials = getInitials(profile?.full_name || user?.email || '')
+
   if (loading) return (
-    <div style={{ minHeight: '100vh', background: '#080808', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <p style={{ color: '#c5a05a', fontFamily: 'sans-serif' }}>Loading…</p>
-    </div>
+    <>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap');`}</style>
+      <div style={{
+        minHeight: '100vh',
+        background: '#050505',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'column',
+        gap: '16px',
+      }}>
+        <div style={{
+          width: '36px',
+          height: '36px',
+          borderRadius: '50%',
+          border: '0.5px solid rgba(197,160,90,0.3)',
+          borderTopColor: '#c5a05a',
+          animation: 'spin 0.8s linear infinite',
+        }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        <span style={{
+          color: 'rgba(255,255,255,0.2)',
+          fontSize: '12px',
+          fontFamily: "'Jost', sans-serif",
+          letterSpacing: '0.1em',
+          textTransform: 'uppercase',
+        }}>
+          Loading
+        </span>
+      </div>
+    </>
   )
 
+  const recentBookings = bookings.slice(0, 5)
+  const activeListings = listings.filter(l => l.active).length
+
   return (
-    <div style={{ minHeight: '100vh', background: '#080808', color: '#ece8e1', fontFamily: 'sans-serif' }}>
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Jost:wght@300;400;500;600&display=swap');
 
-      {/* Nav */}
-      <nav style={{
-        background: '#101010', borderBottom: '0.5px solid rgba(255,255,255,0.07)',
-        padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-      }}>
-        <span
-          onClick={() => window.location.href = '/'}
-          style={{ color: '#c5a05a', fontFamily: 'Georgia, serif', fontSize: '18px', cursor: 'pointer', letterSpacing: '.04em' }}
-        >
-          Secret<span style={{ fontStyle: 'italic', fontWeight: 300 }}>Xperience</span>
-        </span>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button
-            onClick={() => window.location.href = '/listings/create'}
-            style={{ background: 'linear-gradient(135deg,#c5a05a,#9a7a3a)', border: 'none', borderRadius: '8px', color: '#080808', padding: '0.5rem 1rem', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}
-          >
-            + Create listing
-          </button>
-          <button
-            onClick={handleSignOut}
-            style={{ background: 'transparent', border: '0.5px solid rgba(255,255,255,0.12)', borderRadius: '8px', color: '#8c8880', padding: '0.5rem 1rem', cursor: 'pointer', fontSize: '13px' }}
-          >
-            Sign out
-          </button>
-        </div>
-      </nav>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #080808; }
 
-      <div style={{ maxWidth: '900px', margin: '3rem auto', padding: '0 1rem' }}>
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(10px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
 
-        {/* Welcome */}
-        <h2 style={{ fontFamily: 'Georgia, serif', fontWeight: 300, color: '#c5a05a', marginBottom: '0.25rem', fontSize: '28px' }}>
-          Welcome, {profile?.full_name || user?.email}
-        </h2>
-        <p style={{ color: '#8c8880', marginBottom: '2rem', fontSize: '13px' }}>
-          Role: <span style={{ color: '#ece8e1' }}>{profile?.role || 'user'}</span>
-          {profile?.verified && <span style={{ marginLeft: '10px', color: '#26d4a0', fontSize: '12px' }}>✓ Verified</span>}
-        </p>
+        .db-nav-btn-ghost {
+          background: transparent;
+          border: 0.5px solid rgba(255,255,255,0.1);
+          border-radius: 8px;
+          color: rgba(255,255,255,0.45);
+          padding: 8px 16px;
+          cursor: pointer;
+          font-family: 'Jost', sans-serif;
+          font-size: 13px;
+          font-weight: 400;
+          letter-spacing: 0.04em;
+          transition: border-color 0.2s, color 0.2s, background 0.2s;
+        }
+        .db-nav-btn-ghost:hover {
+          border-color: rgba(255,255,255,0.2);
+          color: rgba(255,255,255,0.7);
+          background: rgba(255,255,255,0.03);
+        }
 
-        {/* Stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
-          {[
-            { label: 'Listings', value: listings.length },
-            { label: 'Bookings', value: bookings.length },
-            { label: 'Messages', value: 0 },
-          ].map(stat => (
-            <div key={stat.label} style={{
-              background: '#101010', border: '0.5px solid rgba(255,255,255,0.07)',
-              borderRadius: '13px', padding: '1.5rem', textAlign: 'center'
+        .db-nav-btn-gold {
+          background: linear-gradient(135deg, #c5a05a 0%, #a0803d 100%);
+          border: none;
+          border-radius: 8px;
+          color: #080808;
+          padding: 8px 18px;
+          cursor: pointer;
+          font-family: 'Jost', sans-serif;
+          font-size: 13px;
+          font-weight: 600;
+          letter-spacing: 0.05em;
+          transition: opacity 0.2s, transform 0.15s;
+          position: relative;
+          overflow: hidden;
+        }
+        .db-nav-btn-gold::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(135deg, rgba(255,255,255,0.14) 0%, transparent 60%);
+          pointer-events: none;
+        }
+        .db-nav-btn-gold:hover { opacity: 0.88; transform: translateY(-1px); }
+
+        .db-stat-card {
+          background: linear-gradient(145deg, #111111 0%, #0e0e0e 100%);
+          border: 0.5px solid rgba(255,255,255,0.08);
+          border-radius: 14px;
+          padding: 1.5rem 1.25rem;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          transition: border-color 0.2s, transform 0.2s;
+        }
+        .db-stat-card:hover {
+          border-color: rgba(197,160,90,0.15);
+          transform: translateY(-2px);
+        }
+
+        .db-card {
+          background: linear-gradient(145deg, #111111 0%, #0e0e0e 100%);
+          border: 0.5px solid rgba(255,255,255,0.08);
+          border-radius: 14px;
+          padding: 1.625rem;
+        }
+
+        .db-listing-item {
+          background: rgba(255,255,255,0.02);
+          border: 0.5px solid rgba(255,255,255,0.07);
+          border-radius: 10px;
+          padding: 1rem 1.125rem;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 12px;
+          transition: border-color 0.2s, background 0.2s;
+        }
+        .db-listing-item:hover {
+          border-color: rgba(255,255,255,0.12);
+          background: rgba(255,255,255,0.03);
+        }
+
+        .db-edit-btn {
+          background: transparent;
+          border: 0.5px solid rgba(255,255,255,0.1);
+          border-radius: 6px;
+          color: rgba(255,255,255,0.35);
+          padding: 5px 12px;
+          cursor: pointer;
+          font-family: 'Jost', sans-serif;
+          font-size: 11px;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          transition: border-color 0.2s, color 0.2s;
+          white-space: nowrap;
+        }
+        .db-edit-btn:hover {
+          border-color: rgba(197,160,90,0.35);
+          color: #c5a05a;
+        }
+
+        .db-category-pill {
+          display: inline-flex;
+          align-items: center;
+          padding: 2px 8px;
+          border-radius: 20px;
+          background: rgba(197,160,90,0.07);
+          border: 0.5px solid rgba(197,160,90,0.2);
+          color: rgba(197,160,90,0.7);
+          font-size: 10px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          font-weight: 500;
+          font-family: 'Jost', sans-serif;
+        }
+
+        .db-quick-btn-gold {
+          background: linear-gradient(135deg, #c5a05a 0%, #a0803d 100%);
+          border: none;
+          border-radius: 9px;
+          color: #080808;
+          padding: 10px 20px;
+          cursor: pointer;
+          font-family: 'Jost', sans-serif;
+          font-size: 13px;
+          font-weight: 600;
+          letter-spacing: 0.04em;
+          transition: opacity 0.2s, transform 0.15s;
+          position: relative;
+          overflow: hidden;
+        }
+        .db-quick-btn-gold::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
+          pointer-events: none;
+        }
+        .db-quick-btn-gold:hover { opacity: 0.88; transform: translateY(-1px); }
+
+        .db-quick-btn-dark {
+          background: rgba(255,255,255,0.03);
+          border: 0.5px solid rgba(255,255,255,0.1);
+          border-radius: 9px;
+          color: rgba(255,255,255,0.6);
+          padding: 10px 20px;
+          cursor: pointer;
+          font-family: 'Jost', sans-serif;
+          font-size: 13px;
+          font-weight: 400;
+          letter-spacing: 0.04em;
+          transition: border-color 0.2s, color 0.2s, background 0.2s;
+        }
+        .db-quick-btn-dark:hover {
+          border-color: rgba(255,255,255,0.2);
+          color: rgba(255,255,255,0.85);
+          background: rgba(255,255,255,0.055);
+        }
+
+        .db-section-title {
+          font-size: 10px;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: rgba(255,255,255,0.22);
+          font-weight: 600;
+          font-family: 'Jost', sans-serif;
+        }
+
+        .db-empty-state {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 3rem 1rem;
+          gap: 14px;
+          text-align: center;
+        }
+
+        .db-empty-icon {
+          width: 48px;
+          height: 48px;
+          border-radius: 12px;
+          background: rgba(197,160,90,0.05);
+          border: 0.5px solid rgba(197,160,90,0.15);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .db-booking-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 12px;
+          padding: 1rem 1.125rem;
+          background: rgba(255,255,255,0.02);
+          border: 0.5px solid rgba(255,255,255,0.07);
+          border-radius: 10px;
+          transition: border-color 0.2s;
+        }
+        .db-booking-row:hover { border-color: rgba(255,255,255,0.12); }
+
+        @media (max-width: 640px) {
+          .db-stats-grid { grid-template-columns: 1fr !important; }
+          .db-quick-actions { flex-direction: column !important; }
+          .db-quick-actions button { width: 100%; }
+          .db-nav-right { gap: 6px !important; }
+          .db-create-btn-label { display: none; }
+        }
+      `}</style>
+
+      <div style={{ minHeight: '100vh', background: '#080808', color: '#ece8e1' }}>
+
+        {/* ── Navigation ── */}
+        <nav style={{
+          background: 'rgba(10,10,10,0.95)',
+          borderBottom: '0.5px solid rgba(255,255,255,0.07)',
+          padding: '0 2rem',
+          height: '60px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          position: 'sticky',
+          top: 0,
+          zIndex: 100,
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+        }}>
+          {/* Wordmark */}
+          <a href="/" style={{ textDecoration: 'none', flexShrink: 0 }}>
+            <span style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: '20px',
+              fontWeight: 400,
+              color: '#c5a05a',
+              letterSpacing: '0.04em',
             }}>
-              <div style={{ fontSize: '2rem', fontWeight: 600, color: '#c5a05a', fontFamily: 'Georgia, serif' }}>{stat.value}</div>
-              <div style={{ color: '#8c8880', fontSize: '13px', marginTop: '0.25rem' }}>{stat.label}</div>
-            </div>
-          ))}
-        </div>
+              Secret<em style={{ fontStyle: 'italic', fontWeight: 300 }}>Xperience</em>
+            </span>
+          </a>
 
-        {/* Quick actions */}
-        <div style={{ background: '#101010', border: '0.5px solid rgba(255,255,255,0.07)', borderRadius: '13px', padding: '1.5rem', marginBottom: '2rem' }}>
-          <h3 style={{ marginBottom: '1rem', fontSize: '13px', letterSpacing: '.1em', textTransform: 'uppercase', color: '#4c4a47', fontWeight: 600 }}>Quick actions</h3>
-          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-            <button onClick={() => window.location.href = '/listings/create'} style={{ background: 'linear-gradient(135deg,#c5a05a,#9a7a3a)', border: 'none', borderRadius: '8px', color: '#080808', padding: '0.6rem 1.2rem', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}>
-              + Create listing
+          {/* Right side */}
+          <div className="db-nav-right" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+
+            {/* Admin panel link */}
+            {profile?.role === 'admin' && (
+              <a
+                href="/admin"
+                style={{
+                  color: 'rgba(197,160,90,0.65)',
+                  fontSize: '12px',
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  textDecoration: 'none',
+                  fontFamily: "'Jost', sans-serif",
+                  fontWeight: 500,
+                  padding: '6px 12px',
+                  border: '0.5px solid rgba(197,160,90,0.2)',
+                  borderRadius: '7px',
+                  transition: 'color 0.2s, border-color 0.2s',
+                }}
+              >
+                Admin
+              </a>
+            )}
+
+            {/* Create listing */}
+            <button
+              className="db-nav-btn-gold"
+              onClick={() => window.location.href = '/listings/create'}
+            >
+              <span>+ </span>
+              <span className="db-create-btn-label">Create listing</span>
             </button>
-            {['View bookings', 'Messages', 'Edit profile'].map(action => (
-              <button key={action} style={{ background: '#181818', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', color: '#ece8e1', padding: '0.6rem 1.2rem', cursor: 'pointer', fontSize: '13px' }}>
-                {action}
-              </button>
+
+            {/* Avatar initials */}
+            <div
+              title={displayName}
+              style={{
+                width: '34px',
+                height: '34px',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, rgba(197,160,90,0.2), rgba(197,160,90,0.08))',
+                border: '0.5px solid rgba(197,160,90,0.35)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                cursor: 'default',
+              }}
+            >
+              <span style={{
+                fontFamily: "'Jost', sans-serif",
+                fontSize: '12px',
+                fontWeight: 600,
+                color: '#c5a05a',
+                letterSpacing: '0.04em',
+                lineHeight: 1,
+              }}>
+                {initials}
+              </span>
+            </div>
+
+            {/* Sign out */}
+            <button className="db-nav-btn-ghost" onClick={handleSignOut}>
+              Sign out
+            </button>
+          </div>
+        </nav>
+
+        {/* ── Page content ── */}
+        <div style={{
+          maxWidth: '960px',
+          margin: '0 auto',
+          padding: '3rem 1.5rem 5rem',
+          animation: 'fadeUp 0.4s ease',
+        }}>
+
+          {/* ── Hero greeting ── */}
+          <div style={{ marginBottom: '3rem' }}>
+            <h1 style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: 'clamp(28px, 5vw, 40px)',
+              fontWeight: 300,
+              color: '#ece8e1',
+              letterSpacing: '-0.01em',
+              lineHeight: 1.2,
+              marginBottom: '10px',
+            }}>
+              {getGreeting()},{' '}
+              <span style={{ position: 'relative', display: 'inline-block' }}>
+                <span style={{ color: '#c5a05a' }}>{displayName.split(' ')[0]}</span>
+                <span style={{
+                  position: 'absolute',
+                  bottom: '-4px',
+                  left: 0,
+                  right: 0,
+                  height: '0.5px',
+                  background: 'linear-gradient(90deg, rgba(197,160,90,0.7), rgba(197,160,90,0.1))',
+                }} />
+              </span>
+            </h1>
+            <p style={{
+              color: 'rgba(255,255,255,0.28)',
+              fontSize: '13px',
+              fontWeight: 300,
+              letterSpacing: '0.04em',
+              fontFamily: "'Jost', sans-serif",
+            }}>
+              {new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+              {profile?.role && (
+                <>
+                  {' · '}
+                  <span style={{ textTransform: 'capitalize' }}>{profile.role}</span>
+                  {profile?.verified && (
+                    <span style={{ marginLeft: '8px', color: '#3ecf8e', fontSize: '11px' }}>✓ Verified</span>
+                  )}
+                </>
+              )}
+            </p>
+          </div>
+
+          {/* ── Stats row ── */}
+          <div
+            className="db-stats-grid"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '1rem',
+              marginBottom: '2.5rem',
+            }}
+          >
+            {[
+              { label: 'Listings',  value: listings.length,         sub: `${activeListings} active`,         up: activeListings > 0 },
+              { label: 'Bookings',  value: bookings.length,         sub: 'total bookings',                   up: bookings.length > 0 },
+              { label: 'Messages',  value: 0,                        sub: 'unread',                           up: undefined },
+            ].map(stat => (
+              <div key={stat.label} className="db-stat-card">
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                  <span style={{
+                    fontFamily: "'Cormorant Garamond', serif",
+                    fontSize: '36px',
+                    fontWeight: 300,
+                    color: '#c5a05a',
+                    lineHeight: 1,
+                    letterSpacing: '-0.02em',
+                  }}>
+                    {stat.value}
+                  </span>
+                  <TrendIcon up={stat.up} />
+                </div>
+                <div style={{
+                  fontFamily: "'Jost', sans-serif",
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  color: 'rgba(255,255,255,0.6)',
+                  letterSpacing: '0.03em',
+                }}>
+                  {stat.label}
+                </div>
+                <div style={{
+                  fontFamily: "'Jost', sans-serif",
+                  fontSize: '11px',
+                  color: 'rgba(255,255,255,0.2)',
+                  letterSpacing: '0.04em',
+                  fontWeight: 300,
+                }}>
+                  {stat.sub}
+                </div>
+              </div>
             ))}
           </div>
-        </div>
 
-        {/* My listings */}
-        <div style={{ background: '#101010', border: '0.5px solid rgba(255,255,255,0.07)', borderRadius: '13px', padding: '1.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h3 style={{ fontSize: '13px', letterSpacing: '.1em', textTransform: 'uppercase', color: '#4c4a47', fontWeight: 600 }}>My listings</h3>
-            <button onClick={() => window.location.href = '/listings/create'} style={{ background: 'transparent', border: '0.5px solid rgba(197,160,90,0.3)', borderRadius: '8px', color: '#c5a05a', padding: '0.4rem 0.9rem', cursor: 'pointer', fontSize: '12px' }}>
-              + New
-            </button>
-          </div>
-
-          {listings.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '2rem 0', color: '#4c4a47' }}>
-              <div style={{ fontSize: '32px', marginBottom: '0.5rem' }}>📋</div>
-              <p style={{ fontSize: '13px', marginBottom: '1rem' }}>No listings yet</p>
-              <button onClick={() => window.location.href = '/listings/create'} style={{ background: 'linear-gradient(135deg,#c5a05a,#9a7a3a)', border: 'none', borderRadius: '8px', color: '#080808', padding: '0.6rem 1.4rem', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}>
-                Create your first listing
+          {/* ── My Listings ── */}
+          <div className="db-card" style={{ marginBottom: '1.5rem' }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '1.375rem',
+            }}>
+              <span className="db-section-title">My listings</span>
+              <button
+                className="db-edit-btn"
+                onClick={() => window.location.href = '/listings/create'}
+                style={{
+                  borderColor: 'rgba(197,160,90,0.25)',
+                  color: 'rgba(197,160,90,0.6)',
+                }}
+              >
+                + New
               </button>
             </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {listings.map(listing => (
-                <div key={listing.id} style={{ background: '#181818', border: '0.5px solid rgba(255,255,255,0.07)', borderRadius: '10px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <div style={{ fontFamily: 'Georgia, serif', fontSize: '15px', color: '#ece8e1', marginBottom: '3px' }}>{listing.title}</div>
-                    <div style={{ fontSize: '11px', color: '#8c8880' }}>{listing.category}{listing.subcategory ? ' · ' + listing.subcategory : ''} · {listing.city}</div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    {listing.verified && <span style={{ fontSize: '10px', padding: '2px 8px', borderRadius: '7px', background: 'rgba(26,143,106,.2)', color: '#26d4a0', border: '0.5px solid rgba(26,143,106,.4)' }}>✓ Verified</span>}
-                    <span style={{ fontSize: '12px', color: listing.active ? '#26d4a0' : '#8c8880' }}>{listing.active ? 'Live' : 'Inactive'}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
 
+            {listings.length === 0 ? (
+              <div className="db-empty-state">
+                <div className="db-empty-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(197,160,90,0.5)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="3"/>
+                    <path d="M9 12h6M12 9v6"/>
+                  </svg>
+                </div>
+                <p style={{
+                  color: 'rgba(255,255,255,0.28)',
+                  fontSize: '13px',
+                  fontWeight: 300,
+                  fontFamily: "'Jost', sans-serif",
+                  letterSpacing: '0.03em',
+                }}>
+                  You have no listings yet. Create your first one to start receiving bookings.
+                </p>
+                <button
+                  className="db-quick-btn-gold"
+                  onClick={() => window.location.href = '/listings/create'}
+                  style={{ marginTop: '4px' }}
+                >
+                  Create a listing
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {listings.map(listing => (
+                  <div key={listing.id} className="db-listing-item">
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '5px', flexWrap: 'wrap' }}>
+                        <span style={{
+                          fontFamily: "'Cormorant Garamond', serif",
+                          fontSize: '16px',
+                          fontWeight: 400,
+                          color: '#ece8e1',
+                          letterSpacing: '0.01em',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}>
+                          {listing.title}
+                        </span>
+                        {listing.category && (
+                          <span className="db-category-pill">{listing.category}</span>
+                        )}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                        {listing.city && (
+                          <span style={{
+                            fontSize: '11px',
+                            color: 'rgba(255,255,255,0.28)',
+                            fontFamily: "'Jost', sans-serif",
+                            fontWeight: 300,
+                          }}>
+                            {listing.city}
+                          </span>
+                        )}
+                        {(listing.price_min || listing.price_max) && (
+                          <span style={{
+                            fontSize: '11px',
+                            color: 'rgba(197,160,90,0.5)',
+                            fontFamily: "'Jost', sans-serif",
+                            fontWeight: 300,
+                          }}>
+                            {listing.price_min && listing.price_max
+                              ? `$${listing.price_min} – $${listing.price_max}`
+                              : listing.price_min
+                              ? `from $${listing.price_min}`
+                              : `up to $${listing.price_max}`}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+                      {listing.verified && (
+                        <span style={{
+                          fontSize: '10px',
+                          padding: '2px 8px',
+                          borderRadius: '20px',
+                          background: 'rgba(62,207,142,0.08)',
+                          color: '#3ecf8e',
+                          border: '0.5px solid rgba(62,207,142,0.25)',
+                          fontFamily: "'Jost', sans-serif",
+                          fontWeight: 500,
+                          letterSpacing: '0.06em',
+                        }}>
+                          ✓ Verified
+                        </span>
+                      )}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <StatusDot active={!!listing.active} />
+                        <span style={{
+                          fontSize: '11px',
+                          color: listing.active ? 'rgba(62,207,142,0.75)' : 'rgba(255,255,255,0.25)',
+                          fontFamily: "'Jost', sans-serif",
+                          fontWeight: 400,
+                          letterSpacing: '0.04em',
+                        }}>
+                          {listing.active ? 'Live' : 'Inactive'}
+                        </span>
+                      </div>
+                      <button className="db-edit-btn">Edit</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* ── Recent Bookings ── */}
+          <div className="db-card" style={{ marginBottom: '1.5rem' }}>
+            <div style={{ marginBottom: '1.375rem' }}>
+              <span className="db-section-title">Recent bookings</span>
+            </div>
+
+            {recentBookings.length === 0 ? (
+              <div className="db-empty-state">
+                <div className="db-empty-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(197,160,90,0.5)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                </div>
+                <p style={{
+                  color: 'rgba(255,255,255,0.28)',
+                  fontSize: '13px',
+                  fontWeight: 300,
+                  fontFamily: "'Jost', sans-serif",
+                  letterSpacing: '0.03em',
+                }}>
+                  No bookings yet. Once clients book your listings they will appear here.
+                </p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {recentBookings.map((booking, i) => (
+                  <div key={booking.id ?? i} className="db-booking-row">
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{
+                        fontFamily: "'Cormorant Garamond', serif",
+                        fontSize: '15px',
+                        fontWeight: 400,
+                        color: '#ece8e1',
+                        marginBottom: '3px',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}>
+                        {booking.listing_title || booking.listing_id || 'Booking'}
+                      </div>
+                      {booking.created_at && (
+                        <div style={{
+                          fontSize: '11px',
+                          color: 'rgba(255,255,255,0.25)',
+                          fontFamily: "'Jost', sans-serif",
+                          fontWeight: 300,
+                        }}>
+                          {new Date(booking.created_at).toLocaleDateString('en-GB', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric',
+                          })}
+                        </div>
+                      )}
+                    </div>
+                    <BookingBadge status={booking.status ?? 'pending'} />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* ── Quick Actions ── */}
+          <div className="db-card">
+            <div style={{ marginBottom: '1.25rem' }}>
+              <span className="db-section-title">Quick actions</span>
+            </div>
+            <div
+              className="db-quick-actions"
+              style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}
+            >
+              <button
+                className="db-quick-btn-gold"
+                onClick={() => window.location.href = '/listings/create'}
+              >
+                + Create listing
+              </button>
+              <button
+                className="db-quick-btn-dark"
+                onClick={() => window.location.href = '/messages'}
+              >
+                Messages
+              </button>
+              <button
+                className="db-quick-btn-dark"
+                onClick={() => window.location.href = '/'}
+              >
+                Browse platform
+              </button>
+            </div>
+          </div>
+
+        </div>
       </div>
-    </div>
+    </>
   )
 }
