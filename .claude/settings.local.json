@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($gitPath = \\(Get-ChildItem \"C:\\\\Users\\\\Dries\\\\AppData\\\\Local\\\\GitHubDesktop\\\\bin\" -ErrorAction SilentlyContinue | Select-Object -First 5\\); $gitPath)",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\Dries\\\\AppData\\\\Local\\\\GitHubDesktop\" | ForEach-Object { Write-Output $_.Name })",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\Dries\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.8\" | ForEach-Object { Write-Output $_.Name })",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\Dries\\\\AppData\\\\Local\\\\GitHubDesktop\\\\packages\" | ForEach-Object { Write-Output $_.Name })",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\Dries\\\\AppData\\\\Local\\\\Programs\" | ForEach-Object { Write-Output $_.Name })",
+      "PowerShell($env:PATH)",
+      "PowerShell(Select-String *)",
+      "PowerShell($items = Get-ChildItem \"C:\\\\Program Files\" -ErrorAction SilentlyContinue; Write-Output \"Count: $\\($items.Count\\)\")",
+      "PowerShell($items = Get-ChildItem \"C:\\\\Program Files\" -ErrorAction SilentlyContinue; $items | ForEach-Object { Write-Output $_.Name })",
+      "PowerShell(winget list *)",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\Dries\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.8\\\\resources\" | ForEach-Object { Write-Output $_.Name })",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\Dries\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.8\\\\resources\\\\app\" | ForEach-Object { Write-Output $_.Name })",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\Dries\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.8\\\\resources\\\\app\\\\git\" | ForEach-Object { Write-Output $_.Name })",
+      "PowerShell(& \"C:\\\\Users\\\\Dries\\\\AppData\\\\Local\\\\GitHubDesktop\\\\app-3.5.8\\\\resources\\\\app\\\\git\\\\mingw64\\\\bin\\\\git.exe\" --version)",
+      "PowerShell(git *)"
+    ]
+  }
+}
