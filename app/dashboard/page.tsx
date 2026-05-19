@@ -74,11 +74,14 @@ function TrendIcon({ up }: { up?: boolean }) {
 }
 
 export default function DashboardPage() {
-  const [user, setUser]         = useState<any>(null)
-  const [profile, setProfile]   = useState<any>(null)
-  const [listings, setListings] = useState<any[]>([])
-  const [bookings, setBookings] = useState<any[]>([])
-  const [loading, setLoading]   = useState(true)
+  const [user, setUser]             = useState<any>(null)
+  const [profile, setProfile]       = useState<any>(null)
+  const [listings, setListings]     = useState<any[]>([])
+  const [bookings, setBookings]     = useState<any[]>([])
+  const [loading, setLoading]       = useState(true)
+  const [editingProfile, setEditingProfile] = useState(false)
+  const [profileDraft, setProfileDraft]     = useState<any>({})
+  const [savingProfile, setSavingProfile]   = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -109,6 +112,26 @@ export default function DashboardPage() {
   async function handleSignOut() {
     await signOut()
     window.location.href = '/login'
+  }
+
+  async function saveProfile() {
+    setSavingProfile(true)
+    const supabase = createClient()
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return
+    const updates: any = {
+      full_name: profileDraft.full_name,
+      bio: profileDraft.bio,
+      city: profileDraft.city,
+      country: profileDraft.country,
+      phone: profileDraft.phone,
+    }
+    if (profileDraft.age) updates.age = parseInt(profileDraft.age) || null
+    if (profileDraft.languages) updates.languages = profileDraft.languages.split(',').map((s: string) => s.trim()).filter(Boolean)
+    await supabase.from('profiles').update(updates).eq('id', session.user.id)
+    setProfile((p: any) => ({ ...p, ...updates }))
+    setEditingProfile(false)
+    setSavingProfile(false)
   }
 
   const displayName: string = profile?.full_name || user?.email?.split('@')[0] || 'there'
@@ -800,11 +823,57 @@ export default function DashboardPage() {
               >
                 Browse platform
               </button>
+              <button
+                className="db-quick-btn-dark"
+                onClick={() => { setProfileDraft({ full_name: profile?.full_name || '', bio: profile?.bio || '', city: profile?.city || '', country: profile?.country || '', phone: profile?.phone || '', age: profile?.age || '', languages: (profile?.languages || []).join(', ') }); setEditingProfile(true) }}
+              >
+                Edit profile
+              </button>
+              {profile?.role && profile.role !== 'user' && (
+                <button
+                  className="db-quick-btn-dark"
+                  onClick={() => window.location.href = `/profile/${user?.id}`}
+                >
+                  View public profile
+                </button>
+              )}
             </div>
           </div>
 
         </div>
       </div>
+
+      {/* ── Profile edit modal ── */}
+      {editingProfile && (
+        <div onClick={() => setEditingProfile(false)} style={{ position:'fixed',inset:0,background:'rgba(0,0,0,0.7)',backdropFilter:'blur(6px)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:'1rem' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background:'#111',border:'0.5px solid rgba(197,160,90,0.25)',borderRadius:'16px',padding:'2rem',width:'100%',maxWidth:'480px',maxHeight:'90vh',overflowY:'auto' }}>
+            <div style={{ fontFamily:"'Cormorant Garamond',serif",fontSize:'22px',color:'#ece8e1',marginBottom:'1.5rem' }}>Edit Profile</div>
+            {[
+              { label:'Full name', key:'full_name', type:'text', placeholder:'Your name' },
+              { label:'City', key:'city', type:'text', placeholder:'e.g. Brussels' },
+              { label:'Country', key:'country', type:'text', placeholder:'e.g. Belgium' },
+              { label:'Age', key:'age', type:'number', placeholder:'Your age' },
+              { label:'Phone (optional)', key:'phone', type:'text', placeholder:'+32 ...' },
+              { label:'Languages (comma-separated)', key:'languages', type:'text', placeholder:'English, French, Dutch' },
+            ].map(f => (
+              <div key={f.key} style={{ marginBottom:'1rem' }}>
+                <label style={{ display:'block',fontSize:'11px',color:'#c5a05a',letterSpacing:'0.08em',marginBottom:'6px',textTransform:'uppercase' }}>{f.label}</label>
+                <input type={f.type} value={profileDraft[f.key] || ''} onChange={e => setProfileDraft((d: any) => ({ ...d, [f.key]: e.target.value }))} placeholder={f.placeholder}
+                  style={{ width:'100%',background:'#0a0a0a',border:'0.5px solid rgba(255,255,255,0.1)',borderRadius:'8px',padding:'10px 14px',color:'#ece8e1',fontSize:'14px',fontFamily:'inherit',outline:'none' }} />
+              </div>
+            ))}
+            <div style={{ marginBottom:'1.5rem' }}>
+              <label style={{ display:'block',fontSize:'11px',color:'#c5a05a',letterSpacing:'0.08em',marginBottom:'6px',textTransform:'uppercase' }}>Bio</label>
+              <textarea value={profileDraft.bio || ''} onChange={e => setProfileDraft((d: any) => ({ ...d, bio: e.target.value }))} placeholder="Tell clients about yourself…" rows={4}
+                style={{ width:'100%',background:'#0a0a0a',border:'0.5px solid rgba(255,255,255,0.1)',borderRadius:'8px',padding:'10px 14px',color:'#ece8e1',fontSize:'14px',fontFamily:'inherit',resize:'vertical',outline:'none' }} />
+            </div>
+            <div style={{ display:'flex',gap:'10px',justifyContent:'flex-end' }}>
+              <button onClick={() => setEditingProfile(false)} style={{ padding:'10px 20px',background:'transparent',border:'0.5px solid rgba(255,255,255,0.15)',borderRadius:'8px',color:'#9a8a7a',cursor:'pointer',fontSize:'13px',fontFamily:'inherit' }}>Cancel</button>
+              <button onClick={saveProfile} disabled={savingProfile} style={{ padding:'10px 24px',background:'linear-gradient(135deg,#c5a05a,#a0803d)',border:'none',borderRadius:'8px',color:'#080808',cursor:'pointer',fontSize:'13px',fontWeight:600,fontFamily:'inherit' }}>{savingProfile ? 'Saving…' : 'Save changes'}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }
