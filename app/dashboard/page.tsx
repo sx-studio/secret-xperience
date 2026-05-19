@@ -89,6 +89,8 @@ export default function DashboardPage() {
   const [boostPlan, setBoostPlan]             = useState<'week' | 'month'>('month')
   const [boostLoading, setBoostLoading]       = useState(false)
   const [notification, setNotification]       = useState<string | null>(null)
+  const [connectLoading, setConnectLoading]   = useState(false)
+  const [connectLoginLoading, setConnectLoginLoading] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -119,6 +121,13 @@ export default function DashboardPage() {
         window.history.replaceState({}, '', '/dashboard')
       } else if (params.get('boost') === 'success') {
         setNotification('✦ Your listing is now featured! It will appear at the top of results.')
+        window.history.replaceState({}, '', '/dashboard')
+      } else if (params.get('connect') === 'success') {
+        setNotification('✓ Stripe payouts connected! You\'ll receive payments directly.')
+        window.history.replaceState({}, '', '/dashboard')
+      } else if (params.get('connect') === 'refresh') {
+        // Re-trigger onboarding if the link expired
+        setTimeout(() => handleConnectStripe(), 500)
         window.history.replaceState({}, '', '/dashboard')
       }
     }
@@ -169,6 +178,22 @@ export default function DashboardPage() {
     setListings((prev: any[]) => prev.map(l => l.id === editingListing.id ? { ...l, ...updates } : l))
     setEditingListing(null)
     setSavingListing(false)
+  }
+
+  async function handleConnectStripe() {
+    setConnectLoading(true)
+    const res = await fetch('/api/connect/onboard', { method: 'POST' })
+    const json = await res.json()
+    if (json.url) { window.location.href = json.url }
+    else { setConnectLoading(false) }
+  }
+
+  async function handleConnectDashboard() {
+    setConnectLoginLoading(true)
+    const res = await fetch('/api/connect/login', { method: 'POST' })
+    const json = await res.json()
+    if (json.url) { window.location.href = json.url }
+    else { setConnectLoginLoading(false) }
   }
 
   async function startBoost() {
@@ -656,6 +681,48 @@ export default function DashboardPage() {
               </div>
             ))}
           </div>
+
+          {/* ── Stripe Payouts Card ── */}
+          {(profile?.role === 'provider' || profile?.role === 'venue' || profile?.role === 'creator') && (
+            <div className="db-card" style={{ marginBottom: '1.5rem', border: profile?.stripe_connect_account_id ? '0.5px solid rgba(62,207,142,0.2)' : '0.5px solid rgba(197,160,90,0.25)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: profile?.stripe_connect_account_id ? 'rgba(62,207,142,0.1)' : 'rgba(197,160,90,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
+                    {profile?.stripe_connect_account_id ? '✓' : '💳'}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '15px', fontWeight: 500, color: '#ece8e1', fontFamily: "'Jost', sans-serif", marginBottom: '3px' }}>
+                      {profile?.stripe_connect_account_id ? 'Payouts connected' : 'Set up payouts'}
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#8c8880', fontFamily: "'Jost', sans-serif", lineHeight: 1.4 }}>
+                      {profile?.stripe_connect_account_id
+                        ? 'You receive 85% of each booking. Platform fee: 15%.'
+                        : 'Connect Stripe to receive payments from bookings. Takes 2 minutes.'}
+                    </div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                  {profile?.stripe_connect_account_id ? (
+                    <button
+                      onClick={handleConnectDashboard}
+                      disabled={connectLoginLoading}
+                      style={{ padding: '8px 16px', background: 'transparent', border: '0.5px solid rgba(62,207,142,0.4)', borderRadius: '8px', color: '#3ecf8e', cursor: 'pointer', fontSize: '12px', fontWeight: 500, fontFamily: "'Jost', sans-serif" }}
+                    >
+                      {connectLoginLoading ? 'Opening…' : 'View Stripe dashboard →'}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleConnectStripe}
+                      disabled={connectLoading}
+                      style={{ padding: '8px 20px', background: 'linear-gradient(135deg,#c5a05a,#a0803d)', border: 'none', borderRadius: '8px', color: '#080808', cursor: 'pointer', fontSize: '12px', fontWeight: 600, fontFamily: "'Jost', sans-serif" }}
+                    >
+                      {connectLoading ? 'Redirecting…' : 'Connect Stripe →'}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* ── My Listings ── */}
           <div className="db-card" style={{ marginBottom: '1.5rem' }}>

@@ -45,6 +45,12 @@ export async function POST(req: NextRequest) {
         status: 'confirmed',
         stripe_payment_intent: session.payment_intent as string,
       }).eq('id', meta.booking_id)
+      // Fire booking_confirmed notification
+      fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'https://secret-xperience.vercel.app'}/api/notify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.INTERNAL_SECRET || 'sx-internal'}` },
+        body: JSON.stringify({ type: 'booking_confirmed', booking_id: meta.booking_id }),
+      }).catch(() => {})
     }
   }
 

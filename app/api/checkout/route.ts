@@ -27,6 +27,12 @@ export async function POST(req: NextRequest) {
 
   if (!listing) return NextResponse.json({ error: 'Listing not found' }, { status: 404 })
 
+  const { data: provider } = await supabase
+    .from('profiles')
+    .select('stripe_connect_account_id')
+    .eq('id', listing.profile_id)
+    .single()
+
   // Create a pending booking record first
   const { data: booking, error: bookingErr } = await supabase.from('bookings').insert({
     listing_id,
@@ -43,7 +49,16 @@ export async function POST(req: NextRequest) {
 
   if (bookingErr) return NextResponse.json({ error: bookingErr.message }, { status: 500 })
 
-  const checkoutSession = await stripe.checkout.sessions.create({
+  // Notify provider of new booking request (fire-and-forget)
+  const siteOrigin = process.env.NEXT_PUBLIC_SITE_URL || 'https://secret-xperience.vercel.app'
+  fetch(`${siteOrigin}/api/notify`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.INTERNAL_SECRET || 'sx-internal'}` },
+    body: JSON.stringify({ type: 'booking_created', booking_id: booking.id }),
+  }).catch(() => {})
+
+  const PLATFORM_FEE_PCT = 0.15
+  const checkoutParams: Stripe.Checkout.SessionCreateParams = {
     mode: 'payment',
     payment_method_types: ['card'],
     line_items: [{
@@ -51,7 +66,7 @@ export async function POST(req: NextRequest) {
         currency: 'eur',
         product_data: {
           name: listing.title,
-          description: `${duration} · ${meet_type || 'Incall'} · ${date} ${time}`,
+          description: `${duration} · ${meet_type || 'Incall'} · ${date} ${time || ''}`.trim(),
         },
         unit_amount: price * 100,
       },
@@ -63,8 +78,17 @@ export async function POST(req: NextRequest) {
       client_id: session.user.id,
     },
     success_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://secret-xperience.vercel.app'}/dashboard?booking=success`,
-    cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://secret-xperience.vercel.app'}/?booking=cancelled`,
-  })
+    cancel_url:  `${process.env.NEXT_PUBLIC_SITE_URL || 'https://secret-xperience.vercel.app'}/?booking=cancelled`,
+  }
+
+  if (provider?.stripe_connect_account_id) {
+    checkoutParams.payment_intent_data = {
+      application_fee_amount: Math.round(price * 100 * PLATFORM_FEE_PCT),
+      transfer_data: { destination: provider.stripe_connect_account_id },
+    }
+  }
+
+  const checkoutSession = await stripe.checkout.sessions.create(checkoutParams)
 
   return NextResponse.json({ url: checkoutSession.url })
 }

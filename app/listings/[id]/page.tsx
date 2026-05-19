@@ -103,6 +103,7 @@ export default function ListingDetailPage() {
   const [reviewText,     setReviewText]     = useState('')
   const [submitting,     setSubmitting]     = useState(false)
   const [submitError,    setSubmitError]    = useState<string | null>(null)
+  const [similarListings, setSimilarListings] = useState<any[]>([])
 
   async function fetchReviews() {
     if (!id) return
@@ -143,6 +144,16 @@ export default function ListingDetailPage() {
       } else {
         setListing(data as any)
         if (data.images?.length) setActiveImg(data.images[0])
+        // Fetch similar listings by same category
+        const { data: sims } = await supabase
+          .from('listings')
+          .select('id, title, category, subcategory, city, country, price_from, verified, premium, rating')
+          .eq('active', true)
+          .ilike('category', (data.category || '') + '%')
+          .neq('id', id)
+          .order('rating', { ascending: false })
+          .limit(3)
+        setSimilarListings(sims || [])
         document.title = `${data.title} | SecretXperience`
         let meta = document.querySelector('meta[name="description"]')
         if (!meta) { meta = document.createElement('meta'); meta.setAttribute('name', 'description'); document.head.appendChild(meta) }
@@ -997,6 +1008,38 @@ export default function ListingDetailPage() {
               )}
 
             </div>
+
+            {/* ── Similar listings ── */}
+            {similarListings.length > 0 && (
+              <div style={{ marginBottom: '2rem' }}>
+                <p style={{ fontFamily: "'Jost', sans-serif", fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', fontWeight: 600, marginBottom: '1rem' }}>
+                  Similar listings
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '12px' }}>
+                  {similarListings.map(s => (
+                    <a key={s.id} href={`/listings/${s.id}`} style={{ textDecoration: 'none', display: 'block', background: 'rgba(255,255,255,0.02)', border: '0.5px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '1rem 1.25rem', transition: 'border-color 0.2s' }}
+                      onMouseOver={e => (e.currentTarget.style.borderColor = 'rgba(197,160,90,0.3)')}
+                      onMouseOut={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)')}
+                    >
+                      <div style={{ fontFamily: "'Jost', sans-serif", fontSize: '11px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px' }}>
+                        {s.category}{s.subcategory ? ' · ' + s.subcategory : ''}
+                      </div>
+                      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '16px', color: '#ece8e1', marginBottom: '6px', fontWeight: 400 }}>
+                        {s.title}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <span style={{ fontFamily: "'Jost', sans-serif", fontSize: '13px', color: '#c5a05a' }}>
+                          {s.price_from ? `€${s.price_from}` : 'POA'}
+                        </span>
+                        <span style={{ fontFamily: "'Jost', sans-serif", fontSize: '12px', color: 'rgba(255,255,255,0.25)' }}>
+                          {s.city || ''}
+                        </span>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* ── Right column (sidebar) ── */}
             <div>

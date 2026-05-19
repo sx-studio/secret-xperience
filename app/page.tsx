@@ -315,6 +315,47 @@ var dpOverlay = document.getElementById('detail-overlay');
 var dpPanel = document.getElementById('detail-panel');
 var dpSaved = false;
 
+async function loadSimilarListings(excludeId, category) {
+  var el = document.querySelector('.dp-similar')
+  if (!el) return
+  el.innerHTML = '<div style="color:#4c4a47;font-size:12px;padding:.5rem">Loading…</div>'
+  try {
+    var cat = (category || '').split(' · ')[0].trim().toLowerCase()
+    var { data: sims } = await (supabase as any).from('listings')
+      .select('id,title,category,subcategory,city,country,price_from,verified,premium,profile_id,rating,review_count,description,images,meet_type,featured_until')
+      .eq('active', true)
+      .ilike('category', cat + '%')
+      .neq('id', excludeId)
+      .order('rating', { ascending: false })
+      .limit(3)
+    if (!sims || !sims.length) {
+      el.innerHTML = '<div style="color:#4c4a47;font-size:12px;padding:.5rem">No similar listings found.</div>'
+      return
+    }
+    el.innerHTML = sims.map(function(l) {
+      var icon = ({escorts:'ti-user',companionship:'ti-heart',nightlife:'ti-building',creators:'ti-camera',adult:'ti-flame',rentals:'ti-home',hotels:'ti-bed',events:'ti-confetti',photo:'ti-camera',shop:'ti-shopping-bag'})[l.category?.toLowerCase()] || 'ti-tag'
+      var badges = []
+      if (l.verified) badges.push('<span class="badge bv" style="font-size:8px">✓</span>')
+      if (l.premium) badges.push('<span class="badge bp" style="font-size:8px">P</span>')
+      var dStr = encodeURIComponent(JSON.stringify({
+        id:l.id||'',profile_id:l.profile_id||'',icon:icon,badges:[],
+        cat:l.category||'',type:l.subcategory||l.category||'',name:l.title||'',
+        rating:l.rating||'—',city:(l.city||'—')+', '+(l.country||''),
+        s1:String(l.review_count||0),s2:l.rating?Number(l.rating).toFixed(1):'—',s3:'—',s4:'—',
+        desc:l.description||'',tags:[l.category],
+        pricing:l.price_from?[{dur:'Rate',amt:'€'+l.price_from,note:l.category,feat:true}]:[{dur:'Rate',amt:'POA',note:'',feat:true}],
+        price_from:l.price_from||0,featured_until:l.featured_until||null
+      }))
+      return '<div class="dp-sim-card" onclick="openDetail(JSON.parse(decodeURIComponent(\''+dStr+'\')))" style="cursor:pointer">' +
+        '<div class="dp-sim-img"><i class="ti '+icon+'" aria-hidden="true"></i><div class="card-badges" style="position:absolute;top:5px;left:5px">'+badges.join('')+'</div></div>' +
+        '<div class="dp-sim-body"><div class="dp-sim-cat">'+(l.category||'')+(l.subcategory?' · '+l.subcategory:'')+'</div><div class="dp-sim-name">'+(l.title||'')+'</div><div class="dp-sim-price">'+(l.price_from?'From €'+l.price_from+' · ':'')+(l.city||'')+'</div></div>' +
+        '</div>'
+    }).join('')
+  } catch(e) {
+    el.innerHTML = '<div style="color:#4c4a47;font-size:12px;padding:.5rem">Could not load similar listings.</div>'
+  }
+}
+
 function openDetail(data) {
   // Track recently viewed (max 10, deduplicated, newest first)
   if (data.id) { try { var rv = JSON.parse(localStorage.getItem('sx_recently_viewed') || '[]'); rv = [data.id].concat(rv.filter(function(x){return x!==data.id;})).slice(0,10); localStorage.setItem('sx_recently_viewed', JSON.stringify(rv)); } catch(e){} }
@@ -368,6 +409,7 @@ function openDetail(data) {
   dpOverlay.classList.add('open');
   dpPanel.classList.add('open');
   document.body.style.overflow = 'hidden';
+  if (data.id) loadSimilarListings(data.id, data.cat || '')
 }
 
 function closeDetail() {
@@ -640,6 +682,7 @@ document.getElementById('bookSubmit').addEventListener('click',async function(){
       var res=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({listing_id:currentListingId,date:selDate,time:selTime,duration:selDur,price:selPrice,notes:notes,meet_type:meetType,location:location})});
       var json=await res.json();
       if(json.url){window.location.href=json.url;}
+      else if(res.status===401){showToast('Please sign in to make a booking');setTimeout(function(){window.location.href='/login'},1500);btn.textContent='Confirm Booking';btn.disabled=false;}
       else{showToast(json.error||'Checkout failed');btn.textContent='Confirm Booking';btn.disabled=false;}
     }catch(err){showToast('Network error — please try again');btn.textContent='Confirm Booking';btn.disabled=false;}
   } else {
@@ -973,6 +1016,35 @@ renderHow('escorts');
         .order('created_at', { ascending: false })
       ;(window as any).__sxCacheListings?.(data || [])
       renderCards(data || [])
+      // Update featured banner with top featured listing
+      const topFeatured = (data || []).find((l: any) => l.featured_until && new Date(l.featured_until) > new Date())
+      const banner = document.getElementById('featuredBanner')
+      if (banner) {
+        if (topFeatured) {
+          const titleEl = document.getElementById('featuredBannerTitle')
+          const subEl = document.getElementById('featuredBannerSub')
+          const btn = document.getElementById('featuredBannerBtn')
+          if (titleEl) titleEl.textContent = topFeatured.title || '—'
+          if (subEl) subEl.textContent = [(topFeatured.category || ''), topFeatured.verified ? 'Verified' : '', topFeatured.city || ''].filter(Boolean).join(' · ')
+          if (btn) btn.onclick = function() {
+            const isFeatured = topFeatured.featured_until && new Date(topFeatured.featured_until) > new Date()
+            openDetail({
+              id:topFeatured.id||'',profile_id:topFeatured.profile_id||'',
+              icon:getCategoryIcon(topFeatured.category),badges:isFeatured?[{cls:'bf',txt:'✦ Featured'}]:[],
+              cat:topFeatured.category||'',type:topFeatured.subcategory||topFeatured.category||'',
+              name:topFeatured.title||'',rating:topFeatured.rating||'—',
+              city:(topFeatured.city||'—')+', '+(topFeatured.country||''),
+              s1:String(topFeatured.review_count||0),s2:topFeatured.rating?topFeatured.rating.toFixed(1):'—',s3:'—',s4:'—',
+              desc:topFeatured.description||'',tags:[topFeatured.category],
+              pricing:topFeatured.price_from?[{dur:'Rate',amt:'€'+topFeatured.price_from,note:topFeatured.category,feat:true}]:[{dur:'Rate',amt:'POA',note:'',feat:true}],
+              price_from:topFeatured.price_from||0,featured_until:topFeatured.featured_until||null
+            })
+          }
+          banner.style.display = ''
+        } else {
+          banner.style.display = 'none'
+        }
+      }
     }
 
     // ── Recently Viewed row ──
@@ -1254,13 +1326,13 @@ renderHow('escorts');
       </div>
 
       <!-- Featured -->
-      <div class="featured">
+      <div class="featured" id="featuredBanner" style="display:none">
         <div class="ft-left">
-          <div class="ft-tag">Featured this week</div>
-          <div class="ft-title">Velvet Lounge — Private Experiences</div>
-          <div class="ft-sub">Premium events · Verified · Brussels</div>
+          <div class="ft-tag">✦ Featured listing</div>
+          <div class="ft-title" id="featuredBannerTitle">—</div>
+          <div class="ft-sub" id="featuredBannerSub">—</div>
         </div>
-        <button class="ft-btn">View listing <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+        <button class="ft-btn" id="featuredBannerBtn">View listing <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
       </div>
 
       <!-- Tabs -->
