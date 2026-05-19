@@ -19,7 +19,8 @@
       "mcp__1e794605-26ef-4b6f-b176-ae888a1f2024__list_projects",
       "mcp__1e794605-26ef-4b6f-b176-ae888a1f2024__list_tables",
       "mcp__1e794605-26ef-4b6f-b176-ae888a1f2024__execute_sql",
-      "mcp__1e794605-26ef-4b6f-b176-ae888a1f2024__apply_migration"
+      "mcp__1e794605-26ef-4b6f-b176-ae888a1f2024__apply_migration",
+      "mcp__1e794605-26ef-4b6f-b176-ae888a1f2024__get_project"
     ]
   }
 }
