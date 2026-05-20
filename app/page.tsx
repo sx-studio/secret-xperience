@@ -1259,11 +1259,15 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
       document.getElementById('listingCards')?.scrollIntoView({ behavior: 'smooth', block: 'end' })
     }
 
-    // Wire category bar to real data
+    // Wire category bar to real data + update URL
     document.querySelectorAll('.cat').forEach(function(cat) {
       cat.addEventListener('click', function() {
-        activeFilters.category = (cat as HTMLElement).dataset.cat || 'all'
+        const catVal = (cat as HTMLElement).dataset.cat || 'all'
+        activeFilters.category = catVal
         fetchListings(activeFilters)
+        // Update URL without page reload for bookmarkability
+        const url = catVal === 'all' ? '/' : `/${catVal}`
+        history.pushState({}, '', url)
       })
     })
 
@@ -1426,7 +1430,9 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
     <div class="cat active" data-cat="all" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:var(--gbg);color:var(--gold);border-color:var(--gbrd);font-weight:500;display:inline-flex;align-items:center;">All</div>
     <div class="cat" data-cat="escorts" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Escorts</div>
     <div class="cat" data-cat="companionship" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Companionship</div>
+    <div class="cat" data-cat="massage" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Massage</div>
     <div class="cat" data-cat="nightlife" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Nightlife</div>
+    <div class="cat" data-cat="domination" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Domination</div>
     <div class="cat" data-cat="creators" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Creators</div>
     <div class="cat" data-cat="adult" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Adult Services</div>
     <div class="cat" data-cat="rentals" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Rentals</div>
@@ -1452,7 +1458,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         <p class="t-body" style="color:var(--t2);max-width:480px;margin-bottom:1.5rem;">A members-only marketplace for escorts, companions, nightlife, creators, rentals, and the after-hours.</p>
         <div style="position:relative;max-width:480px;margin-bottom:1.5rem;">
           <i class="ti ti-search" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:16px;"></i>
-          <input type="text" id="heroSearch" placeholder="Search listings, companions, venues…" style="width:100%;height:52px;padding:0 14px 0 42px;background:var(--bg2);border:0.5px solid var(--gbrd);border-radius:20px;color:var(--t);font:400 14px var(--sans);" onkeydown="if(event.key==='Enter'){var q=this.value.trim();if(q){showToast('Searching for: '+q)}}" />
+          <input type="text" id="heroSearch" placeholder="Search listings, companions, venues…" style="width:100%;height:52px;padding:0 14px 0 42px;background:var(--bg2);border:0.5px solid var(--gbrd);border-radius:20px;color:var(--t);font:400 14px var(--sans);" onkeydown="if(event.key==='Enter'){var q=this.value.trim();if(q){window.location.href='/search?q='+encodeURIComponent(q)}else{window.location.href='/search'}}" />
           <i class="ti ti-map-pin" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:16px;"></i>
         </div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;">

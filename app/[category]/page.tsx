@@ -39,6 +39,16 @@ const CATEGORY_META: Record<string, { title: string; description: string; headin
     description: 'Exclusive adult experiences and premium encounters. Curated, verified, discreet.',
     heading: 'Experiences',
   },
+  massage: {
+    title: 'Erotic & Tantric Massage | SecretXperience',
+    description: 'Professional sensual, tantric and erotic massage services across Europe. Verified therapists, private premises.',
+    heading: 'Massage & Wellness',
+  },
+  domination: {
+    title: 'Professional Domination & BDSM | SecretXperience',
+    description: 'Verified professional dominants and BDSM practitioners across Europe. Private dungeons, all experience levels welcome.',
+    heading: 'Domination & BDSM',
+  },
   photo: {
     title: 'Adult Photography Studios | SecretXperience',
     description: 'Professional adult photography and video studios. Private sets, verified locations.',
@@ -70,7 +80,7 @@ export async function generateMetadata({ params }: { params: { category: string 
     openGraph: {
       title: meta.title,
       description: meta.description,
-      url: `https://secret-xperience.vercel.app/${params.category}`,
+      url: `https://www.secretxperience.eu/${params.category}`,
     },
   }
 }

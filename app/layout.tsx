@@ -3,7 +3,7 @@ import Script from 'next/script'
 import './globals.css'
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://secret-xperience.vercel.app'),
+  metadataBase: new URL('https://www.secretxperience.eu'),
   title: 'SecretXperience.eu — Premium Adult Services Platform',
   description: 'Discreet, verified, premium adult experiences across Europe. Browse escorts, companions, nightlife, creators, rentals, and more.',
   manifest: '/manifest.json',
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_EU',
-    url: 'https://secret-xperience.vercel.app',
+    url: 'https://www.secretxperience.eu',
     siteName: 'SecretXperience.eu',
     title: 'SecretXperience.eu — Premium Adult Services Platform',
     description: 'Discreet, verified, premium adult experiences across Europe.',
