@@ -936,40 +936,66 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
       currentSession = session
       const loginBtn = document.getElementById('loginBtn') as HTMLButtonElement | null
       const signupBtn = document.getElementById('signupBtn') as HTMLButtonElement | null
+      const listServiceBtn = document.getElementById('listServiceBtn') as HTMLButtonElement | null
+      const profileMenuWrap = document.getElementById('profileMenuWrap') as HTMLElement | null
+      const profileAvatar = document.getElementById('profileAvatar') as HTMLElement | null
+      const profileDisplayName = document.getElementById('profileDisplayName') as HTMLElement | null
+      const ddName = document.getElementById('ddName') as HTMLElement | null
+      const ddEmail = document.getElementById('ddEmail') as HTMLElement | null
+      const profileBtn = document.getElementById('profileBtn') as HTMLButtonElement | null
+      const profileDropdown = document.getElementById('profileDropdown') as HTMLElement | null
+      const profileChevron = document.getElementById('profileChevron') as HTMLElement | null
+
+      // Profile dropdown toggle
+      if (profileBtn && profileDropdown) {
+        profileBtn.addEventListener('click', function(e) {
+          e.stopPropagation()
+          const open = profileDropdown.style.display === 'block'
+          profileDropdown.style.display = open ? 'none' : 'block'
+          profileBtn.setAttribute('aria-expanded', String(!open))
+          if (profileChevron) profileChevron.style.transform = open ? '' : 'rotate(180deg)'
+        })
+        document.addEventListener('click', function() {
+          profileDropdown.style.display = 'none'
+          profileBtn.setAttribute('aria-expanded', 'false')
+          if (profileChevron) profileChevron.style.transform = ''
+        })
+      }
+
       if (session) {
-        const { data: profile } = await supabase.from('profiles').select('full_name, username, role').eq('id', session.user.id).single()
+        const { data: profile } = await supabase.from('profiles').select('full_name, username, role, email').eq('id', session.user.id).single()
         const name = profile?.full_name || profile?.username || 'Account'
-        if (loginBtn) { loginBtn.textContent = name; loginBtn.onclick = () => { window.location.href = '/dashboard' } }
-        if (signupBtn) {
-          if (profile?.role === 'admin') {
-            signupBtn.textContent = 'Admin'; signupBtn.onclick = () => { window.location.href = '/admin' }
-          } else {
-            signupBtn.textContent = 'List service'; signupBtn.onclick = () => { window.location.href = '/listings/create' }
-            // Check if provider has 0 listings and add a subtle gold dot nudge
-            if (['provider','venue','creator'].includes(profile?.role)) {
-              const { count } = await (supabase as any).from('listings').select('id', { count: 'exact', head: true }).eq('profile_id', session.user.id)
-              if (count === 0 && signupBtn) {
-                signupBtn.style.position = 'relative'
-                const dot = document.createElement('span')
-                dot.title = 'You have no listings yet — create one!'
-                dot.style.cssText = 'position:absolute;top:-4px;right:-4px;width:8px;height:8px;border-radius:50%;background:#c5a05a;border:1.5px solid #080808;pointer-events:none;'
-                signupBtn.appendChild(dot)
-              }
-            }
-          }
+        const initials = name.split(' ').map((w: string) => w[0]).join('').slice(0,2).toUpperCase()
+
+        // Hide logged-out buttons, show logged-in elements
+        if (loginBtn) loginBtn.style.display = 'none'
+        if (signupBtn) signupBtn.style.display = 'none'
+        if (listServiceBtn) listServiceBtn.style.display = 'flex'
+        if (profileMenuWrap) profileMenuWrap.style.display = 'block'
+
+        // Populate avatar + dropdown header
+        if (profileAvatar) profileAvatar.textContent = initials
+        if (profileDisplayName) profileDisplayName.textContent = name
+        if (ddName) ddName.textContent = name
+        if (ddEmail) ddEmail.textContent = profile?.email || session.user.email || ''
+
+        // Admin: show Admin link in dropdown instead of List service
+        if (profile?.role === 'admin') {
+          if (listServiceBtn) { listServiceBtn.innerHTML = '<i class="ti ti-settings" aria-hidden="true"></i> Admin'; listServiceBtn.onclick = () => { window.location.href = '/admin' } }
         }
+
         // Load unread message count
         const { count: unreadCount } = await (supabase as any)
           .from('messages')
           .select('id', { count: 'exact', head: true })
           .eq('receiver_id', session.user.id)
           .eq('read', false)
+        const badge = document.getElementById('navMsgBadge')
+        const ddBadge = document.getElementById('ddMsgBadge')
         if (unreadCount && unreadCount > 0) {
-          const badge = document.getElementById('navMsgBadge')
-          if (badge) {
-            badge.textContent = unreadCount > 9 ? '9+' : String(unreadCount)
-            badge.style.display = 'inline'
-          }
+          const label = unreadCount > 9 ? '9+' : String(unreadCount)
+          if (badge) { badge.textContent = label; badge.style.display = 'inline' }
+          if (ddBadge) { ddBadge.textContent = label; ddBadge.style.display = 'inline' }
         }
       } else {
         if (loginBtn) loginBtn.onclick = () => { window.location.href = '/login' }
@@ -1363,12 +1389,37 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
 
   <!-- NAV -->
   <nav role="navigation" aria-label="Main navigation" style="background:rgba(8,6,18,0.92);backdrop-filter:blur(18px);border-bottom:0.5px solid var(--b);">
-    <div class="nav-logo"><span style="font-family:var(--serif);font-size:22px;color:var(--gold);letter-spacing:.02em;filter:drop-shadow(0 0 12px rgba(197,160,90,0.30))">Secret<em style="font-style:italic;font-weight:300">Xperience</em></span></div>
+    <div class="nav-logo"><span style="font-family:var(--serif);font-size:30px;color:var(--gold);letter-spacing:.02em;filter:drop-shadow(0 0 14px rgba(197,160,90,0.35))">Secret<em style="font-style:italic;font-weight:300">Xperience</em></span></div>
     <div class="nav-right">
       <button class="nb" id="locBtn" aria-label="Location"><i class="ti ti-map-pin" aria-hidden="true"></i> Brussels</button>
       <button onclick="__cycleTheme()" aria-label="Toggle theme" style="width:34px;height:34px;background:var(--bg2);border:0.5px solid var(--b2);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--t2);font-size:16px;flex-shrink:0;"><i class="ti ti-moon-stars" id="themeIcon"></i></button>
+      <!-- logged-out -->
       <button class="nb" id="loginBtn">Log in</button>
       <button class="nb pri" id="signupBtn">Sign up</button>
+      <!-- logged-in: List service + profile avatar -->
+      <button class="nb pri" id="listServiceBtn" style="display:none" onclick="window.location.href='/listings/create'"><i class="ti ti-plus" aria-hidden="true"></i> List service</button>
+      <div id="profileMenuWrap" style="display:none;position:relative;">
+        <button id="profileBtn" aria-label="Account menu" aria-haspopup="true" aria-expanded="false" style="display:flex;align-items:center;gap:6px;background:var(--bg2);border:0.5px solid var(--b2);border-radius:20px;padding:4px 10px 4px 4px;cursor:pointer;color:var(--t);">
+          <div id="profileAvatar" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--goldd));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#0a0a0a;flex-shrink:0;">A</div>
+          <span id="profileDisplayName" style="font-size:13px;font-weight:500;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Account</span>
+          <i class="ti ti-chevron-down" id="profileChevron" style="font-size:11px;color:var(--t3);transition:transform .2s;"></i>
+        </button>
+        <div id="profileDropdown" style="display:none;position:absolute;top:calc(100% + 8px);right:0;min-width:220px;background:var(--bg1);border:0.5px solid var(--b2);border-radius:var(--rl);box-shadow:var(--shadow-modal);z-index:9999;overflow:hidden;">
+          <div style="padding:14px 16px 12px;border-bottom:0.5px solid var(--b);">
+            <div id="ddName" style="font-family:var(--serif);font-size:15px;font-weight:500;color:var(--t);">Account</div>
+            <div id="ddEmail" style="font-size:12px;color:var(--t3);margin-top:2px;"></div>
+          </div>
+          <div style="padding:6px 0;">
+            <a href="/dashboard" style="display:flex;align-items:center;gap:10px;padding:10px 16px;color:var(--t);font-size:13px;text-decoration:none;" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''"><i class="ti ti-user-circle" style="font-size:16px;color:var(--t3);width:18px;text-align:center;"></i> My Profile</a>
+            <a href="/dashboard" style="display:flex;align-items:center;gap:10px;padding:10px 16px;color:var(--t);font-size:13px;text-decoration:none;" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''"><i class="ti ti-layout-dashboard" style="font-size:16px;color:var(--t3);width:18px;text-align:center;"></i> Dashboard</a>
+            <a href="/messages" style="display:flex;align-items:center;gap:10px;padding:10px 16px;color:var(--t);font-size:13px;text-decoration:none;" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''"><i class="ti ti-message" style="font-size:16px;color:var(--t3);width:18px;text-align:center;"></i> Messages <span id="ddMsgBadge" style="display:none;margin-left:auto;background:var(--gold);color:#0a0a0a;border-radius:10px;padding:1px 7px;font-size:11px;font-weight:700;"></span></a>
+            <a href="/listings/create" style="display:flex;align-items:center;gap:10px;padding:10px 16px;color:var(--t);font-size:13px;text-decoration:none;" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''"><i class="ti ti-plus" style="font-size:16px;color:var(--t3);width:18px;text-align:center;"></i> List a service</a>
+          </div>
+          <div style="border-top:0.5px solid var(--b);padding:6px 0;">
+            <button data-action="logout" style="display:flex;align-items:center;gap:10px;padding:10px 16px;color:var(--wine);font-size:13px;background:none;border:none;cursor:pointer;width:100%;text-align:left;" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''"><i class="ti ti-logout" style="font-size:16px;width:18px;text-align:center;"></i> Log out</button>
+          </div>
+        </div>
+      </div>
       <button class="nb nav-menu-btn" id="menuBtn" aria-label="Open menu"><i class="ti ti-menu-2"></i></button>
     </div>
   </nav>
