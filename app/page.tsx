@@ -81,7 +81,8 @@ sov.addEventListener('click', closeSidebar);
         locBtn.innerHTML = '<i class="ti ti-map-pin" aria-hidden="true"></i> ' + (c === 'All Cities' ? 'Location' : c);
         (window as any).__activeCity = c === 'All Cities' ? null : c;
         if(typeof (window as any).activeFilters !== 'undefined'){
-          (window as any).activeFilters.city = (window as any).__activeCity;
+          const _c = (window as any).__activeCity;
+          if (_c === null) { (window as any).activeFilters.cities = []; } else { (window as any).activeFilters.cities = [_c]; }
           if(typeof (window as any).fetchListings === 'function') (window as any).fetchListings((window as any).activeFilters);
         }
         closePicker();
@@ -1104,10 +1105,15 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
     // ── Real listings from Supabase ──
     const activeFilters: any = {
       category: 'all', verified: false, premium: false, trending: false,
-      minRating: 0, priceMax: null, city: null,
-      meetType: 'all', escortType: 'all', orientation: 'all',
-      services: [] as string[], languages: [] as string[],
-      hair: null as string | null, build: null as string | null,
+      minRating: 0, priceMax: null,
+      cities: [] as string[],
+      meetTypes: [] as string[],
+      escortTypes: [] as string[],
+      orientations: [] as string[],
+      services: [] as string[],
+      languages: [] as string[],
+      hairs: [] as string[],
+      builds: [] as string[],
     }
     ;(window as any).activeFilters = activeFilters
     let currentPage = 0
@@ -1207,17 +1213,17 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
       ;(window as any).fetchListings = fetchListings
       let query = (supabase as any).from('listings').select('*').eq('active', true)
       if (filters.category && filters.category !== 'all') query = query.eq('category', filters.category)
-      if (filters.city) query = query.eq('city', filters.city)
-      if (filters.meetType && filters.meetType !== 'all') query = query.eq('meet_type', filters.meetType)
+      if (filters.cities && filters.cities.length > 0) query = query.in('city', filters.cities)
+      if (filters.meetTypes && filters.meetTypes.length > 0) query = query.in('meet_type', filters.meetTypes)
       if (filters.verified) query = query.eq('verified', true)
       if (filters.premium) query = query.eq('premium', true)
       if (filters.trending) query = query.eq('trending', true)
       if (filters.minRating > 0) query = query.gte('rating', filters.minRating)
       if (filters.priceMax) query = query.lte('price_from', filters.priceMax)
-      if (filters.escortType && filters.escortType !== 'all') query = query.contains('tags', [`type:${filters.escortType}`])
-      if (filters.orientation && filters.orientation !== 'all') query = query.contains('tags', [`orientation:${filters.orientation}`])
-      if (filters.hair) query = query.contains('tags', [filters.hair])
-      if (filters.build) query = query.contains('tags', [filters.build])
+      if (filters.escortTypes && filters.escortTypes.length > 0) query = query.overlaps('tags', filters.escortTypes.map((t: string) => 'type:' + t.toLowerCase()))
+      if (filters.orientations && filters.orientations.length > 0) query = query.overlaps('tags', filters.orientations.map((o: string) => 'orientation:' + o.toLowerCase()))
+      if (filters.hairs && filters.hairs.length > 0) query = query.overlaps('tags', filters.hairs)
+      if (filters.builds && filters.builds.length > 0) query = query.overlaps('tags', filters.builds)
       if (filters.services && filters.services.length > 0) {
         for (const svc of filters.services) { query = query.contains('tags', [svc]) }
       }
@@ -1402,43 +1408,94 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
       })
     })
 
-    // Wire escort type buttons
+    // Wire escort type buttons (multi-select)
     document.querySelectorAll('[data-etype]').forEach(function(btn) {
       btn.addEventListener('click', function() {
-        document.querySelectorAll('[data-etype]').forEach(b => b.classList.remove('active'))
-        btn.classList.add('active')
-        activeFilters.escortType = (btn as HTMLElement).dataset.etype || 'all'
+        const val = (btn as HTMLElement).dataset.etype || ''
+        if (val === 'all') {
+          activeFilters.escortTypes = []
+          document.querySelectorAll('[data-etype]').forEach(b => b.classList.remove('active'))
+          btn.classList.add('active')
+        } else {
+          document.querySelector('[data-etype="all"]')?.classList.remove('active')
+          if (activeFilters.escortTypes.includes(val)) {
+            activeFilters.escortTypes = activeFilters.escortTypes.filter((v: string) => v !== val)
+            btn.classList.remove('active')
+            if (activeFilters.escortTypes.length === 0) document.querySelector('[data-etype="all"]')?.classList.add('active')
+          } else {
+            activeFilters.escortTypes.push(val)
+            btn.classList.add('active')
+          }
+        }
         fetchListings(activeFilters)
       })
     })
 
-    // Wire orientation buttons
+    // Wire orientation buttons (multi-select)
     document.querySelectorAll('[data-ori]').forEach(function(btn) {
       btn.addEventListener('click', function() {
-        document.querySelectorAll('[data-ori]').forEach(b => b.classList.remove('active'))
-        btn.classList.add('active')
-        activeFilters.orientation = (btn as HTMLElement).dataset.ori || 'all'
+        const val = (btn as HTMLElement).dataset.ori || ''
+        if (val === 'all') {
+          activeFilters.orientations = []
+          document.querySelectorAll('[data-ori]').forEach(b => b.classList.remove('active'))
+          btn.classList.add('active')
+        } else {
+          document.querySelector('[data-ori="all"]')?.classList.remove('active')
+          if (activeFilters.orientations.includes(val)) {
+            activeFilters.orientations = activeFilters.orientations.filter((v: string) => v !== val)
+            btn.classList.remove('active')
+            if (activeFilters.orientations.length === 0) document.querySelector('[data-ori="all"]')?.classList.add('active')
+          } else {
+            activeFilters.orientations.push(val)
+            btn.classList.add('active')
+          }
+        }
         fetchListings(activeFilters)
       })
     })
 
-    // Wire meet type buttons
+    // Wire meet type buttons (multi-select)
     document.querySelectorAll('[data-meet]').forEach(function(btn) {
       btn.addEventListener('click', function() {
-        document.querySelectorAll('[data-meet]').forEach(b => b.classList.remove('active'))
-        btn.classList.add('active')
-        activeFilters.meetType = (btn as HTMLElement).dataset.meet || 'all'
+        const val = (btn as HTMLElement).dataset.meet || ''
+        if (val === 'all') {
+          activeFilters.meetTypes = []
+          document.querySelectorAll('[data-meet]').forEach(b => b.classList.remove('active'))
+          btn.classList.add('active')
+        } else {
+          document.querySelector('[data-meet="all"]')?.classList.remove('active')
+          if (activeFilters.meetTypes.includes(val)) {
+            activeFilters.meetTypes = activeFilters.meetTypes.filter((v: string) => v !== val)
+            btn.classList.remove('active')
+            if (activeFilters.meetTypes.length === 0) document.querySelector('[data-meet="all"]')?.classList.add('active')
+          } else {
+            activeFilters.meetTypes.push(val)
+            btn.classList.add('active')
+          }
+        }
         fetchListings(activeFilters)
       })
     })
 
-    // Wire city filter buttons (sidebar)
+    // Wire city filter buttons (multi-select)
     document.querySelectorAll('[data-city-f]').forEach(function(btn) {
       btn.addEventListener('click', function() {
-        document.querySelectorAll('[data-city-f]').forEach(b => b.classList.remove('active'))
-        btn.classList.add('active')
         const val = (btn as HTMLElement).dataset.cityF || 'all'
-        activeFilters.city = val === 'all' ? null : val
+        if (val === 'all') {
+          activeFilters.cities = []
+          document.querySelectorAll('[data-city-f]').forEach(b => b.classList.remove('active'))
+          btn.classList.add('active')
+        } else {
+          document.querySelector('[data-city-f="all"]')?.classList.remove('active')
+          if (activeFilters.cities.includes(val)) {
+            activeFilters.cities = activeFilters.cities.filter((v: string) => v !== val)
+            btn.classList.remove('active')
+            if (activeFilters.cities.length === 0) document.querySelector('[data-city-f="all"]')?.classList.add('active')
+          } else {
+            activeFilters.cities.push(val)
+            btn.classList.add('active')
+          }
+        }
         fetchListings(activeFilters)
       })
     })
@@ -1473,32 +1530,30 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
       })
     })
 
-    // Wire hair color (single select toggle)
+    // Wire hair color (multi-select toggle)
     document.querySelectorAll('[data-hair]').forEach(function(btn) {
       btn.addEventListener('click', function() {
         const val = (btn as HTMLElement).dataset.hair || ''
-        if (activeFilters.hair === val) {
-          activeFilters.hair = null
+        if (activeFilters.hairs.includes(val)) {
+          activeFilters.hairs = activeFilters.hairs.filter((v: string) => v !== val)
           btn.classList.remove('active')
         } else {
-          document.querySelectorAll('[data-hair]').forEach(b => b.classList.remove('active'))
-          activeFilters.hair = val
+          activeFilters.hairs.push(val)
           btn.classList.add('active')
         }
         fetchListings(activeFilters)
       })
     })
 
-    // Wire build (single select toggle)
+    // Wire build (multi-select toggle)
     document.querySelectorAll('[data-build]').forEach(function(btn) {
       btn.addEventListener('click', function() {
         const val = (btn as HTMLElement).dataset.build || ''
-        if (activeFilters.build === val) {
-          activeFilters.build = null
+        if (activeFilters.builds.includes(val)) {
+          activeFilters.builds = activeFilters.builds.filter((v: string) => v !== val)
           btn.classList.remove('active')
         } else {
-          document.querySelectorAll('[data-build]').forEach(b => b.classList.remove('active'))
-          activeFilters.build = val
+          activeFilters.builds.push(val)
           btn.classList.add('active')
         }
         fetchListings(activeFilters)
@@ -1507,12 +1562,12 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
 
     // Wire reset button
     document.getElementById('resetFilters')?.addEventListener('click', function() {
-      activeFilters.escortType = 'all'; activeFilters.orientation = 'all'
-      activeFilters.meetType = 'all'; activeFilters.city = null
+      activeFilters.escortTypes = []; activeFilters.orientations = []
+      activeFilters.meetTypes = []; activeFilters.cities = []
+      activeFilters.hairs = []; activeFilters.builds = []
       activeFilters.verified = false; activeFilters.premium = false; activeFilters.trending = false
       activeFilters.priceMax = null; activeFilters.minRating = 0
       activeFilters.services = []; activeFilters.languages = []
-      activeFilters.hair = null; activeFilters.build = null
       document.querySelectorAll('[data-etype]').forEach(b => b.classList.remove('active'))
       document.querySelector('[data-etype="all"]')?.classList.add('active')
       document.querySelectorAll('[data-ori]').forEach(b => b.classList.remove('active'))
