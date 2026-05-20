@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { createClient } from '@supabase/supabase-js'
+import { useState, useEffect } from 'react'
+import { createBrowserClient } from '@supabase/ssr'
 
-const supabase = createClient(
+const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
@@ -158,11 +158,15 @@ export default function ProviderHubPage() {
       if (prof?.availability) {
         try {
           const parsed = JSON.parse(prof.availability)
-          if (parsed.blocked) setBlockedDates(parsed.blocked)
-          if (parsed.notes) setAvailNotes(parsed.notes)
+          const avail: { blocked?: string[]; notes?: string } = (parsed && typeof parsed === 'object')
+            ? parsed
+            : { blocked: [], notes: '' }
+          setBlockedDates(Array.isArray(avail.blocked) ? avail.blocked : [])
+          setAvailNotes(typeof avail.notes === 'string' ? avail.notes : '')
         } catch {
-          // legacy plain text
-          setAvailNotes(prof.availability)
+          // legacy plain text or malformed JSON — default to empty
+          setBlockedDates([])
+          setAvailNotes(typeof prof.availability === 'string' ? prof.availability : '')
         }
       }
 

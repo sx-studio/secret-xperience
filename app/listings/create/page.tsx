@@ -37,6 +37,19 @@ const MEET_TYPES = [
   { value: 'both',    label: 'Both',     desc: 'Either works' },
 ]
 
+const SERVICE_TAGS: Record<string, string[]> = {
+  escorts:      ['GFE', 'BDSM', 'Massage', 'Tantric', 'Roleplay', 'Dinner Date', 'Travel Companion', 'Duo', 'Couples', 'Overnight', 'Striptease', 'Domination'],
+  companionship:['GFE', 'BDSM', 'Massage', 'Tantric', 'Roleplay', 'Dinner Date', 'Travel Companion', 'Duo', 'Couples', 'Overnight', 'Striptease', 'Domination'],
+  massage:      ['Swedish', 'Deep Tissue', 'Tantric', 'Hot Stone', 'Thai', 'Sports', 'Reflexology', 'Aromatherapy'],
+  domination:   ['GFE', 'BDSM', 'Roleplay', 'Dinner Date', 'Overnight', 'Domination'],
+}
+
+const ETHNICITY_OPTIONS = ['Asian', 'Black', 'Caucasian', 'Hispanic', 'Indian', 'Middle Eastern', 'Mixed', 'Other']
+const BUILD_OPTIONS     = ['Slim', 'Athletic', 'Curvy', 'Full-figured', 'Petite', 'Tall', 'Average']
+const HAIR_OPTIONS      = ['Black', 'Blonde', 'Brown', 'Red', 'Auburn', 'White/Grey', 'Other']
+
+const STATS_CATEGORIES  = ['escorts', 'companionship', 'massage', 'domination']
+
 /* ─── Types ─────────────────────────────────────────────── */
 
 interface FormState {
@@ -50,6 +63,10 @@ interface FormState {
   price_to:    string
   meet_type:   string
   images:      string[]
+  tags:        string[]
+  ethnicity:   string
+  build:       string
+  hair:        string
 }
 
 interface UploadingImage {
@@ -147,6 +164,10 @@ export default function CreateListingPage() {
     price_to:    '',
     meet_type:   'both',
     images:      [],
+    tags:        [],
+    ethnicity:   '',
+    build:       '',
+    hair:        '',
   })
 
   const [uploadingImages, setUploadingImages] = useState<UploadingImage[]>([])
@@ -186,14 +207,34 @@ export default function CreateListingPage() {
       const saved = localStorage.getItem('sx_listing_draft')
       if (!saved) return
       const { step: savedStep, form: savedForm } = JSON.parse(saved)
-      setForm(savedForm)
+      setForm((prev) => ({
+        ...prev,
+        ...savedForm,
+        tags: Array.isArray(savedForm?.tags) ? savedForm.tags : [],
+      }))
       setStep(savedStep || 1)
       setDraftBanner(false)
     } catch(e) { setDraftBanner(false) }
   }
 
+  // Autosave to localStorage on every form/step change
+  useEffect(() => {
+    try {
+      localStorage.setItem('sx_listing_draft', JSON.stringify({ step, form }))
+    } catch(e) {}
+  }, [form, step])
+
   const set = (field: keyof FormState, value: string) =>
     setForm(f => ({ ...f, [field]: value }))
+
+  function toggleTag(tag: string) {
+    setForm(f => ({
+      ...f,
+      tags: f.tags.includes(tag)
+        ? f.tags.filter(t => t !== tag)
+        : [...f.tags, tag],
+    }))
+  }
 
   /* ── Image upload ── */
   const uploadFile = useCallback(async (file: File) => {
@@ -248,6 +289,15 @@ export default function CreateListingPage() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) { window.location.href = '/login'; return }
 
+    // Build final tags array: service tags + physical stat tags
+    const statTags: string[] = []
+    if (STATS_CATEGORIES.includes(form.category)) {
+      if (form.ethnicity) statTags.push(`Ethnicity: ${form.ethnicity}`)
+      if (form.build)     statTags.push(`Build: ${form.build}`)
+      if (form.hair)      statTags.push(`Hair: ${form.hair}`)
+    }
+    const finalTags = [...form.tags, ...statTags]
+
     const { error: err } = await supabase.from('listings').insert({
       profile_id:  session.user.id,
       title:       form.title,
@@ -261,6 +311,7 @@ export default function CreateListingPage() {
       country:     form.country,
       meet_type:   form.meet_type,
       images:      form.images.length > 0 ? form.images : null,
+      tags:        finalTags.length > 0 ? finalTags : null,
       active:      true,
     })
 
@@ -502,6 +553,32 @@ export default function CreateListingPage() {
 
         select option { background: var(--bg2, #1a1a1a); color: var(--t, #ece8e1); }
 
+        /* Tag chips */
+        .cl-tag-chip {
+          padding: 6px 13px;
+          border-radius: 20px;
+          border: 0.5px solid var(--b2, rgba(255,255,255,0.12));
+          background: var(--bg2, rgba(255,255,255,0.02));
+          color: var(--t2, rgba(255,255,255,0.4));
+          font-family: var(--sans, 'Jost', sans-serif);
+          font-size: 12px;
+          font-weight: 400;
+          letter-spacing: 0.03em;
+          cursor: pointer;
+          transition: border-color 0.18s, background 0.18s, color 0.18s;
+          user-select: none;
+          white-space: nowrap;
+        }
+        .cl-tag-chip:hover {
+          border-color: var(--gbrd, rgba(197,160,90,0.35));
+          color: rgba(197,160,90,0.7);
+        }
+        .cl-tag-chip.selected {
+          border-color: var(--gbrd, rgba(197,160,90,0.65));
+          background: var(--gbg, rgba(197,160,90,0.08));
+          color: var(--gold, #c5a05a);
+        }
+
         .cl-upload-zone {
           border: 0.5px dashed var(--b3, rgba(197,160,90,0.25));
           border-radius: var(--rl, 13px);
@@ -655,10 +732,10 @@ export default function CreateListingPage() {
               borderRadius: 'var(--r, 8px)', padding: '10px 14px', marginBottom: '1.5rem',
               fontFamily: 'var(--sans, "Jost", sans-serif)', fontSize: '13px',
             }}>
-              <span style={{ color: 'var(--t2, rgba(255,255,255,0.55))', fontWeight: 300 }}>You have a saved draft.</span>
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <button type="button" onClick={restoreDraft} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--gold, #c5a05a)', fontSize: '13px', fontFamily: 'var(--sans, "Jost", sans-serif)', fontWeight: 500, padding: 0 }}>Restore</button>
-                <button type="button" onClick={() => { localStorage.removeItem('sx_listing_draft'); setDraftBanner(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--t3, rgba(255,255,255,0.25))', fontSize: '13px', fontFamily: 'var(--sans, "Jost", sans-serif)', fontWeight: 300, padding: 0 }}>Discard</button>
+              <span style={{ color: 'var(--t2, rgba(255,255,255,0.55))', fontWeight: 300 }}>Resume draft? You have unsaved progress.</span>
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                <button type="button" onClick={restoreDraft} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--gold, #c5a05a)', fontSize: '13px', fontFamily: 'var(--sans, "Jost", sans-serif)', fontWeight: 500, padding: 0 }}>Resume</button>
+                <button type="button" onClick={() => { localStorage.removeItem('sx_listing_draft'); setDraftBanner(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--t3, rgba(255,255,255,0.25))', fontSize: '13px', fontFamily: 'var(--sans, "Jost", sans-serif)', fontWeight: 300, padding: 0 }}>Dismiss</button>
               </div>
             </div>
           )}
@@ -771,6 +848,105 @@ export default function CreateListingPage() {
                   rows={5}
                 />
               </div>
+
+              {/* ── Tags / Services ── */}
+              {SERVICE_TAGS[form.category] && (
+                <div style={fieldWrap}>
+                  <label style={label}>Services &amp; Tags</label>
+                  <p style={{
+                    fontFamily: 'var(--sans, "Jost", sans-serif)',
+                    fontSize: '12px',
+                    color: 'var(--t3, rgba(255,255,255,0.22))',
+                    fontWeight: 300,
+                    letterSpacing: '0.02em',
+                    marginBottom: '10px',
+                  }}>
+                    Select all that apply — shown on your listing.
+                  </p>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                    {SERVICE_TAGS[form.category].map(tag => (
+                      <button
+                        key={tag}
+                        type="button"
+                        className={`cl-tag-chip${form.tags.includes(tag) ? ' selected' : ''}`}
+                        onClick={() => toggleTag(tag)}
+                      >
+                        {tag}
+                      </button>
+                    ))}
+                  </div>
+                  {form.tags.length > 0 && (
+                    <p style={{
+                      fontFamily: 'var(--sans, "Jost", sans-serif)',
+                      fontSize: '11px',
+                      color: 'var(--gold, rgba(197,160,90,0.5))',
+                      marginTop: '8px',
+                      fontWeight: 300,
+                      letterSpacing: '0.04em',
+                    }}>
+                      {form.tags.length} selected
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* ── Physical Stats (escorts / companionship / massage / domination) ── */}
+              {STATS_CATEGORIES.includes(form.category) && (
+                <div style={fieldWrap}>
+                  <label style={label}>Physical Stats <span style={{ fontWeight: 300, textTransform: 'none', letterSpacing: 0 }}>(optional)</span></label>
+                  <p style={{
+                    fontFamily: 'var(--sans, "Jost", sans-serif)',
+                    fontSize: '12px',
+                    color: 'var(--t3, rgba(255,255,255,0.22))',
+                    fontWeight: 300,
+                    letterSpacing: '0.02em',
+                    marginBottom: '12px',
+                  }}>
+                    These are appended as tags on your listing.
+                  </p>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+                    {/* Ethnicity */}
+                    <div>
+                      <label style={{ ...label, marginBottom: '4px' }}>Ethnicity</label>
+                      <select
+                        className="cl-inp"
+                        style={inpField}
+                        value={form.ethnicity}
+                        onChange={e => set('ethnicity', e.target.value)}
+                      >
+                        <option value="">Select…</option>
+                        {ETHNICITY_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+                      </select>
+                    </div>
+                    {/* Build */}
+                    <div>
+                      <label style={{ ...label, marginBottom: '4px' }}>Build</label>
+                      <select
+                        className="cl-inp"
+                        style={inpField}
+                        value={form.build}
+                        onChange={e => set('build', e.target.value)}
+                      >
+                        <option value="">Select…</option>
+                        {BUILD_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+                      </select>
+                    </div>
+                    {/* Hair */}
+                    <div>
+                      <label style={{ ...label, marginBottom: '4px' }}>Hair Color</label>
+                      <select
+                        className="cl-inp"
+                        style={inpField}
+                        value={form.hair}
+                        onChange={e => set('hair', e.target.value)}
+                      >
+                        <option value="">Select…</option>
+                        {HAIR_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
