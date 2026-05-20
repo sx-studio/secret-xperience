@@ -10,16 +10,41 @@ export default function Home() {
 
 // ── Age Gate ──
 var gate = document.getElementById('gate');
-// Skip gate if already verified
+function dismissGate() {
+  if (gate) gate.classList.add('gone');
+  document.body.style.overflow = '';
+  localStorage.setItem('sx_age_ok', '1');
+}
+// Skip gate if already verified via localStorage
 if (localStorage.getItem('sx_age_ok') === '1') {
   if (gate) gate.classList.add('gone');
 } else {
+  // Block scroll while gate is visible
   document.body.style.overflow = 'hidden';
+  // Also skip if user has an active Supabase session (already logged in)
+  try {
+    var _sbUrl = document.querySelector('meta[name="sb-url"]')?.getAttribute('content') || '';
+    var _sbKey = document.querySelector('meta[name="sb-key"]')?.getAttribute('content') || '';
+    if (!_sbUrl) {
+      // Fall back to env-injected values if meta tags not present
+      _sbUrl = (window as any).__SB_URL__ || '';
+      _sbKey = (window as any).__SB_KEY__ || '';
+    }
+    // Check localStorage for Supabase session token (all Supabase v2 clients store it here)
+    var _hasSession = false;
+    for (var _k in localStorage) {
+      if (_k.startsWith('sb-') && _k.endsWith('-auth-token')) {
+        try {
+          var _tok = JSON.parse(localStorage.getItem(_k) || '{}');
+          if (_tok && _tok.access_token) { _hasSession = true; break; }
+        } catch(e) {}
+      }
+    }
+    if (_hasSession) dismissGate();
+  } catch(e) {}
 }
 document.getElementById('gyes').addEventListener('click', function(){
-  gate.classList.add('gone');
-  localStorage.setItem('sx_age_ok', '1');
-  document.body.style.overflow = '';
+  dismissGate();
 });
 document.getElementById('gno').addEventListener('click', function(){
   gate.innerHTML = '<div style="position:relative;z-index:2;background:var(--bg1);border:0.5px solid var(--b3);border-radius:var(--rxl);padding:2.5rem 2rem;max-width:360px;width:90%;text-align:center"><div style="font-family:var(--serif);font-size:22px;color:var(--t);margin-bottom:.75rem">Access Denied</div><div style="font-size:13px;color:var(--t2)">You must be 18 or older to access SecretXperience.eu.</div></div>';
@@ -966,6 +991,8 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
       }
 
       if (session) {
+        // Logged-in users always bypass the age gate
+        dismissGate()
         const { data: profile } = await supabase.from('profiles').select('full_name, username, role, email').eq('id', session.user.id).single()
         const name = profile?.full_name || profile?.username || 'Account'
         const initials = name.split(' ').map((w: string) => w[0]).join('').slice(0,2).toUpperCase()
@@ -1256,15 +1283,17 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
       document.getElementById('listingCards')?.scrollIntoView({ behavior: 'smooth', block: 'end' })
     }
 
-    // Wire category bar to real data + update URL
+    // Wire category bar — navigate to dedicated category pages
     document.querySelectorAll('.cat').forEach(function(cat) {
       cat.addEventListener('click', function() {
         const catVal = (cat as HTMLElement).dataset.cat || 'all'
-        activeFilters.category = catVal
-        fetchListings(activeFilters)
-        // Update URL without page reload for bookmarkability
-        const url = catVal === 'all' ? '/' : `/${catVal}`
-        history.pushState({}, '', url)
+        if (catVal === 'all') {
+          activeFilters.category = 'all'
+          fetchListings(activeFilters)
+          return
+        }
+        // Navigate to the dedicated category page
+        window.location.href = '/' + catVal
       })
     })
 
