@@ -999,7 +999,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         }
       } else {
         if (loginBtn) loginBtn.onclick = () => { window.location.href = '/login' }
-        if (signupBtn) signupBtn.onclick = () => { window.location.href = '/login' }
+        if (signupBtn) signupBtn.onclick = () => { window.location.href = '/advertise' }
       }
 
       // ── Mobile bottom nav ──
