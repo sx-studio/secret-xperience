@@ -1332,22 +1332,6 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
     const navLogo = document.querySelector('.nav-logo') as HTMLElement | null
     if (navLogo) { navLogo.style.cursor = 'pointer'; navLogo.addEventListener('click', () => { window.location.href = '/' }) }
 
-    const origFetch = fetchListings
-    const searchInput = document.querySelector('.nav-search input') as HTMLInputElement | null
-    if (searchInput) {
-      searchInput.addEventListener('input', function() {
-        const q = this.value.toLowerCase().trim()
-        if (!q) { origFetch(activeFilters); return }
-        const filtered = allListings.filter((l: any) =>
-          (l.title || '').toLowerCase().includes(q) ||
-          (l.city || '').toLowerCase().includes(q) ||
-          (l.category || '').toLowerCase().includes(q) ||
-          (l.description || '').toLowerCase().includes(q)
-        )
-        renderCards(filtered)
-      })
-    }
-
   }, [])
 
   return (
@@ -1380,10 +1364,6 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
   <!-- NAV -->
   <nav role="navigation" aria-label="Main navigation" style="background:rgba(8,6,18,0.92);backdrop-filter:blur(18px);border-bottom:0.5px solid var(--b);">
     <div class="nav-logo"><span style="font-family:var(--serif);font-size:22px;color:var(--gold);letter-spacing:.02em;filter:drop-shadow(0 0 12px rgba(197,160,90,0.30))">Secret<em style="font-style:italic;font-weight:300">Xperience</em></span></div>
-    <div class="nav-search" style="position:relative;">
-      <i class="ti ti-search" aria-hidden="true" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:15px;pointer-events:none;"></i>
-      <input type="text" placeholder="Search listings, companions, venues…" aria-label="Search" style="border-radius:20px;border:0.5px solid var(--b2);background:var(--bg2);padding:8px 14px 8px 38px;"/>
-    </div>
     <div class="nav-right">
       <button class="nb" id="locBtn" aria-label="Location"><i class="ti ti-map-pin" aria-hidden="true"></i> Brussels</button>
       <button onclick="__cycleTheme()" aria-label="Toggle theme" style="width:34px;height:34px;background:var(--bg2);border:0.5px solid var(--b2);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--t2);font-size:16px;flex-shrink:0;"><i class="ti ti-moon-stars" id="themeIcon"></i></button>
