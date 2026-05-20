@@ -448,13 +448,20 @@ function openDetail(data) {
   dpOverlay.classList.add('open');
   dpPanel.classList.add('open');
   document.body.style.overflow = 'hidden';
-  if (data.id) loadSimilarListings(data.id, data.cat || '')
+  if (data.id) {
+    loadSimilarListings(data.id, data.cat || '')
+    history.pushState({ listingId: data.id }, '', '/?listing=' + data.id)
+    // Update "View full page" link
+    var fullPageLink = document.getElementById('dpFullPageLink')
+    if (fullPageLink) fullPageLink.setAttribute('href', '/listings/' + data.id)
+  }
 }
 
 function closeDetail() {
   dpOverlay.classList.remove('open');
   dpPanel.classList.remove('open');
   document.body.style.overflow = '';
+  history.pushState({}, '', '/')
 }
 
 ;(window as any).updateHeroImage = function(src: string) {
@@ -1452,10 +1459,10 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
           <i class="ti ti-map-pin" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:16px;"></i>
         </div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;">
-          <div><div id="statListings" style="font-family:var(--serif);font-size:28px;color:var(--gold);">4,200+</div><div class="t-meta" style="color:var(--t3);">LISTINGS</div></div>
-          <div><div style="font-family:var(--serif);font-size:28px;color:var(--gold);">38</div><div class="t-meta" style="color:var(--t3);">CITIES</div></div>
-          <div><div style="font-family:var(--serif);font-size:28px;color:var(--gold);">€38.2k</div><div class="t-meta" style="color:var(--t3);">AVG MONTHLY VOL</div></div>
-          <div><div style="font-family:var(--serif);font-size:28px;color:var(--gold);">4.9 ★</div><div class="t-meta" style="color:var(--t3);">RATING</div></div>
+          <div><div id="statListings" style="font-family:var(--serif);font-size:28px;color:var(--gold);">40+</div><div class="t-meta" style="color:var(--t3);">LISTINGS</div></div>
+          <div><div style="font-family:var(--serif);font-size:28px;color:var(--gold);">8</div><div class="t-meta" style="color:var(--t3);">CITIES</div></div>
+          <div><div style="font-family:var(--serif);font-size:28px;color:var(--gold);">8</div><div class="t-meta" style="color:var(--t3);">CATEGORIES</div></div>
+          <div><div style="font-family:var(--serif);font-size:28px;color:var(--gold);">4.8 ★</div><div class="t-meta" style="color:var(--t3);">AVG RATING</div></div>
         </div>
       </div>
       <!-- MIDDLE: neon-X mascot -->
@@ -2295,7 +2302,10 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
           <div class="dp-type-pill" id="dpTypePill">Private</div>
         </div>
         <div class="dp-name" id="dpName">Sophia A.</div>
-        <a id="dpProfileLink" href="#" onclick="event.preventDefault();var pid=document.getElementById('detail-panel').dataset.profileId;if(pid)window.location.href='/profile/'+pid;" style="display:inline-block;font-size:11px;color:#c5a05a;text-decoration:none;margin-bottom:4px;opacity:0.8;letter-spacing:0.05em">View full profile →</a>
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:4px;">
+          <a id="dpProfileLink" href="#" onclick="event.preventDefault();var pid=document.getElementById('detail-panel').dataset.profileId;if(pid)window.location.href='/profile/'+pid;" style="display:inline-block;font-size:11px;color:#c5a05a;text-decoration:none;opacity:0.8;letter-spacing:0.05em">View profile →</a>
+          <a id="dpFullPageLink" href="#" style="display:inline-block;font-size:11px;color:rgba(255,255,255,0.4);text-decoration:none;letter-spacing:0.05em">Full page ↗</a>
+        </div>
         <div class="dp-meta-row">
           <span class="dp-meta-item gold"><i class="ti ti-star-filled"></i> <span id="dpRating">4.9</span> (128 reviews)</span>
           <span class="dp-meta-item"><i class="ti ti-map-pin"></i> <span id="dpCity">Brussels, BE</span></span>
