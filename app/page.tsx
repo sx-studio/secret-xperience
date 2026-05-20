@@ -59,6 +59,53 @@ document.getElementById('filterToggle').addEventListener('click', openSidebar);
 document.getElementById('sideClose').addEventListener('click', closeSidebar);
 sov.addEventListener('click', closeSidebar);
 
+// ── Location city picker ──
+;(function(){
+  var locBtn = document.getElementById('locBtn');
+  if(!locBtn) return;
+  var CITIES = ['All Cities','Brussels','Antwerp','Ghent','Amsterdam','Berlin','Paris','Cologne','Rotterdam'];
+  var picker: HTMLElement | null = null;
+  function closePicker(){ if(picker && picker.parentNode){ picker.parentNode.removeChild(picker); picker=null; } }
+  locBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    if(picker){ closePicker(); return; }
+    picker = document.createElement('div');
+    picker.style.cssText = 'position:absolute;top:calc(100% + 8px);left:0;z-index:500;background:var(--bg1);border:0.5px solid var(--b2);border-radius:var(--rl);padding:0.5rem;min-width:180px;box-shadow:0 12px 40px rgba(0,0,0,0.55);';
+    CITIES.forEach(function(c){
+      var item = document.createElement('button');
+      item.textContent = c;
+      item.style.cssText = 'display:block;width:100%;text-align:left;background:none;border:none;padding:8px 14px;font:400 13px var(--sans);color:var(--t2);cursor:pointer;border-radius:8px;transition:background 0.15s,color 0.15s;';
+      item.onmouseenter = function(){ item.style.background='var(--bg2)'; item.style.color='var(--t)'; };
+      item.onmouseleave = function(){ item.style.background='none'; item.style.color='var(--t2)'; };
+      item.addEventListener('click', function(ev){ ev.stopPropagation();
+        locBtn.innerHTML = '<i class="ti ti-map-pin" aria-hidden="true"></i> ' + (c === 'All Cities' ? 'Location' : c);
+        (window as any).__activeCity = c === 'All Cities' ? null : c;
+        if(typeof (window as any).activeFilters !== 'undefined'){
+          (window as any).activeFilters.city = (window as any).__activeCity;
+          if(typeof (window as any).fetchListings === 'function') (window as any).fetchListings((window as any).activeFilters);
+        }
+        closePicker();
+      });
+      picker!.appendChild(item);
+    });
+    locBtn.style.position = 'relative';
+    locBtn.appendChild(picker!);
+  });
+  document.addEventListener('click', closePicker);
+})();
+
+// ── Hero search button ──
+;(function(){
+  var heroSearch = document.getElementById('heroSearch') as HTMLInputElement | null;
+  var searchBtn = document.getElementById('heroSearchBtn') as HTMLButtonElement | null;
+  if(searchBtn && heroSearch){
+    searchBtn.addEventListener('click', function(){
+      var q = heroSearch!.value.trim();
+      window.location.href = q ? '/search?q=' + encodeURIComponent(q) : '/search';
+    });
+  }
+})();
+
 // ── Interactive pills / tabs ──
 document.querySelectorAll('.cat').forEach(function(c){
   c.addEventListener('click', function(){
@@ -1055,7 +1102,8 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
     })()
 
     // ── Real listings from Supabase ──
-    const activeFilters: any = { category: 'all', verified: false, premium: false, trending: false, minRating: 0, priceMax: null }
+    const activeFilters: any = { category: 'all', verified: false, premium: false, trending: false, minRating: 0, priceMax: null, city: null }
+    ;(window as any).activeFilters = activeFilters
     let currentPage = 0
     const PAGE_SIZE = 12
     let totalListings: any[] = []
@@ -1150,8 +1198,10 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
     }
 
     const fetchListings = async (filters: any) => {
+      ;(window as any).fetchListings = fetchListings
       let query = (supabase as any).from('listings').select('*').eq('active', true)
       if (filters.category && filters.category !== 'all') query = query.eq('category', filters.category)
+      if (filters.city) query = query.eq('city', filters.city)
       if (filters.verified) query = query.eq('verified', true)
       if (filters.premium) query = query.eq('premium', true)
       if (filters.trending) query = query.eq('trending', true)
@@ -1485,8 +1535,8 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         <p class="t-body" style="color:var(--t2);max-width:480px;margin-bottom:1.5rem;">A members-only marketplace for escorts, companions, nightlife, creators, rentals, and the after-hours.</p>
         <div style="position:relative;max-width:480px;margin-bottom:1.5rem;">
           <i class="ti ti-search" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:16px;"></i>
-          <input type="text" id="heroSearch" placeholder="Search listings, companions, venues…" style="width:100%;height:52px;padding:0 14px 0 42px;background:var(--bg2);border:0.5px solid var(--gbrd);border-radius:20px;color:var(--t);font:400 14px var(--sans);" onkeydown="if(event.key==='Enter'){var q=this.value.trim();if(q){window.location.href='/search?q='+encodeURIComponent(q)}else{window.location.href='/search'}}" />
-          <i class="ti ti-map-pin" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:16px;"></i>
+          <input type="text" id="heroSearch" placeholder="Search listings, companions, venues…" style="width:100%;height:52px;padding:0 14px 56px 42px;background:var(--bg2);border:0.5px solid var(--gbrd);border-radius:20px;color:var(--t);font:400 14px var(--sans);outline:none;" onkeydown="if(event.key==='Enter'){var q=this.value.trim();if(q){window.location.href='/search?q='+encodeURIComponent(q)}else{window.location.href='/search'}}" />
+          <button id="heroSearchBtn" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);height:40px;padding:0 16px;background:var(--grad-gold);border:none;border-radius:16px;color:#000;font:600 13px var(--sans);cursor:pointer;letter-spacing:0.04em;">Search</button>
         </div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;">
           <div><div id="statListings" style="font-family:var(--serif);font-size:28px;color:var(--gold);">40+</div><div class="t-meta" style="color:var(--t3);">LISTINGS</div></div>
