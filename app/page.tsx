@@ -1052,8 +1052,10 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         if (ddName) ddName.textContent = name
         if (ddEmail) ddEmail.textContent = profile?.email || session.user.email || ''
 
-        // Admin: show Admin link in dropdown instead of List service
+        // Admin: show Admin bar + swap nav button
         if (profile?.role === 'admin') {
+          const adminBar = document.getElementById('adminBar')
+          if (adminBar) adminBar.style.display = ''
           if (listServiceBtn) { listServiceBtn.innerHTML = '<i class="ti ti-settings" aria-hidden="true"></i> Admin'; listServiceBtn.onclick = () => { window.location.href = '/admin' } }
         }
 
@@ -1919,8 +1921,8 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
     <!-- ══ MAIN ══ -->
     <main class="main" id="mainContent">
 
-      <!-- Admin bar -->
-      <div class="admin-bar" role="region" aria-label="Admin overview">
+      <!-- Admin bar (hidden until auth confirms admin role) -->
+      <div class="admin-bar" id="adminBar" style="display:none" role="region" aria-label="Admin overview">
         <div class="admin-top">
           <div class="admin-label">
             <i class="ti ti-shield-check" aria-hidden="true" style="color:var(--gold)"></i>
