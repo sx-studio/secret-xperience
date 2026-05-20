@@ -621,7 +621,7 @@ export default async function NightlifePage() {
           Secret<em style={{ fontStyle: 'italic', fontWeight: 300 }}>Xperience</em>
         </a>
         <div className="nl-nav-links">
-          <a href="/listings" className="nl-nav-link">Listings</a>
+          <a href="/escorts" className="nl-nav-link">Listings</a>
           <a href="/nightlife" className="nl-nav-link active">Nightlife</a>
           <a href="/events" className="nl-nav-link">Events</a>
           <a href="/dashboard" className="nl-nav-link">Dashboard</a>
