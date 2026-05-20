@@ -543,8 +543,6 @@ function closeModal(id){
 }
 
 // ══ AUTH MODAL ══
-document.getElementById('loginBtn')?.addEventListener('click',function(){window.location.href='/login?next=/'});
-document.getElementById('signupBtn')?.addEventListener('click',function(){window.location.href='/login?next=/'});
 document.getElementById('authClose').addEventListener('click',function(){closeModal('authModal')});
 document.getElementById('authModal').addEventListener('click',function(e){if(e.target===this)closeModal('authModal')});
 
@@ -898,8 +896,6 @@ document.querySelectorAll('.msg-quick').forEach(function(qb){
 });
 
 // Nav login button -> open auth
-document.getElementById('loginBtn')?.addEventListener('click',function(){window.location.href='/login?next=/'});
-document.getElementById('signupBtn')?.addEventListener('click',function(){window.location.href='/login?next=/'});
 
 // ── Backend modal (wire to nav or keyboard shortcut) ──
 document.getElementById('backendClose').addEventListener('click',function(){closeModal('backendModal')});
