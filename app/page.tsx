@@ -120,12 +120,7 @@ document.querySelectorAll('.pp').forEach(function(p){
     this.classList.add('active');
   });
 });
-document.querySelectorAll('.etype').forEach(function(e){
-  e.addEventListener('click', function(){
-    document.querySelectorAll('.etype').forEach(function(x){ x.classList.remove('active'); });
-    this.classList.add('active');
-  });
-});
+
 document.querySelectorAll('.tab').forEach(function(t){
   t.addEventListener('click', function(){
     document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('active'); });
