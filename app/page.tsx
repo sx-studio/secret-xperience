@@ -1390,6 +1390,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
       <button class="nb" id="locBtn" aria-label="Location"><i class="ti ti-map-pin" aria-hidden="true"></i> Brussels</button>
       <button onclick="__cycleTheme()" aria-label="Toggle theme" style="width:34px;height:34px;background:var(--bg2);border:0.5px solid var(--b2);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--t2);font-size:16px;flex-shrink:0;"><i class="ti ti-moon-stars" id="themeIcon"></i></button>
       <!-- logged-out -->
+      <a href="/events" class="nb" style="text-decoration:none;display:flex;align-items:center;gap:6px;"><i class="ti ti-calendar-event" aria-hidden="true"></i> Events</a>
       <button class="nb" id="loginBtn">Log in</button>
       <button class="nb pri" id="signupBtn" onclick="window.location.href='/advertise'">List your service</button>
       <!-- logged-in: List service + profile avatar -->
@@ -1843,6 +1844,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
           <a href="#">Escorts</a>
           <a href="#">Companionship</a>
           <a href="#">Nightlife</a>
+          <a href="/events">Events</a>
           <a href="#">Creators</a>
           <a href="#">Rentals</a>
         </div>
