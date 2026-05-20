@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '../lib/supabase'
 
-const TABS = ['Listings', 'Users', 'Bookings'] as const
+const TABS = ['Listings', 'Users', 'Verification', 'Bookings'] as const
 type Tab = typeof TABS[number]
 
 export default function AdminPage() {
@@ -71,6 +71,20 @@ export default function AdminPage() {
     const supabase = createClient()
     await supabase.from('profiles').update({ role }).eq('id', id)
     setUsers(prev => prev.map(u => u.id === id ? { ...u, role } : u))
+  }
+
+  async function approveVerification(id: string) {
+    const supabase = createClient()
+    await supabase.from('profiles').update({ verified: true, verification_status: 'approved' }).eq('id', id)
+    await supabase.from('notifications').insert({ user_id: id, type: 'verification', title: '✓ You are now verified!', body: 'Your SecretXperience profile has been verified. Your listings will now show the ✓ Verified badge.', link: '/dashboard' })
+    setUsers(prev => prev.map(u => u.id === id ? { ...u, verified: true, verification_status: 'approved' } : u))
+  }
+
+  async function rejectVerification(id: string) {
+    const supabase = createClient()
+    await supabase.from('profiles').update({ verification_status: 'rejected' }).eq('id', id)
+    await supabase.from('notifications').insert({ user_id: id, type: 'verification', title: 'Verification update', body: 'We were unable to verify your profile at this time. Please contact support for more information.', link: '/dashboard' })
+    setUsers(prev => prev.map(u => u.id === id ? { ...u, verification_status: 'rejected' } : u))
   }
 
   const filteredListings = listings.filter(l => !search || l.title?.toLowerCase().includes(search.toLowerCase()) || l.city?.toLowerCase().includes(search.toLowerCase()))
@@ -334,6 +348,60 @@ export default function AdminPage() {
                             <span style={{ font: '600 10px/1 var(--sans)', letterSpacing: '0.06em' }}>{u.premium ? 'Unpremium' : 'Premium'}</span>
                           </button>
                         </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* ── Verification requests ── */}
+          {tab === 'Verification' && (
+            <div style={{ background: 'var(--bg1, #0a0a0a)', border: '0.5px solid var(--b, rgba(255,255,255,0.06))', borderRadius: 'var(--rl, 13px)', overflow: 'hidden' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                <thead>
+                  <tr style={{ background: 'var(--bg2, rgba(255,255,255,0.02))' }}>
+                    {['Provider', 'Role', 'Requested', 'Status', 'Actions'].map(h => (
+                      <th key={h} style={{ textAlign: 'left', padding: '12px 16px', font: '600 9px/1 var(--sans)', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--t3, #4c4a47)' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.filter(u => u.verification_status === 'pending' || u.verification_status === 'approved' || u.verification_status === 'rejected').length === 0 && (
+                    <tr><td colSpan={5} style={{ padding: '3rem', textAlign: 'center', color: 'var(--t3, #4c4a47)' }}>No verification requests yet</td></tr>
+                  )}
+                  {users.filter(u => u.verification_status && u.verification_status !== 'none').map(u => (
+                    <tr key={u.id} style={{ borderTop: '0.5px solid var(--b)', color: 'var(--t)' }}>
+                      <td style={{ padding: '14px 16px' }}>
+                        <div style={{ fontWeight: 500 }}>{u.full_name || u.username || 'Anonymous'}</div>
+                        <div style={{ fontSize: '11px', color: 'var(--t3)' }}>{u.email}</div>
+                      </td>
+                      <td style={{ padding: '14px 16px', color: 'var(--t2)', textTransform: 'capitalize' }}>{u.role}</td>
+                      <td style={{ padding: '14px 16px', fontSize: '12px', color: 'var(--t3)' }}>
+                        {u.verification_requested_at ? new Date(u.verification_requested_at).toLocaleDateString() : '—'}
+                      </td>
+                      <td style={{ padding: '14px 16px' }}>
+                        <span style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: u.verification_status === 'approved' ? 'rgba(38,212,160,0.12)' : u.verification_status === 'rejected' ? 'rgba(184,77,114,0.12)' : 'rgba(245,168,38,0.12)', color: u.verification_status === 'approved' ? '#26d4a0' : u.verification_status === 'rejected' ? '#b84d72' : '#f5a826' }}>
+                          {u.verification_status}
+                        </span>
+                      </td>
+                      <td style={{ padding: '14px 16px' }}>
+                        {u.verification_status === 'pending' && (
+                          <div style={{ display: 'flex', gap: '6px' }}>
+                            <button onClick={() => approveVerification(u.id)} style={{ padding: '5px 12px', background: 'rgba(38,212,160,0.1)', border: '0.5px solid rgba(38,212,160,0.3)', borderRadius: '6px', color: '#26d4a0', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}>
+                              ✓ Approve
+                            </button>
+                            <button onClick={() => rejectVerification(u.id)} style={{ padding: '5px 12px', background: 'rgba(184,77,114,0.1)', border: '0.5px solid rgba(184,77,114,0.3)', borderRadius: '6px', color: '#b84d72', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}>
+                              ✗ Reject
+                            </button>
+                          </div>
+                        )}
+                        {u.verification_status === 'approved' && (
+                          <button onClick={() => toggleUser(u.id, 'verified', u.verified)} style={{ padding: '5px 12px', background: 'rgba(255,255,255,0.04)', border: '0.5px solid var(--b)', borderRadius: '6px', color: 'var(--t3)', cursor: 'pointer', fontSize: '12px' }}>
+                            Revoke
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}

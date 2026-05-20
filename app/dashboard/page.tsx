@@ -804,6 +804,42 @@ export default function DashboardPage() {
             ))}
           </div>
 
+          {/* ── Verification Card ── */}
+          {(profile?.role === 'provider' || profile?.role === 'venue' || profile?.role === 'creator') && !profile?.verified && (
+            <div className="db-card" style={{ marginBottom: '1.5rem', border: profile?.verification_status === 'pending' ? '0.5px solid rgba(245,168,38,0.3)' : '0.5px solid var(--gbrd, rgba(197,160,90,0.25))' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(197,160,90,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <i className="ti ti-shield-check" style={{ color: 'var(--gold)', fontSize: '20px' }} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '15px', fontWeight: 500, color: 'var(--t)', marginBottom: '3px' }}>
+                      {profile?.verification_status === 'pending' ? 'Verification pending' : 'Get verified'}
+                    </div>
+                    <div style={{ fontSize: '12px', color: 'var(--t2)', lineHeight: 1.4 }}>
+                      {profile?.verification_status === 'pending'
+                        ? 'Our team is reviewing your profile. Usually within 24–48 hours.'
+                        : 'Verified providers get a ✓ badge, appear higher in results, and earn more trust.'}
+                    </div>
+                  </div>
+                </div>
+                {profile?.verification_status !== 'pending' && (
+                  <button
+                    onClick={async () => {
+                      const supabase = (await import('../lib/supabase')).createClient()
+                      await supabase.from('profiles').update({ verification_status: 'pending', verification_requested_at: new Date().toISOString() }).eq('id', user.id)
+                      setProfile((p: any) => ({ ...p, verification_status: 'pending' }))
+                      setNotification('✓ Verification request submitted. We\'ll review your profile within 48 hours.')
+                    }}
+                    className="db-quick-btn-gold"
+                  >
+                    Request verification →
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* ── Stripe Payouts Card ── */}
           {(profile?.role === 'provider' || profile?.role === 'venue' || profile?.role === 'creator') && (
             <div className="db-card" style={{ marginBottom: '1.5rem', border: profile?.stripe_connect_account_id ? '0.5px solid rgba(62,207,142,0.2)' : '0.5px solid var(--gbrd, rgba(197,160,90,0.25))' }}>
