@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '../../../app/lib/supabase'
+import EscortProfile from './EscortProfile'
+
+const ESCORT_CATEGORIES = new Set(['escorts', 'companionship', 'massage', 'domination', 'experiences'])
 
 /* ─── Category helpers ───────────────────────────────────── */
 
@@ -292,6 +295,47 @@ export default function ListingDetailPage() {
   const meetLabel = listing.meet_type ? (MEET_LABELS[listing.meet_type] || listing.meet_type) : null
   const hasImages = listing.images && listing.images.length > 0
   const prof      = listing.profile
+
+  /* ── Escort/companion/massage/domination — use dedicated profile layout ── */
+  if (ESCORT_CATEGORIES.has(cat)) {
+    return (
+      <>
+        <style>{`
+          ${fonts}
+          *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+          body { background: #050505; }
+          @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+          @media (min-width: 900px) { .ep-mobile-cta { display: none !important; } }
+        `}</style>
+        <div style={{ minHeight: '100vh', background: '#050505', color: '#ece8e1' }}>
+          <nav style={{ background: 'rgba(5,5,5,0.95)', borderBottom: '0.5px solid rgba(255,255,255,0.06)', height: '60px', padding: '0 2rem', display: 'flex', alignItems: 'center', gap: '1rem', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(16px)' }}>
+            <button onClick={() => window.history.back()} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', padding: '4px 8px', fontSize: '18px', lineHeight: 1, borderRadius: '6px' }} aria-label="Go back">←</button>
+            <a href="/" style={{ textDecoration: 'none', flex: 1 }}>
+              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '20px', fontWeight: 400, color: '#c5a05a', letterSpacing: '0.04em' }}>
+                Secret<em style={{ fontStyle: 'italic', fontWeight: 300 }}>Xperience</em>
+              </span>
+            </a>
+            <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>{catLabel}</span>
+          </nav>
+          <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '2.5rem 1.5rem 6rem', animation: 'fadeUp 0.35s ease' }}>
+            <EscortProfile
+              listing={{ ...listing, tags: (listing as any).tags ?? [] }}
+              reviews={reviews}
+              session={session}
+              onBook={goToBook}
+              onMessage={goToMessage}
+              onReviewSubmit={async (rating, text) => {
+                if (!session) return
+                const supabase = createClient()
+                await supabase.from('reviews').insert({ listing_id: id, reviewer_id: session.user.id, rating, content: text.trim() || null })
+                await fetchReviews()
+              }}
+            />
+          </div>
+        </div>
+      </>
+    )
+  }
 
   return (
     <>
