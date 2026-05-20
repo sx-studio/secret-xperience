@@ -1121,6 +1121,14 @@ export default function DashboardPage() {
                   View public profile
                 </button>
               )}
+              {(profile?.role === 'provider' || profile?.role === 'creator' || profile?.role === 'venue') && (
+                <button
+                  className="db-quick-btn-gold"
+                  onClick={() => window.location.href = '/provider'}
+                >
+                  Provider Hub →
+                </button>
+              )}
             </div>
           </div>
 

@@ -46,6 +46,7 @@ export default function MessagesPage() {
       const providerId = params.get('provider_id')
       const listingId = params.get('listing_id')
       const listingTitle = params.get('listing_title')
+      const preset = params.get('preset')
 
       const { data: msgs } = await supabase
         .from('messages')
@@ -126,6 +127,10 @@ export default function MessagesPage() {
           (m.sender_id === providerId && m.receiver_id === uid)
         )
         setMessages(thread)
+        // Pre-fill message body when preset=book
+        if (preset === 'book' && listingTitle) {
+          setBody(`Hi, I'm interested in booking "${decodeURIComponent(listingTitle)}". Could you let me know your availability?`)
+        }
         // Fix 2: mark messages as read when opening conversation
         await supabase.from('messages').update({ read: true }).eq('receiver_id', uid).eq('sender_id', providerId)
       } else if (convList.length > 0) {

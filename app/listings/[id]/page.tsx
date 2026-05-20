@@ -219,8 +219,8 @@ export default function ListingDetailPage() {
   }
 
   function goToBook() {
-    // Deep-link to homepage with this listing open so the booking modal can be used
-    window.location.href = `/?listing=${listing!.id}`
+    if (!session) { window.location.href = `/login?next=/listings/${id}`; return }
+    window.location.href = `/messages?provider_id=${listing!.profile_id}&listing_id=${listing!.id}&listing_title=${encodeURIComponent(listing!.title)}&preset=book`
   }
 
   /* ── Shared styles ── */
