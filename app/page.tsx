@@ -1395,7 +1395,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
       <button onclick="__cycleTheme()" aria-label="Toggle theme" style="width:34px;height:34px;background:var(--bg2);border:0.5px solid var(--b2);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--t2);font-size:16px;flex-shrink:0;"><i class="ti ti-moon-stars" id="themeIcon"></i></button>
       <!-- logged-out -->
       <button class="nb" id="loginBtn">Log in</button>
-      <button class="nb pri" id="signupBtn">Sign up</button>
+      <button class="nb pri" id="signupBtn" onclick="window.location.href='/advertise'">List your service</button>
       <!-- logged-in: List service + profile avatar -->
       <button class="nb pri" id="listServiceBtn" style="display:none" onclick="window.location.href='/listings/create'"><i class="ti ti-plus" aria-hidden="true"></i> List service</button>
       <div id="profileMenuWrap" style="display:none;position:relative;">
