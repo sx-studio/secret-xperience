@@ -1389,7 +1389,8 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebSite', name: 'SecretXperience', url: 'https://secret-xperience.vercel.app', description: 'Premium adult services marketplace in Belgium.', potentialAction: { '@type': 'SearchAction', target: 'https://secret-xperience.vercel.app/?q={search_term_string}', 'query-input': 'required name=search_term_string' } }) }} />
-      <div dangerouslySetInnerHTML={{ __html: `<!-- ══ AGE GATE ══ -->
+      <div dangerouslySetInnerHTML={{ __html: `<script>(function(){try{var ok=localStorage.getItem('sx_age_ok')==='1';if(!ok){for(var k in localStorage){if(k.startsWith('sb-')&&k.endsWith('-auth-token')){try{if(JSON.parse(localStorage.getItem(k)||'{}').access_token){ok=true;localStorage.setItem('sx_age_ok','1');break;}}catch(e){}}}}if(ok){var s=document.createElement('style');s.textContent='#gate{display:none!important}';document.head.appendChild(s);}}catch(e){}})();<\/script>
+<!-- ══ AGE GATE ══ -->
 <div id="gate" role="dialog" aria-modal="true" aria-label="Age verification" style="background:rgba(4,4,4,0.93);backdrop-filter:blur(14px);">
   <div class="gate-box" style="max-width:400px;padding:2.5rem 2rem;background:var(--grad-velvet);border:0.5px solid var(--b3);border-radius:var(--rxl);box-shadow:var(--shadow-modal);position:relative;overflow:hidden;animation:gateIn .4s var(--ease-out) both;">
     <div style="position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:200px;height:200px;background:radial-gradient(circle,rgba(197,160,90,0.15) 0%,transparent 70%);pointer-events:none;"></div>
