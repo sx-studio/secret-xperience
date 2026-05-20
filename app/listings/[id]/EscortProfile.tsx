@@ -56,7 +56,7 @@ interface EscortProfileProps {
 }
 
 /* ── Tag classification ────────────────────────────────── */
-const HAIR_SET   = new Set(['blonde','brunette','redhead','black hair','auburn','dark hair','black','brown hair'])
+const HAIR_SET   = new Set(['blonde','brunette','redhead','black hair','auburn','dark hair','black','brown hair','dark'])
 const BUILD_SET  = new Set(['slim','athletic','curvy','petite','bbw','muscular','fit','average'])
 const ETHNIC_SET = new Set(['european','latina','asian','ebony','arabic','mixed','eastern european','caucasian'])
 const LANG_SET   = new Set(['english','french','dutch','german','spanish','italian','portuguese','arabic','russian','polish','czech'])
@@ -64,25 +64,61 @@ const HEIGHT_RE  = /^(\d{3})\s*cm$/i
 const WEIGHT_RE  = /^(\d{2,3})\s*kg$/i
 const AGE_RE     = /^(\d{2})\s*(years?|yo|yrs?)?$/i
 const NATIONALITY_SET = new Set(['belgian','dutch','german','french','spanish','italian','british','american','brazilian','colombian','czech','polish','romanian','ukrainian','russian'])
+const WH_DAYS    = ['mon','tue','wed','thu','fri','sat','sun']
 
 function classifyTags(tags: string[]) {
   const lower = tags.map(t => t.toLowerCase().trim())
+
+  // Prefixed metadata tags
+  const escortTypeTag = tags.find(t => t.toLowerCase().startsWith('type:'))
+  const escortType = escortTypeTag ? escortTypeTag.slice(escortTypeTag.indexOf(':') + 1).trim() : null
+
+  const orientationTag = tags.find(t => t.toLowerCase().startsWith('orientation:'))
+  const orientation = orientationTag ? orientationTag.slice(orientationTag.indexOf(':') + 1).trim() : null
+
+  // Working hours: wh:mon:10-22 or wh:mon:off
+  const workingHours: Record<string, string | null> = {}
+  let hasWhTags = false
+  tags.forEach(t => {
+    const l = t.toLowerCase()
+    if (l.startsWith('wh:')) {
+      const p = l.split(':')
+      if (p.length === 3 && WH_DAYS.includes(p[1])) {
+        workingHours[p[1]] = p[2] === 'off' ? null : p[2]
+        hasWhTags = true
+      }
+    }
+  })
+  if (!hasWhTags) {
+    WH_DAYS.forEach((d, i) => { workingHours[d] = i < 5 ? '10-22' : null })
+  }
+
+  // Handle both raw values and "Key: Value" prefixed formats (from create form)
+  const getField = (prefixRe: RegExp, set: Set<string>) => {
+    const prefixed = tags.find(t => prefixRe.test(t))
+    if (prefixed) return prefixed.replace(prefixRe, '').toLowerCase().trim()
+    return lower.find(t => set.has(t)) ?? null
+  }
+
   const height     = lower.find(t => HEIGHT_RE.test(t))?.match(HEIGHT_RE)?.[1] ?? null
   const weight     = lower.find(t => WEIGHT_RE.test(t))?.match(WEIGHT_RE)?.[1] ?? null
   const ageMatch   = lower.find(t => AGE_RE.test(t))?.match(AGE_RE)?.[1] ?? null
-  const hair       = lower.find(t => HAIR_SET.has(t)) ?? null
-  const build      = lower.find(t => BUILD_SET.has(t)) ?? null
-  const ethnicity  = lower.find(t => ETHNIC_SET.has(t)) ?? null
-  const nationality = lower.find(t => NATIONALITY_SET.has(t)) ?? null
+  const hair       = getField(/^hair:\s*/i,        HAIR_SET)
+  const build      = getField(/^build:\s*/i,       BUILD_SET)
+  const ethnicity  = getField(/^ethnicity:\s*/i,   ETHNIC_SET)
+  const nationality = getField(/^nationality:\s*/i, NATIONALITY_SET)
   const languages  = lower.filter(t => LANG_SET.has(t))
-  const meta = new Set([height && `${height} cm`, weight && `${weight} kg`, ageMatch, hair, build, ethnicity, nationality, ...languages].filter(Boolean) as string[])
+
   const services = tags.filter(t => {
     const l = t.toLowerCase().trim()
     return !HEIGHT_RE.test(l) && !WEIGHT_RE.test(l) && !AGE_RE.test(l) &&
       !HAIR_SET.has(l) && !BUILD_SET.has(l) && !ETHNIC_SET.has(l) &&
-      !NATIONALITY_SET.has(l) && !LANG_SET.has(l)
+      !NATIONALITY_SET.has(l) && !LANG_SET.has(l) &&
+      !l.startsWith('type:') && !l.startsWith('orientation:') && !l.startsWith('wh:') &&
+      !/^(hair|build|ethnicity|nationality):\s*/i.test(l)
   })
-  return { height, weight, age: ageMatch, hair, build, ethnicity, nationality, languages, services }
+
+  return { height, weight, age: ageMatch, hair, build, ethnicity, nationality, languages, services, escortType, orientation, workingHours }
 }
 
 function derivedRates(base: number, sym: string) {
@@ -135,7 +171,7 @@ export default function EscortProfile({
 
   const images  = (listing.images ?? []).filter(Boolean)
   const tags    = listing.tags ?? []
-  const { height, weight, age, hair, build, ethnicity, nationality, languages, services } = classifyTags(tags)
+  const { height, weight, age, hair, build, ethnicity, nationality, languages, services, escortType, orientation, workingHours } = classifyTags(tags)
   const sym     = listing.currency === 'GBP' ? '£' : '€'
   const rates   = listing.price_from ? derivedRates(listing.price_from, sym) : []
   const catLabel = CATEGORY_LABEL[listing.category] ?? cap(listing.category)
@@ -414,13 +450,16 @@ export default function EscortProfile({
           <div className="rl-section">
             <div className="rl-section-title">Working Hours</div>
             <div className="rl-hours-grid">
-              {DAYS.map((d, i) => {
-                const isWeekend = i >= 5
+              {DAYS.map((d) => {
+                const key = d.toLowerCase()
+                const hours = workingHours[key]
+                const isOn = hours !== null && hours !== undefined
+                const displayTime = isOn ? hours.replace('-', '–') : ''
                 return (
                   <div key={d} className="rl-day-col">
                     <div className="rl-day-label">{d}</div>
-                    <div className={`rl-day-dot ${isWeekend ? 'off' : 'on'}`}>{isWeekend ? '–' : '✓'}</div>
-                    <div className="rl-day-time">{isWeekend ? '' : '10–22'}</div>
+                    <div className={`rl-day-dot ${isOn ? 'on' : 'off'}`}>{isOn ? '✓' : '–'}</div>
+                    {displayTime && <div className="rl-day-time">{displayTime}</div>}
                   </div>
                 )
               })}
@@ -523,10 +562,16 @@ export default function EscortProfile({
           <div className="rl-scard">
             <div className="rl-section-title" style={{ fontSize: '10px' }}>Profile Details</div>
 
-            {listing.subcategory && (
+            {(escortType || listing.subcategory) && (
               <div className="rl-detail-row">
                 <span className="rl-detail-label">Type</span>
-                <span className="rl-detail-val">{cap(listing.subcategory)}</span>
+                <span className="rl-detail-val">{cap(escortType ?? listing.subcategory ?? '')}</span>
+              </div>
+            )}
+            {orientation && (
+              <div className="rl-detail-row">
+                <span className="rl-detail-label">Orientation</span>
+                <span className="rl-detail-val">{cap(orientation)}</span>
               </div>
             )}
             {age && (

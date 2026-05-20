@@ -4,6 +4,84 @@ import { useEffect, useState } from 'react'
 import { signOut } from '../lib/auth'
 import { createClient } from '../lib/supabase'
 
+/* ── Listing edit constants ── */
+const ESCORT_TYPES_OPT = ['Women','Men','Trans Woman','Trans Man','Non-Binary','Couples','Fetish']
+const ORIENTATION_OPT  = ['Straight','Gay','Bisexual','For All']
+const ETHNICITY_OPT    = ['Caucasian','Latina','Asian','Ebony','Arabic','Mixed','Eastern European']
+const HAIR_OPT         = ['Blonde','Brunette','Redhead','Black','Auburn','Dark']
+const BUILD_OPT        = ['Slim','Athletic','Curvy','Petite','BBW','Muscular','Average']
+const NATIONALITY_OPT  = ['Belgian','Dutch','German','French','Spanish','Italian','British','American','Brazilian','Colombian','Czech','Polish','Romanian','Ukrainian','Russian','Other']
+const LANGUAGE_OPT     = ['English','French','Dutch','German','Spanish','Italian','Portuguese','Arabic','Russian','Polish','Czech']
+const ESCORT_SVCS      = ['GFE','BDSM','Massage','Tantric','Roleplay','Dinner Date','Travel Companion','Duo','Couples','Overnight','Striptease','Domination','Foot Fetish','Lingerie','Toys','Safe Sex','French Kiss','69']
+const MASSAGE_SVCS     = ['Swedish','Deep Tissue','Tantric','Hot Stone','Thai','Sports','Reflexology','Aromatherapy','Nuru','Body to Body','Four Hands','Happy Ending']
+const ESCORT_CATS      = new Set(['escorts','companionship','massage','domination','experiences','adult'])
+const WH_DAYS          = ['mon','tue','wed','thu','fri','sat','sun']
+const WH_DAY_LABELS    = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
+
+function getServiceOptions(category: string): string[] {
+  if (category === 'massage') return MASSAGE_SVCS
+  return ESCORT_SVCS
+}
+
+function parseListingTags(tags: string[] | null | undefined) {
+  const res: any = {
+    age: '', height: '', weight: '',
+    nationality: '', ethnicity: '', hair: '', build: '',
+    escort_type: '', orientation: '',
+    languages: [] as string[], services: [] as string[],
+    wh_mon: '10-22', wh_tue: '10-22', wh_wed: '10-22',
+    wh_thu: '10-22', wh_fri: '10-22', wh_sat: 'off', wh_sun: 'off',
+  }
+  if (!tags) return res
+  const HAIR_V = ['blonde','brunette','redhead','black hair','auburn','dark hair','black','brown hair','dark']
+  const BUILD_V = ['slim','athletic','curvy','petite','bbw','muscular','fit','average']
+  const ETHNIC_V = ['european','latina','asian','ebony','arabic','mixed','eastern european','caucasian']
+  const NAT_V = ['belgian','dutch','german','french','spanish','italian','british','american','brazilian','colombian','czech','polish','romanian','ukrainian','russian']
+  const LANG_V = ['english','french','dutch','german','spanish','italian','portuguese','arabic','russian','polish','czech']
+  for (const tag of tags) {
+    const l = tag.toLowerCase().trim()
+    if (l.startsWith('type:'))        { res.escort_type = l.slice(5).trim(); continue }
+    if (l.startsWith('orientation:')) { res.orientation = l.slice(12).trim(); continue }
+    if (l.startsWith('wh:')) {
+      const p = l.split(':')
+      if (p.length === 3 && WH_DAYS.includes(p[1])) { res[`wh_${p[1]}`] = p[2] }
+      continue
+    }
+    const m = tag.match(/^(ethnicity|build|hair|nationality):\s*(.+)$/i)
+    if (m) { res[m[1].toLowerCase()] = m[2].toLowerCase().trim(); continue }
+    const hm = l.match(/^(\d{3})\s*cm$/i); if (hm) { res.height = hm[1]; continue }
+    const wm = l.match(/^(\d{2,3})\s*kg$/i); if (wm) { res.weight = wm[1]; continue }
+    const am = l.match(/^(\d{2})$/); if (am) { res.age = am[1]; continue }
+    if (HAIR_V.includes(l))  { res.hair = l; continue }
+    if (BUILD_V.includes(l)) { res.build = l; continue }
+    if (ETHNIC_V.includes(l)) { res.ethnicity = l; continue }
+    if (NAT_V.includes(l))   { res.nationality = l; continue }
+    if (LANG_V.includes(l))  { res.languages.push(l); continue }
+    res.services.push(tag)
+  }
+  return res
+}
+
+function buildTagsFromDraft(draft: any): string[] {
+  const tags: string[] = []
+  if (draft.escort_type) tags.push(`type:${draft.escort_type.toLowerCase()}`)
+  if (draft.orientation) tags.push(`orientation:${draft.orientation.toLowerCase()}`)
+  if (draft.height) tags.push(`${draft.height} cm`)
+  if (draft.weight) tags.push(`${draft.weight} kg`)
+  if (draft.age) tags.push(String(draft.age))
+  if (draft.hair) tags.push(draft.hair.toLowerCase())
+  if (draft.build) tags.push(draft.build.toLowerCase())
+  if (draft.ethnicity) tags.push(draft.ethnicity.toLowerCase())
+  if (draft.nationality) tags.push(draft.nationality.toLowerCase())
+  for (const lang of (draft.languages || [])) tags.push(lang.toLowerCase())
+  for (const svc of (draft.services || [])) tags.push(svc)
+  for (const day of WH_DAYS) {
+    const val = draft[`wh_${day}`]
+    if (val) tags.push(`wh:${day}:${val}`)
+  }
+  return tags
+}
+
 function getGreeting(): string {
   const h = new Date().getHours()
   if (h < 12) return 'Good morning'
@@ -171,14 +249,17 @@ export default function DashboardPage() {
     if (!editingListing) return
     setSavingListing(true)
     const supabase = createClient()
+    const tags = buildTagsFromDraft(listingDraft)
     const updates: any = {
-      title:      listingDraft.title,
+      title:       listingDraft.title,
       description: listingDraft.description,
-      category:   listingDraft.category,
-      city:       listingDraft.city,
-      country:    listingDraft.country,
-      meet_type:  listingDraft.meet_type,
-      active:     listingDraft.active,
+      category:    listingDraft.category,
+      city:        listingDraft.city,
+      country:     listingDraft.country,
+      meet_type:   listingDraft.meet_type,
+      active:      listingDraft.active,
+      images:      (listingDraft.images || []).filter(Boolean),
+      tags:        tags.length > 0 ? tags : null,
     }
     if (listingDraft.price_from !== '' && listingDraft.price_from !== undefined) updates.price_from = parseFloat(listingDraft.price_from) || null
     if (listingDraft.price_to !== '' && listingDraft.price_to !== undefined) updates.price_to = parseFloat(listingDraft.price_to) || null
@@ -593,12 +674,38 @@ export default function DashboardPage() {
           box-shadow: 0 0 0 3px var(--gbg, rgba(197,160,90,0.12));
         }
 
+        .db-chip-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+        .db-chip {
+          padding: 5px 12px; border-radius: 20px; font: 500 12px/1 var(--sans);
+          letter-spacing: 0.04em; cursor: pointer; border: 0.5px solid var(--b2, rgba(255,255,255,0.12));
+          background: transparent; color: var(--t2, rgba(255,255,255,0.4));
+          transition: all 0.15s; white-space: nowrap;
+        }
+        .db-chip:hover { border-color: var(--gbrd); color: var(--gold); }
+        .db-chip.selected { border-color: var(--gbrd, rgba(197,160,90,0.5)); background: var(--gbg, rgba(197,160,90,0.1)); color: var(--gold, #c5a05a); }
+        .db-wh-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+        .db-wh-day { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .db-wh-label { font: 600 10px/1 var(--sans); color: var(--t3); letter-spacing: 0.06em; text-align: center; }
+        .db-wh-toggle { width: 36px; height: 36px; border-radius: 50%; border: 0.5px solid; cursor: pointer; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+        .db-wh-toggle.on  { background: rgba(26,143,106,0.15); border-color: rgba(26,143,106,0.4); color: #26d4a0; }
+        .db-wh-toggle.off { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.2); }
+        .db-wh-time { width: 100%; font: 400 10px/1 var(--sans); background: var(--bg3); border: 0.5px solid var(--b2); border-radius: 5px; color: var(--t2); text-align: center; padding: 3px 4px; outline: none; }
+        .db-form-section { margin-bottom: 1.5rem; }
+        .db-form-section-title { font: 600 9px/1 var(--sans); letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold, #c5a05a); margin-bottom: 1rem; padding-bottom: 6px; border-bottom: 0.5px solid rgba(197,160,90,0.15); }
+        .db-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .db-form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+        .db-photo-url { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+        .db-photo-url input { flex: 1; }
+        .db-photo-num { font: 600 10px/1 var(--sans); color: var(--t3); min-width: 14px; text-align: right; }
+
         @media (max-width: 640px) {
           .db-stats-grid { grid-template-columns: 1fr !important; }
           .db-quick-actions { flex-direction: column !important; }
           .db-quick-actions button { width: 100%; }
           .db-nav-right { gap: 6px !important; }
           .db-create-btn-label { display: none; }
+          .db-form-row, .db-form-row-3 { grid-template-columns: 1fr; }
+          .db-wh-grid { grid-template-columns: repeat(4, 1fr); }
         }
       `}</style>
 
@@ -1009,7 +1116,19 @@ export default function DashboardPage() {
                       <button
                         className="db-icon-btn"
                         title="Edit listing"
-                        onClick={() => { setListingDraft({ title: listing.title || '', description: listing.description || '', category: listing.category || '', city: listing.city || '', country: listing.country || '', price_from: listing.price_from ?? '', price_to: listing.price_to ?? '', meet_type: listing.meet_type || '', active: listing.active ?? true }); setEditingListing(listing) }}
+                        onClick={() => {
+                          const parsed = parseListingTags(listing.tags)
+                          setListingDraft({
+                            title: listing.title || '', description: listing.description || '',
+                            category: listing.category || '', city: listing.city || '',
+                            country: listing.country || '', price_from: listing.price_from ?? '',
+                            price_to: listing.price_to ?? '', meet_type: listing.meet_type || 'incall',
+                            active: listing.active ?? true,
+                            images: Array.isArray(listing.images) ? [...listing.images] : [],
+                            ...parsed,
+                          })
+                          setEditingListing(listing)
+                        }}
                       >
                         <i className="ti ti-edit" aria-hidden="true" />
                       </button>
@@ -1116,7 +1235,10 @@ export default function DashboardPage() {
               {profile?.role && profile.role !== 'user' && (
                 <button
                   className="db-quick-btn-dark"
-                  onClick={() => window.location.href = `/profile/${user?.id}`}
+                  onClick={() => {
+                    const first = listings.find((l: any) => l.active) ?? listings[0]
+                    window.location.href = first ? `/listings/${first.id}` : `/profile/${user?.id}`
+                  }}
                 >
                   View public profile
                 </button>
@@ -1137,48 +1259,247 @@ export default function DashboardPage() {
 
       {/* ── Listing edit modal ── */}
       {editingListing && (
-        <div onClick={() => setEditingListing(null)} style={{ position:'fixed',inset:0,background:'rgba(0,0,0,0.7)',backdropFilter:'blur(8px)',WebkitBackdropFilter:'blur(8px)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:'1rem' }}>
-          <div onClick={e => e.stopPropagation()} style={{ background:'var(--bg1, #111)',border:'0.5px solid var(--b3, rgba(197,160,90,0.25))',borderRadius:'var(--rxl, 20px)',padding:'2rem',width:'100%',maxWidth:'520px',maxHeight:'90vh',overflowY:'auto',boxShadow:'var(--shadow-modal)' }}>
-            <div style={{ fontFamily:'var(--serif)',fontSize:'22px',fontWeight:500,color:'var(--t, #ece8e1)',marginBottom:'1.5rem' }}>Edit Listing</div>
-            {[
-              { label:'Title', key:'title', type:'text', placeholder:'Listing title' },
-              { label:'City', key:'city', type:'text', placeholder:'e.g. Brussels' },
-              { label:'Country', key:'country', type:'text', placeholder:'e.g. Belgium' },
-              { label:'Price from (€)', key:'price_from', type:'number', placeholder:'e.g. 150' },
-              { label:'Price to (€, optional)', key:'price_to', type:'number', placeholder:'e.g. 300' },
-            ].map(f => (
-              <div key={f.key} style={{ marginBottom:'1rem' }}>
-                <label style={{ display:'block',font:'600 10px/1 var(--sans)',color:'var(--gold, #c5a05a)',letterSpacing:'0.1em',marginBottom:'8px',textTransform:'uppercase' }}>{f.label}</label>
-                <input type={f.type} value={listingDraft[f.key] ?? ''} onChange={e => setListingDraft((d: any) => ({ ...d, [f.key]: e.target.value }))} placeholder={f.placeholder}
-                  className="db-input" />
+        <div onClick={() => setEditingListing(null)} style={{ position:'fixed',inset:0,background:'rgba(0,0,0,0.75)',backdropFilter:'blur(10px)',WebkitBackdropFilter:'blur(10px)',zIndex:1000,display:'flex',alignItems:'flex-start',justifyContent:'center',padding:'1.5rem 1rem',overflowY:'auto' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background:'#0e0e0e',border:'0.5px solid rgba(197,160,90,0.25)',borderRadius:'20px',padding:'2rem',width:'100%',maxWidth:'640px',boxShadow:'0 24px 80px rgba(0,0,0,0.7)',marginBottom:'2rem' }}>
+
+            <div style={{ display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'1.75rem' }}>
+              <div style={{ fontFamily:'var(--serif)',fontSize:'24px',fontWeight:500,color:'var(--t, #ece8e1)' }}>Edit Listing</div>
+              <button onClick={() => setEditingListing(null)} style={{ background:'none',border:'0.5px solid rgba(255,255,255,0.1)',borderRadius:'50%',width:32,height:32,color:'rgba(255,255,255,0.4)',cursor:'pointer',fontSize:'16px',display:'flex',alignItems:'center',justifyContent:'center' }}>×</button>
+            </div>
+
+            {/* ── Basic Info ── */}
+            <div className="db-form-section">
+              <div className="db-form-section-title">Basic Info</div>
+              <div style={{ marginBottom:'1rem' }}>
+                <label style={{ display:'block',font:'600 10px/1 var(--sans)',color:'rgba(255,255,255,0.35)',letterSpacing:'0.1em',marginBottom:'7px',textTransform:'uppercase' }}>Title / Name</label>
+                <input type="text" value={listingDraft.title||''} onChange={e => setListingDraft((d:any)=>({...d,title:e.target.value}))} placeholder="Your listing title" className="db-input" />
               </div>
-            ))}
-            <div style={{ marginBottom:'1rem' }}>
-              <label style={{ display:'block',font:'600 10px/1 var(--sans)',color:'var(--gold, #c5a05a)',letterSpacing:'0.1em',marginBottom:'8px',textTransform:'uppercase' }}>Category</label>
-              <select value={listingDraft.category || ''} onChange={e => setListingDraft((d: any) => ({ ...d, category: e.target.value }))}
-                className="db-select">
-                {['escorts','massage','companionship','domination','adult','creators','nightlife','experiences','rentals','events','photo','memberships'].map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase()+c.slice(1)}</option>)}
-              </select>
+              <div style={{ marginBottom:'1rem' }}>
+                <label style={{ display:'block',font:'600 10px/1 var(--sans)',color:'rgba(255,255,255,0.35)',letterSpacing:'0.1em',marginBottom:'7px',textTransform:'uppercase' }}>About / Description</label>
+                <textarea value={listingDraft.description||''} onChange={e => setListingDraft((d:any)=>({...d,description:e.target.value}))} rows={4} placeholder="Describe yourself and what you offer…" className="db-textarea" />
+              </div>
+              <div className="db-form-row" style={{ marginBottom:'1rem' }}>
+                <div>
+                  <label style={{ display:'block',font:'600 10px/1 var(--sans)',color:'rgba(255,255,255,0.35)',letterSpacing:'0.1em',marginBottom:'7px',textTransform:'uppercase' }}>Category</label>
+                  <select value={listingDraft.category||''} onChange={e => setListingDraft((d:any)=>({...d,category:e.target.value}))} className="db-select">
+                    {['escorts','massage','companionship','domination','adult','creators','nightlife','experiences','rentals','events','photo','memberships'].map(c => <option key={c} value={c}>{c.charAt(0).toUpperCase()+c.slice(1)}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display:'block',font:'600 10px/1 var(--sans)',color:'rgba(255,255,255,0.35)',letterSpacing:'0.1em',marginBottom:'7px',textTransform:'uppercase' }}>Meet Type</label>
+                  <select value={listingDraft.meet_type||'incall'} onChange={e => setListingDraft((d:any)=>({...d,meet_type:e.target.value}))} className="db-select">
+                    <option value="incall">Incall</option>
+                    <option value="outcall">Outcall</option>
+                    <option value="both">Both (Incall & Outcall)</option>
+                  </select>
+                </div>
+              </div>
             </div>
-            <div style={{ marginBottom:'1rem' }}>
-              <label style={{ display:'block',font:'600 10px/1 var(--sans)',color:'var(--gold, #c5a05a)',letterSpacing:'0.1em',marginBottom:'8px',textTransform:'uppercase' }}>Meet type</label>
-              <select value={listingDraft.meet_type || ''} onChange={e => setListingDraft((d: any) => ({ ...d, meet_type: e.target.value }))}
-                className="db-select">
-                <option value="incall">Incall</option>
-                <option value="outcall">Outcall</option>
-                <option value="both">Both</option>
-              </select>
+
+            {/* ── Location & Pricing ── */}
+            <div className="db-form-section">
+              <div className="db-form-section-title">Location & Pricing</div>
+              <div className="db-form-row" style={{ marginBottom:'1rem' }}>
+                <div>
+                  <label style={{ display:'block',font:'600 10px/1 var(--sans)',color:'rgba(255,255,255,0.35)',letterSpacing:'0.1em',marginBottom:'7px',textTransform:'uppercase' }}>City</label>
+                  <input type="text" value={listingDraft.city||''} onChange={e => setListingDraft((d:any)=>({...d,city:e.target.value}))} placeholder="e.g. Brussels" className="db-input" />
+                </div>
+                <div>
+                  <label style={{ display:'block',font:'600 10px/1 var(--sans)',color:'rgba(255,255,255,0.35)',letterSpacing:'0.1em',marginBottom:'7px',textTransform:'uppercase' }}>Country</label>
+                  <input type="text" value={listingDraft.country||''} onChange={e => setListingDraft((d:any)=>({...d,country:e.target.value}))} placeholder="e.g. Belgium" className="db-input" />
+                </div>
+              </div>
+              <div className="db-form-row" style={{ marginBottom:'1rem' }}>
+                <div>
+                  <label style={{ display:'block',font:'600 10px/1 var(--sans)',color:'rgba(255,255,255,0.35)',letterSpacing:'0.1em',marginBottom:'7px',textTransform:'uppercase' }}>Price from (€/hr)</label>
+                  <input type="number" value={listingDraft.price_from??''} onChange={e => setListingDraft((d:any)=>({...d,price_from:e.target.value}))} placeholder="e.g. 150" className="db-input" />
+                </div>
+                <div>
+                  <label style={{ display:'block',font:'600 10px/1 var(--sans)',color:'rgba(255,255,255,0.35)',letterSpacing:'0.1em',marginBottom:'7px',textTransform:'uppercase' }}>Price to (€, optional)</label>
+                  <input type="number" value={listingDraft.price_to??''} onChange={e => setListingDraft((d:any)=>({...d,price_to:e.target.value}))} placeholder="e.g. 300" className="db-input" />
+                </div>
+              </div>
+              <div style={{ display:'flex',alignItems:'center',gap:'10px' }}>
+                <input type="checkbox" id="listingActive" checked={!!listingDraft.active} onChange={e => setListingDraft((d:any)=>({...d,active:e.target.checked}))} style={{ accentColor:'var(--gold,#c5a05a)',width:'16px',height:'16px',cursor:'pointer' }} />
+                <label htmlFor="listingActive" style={{ fontSize:'13px',color:'var(--t,#ece8e1)',cursor:'pointer',fontFamily:'var(--sans)' }}>Listing is active and visible to clients</label>
+              </div>
             </div>
-            <div style={{ marginBottom:'1rem' }}>
-              <label style={{ display:'block',font:'600 10px/1 var(--sans)',color:'var(--gold, #c5a05a)',letterSpacing:'0.1em',marginBottom:'8px',textTransform:'uppercase' }}>Description</label>
-              <textarea value={listingDraft.description || ''} onChange={e => setListingDraft((d: any) => ({ ...d, description: e.target.value }))} rows={4}
-                className="db-textarea" />
+
+            {/* ── Photos ── */}
+            <div className="db-form-section">
+              <div className="db-form-section-title">Photos (up to 5 URLs)</div>
+              {[0,1,2,3,4].map(i => (
+                <div key={i} className="db-photo-url">
+                  <span className="db-photo-num">{i+1}</span>
+                  <input
+                    type="url" className="db-input"
+                    value={(listingDraft.images||[])[i]||''}
+                    onChange={e => setListingDraft((d:any)=>{
+                      const imgs = [...(d.images||['','','','',''])]
+                      imgs[i] = e.target.value
+                      return { ...d, images: imgs }
+                    })}
+                    placeholder="https://images.unsplash.com/…"
+                    style={{ height:'36px',fontSize:'12px' }}
+                  />
+                </div>
+              ))}
+              <div style={{ fontSize:'11px',color:'rgba(255,255,255,0.2)',marginTop:'4px',fontFamily:'var(--sans)' }}>Paste direct image URLs. Leave blank to skip.</div>
             </div>
-            <div style={{ marginBottom:'1.5rem',display:'flex',alignItems:'center',gap:'10px' }}>
-              <input type="checkbox" id="listingActive" checked={!!listingDraft.active} onChange={e => setListingDraft((d: any) => ({ ...d, active: e.target.checked }))} style={{ accentColor:'var(--gold, #c5a05a)',width:'16px',height:'16px',cursor:'pointer' }} />
-              <label htmlFor="listingActive" style={{ fontSize:'13px',color:'var(--t, #ece8e1)',cursor:'pointer',fontFamily:'var(--sans)' }}>Listing is active and visible to clients</label>
-            </div>
-            <div style={{ display:'flex',gap:'10px',justifyContent:'flex-end' }}>
+
+            {/* ── Profile Details (escort categories only) ── */}
+            {ESCORT_CATS.has(listingDraft.category) && (<>
+
+              <div className="db-form-section">
+                <div className="db-form-section-title">Profile Type & Orientation</div>
+                <div style={{ marginBottom:'1rem' }}>
+                  <label style={{ display:'block',font:'600 10px/1 var(--sans)',color:'rgba(255,255,255,0.35)',letterSpacing:'0.1em',marginBottom:'8px',textTransform:'uppercase' }}>Escort Type</label>
+                  <div className="db-chip-grid">
+                    {ESCORT_TYPES_OPT.map(t => (
+                      <button key={t} type="button"
+                        className={`db-chip${listingDraft.escort_type === t.toLowerCase() ? ' selected' : ''}`}
+                        onClick={() => setListingDraft((d:any)=>({ ...d, escort_type: d.escort_type === t.toLowerCase() ? '' : t.toLowerCase() }))}>
+                        {t}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label style={{ display:'block',font:'600 10px/1 var(--sans)',color:'rgba(255,255,255,0.35)',letterSpacing:'0.1em',marginBottom:'8px',textTransform:'uppercase' }}>Sexual Orientation</label>
+                  <div className="db-chip-grid">
+                    {ORIENTATION_OPT.map(o => (
+                      <button key={o} type="button"
+                        className={`db-chip${listingDraft.orientation === o.toLowerCase() ? ' selected' : ''}`}
+                        onClick={() => setListingDraft((d:any)=>({ ...d, orientation: d.orientation === o.toLowerCase() ? '' : o.toLowerCase() }))}>
+                        {o}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="db-form-section">
+                <div className="db-form-section-title">Physical Details</div>
+                <div className="db-form-row-3" style={{ marginBottom:'1rem' }}>
+                  <div>
+                    <label style={{ display:'block',font:'600 10px/1 var(--sans)',color:'rgba(255,255,255,0.35)',letterSpacing:'0.1em',marginBottom:'7px',textTransform:'uppercase' }}>Age</label>
+                    <input type="number" value={listingDraft.age||''} onChange={e => setListingDraft((d:any)=>({...d,age:e.target.value}))} placeholder="25" className="db-input" min="18" max="99" />
+                  </div>
+                  <div>
+                    <label style={{ display:'block',font:'600 10px/1 var(--sans)',color:'rgba(255,255,255,0.35)',letterSpacing:'0.1em',marginBottom:'7px',textTransform:'uppercase' }}>Height (cm)</label>
+                    <input type="number" value={listingDraft.height||''} onChange={e => setListingDraft((d:any)=>({...d,height:e.target.value}))} placeholder="165" className="db-input" min="140" max="220" />
+                  </div>
+                  <div>
+                    <label style={{ display:'block',font:'600 10px/1 var(--sans)',color:'rgba(255,255,255,0.35)',letterSpacing:'0.1em',marginBottom:'7px',textTransform:'uppercase' }}>Weight (kg)</label>
+                    <input type="number" value={listingDraft.weight||''} onChange={e => setListingDraft((d:any)=>({...d,weight:e.target.value}))} placeholder="55" className="db-input" min="40" max="200" />
+                  </div>
+                </div>
+                <div className="db-form-row" style={{ marginBottom:'1rem' }}>
+                  <div>
+                    <label style={{ display:'block',font:'600 10px/1 var(--sans)',color:'rgba(255,255,255,0.35)',letterSpacing:'0.1em',marginBottom:'7px',textTransform:'uppercase' }}>Nationality</label>
+                    <select value={listingDraft.nationality||''} onChange={e => setListingDraft((d:any)=>({...d,nationality:e.target.value}))} className="db-select">
+                      <option value="">Select…</option>
+                      {NATIONALITY_OPT.map(n => <option key={n} value={n.toLowerCase()}>{n}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ display:'block',font:'600 10px/1 var(--sans)',color:'rgba(255,255,255,0.35)',letterSpacing:'0.1em',marginBottom:'7px',textTransform:'uppercase' }}>Ethnicity</label>
+                    <select value={listingDraft.ethnicity||''} onChange={e => setListingDraft((d:any)=>({...d,ethnicity:e.target.value}))} className="db-select">
+                      <option value="">Select…</option>
+                      {ETHNICITY_OPT.map(e => <option key={e} value={e.toLowerCase()}>{e}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="db-form-row" style={{ marginBottom:'1rem' }}>
+                  <div>
+                    <label style={{ display:'block',font:'600 10px/1 var(--sans)',color:'rgba(255,255,255,0.35)',letterSpacing:'0.1em',marginBottom:'7px',textTransform:'uppercase' }}>Hair Color</label>
+                    <select value={listingDraft.hair||''} onChange={e => setListingDraft((d:any)=>({...d,hair:e.target.value}))} className="db-select">
+                      <option value="">Select…</option>
+                      {HAIR_OPT.map(h => <option key={h} value={h.toLowerCase()}>{h}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label style={{ display:'block',font:'600 10px/1 var(--sans)',color:'rgba(255,255,255,0.35)',letterSpacing:'0.1em',marginBottom:'7px',textTransform:'uppercase' }}>Build</label>
+                    <select value={listingDraft.build||''} onChange={e => setListingDraft((d:any)=>({...d,build:e.target.value}))} className="db-select">
+                      <option value="">Select…</option>
+                      {BUILD_OPT.map(b => <option key={b} value={b.toLowerCase()}>{b}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label style={{ display:'block',font:'600 10px/1 var(--sans)',color:'rgba(255,255,255,0.35)',letterSpacing:'0.1em',marginBottom:'8px',textTransform:'uppercase' }}>Languages</label>
+                  <div className="db-chip-grid">
+                    {LANGUAGE_OPT.map(lang => {
+                      const v = lang.toLowerCase()
+                      const selected = (listingDraft.languages||[]).includes(v)
+                      return (
+                        <button key={lang} type="button"
+                          className={`db-chip${selected ? ' selected' : ''}`}
+                          onClick={() => setListingDraft((d:any)=>({
+                            ...d, languages: selected
+                              ? d.languages.filter((l:string)=>l!==v)
+                              : [...(d.languages||[]), v]
+                          }))}>
+                          {lang}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Services ── */}
+              <div className="db-form-section">
+                <div className="db-form-section-title">Services / Possibilities</div>
+                <div className="db-chip-grid">
+                  {getServiceOptions(listingDraft.category).map(svc => {
+                    const selected = (listingDraft.services||[]).includes(svc)
+                    return (
+                      <button key={svc} type="button"
+                        className={`db-chip${selected ? ' selected' : ''}`}
+                        onClick={() => setListingDraft((d:any)=>({
+                          ...d, services: selected
+                            ? d.services.filter((s:string)=>s!==svc)
+                            : [...(d.services||[]), svc]
+                        }))}>
+                        {svc}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* ── Working Hours ── */}
+              <div className="db-form-section">
+                <div className="db-form-section-title">Working Hours</div>
+                <div className="db-wh-grid">
+                  {WH_DAYS.map((day, i) => {
+                    const key = `wh_${day}`
+                    const val = listingDraft[key] ?? (i < 5 ? '10-22' : 'off')
+                    const isOn = val !== 'off'
+                    return (
+                      <div key={day} className="db-wh-day">
+                        <div className="db-wh-label">{WH_DAY_LABELS[i]}</div>
+                        <button type="button"
+                          className={`db-wh-toggle ${isOn ? 'on' : 'off'}`}
+                          onClick={() => setListingDraft((d:any)=>({...d, [key]: isOn ? 'off' : '10-22'}))}>
+                          {isOn ? '✓' : '–'}
+                        </button>
+                        {isOn && (
+                          <input type="text" className="db-wh-time"
+                            value={val} placeholder="10-22"
+                            onChange={e => setListingDraft((d:any)=>({...d, [key]: e.target.value}))}
+                          />
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+                <div style={{ fontSize:'11px',color:'rgba(255,255,255,0.2)',marginTop:'10px',fontFamily:'var(--sans)' }}>Format: HH-HH (e.g. 10-22 = 10:00 to 22:00). Click dot to toggle day on/off.</div>
+              </div>
+            </>)}
+
+            <div style={{ display:'flex',gap:'10px',justifyContent:'flex-end',paddingTop:'0.5rem',borderTop:'0.5px solid rgba(255,255,255,0.06)' }}>
               <button onClick={() => setEditingListing(null)} className="db-quick-btn-dark">Cancel</button>
               <button onClick={saveListing} disabled={savingListing} className="db-quick-btn-gold">{savingListing ? 'Saving…' : 'Save changes'}</button>
             </div>
