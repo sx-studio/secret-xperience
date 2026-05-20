@@ -768,6 +768,7 @@ select.input { appearance: none; padding-right: 32px; background-image: linear-g
 .nav-right{display:flex;gap:7px;flex-shrink:0;align-items:center}
 .nb{
   height:36px;padding:0 14px;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
   background:transparent;border:0.5px solid var(--b2);
   border-radius:var(--r);color:var(--t2);
   font-size:13px;cursor:pointer;

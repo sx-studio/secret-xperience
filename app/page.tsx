@@ -1736,7 +1736,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         <p class="t-body" style="color:var(--t2);max-width:480px;margin-bottom:1.5rem;">A members-only marketplace for escorts, companions, nightlife, creators, rentals, and the after-hours.</p>
         <div style="position:relative;max-width:480px;margin-bottom:1.5rem;">
           <i class="ti ti-search" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:16px;"></i>
-          <input type="text" id="heroSearch" placeholder="Search listings, companions, venues…" style="width:100%;height:52px;padding:0 14px 56px 42px;background:var(--bg2);border:0.5px solid var(--gbrd);border-radius:20px;color:var(--t);font:400 14px var(--sans);outline:none;" onkeydown="if(event.key==='Enter'){var q=this.value.trim();if(q){window.location.href='/search?q='+encodeURIComponent(q)}else{window.location.href='/search'}}" />
+          <input type="text" id="heroSearch" placeholder="Search listings, companions, venues…" style="width:100%;height:52px;padding:0 90px 0 42px;background:var(--bg2);border:0.5px solid var(--gbrd);border-radius:20px;color:var(--t);font:400 14px var(--sans);outline:none;" onkeydown="if(event.key==='Enter'){var q=this.value.trim();if(q){window.location.href='/search?q='+encodeURIComponent(q)}else{window.location.href='/search'}}" />
           <button id="heroSearchBtn" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);height:40px;padding:0 16px;background:var(--grad-gold);border:none;border-radius:16px;color:#000;font:600 13px var(--sans);cursor:pointer;letter-spacing:0.04em;">Search</button>
         </div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;">
