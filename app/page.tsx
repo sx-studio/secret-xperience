@@ -1102,7 +1102,13 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
     })()
 
     // ── Real listings from Supabase ──
-    const activeFilters: any = { category: 'all', verified: false, premium: false, trending: false, minRating: 0, priceMax: null, city: null }
+    const activeFilters: any = {
+      category: 'all', verified: false, premium: false, trending: false,
+      minRating: 0, priceMax: null, city: null,
+      meetType: 'all', escortType: 'all', orientation: 'all',
+      services: [] as string[], languages: [] as string[],
+      hair: null as string | null, build: null as string | null,
+    }
     ;(window as any).activeFilters = activeFilters
     let currentPage = 0
     const PAGE_SIZE = 12
@@ -1202,11 +1208,22 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
       let query = (supabase as any).from('listings').select('*').eq('active', true)
       if (filters.category && filters.category !== 'all') query = query.eq('category', filters.category)
       if (filters.city) query = query.eq('city', filters.city)
+      if (filters.meetType && filters.meetType !== 'all') query = query.eq('meet_type', filters.meetType)
       if (filters.verified) query = query.eq('verified', true)
       if (filters.premium) query = query.eq('premium', true)
       if (filters.trending) query = query.eq('trending', true)
       if (filters.minRating > 0) query = query.gte('rating', filters.minRating)
       if (filters.priceMax) query = query.lte('price_from', filters.priceMax)
+      if (filters.escortType && filters.escortType !== 'all') query = query.contains('tags', [`type:${filters.escortType}`])
+      if (filters.orientation && filters.orientation !== 'all') query = query.contains('tags', [`orientation:${filters.orientation}`])
+      if (filters.hair) query = query.contains('tags', [filters.hair])
+      if (filters.build) query = query.contains('tags', [filters.build])
+      if (filters.services && filters.services.length > 0) {
+        for (const svc of filters.services) { query = query.contains('tags', [svc]) }
+      }
+      if (filters.languages && filters.languages.length > 0) {
+        for (const lang of filters.languages) { query = query.contains('tags', [lang]) }
+      }
       query = query.order('featured_until', { ascending: false, nullsFirst: false })
       const sort = (filters.sort || 'relevance')
       if (sort === 'rating') query = query.order('rating', { ascending: false })
@@ -1361,7 +1378,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
       fetchListings(activeFilters)
     })
 
-    // Wire rating slider (re-wire to ensure activeFilters.minRating is always in sync)
+    // Wire rating slider
     document.getElementById('rsl')?.addEventListener('input', function(e) {
       const val = parseFloat((e.target as HTMLInputElement).value)
       activeFilters.minRating = val
@@ -1376,14 +1393,143 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         document.querySelectorAll('.pp').forEach(p => p.classList.remove('active'))
         pill.classList.add('active')
         const text = pill.textContent || ''
-        if (text === 'Free') activeFilters.priceMax = 0
-        else if (text === '€0–100') activeFilters.priceMax = 100
-        else if (text === '€100–500') activeFilters.priceMax = 500
-        else if (text === '€500–1k') activeFilters.priceMax = 1000
-        else if (text === '€1k–5k') activeFilters.priceMax = 5000
+        if (text === '€0–100') activeFilters.priceMax = 100
+        else if (text === '€100–300') activeFilters.priceMax = 300
+        else if (text === '€300–500') activeFilters.priceMax = 500
+        else if (text === '€500+') activeFilters.priceMax = 99999
         else activeFilters.priceMax = null
         fetchListings(activeFilters)
       })
+    })
+
+    // Wire escort type buttons
+    document.querySelectorAll('[data-etype]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('[data-etype]').forEach(b => b.classList.remove('active'))
+        btn.classList.add('active')
+        activeFilters.escortType = (btn as HTMLElement).dataset.etype || 'all'
+        fetchListings(activeFilters)
+      })
+    })
+
+    // Wire orientation buttons
+    document.querySelectorAll('[data-ori]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('[data-ori]').forEach(b => b.classList.remove('active'))
+        btn.classList.add('active')
+        activeFilters.orientation = (btn as HTMLElement).dataset.ori || 'all'
+        fetchListings(activeFilters)
+      })
+    })
+
+    // Wire meet type buttons
+    document.querySelectorAll('[data-meet]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('[data-meet]').forEach(b => b.classList.remove('active'))
+        btn.classList.add('active')
+        activeFilters.meetType = (btn as HTMLElement).dataset.meet || 'all'
+        fetchListings(activeFilters)
+      })
+    })
+
+    // Wire city filter buttons (sidebar)
+    document.querySelectorAll('[data-city-f]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('[data-city-f]').forEach(b => b.classList.remove('active'))
+        btn.classList.add('active')
+        const val = (btn as HTMLElement).dataset.cityF || 'all'
+        activeFilters.city = val === 'all' ? null : val
+        fetchListings(activeFilters)
+      })
+    })
+
+    // Wire services (multi-select toggle)
+    document.querySelectorAll('[data-svc]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        const svc = (btn as HTMLElement).dataset.svc || ''
+        if (activeFilters.services.includes(svc)) {
+          activeFilters.services = activeFilters.services.filter((s: string) => s !== svc)
+          btn.classList.remove('active')
+        } else {
+          activeFilters.services.push(svc)
+          btn.classList.add('active')
+        }
+        fetchListings(activeFilters)
+      })
+    })
+
+    // Wire languages (multi-select toggle)
+    document.querySelectorAll('[data-lang]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        const lang = (btn as HTMLElement).dataset.lang || ''
+        if (activeFilters.languages.includes(lang)) {
+          activeFilters.languages = activeFilters.languages.filter((l: string) => l !== lang)
+          btn.classList.remove('active')
+        } else {
+          activeFilters.languages.push(lang)
+          btn.classList.add('active')
+        }
+        fetchListings(activeFilters)
+      })
+    })
+
+    // Wire hair color (single select toggle)
+    document.querySelectorAll('[data-hair]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        const val = (btn as HTMLElement).dataset.hair || ''
+        if (activeFilters.hair === val) {
+          activeFilters.hair = null
+          btn.classList.remove('active')
+        } else {
+          document.querySelectorAll('[data-hair]').forEach(b => b.classList.remove('active'))
+          activeFilters.hair = val
+          btn.classList.add('active')
+        }
+        fetchListings(activeFilters)
+      })
+    })
+
+    // Wire build (single select toggle)
+    document.querySelectorAll('[data-build]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        const val = (btn as HTMLElement).dataset.build || ''
+        if (activeFilters.build === val) {
+          activeFilters.build = null
+          btn.classList.remove('active')
+        } else {
+          document.querySelectorAll('[data-build]').forEach(b => b.classList.remove('active'))
+          activeFilters.build = val
+          btn.classList.add('active')
+        }
+        fetchListings(activeFilters)
+      })
+    })
+
+    // Wire reset button
+    document.getElementById('resetFilters')?.addEventListener('click', function() {
+      activeFilters.escortType = 'all'; activeFilters.orientation = 'all'
+      activeFilters.meetType = 'all'; activeFilters.city = null
+      activeFilters.verified = false; activeFilters.premium = false; activeFilters.trending = false
+      activeFilters.priceMax = null; activeFilters.minRating = 0
+      activeFilters.services = []; activeFilters.languages = []
+      activeFilters.hair = null; activeFilters.build = null
+      document.querySelectorAll('[data-etype]').forEach(b => b.classList.remove('active'))
+      document.querySelector('[data-etype="all"]')?.classList.add('active')
+      document.querySelectorAll('[data-ori]').forEach(b => b.classList.remove('active'))
+      document.querySelector('[data-ori="all"]')?.classList.add('active')
+      document.querySelectorAll('[data-meet]').forEach(b => b.classList.remove('active'))
+      document.querySelector('[data-meet="all"]')?.classList.add('active')
+      document.querySelectorAll('[data-city-f]').forEach(b => b.classList.remove('active'))
+      document.querySelector('[data-city-f="all"]')?.classList.add('active')
+      document.querySelectorAll('[data-svc],[data-lang],[data-hair],[data-build]').forEach(b => b.classList.remove('active'))
+      document.querySelectorAll('.pp').forEach(b => b.classList.remove('active'))
+      document.querySelector('.pp')?.classList.add('active')
+      const rsl = document.getElementById('rsl') as HTMLInputElement; if (rsl) rsl.value = '0'
+      const rval = document.getElementById('rval'); if (rval) rval.textContent = 'Any'
+      const fv = document.getElementById('fv') as HTMLInputElement; if (fv) fv.checked = false
+      const fp = document.getElementById('fp') as HTMLInputElement; if (fp) fp.checked = false
+      const ft = document.getElementById('ft') as HTMLInputElement; if (ft) ft.checked = false
+      fetchListings(activeFilters)
     })
 
     document.getElementById('sortSel')?.addEventListener('change', function() {
@@ -1584,19 +1730,51 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
       </div>
 
       <div class="fsec">
-        <div class="flbl">Escort type</div>
+        <div class="flbl">Escort Type</div>
         <div class="etype-list">
-          <button class="etype active">All escorts</button>
-          <button class="etype">Independent</button>
-          <button class="etype">Private</button>
-          <button class="etype">Agency</button>
-          <button class="etype">VIP / Elite</button>
-          <button class="etype">Touring</button>
-          <button class="etype">Duo / Couple</button>
-          <button class="etype">Male</button>
-          <button class="etype">Female</button>
-          <button class="etype">Non-binary</button>
-          <button class="etype">Trans</button>
+          <button class="etype active" data-etype="all">All</button>
+          <button class="etype" data-etype="women">Women</button>
+          <button class="etype" data-etype="men">Men</button>
+          <button class="etype" data-etype="trans woman">Trans Woman</button>
+          <button class="etype" data-etype="trans man">Trans Man</button>
+          <button class="etype" data-etype="non-binary">Non-Binary</button>
+          <button class="etype" data-etype="couples">Couples</button>
+          <button class="etype" data-etype="fetish">Fetish</button>
+        </div>
+      </div>
+
+      <div class="fsec">
+        <div class="flbl">Orientation</div>
+        <div class="etype-list">
+          <button class="etype active" data-ori="all">All</button>
+          <button class="etype" data-ori="straight">Straight</button>
+          <button class="etype" data-ori="gay">Gay</button>
+          <button class="etype" data-ori="bisexual">Bisexual</button>
+          <button class="etype" data-ori="for all">For All</button>
+        </div>
+      </div>
+
+      <div class="fsec">
+        <div class="flbl">Meet Type</div>
+        <div class="etype-list">
+          <button class="etype active" data-meet="all">All</button>
+          <button class="etype" data-meet="incall">Incall</button>
+          <button class="etype" data-meet="outcall">Outcall</button>
+          <button class="etype" data-meet="both">Both</button>
+        </div>
+      </div>
+
+      <div class="fsec">
+        <div class="flbl">City</div>
+        <div class="etype-list">
+          <button class="etype active" data-city-f="all">All cities</button>
+          <button class="etype" data-city-f="Brussels">Brussels</button>
+          <button class="etype" data-city-f="Antwerp">Antwerp</button>
+          <button class="etype" data-city-f="Ghent">Ghent</button>
+          <button class="etype" data-city-f="Liège">Liège</button>
+          <button class="etype" data-city-f="Bruges">Bruges</button>
+          <button class="etype" data-city-f="Amsterdam">Amsterdam</button>
+          <button class="etype" data-city-f="Rotterdam">Rotterdam</button>
         </div>
       </div>
 
@@ -1605,23 +1783,77 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         <div class="frow"><input type="checkbox" id="fv"/><label for="fv">Verified only</label></div>
         <div class="frow"><input type="checkbox" id="fp"/><label for="fp">Premium listings</label></div>
         <div class="frow"><input type="checkbox" id="ft"/><label for="ft">Trending now</label></div>
-        <div class="frow"><input type="checkbox" id="fn"/><label for="fn">Available now</label></div>
       </div>
 
       <div class="fsec">
-        <div class="flbl">Price range</div>
+        <div class="flbl">Price (€/hr)</div>
         <div class="ppills">
-          <div class="pp active">Free</div>
+          <div class="pp active">Any</div>
           <div class="pp">€0–100</div>
-          <div class="pp">€100–500</div>
-          <div class="pp">€500–1k</div>
-          <div class="pp">€1k–5k</div>
-          <div class="pp">€5k+</div>
+          <div class="pp">€100–300</div>
+          <div class="pp">€300–500</div>
+          <div class="pp">€500+</div>
         </div>
       </div>
 
       <div class="fsec">
-        <div class="flbl">Minimum rating</div>
+        <div class="flbl">Services</div>
+        <div class="etype-list" style="flex-wrap:wrap;gap:5px">
+          <button class="etype" data-svc="GFE">GFE</button>
+          <button class="etype" data-svc="BDSM">BDSM</button>
+          <button class="etype" data-svc="Tantric">Tantric</button>
+          <button class="etype" data-svc="Roleplay">Roleplay</button>
+          <button class="etype" data-svc="Dinner Date">Dinner Date</button>
+          <button class="etype" data-svc="Travel Companion">Travel</button>
+          <button class="etype" data-svc="Duo">Duo</button>
+          <button class="etype" data-svc="Couples">Couples</button>
+          <button class="etype" data-svc="Overnight">Overnight</button>
+          <button class="etype" data-svc="Domination">Domination</button>
+          <button class="etype" data-svc="Foot Fetish">Foot Fetish</button>
+          <button class="etype" data-svc="Toys">Toys</button>
+          <button class="etype" data-svc="Safe Sex">Safe Sex</button>
+        </div>
+      </div>
+
+      <div class="fsec">
+        <div class="flbl">Languages</div>
+        <div class="etype-list" style="flex-wrap:wrap;gap:5px">
+          <button class="etype" data-lang="english">English</button>
+          <button class="etype" data-lang="french">French</button>
+          <button class="etype" data-lang="dutch">Dutch</button>
+          <button class="etype" data-lang="german">German</button>
+          <button class="etype" data-lang="spanish">Spanish</button>
+          <button class="etype" data-lang="arabic">Arabic</button>
+          <button class="etype" data-lang="russian">Russian</button>
+        </div>
+      </div>
+
+      <div class="fsec">
+        <div class="flbl">Hair Color</div>
+        <div class="etype-list" style="flex-wrap:wrap;gap:5px">
+          <button class="etype" data-hair="blonde">Blonde</button>
+          <button class="etype" data-hair="brunette">Brunette</button>
+          <button class="etype" data-hair="redhead">Redhead</button>
+          <button class="etype" data-hair="black">Black</button>
+          <button class="etype" data-hair="auburn">Auburn</button>
+          <button class="etype" data-hair="dark">Dark</button>
+        </div>
+      </div>
+
+      <div class="fsec">
+        <div class="flbl">Build</div>
+        <div class="etype-list" style="flex-wrap:wrap;gap:5px">
+          <button class="etype" data-build="slim">Slim</button>
+          <button class="etype" data-build="athletic">Athletic</button>
+          <button class="etype" data-build="curvy">Curvy</button>
+          <button class="etype" data-build="petite">Petite</button>
+          <button class="etype" data-build="bbw">BBW</button>
+          <button class="etype" data-build="average">Average</button>
+        </div>
+      </div>
+
+      <div class="fsec">
+        <div class="flbl">Minimum Rating</div>
         <input type="range" class="rslider" min="0" max="5" step="0.5" value="0" id="rsl" aria-label="Minimum rating"/>
         <div style="font-size:11px;color:var(--t3);margin-top:4px">
           <i class="ti ti-star-filled" style="color:var(--gold);font-size:12px" aria-hidden="true"></i>
@@ -1630,12 +1862,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
       </div>
 
       <div class="fsec">
-        <div class="flbl">Membership tier</div>
-        <div class="tier-stack">
-          <div class="tier">Free</div>
-          <div class="tier gold-tier"><i class="ti ti-crown" aria-hidden="true" style="font-size:12px"></i> Gold Member</div>
-          <div class="tier plat-tier"><i class="ti ti-diamond" aria-hidden="true" style="font-size:12px"></i> Platinum Member</div>
-        </div>
+        <button id="resetFilters" style="width:100%;padding:10px;background:transparent;border:0.5px solid rgba(255,255,255,0.1);border-radius:8px;color:rgba(255,255,255,0.4);font-size:12px;cursor:pointer;font-family:inherit;letter-spacing:0.06em;text-transform:uppercase">Reset all filters</button>
       </div>
     </aside>
 
