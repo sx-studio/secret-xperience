@@ -175,6 +175,25 @@ body::before {
   color: var(--t2);
   text-wrap: pretty;
   min-height: 2.6em;
+  margin-bottom: 1.1rem;
+}
+.cat-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+  text-decoration: none;
+  opacity: 0.75;
+  transition: opacity var(--t-fast), gap var(--t-fast);
+}
+.cat-cta:hover { opacity: 1; gap: 10px; }
+.cat-card a.cat-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
 }
 
 /* ── Section foot ───────────────────────────────────────────── */

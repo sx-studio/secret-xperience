@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import Script from 'next/script'
+import Link from 'next/link'
 import './styles.css'
 
 /**
@@ -61,7 +62,7 @@ export default function CategoryAnimations() {
           <div className="cat-grid">
 
             {/* 1. ESCORTS — Candleglow */}
-            <article className="cat-card" id="cat-escorts" data-anim="candleglow">
+            <article className="cat-card" id="cat-escorts" data-anim="candleglow" onClick={() => window.location.href='/escorts'} style={{ cursor: 'pointer' }}>
               <div className="cat-canvas">
                 <svg viewBox="0 0 260 200" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
                   <defs>
@@ -99,11 +100,12 @@ export default function CategoryAnimations() {
               <div className="cat-meta">
                 <h3 className="cat-title">Escorts</h3>
                 <p className="cat-desc">Verified, discreet companions — by the hour, the evening, or the weekend.</p>
+                <Link href="/escorts" className="cat-cta" onClick={e => e.stopPropagation()}>Explore escorts →</Link>
               </div>
             </article>
 
             {/* 2. COMPANIONS — Silk Thread */}
-            <article className="cat-card" id="cat-companions" data-anim="silk">
+            <article className="cat-card" id="cat-companions" data-anim="silk" onClick={() => window.location.href='/companionship'} style={{ cursor: 'pointer' }}>
               <div className="cat-canvas">
                 <svg viewBox="0 0 260 200" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
                   <defs>
@@ -135,11 +137,12 @@ export default function CategoryAnimations() {
               <div className="cat-meta">
                 <h3 className="cat-title">Companions</h3>
                 <p className="cat-desc">Dinner-date companions, travel partners, plus-ones for the night.</p>
+                <Link href="/companionship" className="cat-cta" onClick={e => e.stopPropagation()}>Explore companions →</Link>
               </div>
             </article>
 
             {/* 3. NIGHTLIFE — Pulse Rings */}
-            <article className="cat-card" id="cat-nightlife" data-anim="pulse">
+            <article className="cat-card" id="cat-nightlife" data-anim="pulse" onClick={() => window.location.href='/nightlife'} style={{ cursor: 'pointer' }}>
               <div className="cat-canvas">
                 <svg viewBox="0 0 260 200" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
                   <defs>
@@ -174,11 +177,12 @@ export default function CategoryAnimations() {
               <div className="cat-meta">
                 <h3 className="cat-title">Nightlife</h3>
                 <p className="cat-desc">Private clubs, members-only lounges, after-hours by reservation.</p>
+                <Link href="/nightlife" className="cat-cta" onClick={e => e.stopPropagation()}>Explore venues →</Link>
               </div>
             </article>
 
             {/* 4. CREATORS — Aperture */}
-            <article className="cat-card" id="cat-creators" data-anim="aperture">
+            <article className="cat-card" id="cat-creators" data-anim="aperture" onClick={() => window.location.href='/creators'} style={{ cursor: 'pointer' }}>
               <div className="cat-canvas">
                 <svg viewBox="0 0 260 200" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
                   <defs>
@@ -221,11 +225,12 @@ export default function CategoryAnimations() {
               <div className="cat-meta">
                 <h3 className="cat-title">Creators</h3>
                 <p className="cat-desc">Private content, custom commissions, subscriptions to your favorites.</p>
+                <Link href="/creators" className="cat-cta" onClick={e => e.stopPropagation()}>Browse creators →</Link>
               </div>
             </article>
 
             {/* 5. RENTALS — Door Light */}
-            <article className="cat-card" id="cat-rentals" data-anim="door">
+            <article className="cat-card" id="cat-rentals" data-anim="door" onClick={() => window.location.href='/rentals'} style={{ cursor: 'pointer' }}>
               <div className="cat-canvas">
                 <svg viewBox="0 0 260 200" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
                   <defs>
@@ -266,11 +271,12 @@ export default function CategoryAnimations() {
               <div className="cat-meta">
                 <h3 className="cat-title">Rentals</h3>
                 <p className="cat-desc">Private apartments and suites — discreet entry, hourly or nightly.</p>
+                <Link href="/rentals" className="cat-cta" onClick={e => e.stopPropagation()}>Find a space →</Link>
               </div>
             </article>
 
             {/* 6. HOTELS — Key Card */}
-            <article className="cat-card" id="cat-hotels" data-anim="keycard">
+            <article className="cat-card" id="cat-hotels" data-anim="keycard" onClick={() => window.location.href='/hotels'} style={{ cursor: 'pointer' }}>
               <div className="cat-canvas">
                 <svg viewBox="0 0 260 200" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
                   <defs>
@@ -301,11 +307,12 @@ export default function CategoryAnimations() {
               <div className="cat-meta">
                 <h3 className="cat-title">Hotels</h3>
                 <p className="cat-desc">Adult-friendly hotels, late check-in, no questions asked.</p>
+                <Link href="/hotels" className="cat-cta" onClick={e => e.stopPropagation()}>Book a room →</Link>
               </div>
             </article>
 
             {/* 7. EVENTS — Champagne */}
-            <article className="cat-card" id="cat-events" data-anim="champagne">
+            <article className="cat-card" id="cat-events" data-anim="champagne" onClick={() => window.location.href='/events'} style={{ cursor: 'pointer' }}>
               <div className="cat-canvas">
                 <svg viewBox="0 0 260 200" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
                   <defs>
@@ -353,11 +360,12 @@ export default function CategoryAnimations() {
               <div className="cat-meta">
                 <h3 className="cat-title">Events</h3>
                 <p className="cat-desc">Curated parties, soirées, and private events across the continent.</p>
+                <Link href="/events" className="cat-cta" onClick={e => e.stopPropagation()}>View events calendar →</Link>
               </div>
             </article>
 
             {/* 8. SHOP — Ribbon Untie */}
-            <article className="cat-card" id="cat-shop" data-anim="ribbon">
+            <article className="cat-card" id="cat-shop" data-anim="ribbon" onClick={() => window.location.href='/shop'} style={{ cursor: 'pointer' }}>
               <div className="cat-canvas">
                 <svg viewBox="0 0 260 200" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
                   <defs>
@@ -399,6 +407,7 @@ export default function CategoryAnimations() {
               <div className="cat-meta">
                 <h3 className="cat-title">Shop</h3>
                 <p className="cat-desc">Refined accessories, intimate gifts, lingerie — delivered discreetly.</p>
+                <Link href="/shop" className="cat-cta" onClick={e => e.stopPropagation()}>Shop now →</Link>
               </div>
             </article>
 
