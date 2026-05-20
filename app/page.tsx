@@ -2196,34 +2196,34 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
       <div class="footer-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:2rem;margin-bottom:2.5rem;">
         <div class="footer-col">
           <div class="footer-col-title">About</div>
-          <a href="#">Our story</a>
-          <a href="#">How it works</a>
-          <a href="#">Trust &amp; safety</a>
-          <a href="#">Press</a>
+          <a href="/about">Our story</a>
+          <a href="/how-it-works">How it works</a>
+          <a href="/trust-safety">Trust &amp; safety</a>
+          <a href="/press">Press</a>
         </div>
         <div class="footer-col">
           <div class="footer-col-title">Browse</div>
-          <a href="#">Escorts</a>
-          <a href="#">Companionship</a>
-          <a href="#">Nightlife</a>
+          <a href="/escorts">Escorts</a>
+          <a href="/companionship">Companionship</a>
+          <a href="/nightlife">Nightlife</a>
           <a href="/events">Events</a>
-          <a href="#">Creators</a>
-          <a href="#">Rentals</a>
+          <a href="/creators">Creators</a>
+          <a href="/rentals">Rentals</a>
         </div>
         <div class="footer-col">
           <div class="footer-col-title">Help</div>
-          <a href="#">FAQ</a>
-          <a href="#">Contact support</a>
-          <a href="#">Report a listing</a>
-          <a href="#">List a service</a>
+          <a href="/faq">FAQ</a>
+          <a href="/contact">Contact support</a>
+          <a href="/report">Report a listing</a>
+          <a href="/advertise">List a service</a>
         </div>
         <div class="footer-col">
           <div class="footer-col-title">Legal</div>
           <a href="/terms">Terms of Use</a>
           <a href="/privacy">Privacy Policy</a>
-          <a href="#">Cookie Policy</a>
-          <a href="#">DMCA</a>
-          <a href="#">18 U.S.C. § 2257</a>
+          <a href="/cookies">Cookie Policy</a>
+          <a href="/dmca">DMCA</a>
+          <a href="/2257">18 U.S.C. § 2257</a>
         </div>
       </div>
       <div class="footer-bottom" style="border-top:0.5px solid var(--b);padding-top:1.5rem;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:1rem;">
