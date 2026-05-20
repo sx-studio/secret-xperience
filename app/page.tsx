@@ -1005,21 +1005,11 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
           // Home
           btn.addEventListener('click', function() { window.location.href = '/' })
         } else if (i === 1) {
-          // Search — toggles the filter sidebar
-          btn.addEventListener('click', function() {
-            var sb = document.getElementById('sidebar')
-            var so = document.getElementById('sov')
-            if (sb && so) {
-              if (sb.classList.contains('open')) {
-                sb.classList.remove('open'); so.classList.remove('show'); so.setAttribute('aria-hidden','true')
-              } else {
-                sb.classList.add('open'); so.classList.add('show'); so.setAttribute('aria-hidden','false')
-              }
-            }
-          })
+          // Search page
+          btn.addEventListener('click', function() { window.location.href = '/search' })
         } else if (i === 2) {
-          // Favourites placeholder — show toast
-          btn.addEventListener('click', function() { showToast('Saves coming soon — create an account to save listings') })
+          // Events
+          btn.addEventListener('click', function() { window.location.href = '/events' })
         } else if (i === 3) {
           // Messages
           btn.addEventListener('click', function() { window.location.href = '/messages' })
@@ -2451,8 +2441,8 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
   <nav class="bnav" aria-label="Mobile navigation">
     <div class="bnav-items">
       <button class="bni active" aria-label="Home"><i class="ti ti-home"></i><span>Home</span></button>
-      <button class="bni" aria-label="Search"><i class="ti ti-search"></i><span>Search</span></button>
-      <button class="bni" aria-label="Saves"><i class="ti ti-heart"></i><span>Saves</span></button>
+      <button class="bni" aria-label="Search" onclick="window.location.href='/search'"><i class="ti ti-search"></i><span>Search</span></button>
+      <button class="bni" aria-label="Events" onclick="window.location.href='/events'"><i class="ti ti-calendar-event"></i><span>Events</span></button>
       <button class="bni" id="navMsgBtn" aria-label="Messages"><i class="ti ti-message-circle"></i><span>Messages</span><span id="navMsgBadge" style="display:none;background:#c5a05a;color:#080808;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;margin-left:4px;vertical-align:middle"></span></button>
       <button class="bni" aria-label="Profile"><i class="ti ti-user-circle"></i><span>Profile</span></button>
     </div>
