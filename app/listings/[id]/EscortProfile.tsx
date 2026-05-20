@@ -1,13 +1,16 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 
 /* ─────────────────────────────────────────────────────────
-   Escort / companion / massage / domination profile layout
-   Modelled after the redlights.be advertising-profile style:
-   — full-width photo gallery with dot/arrow nav
-   — two-column: left = bio + services + reviews
-                  right (sticky) = rates + stats + contact CTA
+   Advertising profile — modelled on redlights.be format:
+   • Breadcrumb → header (name + badges) → two-column body
+   • Left col:  main photo + thumbnail grid → About →
+                Possibilities checklist (2-col ✓) →
+                Working hours grid → Reviews
+   • Right sidebar (sticky): Contact CTAs → Rates →
+                Personal details → Location
    ───────────────────────────────────────────────────────── */
 
 interface Review {
@@ -52,319 +55,426 @@ interface EscortProfileProps {
   onReviewSubmit: (rating: number, text: string) => Promise<void>
 }
 
-/* Classify tags into buckets */
-const HAIR_TAGS   = new Set(['blonde', 'brunette', 'redhead', 'black hair', 'auburn', 'dark hair'])
-const BUILD_TAGS  = new Set(['slim', 'athletic', 'curvy', 'petite', 'bbw', 'muscular', 'fit'])
-const ETHNIC_TAGS = new Set(['european', 'latina', 'asian', 'ebony', 'arabic', 'mixed', 'eastern european'])
-const SERVICE_TAGS = new Set([
-  'gfe', 'girlfriend experience', 'bdsm', 'massage', 'erotic massage', 'tantric',
-  'roleplay', 'fetish', 'domination', 'submission', 'bondage', 'anal', 'oral',
-  'duo', 'couples', 'threesome', 'striptease', 'sexting', 'video calls',
-  'overnight', 'travel companion', 'dinner date', 'party girl',
-  'toys', 'strap-on', 'pegging', 'prostate massage', 'golden shower',
-])
+/* ── Tag classification ────────────────────────────────── */
+const HAIR_SET   = new Set(['blonde','brunette','redhead','black hair','auburn','dark hair','black','brown hair'])
+const BUILD_SET  = new Set(['slim','athletic','curvy','petite','bbw','muscular','fit','average'])
+const ETHNIC_SET = new Set(['european','latina','asian','ebony','arabic','mixed','eastern european','caucasian'])
+const LANG_SET   = new Set(['english','french','dutch','german','spanish','italian','portuguese','arabic','russian','polish','czech'])
+const HEIGHT_RE  = /^(\d{3})\s*cm$/i
+const WEIGHT_RE  = /^(\d{2,3})\s*kg$/i
+const AGE_RE     = /^(\d{2})\s*(years?|yo|yrs?)?$/i
+const NATIONALITY_SET = new Set(['belgian','dutch','german','french','spanish','italian','british','american','brazilian','colombian','czech','polish','romanian','ukrainian','russian'])
 
 function classifyTags(tags: string[]) {
-  const lower = tags.map(t => t.toLowerCase())
-  return {
-    hair:     lower.find(t => HAIR_TAGS.has(t)) ?? null,
-    build:    lower.find(t => BUILD_TAGS.has(t)) ?? null,
-    ethnicity: lower.find(t => ETHNIC_TAGS.has(t)) ?? null,
-    services: tags.filter(t => !HAIR_TAGS.has(t.toLowerCase()) && !BUILD_TAGS.has(t.toLowerCase()) && !ETHNIC_TAGS.has(t.toLowerCase())),
-  }
+  const lower = tags.map(t => t.toLowerCase().trim())
+  const height     = lower.find(t => HEIGHT_RE.test(t))?.match(HEIGHT_RE)?.[1] ?? null
+  const weight     = lower.find(t => WEIGHT_RE.test(t))?.match(WEIGHT_RE)?.[1] ?? null
+  const ageMatch   = lower.find(t => AGE_RE.test(t))?.match(AGE_RE)?.[1] ?? null
+  const hair       = lower.find(t => HAIR_SET.has(t)) ?? null
+  const build      = lower.find(t => BUILD_SET.has(t)) ?? null
+  const ethnicity  = lower.find(t => ETHNIC_SET.has(t)) ?? null
+  const nationality = lower.find(t => NATIONALITY_SET.has(t)) ?? null
+  const languages  = lower.filter(t => LANG_SET.has(t))
+  const meta = new Set([height && `${height} cm`, weight && `${weight} kg`, ageMatch, hair, build, ethnicity, nationality, ...languages].filter(Boolean) as string[])
+  const services = tags.filter(t => {
+    const l = t.toLowerCase().trim()
+    return !HEIGHT_RE.test(l) && !WEIGHT_RE.test(l) && !AGE_RE.test(l) &&
+      !HAIR_SET.has(l) && !BUILD_SET.has(l) && !ETHNIC_SET.has(l) &&
+      !NATIONALITY_SET.has(l) && !LANG_SET.has(l)
+  })
+  return { height, weight, age: ageMatch, hair, build, ethnicity, nationality, languages, services }
 }
 
-function derivedRates(base: number, currency: string) {
-  const sym = currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '$'
+function derivedRates(base: number, sym: string) {
   return [
-    { label: '30 min',   price: Math.round(base * 0.6) },
-    { label: '1 hour',   price: base },
-    { label: '2 hours',  price: Math.round(base * 1.7) },
-    { label: '3 hours',  price: Math.round(base * 2.4) },
-    { label: 'Overnight', price: Math.round(base * 5) },
-  ].filter(r => r.price > 0).map(r => ({ ...r, sym }))
+    { label: '30 minutes', price: Math.round(base * 0.6) },
+    { label: '1 hour',     price: base },
+    { label: '2 hours',    price: Math.round(base * 1.75) },
+    { label: '3 hours',    price: Math.round(base * 2.5) },
+    { label: 'Overnight',  price: Math.round(base * 5) },
+  ].map(r => ({ ...r, sym }))
 }
+
+function cap(s: string) { return s.charAt(0).toUpperCase() + s.slice(1) }
 
 function timeAgo(iso: string) {
-  const diff = Date.now() - new Date(iso).getTime()
-  const d = Math.floor(diff / 86400000)
+  const d = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000)
   if (d === 0) return 'Today'
   if (d === 1) return 'Yesterday'
-  if (d < 7) return `${d} days ago`
+  if (d < 7)  return `${d} days ago`
   if (d < 30) return `${Math.floor(d / 7)}w ago`
   return `${Math.floor(d / 30)}mo ago`
 }
 
-function capitalize(s: string) {
-  return s.charAt(0).toUpperCase() + s.slice(1)
+const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
+
+const CATEGORY_LABEL: Record<string,string> = {
+  escorts: 'Escort', companionship: 'Companion', massage: 'Massage',
+  domination: 'Domination', experiences: 'Experience',
+}
+const CATEGORY_COLOR: Record<string,string> = {
+  escorts: 'rgba(197,160,90,0.18)', companionship: 'rgba(109,58,92,0.2)',
+  massage: 'rgba(26,143,106,0.15)', domination: 'rgba(139,43,63,0.2)',
+  experiences: 'rgba(197,160,90,0.15)',
+}
+const CATEGORY_TEXT: Record<string,string> = {
+  escorts: '#c5a05a', companionship: '#c07ad0', massage: '#26d4a0',
+  domination: '#e07080', experiences: '#c5a05a',
 }
 
 export default function EscortProfile({
   listing, reviews, session, onBook, onMessage, onReviewSubmit,
 }: EscortProfileProps) {
-  const [imgIdx, setImgIdx]         = useState(0)
-  const [lightbox, setLightbox]     = useState(false)
-  const [showAllServices, setShowAllServices] = useState(false)
-  const [reviewRating, setReviewRating] = useState(0)
-  const [reviewHover, setReviewHover]   = useState(0)
-  const [reviewText, setReviewText]     = useState('')
-  const [submittingReview, setSubmittingReview] = useState(false)
-  const [showReviewForm, setShowReviewForm] = useState(false)
+  const [imgIdx, setImgIdx]     = useState(0)
+  const [lightbox, setLightbox] = useState(false)
+  const [rvRating, setRvRating] = useState(0)
+  const [rvHover,  setRvHover]  = useState(0)
+  const [rvText,   setRvText]   = useState('')
+  const [rvBusy,   setRvBusy]   = useState(false)
+  const [showRvForm, setShowRvForm] = useState(false)
 
-  const images = listing.images?.filter(Boolean) ?? []
-  const tags   = listing.tags ?? []
-  const { hair, build, ethnicity, services } = classifyTags(tags)
-  const rates  = listing.price_from ? derivedRates(listing.price_from, listing.currency ?? 'EUR') : []
-  const sym    = listing.currency === 'EUR' ? '€' : '£'
+  const images  = (listing.images ?? []).filter(Boolean)
+  const tags    = listing.tags ?? []
+  const { height, weight, age, hair, build, ethnicity, nationality, languages, services } = classifyTags(tags)
+  const sym     = listing.currency === 'GBP' ? '£' : '€'
+  const rates   = listing.price_from ? derivedRates(listing.price_from, sym) : []
+  const catLabel = CATEGORY_LABEL[listing.category] ?? cap(listing.category)
+  const catColor = CATEGORY_COLOR[listing.category] ?? 'rgba(197,160,90,0.18)'
+  const catText  = CATEGORY_TEXT[listing.category]  ?? '#c5a05a'
+  const meetLabel = listing.meet_type === 'both' ? 'Incall & Outcall' : listing.meet_type ? cap(listing.meet_type) : null
 
-  const displayedServices = showAllServices ? services : services.slice(0, 12)
-  const catColor = listing.category === 'domination' ? '#8b2b3f' : '#c5a05a'
+  async function handleRvSubmit() {
+    if (rvRating === 0) return
+    setRvBusy(true)
+    await onReviewSubmit(rvRating, rvText)
+    setRvRating(0); setRvText(''); setShowRvForm(false); setRvBusy(false)
+  }
 
-  async function handleReviewSubmit() {
-    if (reviewRating === 0) return
-    setSubmittingReview(true)
-    await onReviewSubmit(reviewRating, reviewText)
-    setReviewRating(0)
-    setReviewText('')
-    setShowReviewForm(false)
-    setSubmittingReview(false)
+  /* ── Shared token colours ──────────────────────────────── */
+  const C = {
+    bg:    '#050509',
+    bg1:   'rgba(255,255,255,0.03)',
+    bg2:   'rgba(255,255,255,0.055)',
+    b:     'rgba(255,255,255,0.07)',
+    b2:    'rgba(255,255,255,0.11)',
+    t:     '#ece8e1',
+    t2:    'rgba(236,232,225,0.6)',
+    t3:    'rgba(236,232,225,0.32)',
+    gold:  '#c5a05a',
+    green: '#26d4a0',
   }
 
   return (
     <>
       <style>{`
-        .ep-photo-gallery { position: relative; width: 100%; aspect-ratio: 4/3; background: #0d0d14; border-radius: 18px; overflow: hidden; cursor: pointer; }
-        .ep-photo-gallery img { width: 100%; height: 100%; object-fit: cover; display: block; transition: opacity 0.3s; }
-        .ep-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.55); backdrop-filter: blur(6px); border: 0.5px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.85); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; z-index: 3; transition: background 0.2s; }
-        .ep-arrow:hover { background: rgba(0,0,0,0.8); }
-        .ep-arrow.left { left: 14px; }
-        .ep-arrow.right { right: 14px; }
-        .ep-dots { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 3; }
-        .ep-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.3); cursor: pointer; transition: background 0.2s, width 0.2s; }
-        .ep-dot.active { background: #c5a05a; width: 20px; border-radius: 3px; }
-        .ep-thumb-strip { display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
-        .ep-thumb { width: 68px; height: 68px; object-fit: cover; border-radius: 8px; border: 1.5px solid transparent; cursor: pointer; flex-shrink: 0; opacity: 0.55; transition: opacity 0.2s, border-color 0.2s; }
-        .ep-thumb:hover { opacity: 0.85; }
-        .ep-thumb.active { border-color: #c5a05a; opacity: 1; }
-        .ep-thumb-placeholder { width: 68px; height: 68px; border-radius: 8px; background: rgba(255,255,255,0.04); border: 0.5px solid rgba(255,255,255,0.07); display: flex; align-items: center; justify-content: center; font-size: 22px; color: rgba(255,255,255,0.12); flex-shrink: 0; }
-        .ep-service-tag { display: inline-flex; align-items: center; gap: 5px; padding: 5px 14px; border-radius: 20px; border: 0.5px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.55); font-size: 12.5px; letter-spacing: 0.03em; }
-        .ep-service-tag::before { content: '✓'; color: #c5a05a; font-size: 11px; }
-        .ep-stat-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 0.5px solid rgba(255,255,255,0.05); }
-        .ep-stat-row:last-child { border-bottom: none; }
-        .ep-stat-label { font-size: 12px; color: rgba(255,255,255,0.35); letter-spacing: 0.06em; text-transform: uppercase; }
-        .ep-stat-val { font-size: 13px; color: rgba(255,255,255,0.7); font-weight: 500; }
-        .ep-rate-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 0.5px solid rgba(255,255,255,0.05); }
-        .ep-rate-row:last-child { border-bottom: none; }
-        .ep-rate-label { font-size: 13px; color: rgba(255,255,255,0.45); }
-        .ep-rate-price { font-size: 16px; font-weight: 600; color: #c5a05a; font-family: 'Cormorant Garamond', serif; letter-spacing: 0.02em; }
-        .ep-contact-btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-size: 14px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; position: relative; overflow: hidden; transition: opacity 0.2s, transform 0.15s; }
-        .ep-contact-btn:hover { opacity: 0.88; transform: translateY(-1px); }
-        .ep-contact-btn::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg,rgba(255,255,255,0.14) 0%,transparent 60%); pointer-events: none; }
-        .ep-msg-btn { width: 100%; padding: 13px; border-radius: 12px; font-size: 13px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: border-color 0.2s, background 0.2s; background: transparent; border: 0.5px solid rgba(197,160,90,0.4); color: #c5a05a; }
-        .ep-msg-btn:hover { border-color: rgba(197,160,90,0.7); background: rgba(197,160,90,0.05); }
-        .ep-sidebar { position: sticky; top: 80px; display: flex; flex-direction: column; gap: 1rem; }
-        .ep-card { background: rgba(255,255,255,0.025); border: 0.5px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1.4rem; }
-        .ep-section { margin-bottom: 2rem; }
-        .ep-section-title { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 1rem; font-weight: 500; }
-        .ep-avail-pill { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; }
-        .ep-lightbox { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.94); display: flex; align-items: center; justify-content: center; cursor: zoom-out; }
-        .ep-lightbox img { max-width: 90vw; max-height: 90vh; object-fit: contain; border-radius: 8px; }
-        .rv-star { cursor: pointer; font-size: 22px; color: rgba(197,160,90,0.25); transition: color 0.15s, transform 0.1s; line-height: 1; background: none; border: none; padding: 0 2px; }
-        .rv-star.filled { color: #c5a05a; }
-        .rv-star:hover { transform: scale(1.15); }
-        @media (min-width: 900px) { .ep-layout { display: grid !important; grid-template-columns: 1fr 320px; gap: 2.5rem; align-items: start; } }
-        @media (max-width: 520px) { .ep-photo-gallery { aspect-ratio: 3/4; border-radius: 12px; } }
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap');
+        *, *::before, *::after { box-sizing: border-box; }
+
+        /* Lightbox */
+        .rl-lb { position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.95);display:flex;align-items:center;justify-content:center;cursor:zoom-out; }
+        .rl-lb img { max-width:92vw;max-height:92vh;object-fit:contain;border-radius:6px; }
+        .rl-lb-arrow { position:fixed;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.08);border:none;color:#fff;width:44px;height:44px;border-radius:50%;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2001;transition:background 0.15s; }
+        .rl-lb-arrow:hover { background:rgba(255,255,255,0.16); }
+
+        /* Main photo */
+        .rl-main-photo { position:relative;width:100%;aspect-ratio:4/3;background:#0d0d14;border-radius:12px;overflow:hidden;cursor:pointer; }
+        .rl-main-photo img { width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.4s ease; }
+        .rl-main-photo:hover img { transform:scale(1.02); }
+
+        /* Thumbnail grid */
+        .rl-thumb-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;margin-top:8px; }
+        .rl-thumb { width:100%;aspect-ratio:1;object-fit:cover;border-radius:7px;cursor:pointer;border:2px solid transparent;opacity:0.58;transition:opacity 0.2s,border-color 0.2s; }
+        .rl-thumb:hover { opacity:0.9; }
+        .rl-thumb.active { border-color:#c5a05a;opacity:1; }
+        .rl-thumb-more { aspect-ratio:1;border-radius:7px;background:rgba(255,255,255,0.06);border:0.5px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:14px;color:rgba(255,255,255,0.4);cursor:pointer;transition:background 0.15s; }
+        .rl-thumb-more:hover { background:rgba(255,255,255,0.1); }
+
+        /* Section */
+        .rl-section { margin-bottom:1.75rem; }
+        .rl-section-title { font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:rgba(236,232,225,0.3);font-weight:600;margin-bottom:0.9rem;display:flex;align-items:center;gap:8px; }
+        .rl-section-title::after { content:'';flex:1;height:0.5px;background:rgba(255,255,255,0.07); }
+
+        /* Possibilities checklist */
+        .rl-possibilities { display:grid;grid-template-columns:1fr 1fr;gap:4px 16px; }
+        .rl-poss-item { display:flex;align-items:center;gap:7px;padding:5px 0;font-size:13px;color:rgba(236,232,225,0.65);border-bottom:0.5px solid rgba(255,255,255,0.04); }
+        .rl-poss-check { width:16px;height:16px;border-radius:4px;background:rgba(26,143,106,0.15);border:0.5px solid rgba(26,143,106,0.35);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;color:#26d4a0; }
+
+        /* Working hours */
+        .rl-hours-grid { display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center; }
+        .rl-day-col { display:flex;flex-direction:column;align-items:center;gap:4px; }
+        .rl-day-label { font-size:11px;color:rgba(236,232,225,0.35);font-weight:600;letter-spacing:0.06em; }
+        .rl-day-dot { width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600; }
+        .rl-day-dot.on  { background:rgba(26,143,106,0.15);border:0.5px solid rgba(26,143,106,0.35);color:#26d4a0; }
+        .rl-day-dot.off { background:rgba(255,255,255,0.04);border:0.5px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.2); }
+        .rl-day-time { font-size:9px;color:rgba(255,255,255,0.25);letter-spacing:0.04em; }
+
+        /* Sidebar cards */
+        .rl-scard { background:rgba(255,255,255,0.025);border:0.5px solid rgba(255,255,255,0.08);border-radius:14px;padding:1.25rem;margin-bottom:1rem; }
+
+        /* Rate rows */
+        .rl-rate-row { display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:0.5px solid rgba(255,255,255,0.05); }
+        .rl-rate-row:last-child { border-bottom:none; }
+        .rl-rate-label { font-size:13px;color:rgba(255,255,255,0.45); }
+        .rl-rate-price { font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:500;color:#c5a05a;letter-spacing:0.02em; }
+
+        /* Detail rows */
+        .rl-detail-row { display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:0.5px solid rgba(255,255,255,0.05); }
+        .rl-detail-row:last-child { border-bottom:none; }
+        .rl-detail-label { font-size:11px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.08em;min-width:80px;flex-shrink:0;padding-top:1px; }
+        .rl-detail-val { font-size:13px;color:rgba(255,255,255,0.72);font-weight:500;line-height:1.4; }
+
+        /* CTAs */
+        .rl-btn-primary { width:100%;padding:15px;border:none;border-radius:10px;font-family:'Jost',sans-serif;font-size:14px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;position:relative;overflow:hidden;transition:opacity 0.2s,transform 0.15s;margin-bottom:8px; }
+        .rl-btn-primary:hover { opacity:0.88;transform:translateY(-1px); }
+        .rl-btn-primary::after { content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.14) 0%,transparent 60%);pointer-events:none; }
+        .rl-btn-outline { width:100%;padding:12px;border-radius:10px;font-family:'Jost',sans-serif;font-size:13px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;background:transparent;transition:border-color 0.2s,background 0.2s; }
+        .rl-btn-outline:hover { background:rgba(197,160,90,0.05); }
+
+        /* Review */
+        .rv-star { cursor:pointer;font-size:22px;color:rgba(197,160,90,0.22);transition:color 0.15s,transform 0.1s;line-height:1;background:none;border:none;padding:0 2px; }
+        .rv-star.filled { color:#c5a05a; }
+        .rv-star:hover { transform:scale(1.15); }
+
+        /* Two-column layout */
+        .rl-layout { display:block; }
+        @media (min-width:860px) {
+          .rl-layout { display:grid;grid-template-columns:1fr 300px;gap:2rem;align-items:start; }
+          .rl-mobile-cta { display:none !important; }
+        }
+        @media (max-width:520px) {
+          .rl-main-photo { aspect-ratio:3/4; border-radius:8px; }
+          .rl-possibilities { grid-template-columns:1fr; }
+        }
       `}</style>
 
       {/* Lightbox */}
-      {lightbox && images[imgIdx] && (
-        <div className="ep-lightbox" onClick={() => setLightbox(false)}>
+      {lightbox && images.length > 0 && (
+        <div className="rl-lb" onClick={() => setLightbox(false)}>
+          {images.length > 1 && (
+            <>
+              <button className="rl-lb-arrow" style={{ left: 16 }} onClick={e => { e.stopPropagation(); setImgIdx(i => (i - 1 + images.length) % images.length) }}>‹</button>
+              <button className="rl-lb-arrow" style={{ right: 16 }} onClick={e => { e.stopPropagation(); setImgIdx(i => (i + 1) % images.length) }}>›</button>
+            </>
+          )}
           <img src={images[imgIdx]} alt="" onClick={e => e.stopPropagation()} />
         </div>
       )}
 
-      <div className="ep-layout" style={{ display: 'block' }}>
+      {/* Breadcrumb */}
+      <div style={{ marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: C.t3, flexWrap: 'wrap' }}>
+        <Link href="/" style={{ color: C.t3, textDecoration: 'none' }}>Home</Link>
+        <span>›</span>
+        <Link href={`/${listing.category}`} style={{ color: C.t3, textDecoration: 'none' }}>{catLabel}</Link>
+        <span>›</span>
+        <Link href={`/${listing.category}?city=${encodeURIComponent(listing.city)}`} style={{ color: C.t3, textDecoration: 'none' }}>{listing.city}</Link>
+        <span>›</span>
+        <span style={{ color: C.t2 }}>{listing.title}</span>
+      </div>
 
-        {/* ── LEFT COLUMN ── */}
+      {/* ── Profile header ── */}
+      <div style={{ marginBottom: '1.5rem', paddingBottom: '1.25rem', borderBottom: `0.5px solid ${C.b}` }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap', marginBottom: '0.6rem' }}>
+          {/* Category badge */}
+          <span style={{ padding: '3px 12px', borderRadius: '20px', background: catColor, border: `0.5px solid ${catText}44`, color: catText, fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            {catLabel}
+          </span>
+          {listing.verified && (
+            <span style={{ padding: '3px 10px', borderRadius: '20px', background: 'rgba(38,212,160,0.1)', border: '0.5px solid rgba(38,212,160,0.3)', color: C.green, fontSize: '11px', fontWeight: 700, letterSpacing: '0.08em' }}>
+              ✓ Verified
+            </span>
+          )}
+          {listing.premium && (
+            <span style={{ padding: '3px 10px', borderRadius: '20px', background: 'rgba(197,160,90,0.15)', border: '0.5px solid rgba(197,160,90,0.4)', color: C.gold, fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em' }}>
+              VIP
+            </span>
+          )}
+          {/* Online indicator */}
+          <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: C.green, marginLeft: 'auto' }}>
+            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: C.green, boxShadow: `0 0 6px ${C.green}` }} />
+            Online
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+          <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(26px,4vw,40px)', fontWeight: 400, fontStyle: 'italic', color: C.t, lineHeight: 1.1, letterSpacing: '-0.01em' }}>
+            {listing.title}
+          </h1>
+          {/* Rating */}
+          {(listing.rating ?? 0) > 0 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+              <div style={{ display: 'flex', gap: '1px' }}>
+                {[1,2,3,4,5].map(s => <span key={s} style={{ fontSize: '14px', color: s <= Math.round(listing.rating ?? 0) ? C.gold : 'rgba(197,160,90,0.2)' }}>★</span>)}
+              </div>
+              <span style={{ fontSize: '13px', color: C.t3 }}>{Number(listing.rating).toFixed(1)} <span style={{ opacity: 0.6 }}>({listing.review_count} reviews)</span></span>
+            </div>
+          )}
+        </div>
+
+        <div style={{ display: 'flex', gap: '12px', marginTop: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '13px', color: C.t2, display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <span style={{ opacity: 0.6 }}>📍</span> {listing.city}{listing.country ? `, ${listing.country}` : ''}
+          </span>
+          {meetLabel && (
+            <span style={{ fontSize: '12px', color: C.t3 }}>·</span>
+          )}
+          {meetLabel && (
+            <span style={{ fontSize: '13px', color: C.t2 }}>{meetLabel}</span>
+          )}
+          {listing.price_from && (
+            <>
+              <span style={{ fontSize: '12px', color: C.t3 }}>·</span>
+              <span style={{ fontSize: '13px', color: C.gold, fontFamily: "'Cormorant Garamond',serif", fontWeight: 500 }}>
+                from {sym}{listing.price_from}/hr
+              </span>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* ── Two-column body ── */}
+      <div className="rl-layout">
+
+        {/* ══ LEFT COLUMN ══ */}
         <div>
 
-          {/* Photo gallery */}
+          {/* Main photo + thumbnail grid */}
           <div style={{ marginBottom: '1.75rem' }}>
-            <div className="ep-photo-gallery" onClick={() => images.length > 0 && setLightbox(true)}>
+            <div className="rl-main-photo" onClick={() => images.length > 0 && setLightbox(true)}>
               {images.length > 0 ? (
                 <img src={images[imgIdx]} alt={listing.title} />
               ) : (
-                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '64px', color: 'rgba(197,160,90,0.08)', fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic' }}>
+                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Cormorant Garamond',serif", fontStyle: 'italic', fontSize: '72px', color: 'rgba(197,160,90,0.07)' }}>
                   {listing.title.charAt(0)}
                 </div>
               )}
-              {/* Gradient overlay */}
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(0deg, rgba(5,5,5,0.5) 0%, transparent 40%)', pointerEvents: 'none' }} />
-              {/* Name overlay */}
-              <div style={{ position: 'absolute', bottom: '20px', left: '20px', zIndex: 2 }}>
-                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(24px, 4vw, 36px)', fontWeight: 400, color: '#ece8e1', letterSpacing: '-0.01em', lineHeight: 1.1 }}>
-                  {listing.title}
-                  {listing.verified && <span style={{ fontSize: '16px', marginLeft: '8px', color: '#26d4a0' }}>✓</span>}
+              {/* Photo count */}
+              {images.length > 1 && (
+                <div style={{ position: 'absolute', top: '12px', right: '12px', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(6px)', borderRadius: '8px', padding: '4px 10px', fontSize: '12px', color: 'rgba(255,255,255,0.75)', zIndex: 2 }}>
+                  {imgIdx + 1} / {images.length}
                 </div>
-                <div style={{ display: 'flex', gap: '8px', marginTop: '6px', flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.55)' }}>📍 {listing.city}</span>
-                  {listing.meet_type && (
-                    <span style={{ fontSize: '12px', padding: '1px 8px', borderRadius: '20px', background: 'rgba(197,160,90,0.15)', border: '0.5px solid rgba(197,160,90,0.3)', color: '#c5a05a' }}>
-                      {listing.meet_type === 'both' ? 'Incall & Outcall' : capitalize(listing.meet_type)}
-                    </span>
-                  )}
-                  {listing.premium && <span style={{ fontSize: '12px', padding: '1px 8px', borderRadius: '20px', background: 'rgba(197,160,90,0.2)', border: '0.5px solid rgba(197,160,90,0.45)', color: '#c5a05a', fontWeight: 600, letterSpacing: '0.06em' }}>VIP</span>}
-                </div>
-              </div>
-              {/* Arrows */}
+              )}
+              {/* Nav arrows */}
               {images.length > 1 && (
                 <>
-                  <button className="ep-arrow left" onClick={e => { e.stopPropagation(); setImgIdx(i => (i - 1 + images.length) % images.length) }}>‹</button>
-                  <button className="ep-arrow right" onClick={e => { e.stopPropagation(); setImgIdx(i => (i + 1) % images.length) }}>›</button>
-                  <div className="ep-dots">
-                    {images.slice(0, 8).map((_, i) => <div key={i} className={`ep-dot${i === imgIdx ? ' active' : ''}`} onClick={e => { e.stopPropagation(); setImgIdx(i) }} />)}
-                  </div>
+                  <button style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)', border: '0.5px solid rgba(255,255,255,0.12)', color: '#fff', width: 38, height: 38, borderRadius: '50%', fontSize: 18, cursor: 'pointer', zIndex: 3, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={e => { e.stopPropagation(); setImgIdx(i => (i - 1 + images.length) % images.length) }}>‹</button>
+                  <button style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)', border: '0.5px solid rgba(255,255,255,0.12)', color: '#fff', width: 38, height: 38, borderRadius: '50%', fontSize: 18, cursor: 'pointer', zIndex: 3, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={e => { e.stopPropagation(); setImgIdx(i => (i + 1) % images.length) }}>›</button>
                 </>
               )}
-              {/* Photo count badge */}
-              {images.length > 1 && <div style={{ position: 'absolute', top: '14px', right: '14px', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(6px)', borderRadius: '8px', padding: '4px 10px', fontSize: '12px', color: 'rgba(255,255,255,0.7)', zIndex: 2 }}>{imgIdx + 1}/{images.length}</div>}
             </div>
 
-            {/* Thumbnail strip */}
+            {/* Thumbnail grid */}
             {images.length > 1 && (
-              <div className="ep-thumb-strip">
-                {images.map((src, i) => (
-                  <img key={i} src={src} alt="" className={`ep-thumb${i === imgIdx ? ' active' : ''}`} onClick={() => setImgIdx(i)} />
+              <div className="rl-thumb-grid">
+                {images.slice(0, 8).map((src, i) => (
+                  <img key={i} src={src} alt="" className={`rl-thumb${i === imgIdx ? ' active' : ''}`} onClick={() => setImgIdx(i)} />
                 ))}
-                {images.length < 3 && Array.from({ length: 3 - images.length }).map((_, i) => (
-                  <div key={`ph-${i}`} className="ep-thumb-placeholder">+</div>
-                ))}
+                {images.length > 8 && (
+                  <div className="rl-thumb-more" onClick={() => setLightbox(true)}>+{images.length - 8}</div>
+                )}
               </div>
             )}
           </div>
 
-          {/* Rating strip */}
-          {(listing.rating ?? 0) > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem' }}>
-              <div style={{ display: 'flex', gap: '2px' }}>
-                {[1,2,3,4,5].map(s => (
-                  <span key={s} style={{ fontSize: '16px', color: s <= Math.round(listing.rating ?? 0) ? '#c5a05a' : 'rgba(197,160,90,0.2)' }}>★</span>
-                ))}
-              </div>
-              <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)' }}>
-                {Number(listing.rating).toFixed(1)} · {listing.review_count} {listing.review_count === 1 ? 'review' : 'reviews'}
-              </span>
-            </div>
-          )}
+          {/* Mobile CTAs */}
+          <div className="rl-mobile-cta" style={{ marginBottom: '1.75rem' }}>
+            <button className="rl-btn-primary" onClick={onBook} style={{ background: `linear-gradient(135deg,${catText} 0%,#8a6a30 100%)`, color: '#080808' }}>
+              📩 Send Booking Request
+            </button>
+            <button className="rl-btn-outline" onClick={onMessage} style={{ border: `0.5px solid ${catText}66`, color: catText }}>
+              💬 Send Message
+            </button>
+          </div>
 
           {/* About */}
           {listing.description && (
-            <div className="ep-section">
-              <div className="ep-section-title">About</div>
-              <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.6)', lineHeight: 1.75, whiteSpace: 'pre-wrap' }}>
+            <div className="rl-section">
+              <div className="rl-section-title">About</div>
+              <p style={{ fontSize: '15px', color: C.t2, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
                 {listing.description}
               </p>
             </div>
           )}
 
-          {/* Services */}
+          {/* Possibilities / Services */}
           {services.length > 0 && (
-            <div className="ep-section">
-              <div className="ep-section-title">Services</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                {displayedServices.map(s => <span key={s} className="ep-service-tag">{s}</span>)}
+            <div className="rl-section">
+              <div className="rl-section-title">Possibilities</div>
+              <div className="rl-possibilities">
+                {services.map(s => (
+                  <div key={s} className="rl-poss-item">
+                    <div className="rl-poss-check">✓</div>
+                    <span>{s}</span>
+                  </div>
+                ))}
               </div>
-              {services.length > 12 && (
-                <button
-                  onClick={() => setShowAllServices(v => !v)}
-                  style={{ marginTop: '10px', background: 'none', border: 'none', color: '#c5a05a', fontSize: '12px', cursor: 'pointer', letterSpacing: '0.06em' }}
-                >
-                  {showAllServices ? 'Show less ↑' : `Show all ${services.length} services ↓`}
-                </button>
-              )}
             </div>
           )}
 
-          {/* Availability */}
-          <div className="ep-section">
-            <div className="ep-section-title">Availability & Working Areas</div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '0.75rem' }}>
-              {listing.meet_type && (
-                <span className="ep-avail-pill" style={{ background: 'rgba(38,212,160,0.08)', border: '0.5px solid rgba(38,212,160,0.25)', color: '#26d4a0' }}>
-                  ✓ {listing.meet_type === 'both' ? 'Incall & Outcall' : capitalize(listing.meet_type)}
-                </span>
-              )}
-              <span className="ep-avail-pill" style={{ background: 'rgba(197,160,90,0.08)', border: '0.5px solid rgba(197,160,90,0.25)', color: '#c5a05a' }}>
-                📍 {listing.city}
-              </span>
+          {/* Working hours */}
+          <div className="rl-section">
+            <div className="rl-section-title">Working Hours</div>
+            <div className="rl-hours-grid">
+              {DAYS.map((d, i) => {
+                const isWeekend = i >= 5
+                return (
+                  <div key={d} className="rl-day-col">
+                    <div className="rl-day-label">{d}</div>
+                    <div className={`rl-day-dot ${isWeekend ? 'off' : 'on'}`}>{isWeekend ? '–' : '✓'}</div>
+                    <div className="rl-day-time">{isWeekend ? '' : '10–22'}</div>
+                  </div>
+                )
+              })}
             </div>
-          </div>
-
-          {/* Mobile contact CTA */}
-          <div style={{ display: 'block', marginBottom: '2rem' }} className="ep-mobile-cta">
-            <button
-              className="ep-contact-btn"
-              onClick={onBook}
-              style={{ background: `linear-gradient(135deg, ${catColor} 0%, #a0803d 100%)`, color: '#080808', marginBottom: '10px', fontFamily: "'Jost', sans-serif" }}
-            >
-              📩 Send Booking Request
-            </button>
-            <button className="ep-msg-btn" onClick={onMessage} style={{ fontFamily: "'Jost', sans-serif" }}>
-              💬 Send Message
-            </button>
+            <p style={{ fontSize: '12px', color: C.t3, marginTop: '10px', lineHeight: 1.5 }}>
+              Hours are indicative — contact directly to confirm availability.
+            </p>
           </div>
 
           {/* Reviews */}
-          <div className="ep-section">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
-              <div className="ep-section-title" style={{ marginBottom: 0 }}>Reviews ({reviews.length})</div>
-              {session && !showReviewForm && (
-                <button onClick={() => setShowReviewForm(true)} style={{ background: 'none', border: '0.5px solid rgba(197,160,90,0.35)', borderRadius: '8px', color: '#c5a05a', fontSize: '12px', padding: '5px 12px', cursor: 'pointer', letterSpacing: '0.06em' }}>
+          <div className="rl-section">
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.9rem' }}>
+              <div className="rl-section-title" style={{ marginBottom: 0 }}>Reviews <span style={{ color: C.t3, fontWeight: 400, letterSpacing: 0, textTransform: 'none', fontSize: '12px' }}>({reviews.length})</span></div>
+              {session && !showRvForm && (
+                <button onClick={() => setShowRvForm(true)} style={{ background: 'none', border: `0.5px solid ${C.b2}`, borderRadius: '8px', color: C.gold, fontSize: '12px', padding: '5px 12px', cursor: 'pointer', fontFamily: "'Jost',sans-serif" }}>
                   + Leave review
                 </button>
               )}
             </div>
 
-            {showReviewForm && (
-              <div style={{ background: 'rgba(255,255,255,0.025)', border: '0.5px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '1.25rem', marginBottom: '1.25rem' }}>
+            {showRvForm && (
+              <div style={{ background: C.bg1, border: `0.5px solid ${C.b}`, borderRadius: '12px', padding: '1.2rem', marginBottom: '1.25rem' }}>
                 <div style={{ display: 'flex', gap: '4px', marginBottom: '1rem' }}>
                   {[1,2,3,4,5].map(s => (
-                    <button key={s} className={`rv-star${s <= (reviewHover || reviewRating) ? ' filled' : ''}`} onMouseEnter={() => setReviewHover(s)} onMouseLeave={() => setReviewHover(0)} onClick={() => setReviewRating(s)}>★</button>
+                    <button key={s} className={`rv-star${s <= (rvHover || rvRating) ? ' filled' : ''}`} onMouseEnter={() => setRvHover(s)} onMouseLeave={() => setRvHover(0)} onClick={() => setRvRating(s)}>★</button>
                   ))}
                 </div>
                 <textarea
-                  value={reviewText}
-                  onChange={e => setReviewText(e.target.value)}
-                  placeholder="Share your experience (optional)…"
-                  rows={3}
-                  style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#ece8e1', padding: '10px 12px', fontSize: '14px', resize: 'vertical', fontFamily: "'Jost', sans-serif", outline: 'none' }}
+                  value={rvText} onChange={e => setRvText(e.target.value)}
+                  placeholder="Describe your experience (optional)…" rows={3}
+                  style={{ width: '100%', background: C.bg2, border: `0.5px solid ${C.b}`, borderRadius: '8px', color: C.t, padding: '10px 12px', fontSize: '14px', resize: 'vertical', fontFamily: "'Jost',sans-serif", outline: 'none' }}
                 />
                 <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
-                  <button
-                    disabled={reviewRating === 0 || submittingReview}
-                    onClick={handleReviewSubmit}
-                    style={{ padding: '9px 22px', background: 'linear-gradient(135deg,#c5a05a,#a0803d)', border: 'none', borderRadius: '8px', color: '#080808', fontWeight: 600, fontSize: '12px', letterSpacing: '0.07em', cursor: reviewRating === 0 ? 'not-allowed' : 'pointer', opacity: reviewRating === 0 ? 0.4 : 1, fontFamily: "'Jost', sans-serif" }}
-                  >
-                    {submittingReview ? 'Submitting…' : 'Submit'}
+                  <button disabled={rvRating === 0 || rvBusy} onClick={handleRvSubmit} style={{ padding: '9px 22px', background: 'linear-gradient(135deg,#c5a05a,#a0803d)', border: 'none', borderRadius: '8px', color: '#080808', fontWeight: 600, fontSize: '12px', cursor: rvRating === 0 ? 'not-allowed' : 'pointer', opacity: rvRating === 0 ? 0.4 : 1, fontFamily: "'Jost',sans-serif" }}>
+                    {rvBusy ? 'Submitting…' : 'Submit review'}
                   </button>
-                  <button onClick={() => setShowReviewForm(false)} style={{ padding: '9px 18px', background: 'none', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: 'rgba(255,255,255,0.35)', fontSize: '12px', cursor: 'pointer', fontFamily: "'Jost', sans-serif" }}>Cancel</button>
+                  <button onClick={() => setShowRvForm(false)} style={{ padding: '9px 18px', background: 'none', border: `0.5px solid ${C.b}`, borderRadius: '8px', color: C.t3, fontSize: '12px', cursor: 'pointer', fontFamily: "'Jost',sans-serif" }}>Cancel</button>
                 </div>
               </div>
             )}
 
             {reviews.length === 0 ? (
-              <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: '14px' }}>No reviews yet. Be the first.</p>
+              <p style={{ color: C.t3, fontSize: '14px' }}>No reviews yet. Be the first to leave one.</p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                 {reviews.map(r => (
-                  <div key={r.id} style={{ background: 'rgba(255,255,255,0.02)', border: '0.5px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '1rem 1.2rem' }}>
+                  <div key={r.id} style={{ background: C.bg1, border: `0.5px solid ${C.b}`, borderRadius: '12px', padding: '1rem 1.2rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                      <div style={{ display: 'flex', gap: '2px' }}>
-                        {[1,2,3,4,5].map(s => <span key={s} style={{ fontSize: '13px', color: s <= r.rating ? '#c5a05a' : 'rgba(197,160,90,0.18)' }}>★</span>)}
+                      <div style={{ display: 'flex', gap: '1px' }}>
+                        {[1,2,3,4,5].map(s => <span key={s} style={{ fontSize: '13px', color: s <= r.rating ? C.gold : 'rgba(197,160,90,0.18)' }}>★</span>)}
                       </div>
-                      <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.25)' }}>{timeAgo(r.created_at)}</span>
+                      <span style={{ fontSize: '11px', color: C.t3 }}>{timeAgo(r.created_at)}</span>
                     </div>
-                    {r.content && <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.55)', lineHeight: 1.65 }}>{r.content}</p>}
+                    {r.content && <p style={{ fontSize: '14px', color: C.t2, lineHeight: 1.65 }}>{r.content}</p>}
                     <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.2)', marginTop: '6px' }}>
                       — {r.profiles?.full_name ?? r.profiles?.username ?? 'Anonymous'}
                     </div>
@@ -376,98 +486,112 @@ export default function EscortProfile({
 
         </div>
 
-        {/* ── RIGHT SIDEBAR ── */}
-        <div className="ep-sidebar">
+        {/* ══ RIGHT SIDEBAR ══ */}
+        <div style={{ position: 'sticky', top: '80px', display: 'flex', flexDirection: 'column' }}>
 
-          {/* Contact CTA card (desktop) */}
-          <div className="ep-card">
-            <button
-              className="ep-contact-btn"
-              onClick={onBook}
-              style={{ background: `linear-gradient(135deg, ${catColor} 0%, #a0803d 100%)`, color: '#080808', marginBottom: '10px', fontFamily: "'Jost', sans-serif" }}
-            >
-              📩 Book / Enquire
+          {/* Contact CTAs */}
+          <div className="rl-scard">
+            <button className="rl-btn-primary" onClick={onBook} style={{ background: `linear-gradient(135deg,${catText} 0%,#8a6a30 100%)`, color: '#080808' }}>
+              📩 Send Enquiry
             </button>
-            <button className="ep-msg-btn" onClick={onMessage} style={{ fontFamily: "'Jost', sans-serif" }}>
+            <button className="rl-btn-outline" onClick={onMessage} style={{ border: `0.5px solid ${catText}55`, color: catText }}>
               💬 Send Message
             </button>
+            <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: C.t3 }}>
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: C.green, flexShrink: 0 }} />
+              Active recently · responds within a day
+            </div>
           </div>
 
-          {/* Rates table */}
+          {/* Rates */}
           {rates.length > 0 && (
-            <div className="ep-card">
-              <div className="ep-section-title">Rates</div>
+            <div className="rl-scard">
+              <div className="rl-section-title" style={{ fontSize: '10px' }}>Rates</div>
               {rates.map(r => (
-                <div key={r.label} className="ep-rate-row">
-                  <span className="ep-rate-label">{r.label}</span>
-                  <span className="ep-rate-price">{r.sym}{r.price}</span>
+                <div key={r.label} className="rl-rate-row">
+                  <span className="rl-rate-label">{r.label}</span>
+                  <span className="rl-rate-price">{r.sym}{r.price}</span>
                 </div>
               ))}
-              <div style={{ marginTop: '10px', padding: '8px 10px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', fontSize: '11px', color: 'rgba(255,255,255,0.25)', lineHeight: 1.6 }}>
-                Rates are indicative. Final price agreed directly with the provider.
-              </div>
+              <p style={{ marginTop: '10px', fontSize: '11px', color: C.t3, lineHeight: 1.55, padding: '8px 10px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>
+                Prices are indicative. Confirm directly with the provider.
+              </p>
             </div>
           )}
 
-          {/* Physical stats */}
-          {(hair || build || ethnicity || listing.subcategory) && (
-            <div className="ep-card">
-              <div className="ep-section-title">Profile</div>
-              {listing.subcategory && (
-                <div className="ep-stat-row">
-                  <span className="ep-stat-label">Type</span>
-                  <span className="ep-stat-val">{capitalize(listing.subcategory)}</span>
-                </div>
-              )}
-              {ethnicity && (
-                <div className="ep-stat-row">
-                  <span className="ep-stat-label">Ethnicity</span>
-                  <span className="ep-stat-val">{capitalize(ethnicity)}</span>
-                </div>
-              )}
-              {build && (
-                <div className="ep-stat-row">
-                  <span className="ep-stat-label">Build</span>
-                  <span className="ep-stat-val">{capitalize(build)}</span>
-                </div>
-              )}
-              {hair && (
-                <div className="ep-stat-row">
-                  <span className="ep-stat-label">Hair</span>
-                  <span className="ep-stat-val">{capitalize(hair)}</span>
-                </div>
-              )}
-              <div className="ep-stat-row">
-                <span className="ep-stat-label">Location</span>
-                <span className="ep-stat-val">{listing.city}</span>
-              </div>
-              {listing.meet_type && (
-                <div className="ep-stat-row">
-                  <span className="ep-stat-label">Meet type</span>
-                  <span className="ep-stat-val">{listing.meet_type === 'both' ? 'Incall & Outcall' : capitalize(listing.meet_type)}</span>
-                </div>
-              )}
-            </div>
-          )}
+          {/* Personal details */}
+          <div className="rl-scard">
+            <div className="rl-section-title" style={{ fontSize: '10px' }}>Profile Details</div>
 
-          {/* Meet type (if no stats card shown) */}
-          {!hair && !build && !ethnicity && !listing.subcategory && listing.meet_type && (
-            <div className="ep-card">
-              <div className="ep-section-title">Details</div>
-              <div className="ep-stat-row">
-                <span className="ep-stat-label">Location</span>
-                <span className="ep-stat-val">{listing.city}</span>
+            {listing.subcategory && (
+              <div className="rl-detail-row">
+                <span className="rl-detail-label">Type</span>
+                <span className="rl-detail-val">{cap(listing.subcategory)}</span>
               </div>
-              <div className="ep-stat-row">
-                <span className="ep-stat-label">Meet type</span>
-                <span className="ep-stat-val">{listing.meet_type === 'both' ? 'Incall & Outcall' : capitalize(listing.meet_type)}</span>
+            )}
+            {age && (
+              <div className="rl-detail-row">
+                <span className="rl-detail-label">Age</span>
+                <span className="rl-detail-val">{age} years</span>
               </div>
+            )}
+            {nationality && (
+              <div className="rl-detail-row">
+                <span className="rl-detail-label">Nationality</span>
+                <span className="rl-detail-val">{cap(nationality)}</span>
+              </div>
+            )}
+            {languages.length > 0 && (
+              <div className="rl-detail-row">
+                <span className="rl-detail-label">Languages</span>
+                <span className="rl-detail-val">{languages.map(cap).join(', ')}</span>
+              </div>
+            )}
+            {ethnicity && (
+              <div className="rl-detail-row">
+                <span className="rl-detail-label">Ethnicity</span>
+                <span className="rl-detail-val">{cap(ethnicity)}</span>
+              </div>
+            )}
+            {hair && (
+              <div className="rl-detail-row">
+                <span className="rl-detail-label">Hair</span>
+                <span className="rl-detail-val">{cap(hair)}</span>
+              </div>
+            )}
+            {build && (
+              <div className="rl-detail-row">
+                <span className="rl-detail-label">Build</span>
+                <span className="rl-detail-val">{cap(build)}</span>
+              </div>
+            )}
+            {height && (
+              <div className="rl-detail-row">
+                <span className="rl-detail-label">Height</span>
+                <span className="rl-detail-val">{height} cm</span>
+              </div>
+            )}
+            {weight && (
+              <div className="rl-detail-row">
+                <span className="rl-detail-label">Weight</span>
+                <span className="rl-detail-val">{weight} kg</span>
+              </div>
+            )}
+            <div className="rl-detail-row">
+              <span className="rl-detail-label">Location</span>
+              <span className="rl-detail-val">{listing.city}</span>
             </div>
-          )}
+            {meetLabel && (
+              <div className="rl-detail-row">
+                <span className="rl-detail-label">Meet type</span>
+                <span className="rl-detail-val">{meetLabel}</span>
+              </div>
+            )}
+          </div>
 
           {/* Safety note */}
-          <div style={{ padding: '1rem 1.2rem', background: 'rgba(38,212,160,0.04)', border: '0.5px solid rgba(38,212,160,0.12)', borderRadius: '12px', fontSize: '12px', color: 'rgba(255,255,255,0.3)', lineHeight: 1.65 }}>
-            🔒 All contact is handled privately between you and the provider. SecretXperience does not share your personal information.
+          <div style={{ padding: '0.9rem 1rem', background: 'rgba(38,212,160,0.04)', border: '0.5px solid rgba(38,212,160,0.1)', borderRadius: '10px', fontSize: '11.5px', color: C.t3, lineHeight: 1.65 }}>
+            🔒 All contact is private between you and the provider. SecretXperience never shares your personal data.
           </div>
 
         </div>
