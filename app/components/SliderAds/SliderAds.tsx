@@ -135,16 +135,20 @@ export default function SliderAds() {
       style={{ margin: '0 0 1.5rem', position: 'relative' }}
     >
       {/* Header strip */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 9, letterSpacing: '0.14em', fontWeight: 700, color: accent, textTransform: 'uppercase', background: `${accent}18`, border: `0.5px solid ${accent}44`, borderRadius: 6, padding: '3px 8px' }}>✦ Featured Ads</span>
-          <span style={{ fontSize: 11, color: 'var(--t3)' }}>Sponsored listings</span>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: accent, display: 'inline-block', flexShrink: 0 }} />
+          <span style={{ fontSize: 9, letterSpacing: '0.16em', fontWeight: 700, color: 'var(--t3, #888)', textTransform: 'uppercase' }}>Sponsored Feature</span>
+          <span style={{ flex: 1, height: '0.5px', background: 'rgba(255,255,255,0.08)' }} />
+          <span style={{ fontSize: 11, color: 'var(--t3, #888)', fontVariantNumeric: 'tabular-nums', letterSpacing: '0.04em' }}>
+            <span style={{ color: accent, fontWeight: 600 }}>{String(current + 1).padStart(2, '0')}</span>
+            {' / '}
+            {String(slides.length).padStart(2, '0')}
+          </span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          {slides.map((_, i) => (
-            <button key={i} onClick={() => goTo(i, i > current ? 1 : -1)}
-              style={{ width: i === current ? 20 : 6, height: 6, borderRadius: 3, background: i === current ? accent : 'rgba(255,255,255,0.15)', border: 'none', cursor: 'pointer', padding: 0, transition: 'all .3s' }} />
-          ))}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <button aria-label="Previous" onClick={prev} style={{ width: 26, height: 26, background: 'rgba(255,255,255,0.06)', border: '0.5px solid rgba(255,255,255,0.12)', borderRadius: '50%', cursor: 'pointer', color: 'var(--t, #fff)', fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background .2s' }} onMouseOver={e => (e.currentTarget.style.background = `${accent}22`)} onMouseOut={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.06)')}>‹</button>
+          <button aria-label="Next" onClick={next} style={{ width: 26, height: 26, background: 'rgba(255,255,255,0.06)', border: '0.5px solid rgba(255,255,255,0.12)', borderRadius: '50%', cursor: 'pointer', color: 'var(--t, #fff)', fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background .2s' }} onMouseOver={e => (e.currentTarget.style.background = `${accent}22`)} onMouseOut={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.06)')}>›</button>
         </div>
       </div>
 
@@ -185,11 +189,13 @@ export default function SliderAds() {
                 )}
                 {/* Gradient overlay */}
                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, transparent 50%, rgba(0,0,0,0.5))', pointerEvents: 'none' }} />
-                {/* Badges */}
+                {/* Top badges */}
                 <div style={{ position: 'absolute', top: 10, left: 10, display: 'flex', gap: 4 }}>
                   {s.verified && <span style={{ fontSize: 9, fontWeight: 700, background: 'rgba(29,201,143,0.2)', color: '#1dc98f', border: '0.5px solid rgba(29,201,143,0.4)', borderRadius: 6, padding: '2px 6px', letterSpacing: '0.06em' }}>✓ VER</span>}
                   {s.premium && <span style={{ fontSize: 9, fontWeight: 700, background: `${a}22`, color: a, border: `0.5px solid ${a}44`, borderRadius: 6, padding: '2px 6px', letterSpacing: '0.06em' }}>PREM</span>}
                 </div>
+                {/* Category plate — bottom of image */}
+                <span style={{ position: 'absolute', bottom: 8, left: 10, fontSize: 9, letterSpacing: '0.12em', fontWeight: 600, textTransform: 'uppercase', color: a, background: 'rgba(0,0,0,0.65)', border: `0.5px solid ${a}44`, borderRadius: 20, padding: '3px 9px', backdropFilter: 'blur(8px)' }}>✦ {s.category}</span>
               </div>
 
               {/* Content */}
@@ -211,11 +217,23 @@ export default function SliderAds() {
                 </div>
               </div>
 
-              {/* Nav arrows inside slide */}
+              {/* Left / right edge arrows */}
               {slides.length > 1 && (
                 <>
-                  <button onClick={e => { e.stopPropagation(); prev() }} style={{ position: 'absolute', left: 210, top: '50%', transform: 'translateY(-50%)', width: 30, height: 30, background: 'rgba(0,0,0,0.5)', border: `0.5px solid ${a}33`, borderRadius: '50%', cursor: 'pointer', color: 'var(--t, #fff)', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, backdropFilter: 'blur(6px)' }}>‹</button>
-                  <button onClick={e => { e.stopPropagation(); next() }} style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', width: 30, height: 30, background: 'rgba(0,0,0,0.5)', border: `0.5px solid ${a}33`, borderRadius: '50%', cursor: 'pointer', color: 'var(--t, #fff)', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, backdropFilter: 'blur(6px)' }}>›</button>
+                  <button
+                    aria-label="Previous"
+                    onClick={e => { e.stopPropagation(); prev() }}
+                    style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', width: 34, height: 34, background: 'rgba(0,0,0,0.55)', border: `0.5px solid ${a}44`, borderRadius: '50%', cursor: 'pointer', color: '#fff', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 4, backdropFilter: 'blur(8px)', transition: 'background .2s' }}
+                    onMouseOver={e => (e.currentTarget.style.background = `${a}44`)}
+                    onMouseOut={e => (e.currentTarget.style.background = 'rgba(0,0,0,0.55)')}
+                  >‹</button>
+                  <button
+                    aria-label="Next"
+                    onClick={e => { e.stopPropagation(); next() }}
+                    style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', width: 34, height: 34, background: 'rgba(0,0,0,0.55)', border: `0.5px solid ${a}44`, borderRadius: '50%', cursor: 'pointer', color: '#fff', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 4, backdropFilter: 'blur(8px)', transition: 'background .2s' }}
+                    onMouseOver={e => (e.currentTarget.style.background = `${a}44`)}
+                    onMouseOut={e => (e.currentTarget.style.background = 'rgba(0,0,0,0.55)')}
+                  >›</button>
                 </>
               )}
             </div>
@@ -223,8 +241,19 @@ export default function SliderAds() {
         })}
       </div>
 
-      {/* "Advertise here" CTA */}
-      <div style={{ marginTop: '0.6rem', textAlign: 'right' }}>
+      {/* Bottom rail: dots + pause hint + advertise CTA */}
+      <div style={{ marginTop: '0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+          {slides.map((_, i) => (
+            <button key={i} aria-label={`Go to slide ${i + 1}`} onClick={() => goTo(i, i > current ? 1 : -1)}
+              style={{ width: i === current ? 20 : 5, height: 5, borderRadius: 3, background: i === current ? accent : 'rgba(255,255,255,0.15)', border: 'none', cursor: 'pointer', padding: 0, transition: 'all .3s' }} />
+          ))}
+          {paused && (
+            <span style={{ fontSize: 10, color: 'var(--t3, #888)', marginLeft: 6, letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span style={{ fontSize: 8 }}>⏸</span> Paused
+            </span>
+          )}
+        </div>
         <a href="/advertise" style={{ fontSize: 11, color: 'var(--t3, #555)', textDecoration: 'none', letterSpacing: '0.04em' }} onMouseOver={e => (e.currentTarget.style.color = accent)} onMouseOut={e => (e.currentTarget.style.color = 'var(--t3, #555)')}>
           Want your listing here? <span style={{ color: accent, fontWeight: 600 }}>Get featured →</span>
         </a>
