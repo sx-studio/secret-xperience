@@ -12,6 +12,7 @@ export default function AdminPage() {
   const [listings, setListings] = useState<any[]>([])
   const [users, setUsers] = useState<any[]>([])
   const [bookings, setBookings] = useState<any[]>([])
+  const [verifications, setVerifications] = useState<any[]>([])
   const [stats, setStats] = useState({ listings: 0, users: 0, bookings: 0, revenue: 0, providers: 0, pendingListings: 0 })
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -24,12 +25,14 @@ export default function AdminPage() {
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single()
       if (profile?.role !== 'admin') { window.location.href = '/'; return }
       setIsAdmin(true)
-      const [lr, ur, br] = await Promise.all([
+      const [lr, ur, br, vr] = await Promise.all([
         supabase.from('listings').select('*, profiles(full_name, username)').order('created_at', { ascending: false }),
         supabase.from('profiles').select('*').order('created_at', { ascending: false }),
         supabase.from('bookings').select('*, listings(title), profiles!bookings_client_id_fkey(full_name, username)').order('created_at', { ascending: false }),
+        supabase.from('identity_verifications').select('*, profiles(full_name, username, email, role)').order('submitted_at', { ascending: false }),
       ])
       const ls = lr.data || [], us = ur.data || [], bs = br.data || []
+      setVerifications(vr.data || [])
       const revenue = bs.filter((b: any) => b.status === 'confirmed').reduce((s: number, b: any) => s + (b.total_amount || 0), 0)
       setListings(ls); setUsers(us); setBookings(bs)
       const providers = us.filter((u: any) => ['provider','venue','creator'].includes(u.role)).length
@@ -73,18 +76,19 @@ export default function AdminPage() {
     setUsers(prev => prev.map(u => u.id === id ? { ...u, role } : u))
   }
 
-  async function approveVerification(id: string) {
+  async function approveVerification(verifId: string, userId: string) {
     const supabase = createClient()
-    await supabase.from('profiles').update({ verified: true, verification_status: 'approved' }).eq('id', id)
-    await supabase.from('notifications').insert({ user_id: id, type: 'verification', title: '✓ You are now verified!', body: 'Your SecretXperience profile has been verified. Your listings will now show the ✓ Verified badge.', link: '/dashboard' })
-    setUsers(prev => prev.map(u => u.id === id ? { ...u, verified: true, verification_status: 'approved' } : u))
+    await supabase.from('identity_verifications').update({ status: 'approved', reviewed_at: new Date().toISOString() }).eq('id', verifId)
+    await supabase.from('profiles').update({ verified: true }).eq('id', userId)
+    await supabase.from('notifications').insert({ user_id: userId, type: 'verification', title: '✓ You are now verified!', body: 'Your SecretXperience profile has been verified. Your listings will now show the ✓ Verified badge.', link: '/dashboard' })
+    setVerifications(prev => prev.map(v => v.id === verifId ? { ...v, status: 'approved' } : v))
   }
 
-  async function rejectVerification(id: string) {
+  async function rejectVerification(verifId: string, userId: string) {
     const supabase = createClient()
-    await supabase.from('profiles').update({ verification_status: 'rejected' }).eq('id', id)
-    await supabase.from('notifications').insert({ user_id: id, type: 'verification', title: 'Verification update', body: 'We were unable to verify your profile at this time. Please contact support for more information.', link: '/dashboard' })
-    setUsers(prev => prev.map(u => u.id === id ? { ...u, verification_status: 'rejected' } : u))
+    await supabase.from('identity_verifications').update({ status: 'rejected', reviewed_at: new Date().toISOString() }).eq('id', verifId)
+    await supabase.from('notifications').insert({ user_id: userId, type: 'verification', title: 'Verification update', body: 'We were unable to verify your profile at this time. Please resubmit with clearer documents or contact support.', link: '/verify' })
+    setVerifications(prev => prev.map(v => v.id === verifId ? { ...v, status: 'rejected' } : v))
   }
 
   const filteredListings = listings.filter(l => !search || l.title?.toLowerCase().includes(search.toLowerCase()) || l.city?.toLowerCase().includes(search.toLowerCase()))
@@ -358,55 +362,63 @@ export default function AdminPage() {
 
           {/* ── Verification requests ── */}
           {tab === 'Verification' && (
-            <div style={{ background: 'var(--bg1, #0a0a0a)', border: '0.5px solid var(--b, rgba(255,255,255,0.06))', borderRadius: 'var(--rl, 13px)', overflow: 'hidden' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-                <thead>
-                  <tr style={{ background: 'var(--bg2, rgba(255,255,255,0.02))' }}>
-                    {['Provider', 'Role', 'Requested', 'Status', 'Actions'].map(h => (
-                      <th key={h} style={{ textAlign: 'left', padding: '12px 16px', font: '600 9px/1 var(--sans)', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--t3, #4c4a47)' }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.filter(u => u.verification_status === 'pending' || u.verification_status === 'approved' || u.verification_status === 'rejected').length === 0 && (
-                    <tr><td colSpan={5} style={{ padding: '3rem', textAlign: 'center', color: 'var(--t3, #4c4a47)' }}>No verification requests yet</td></tr>
-                  )}
-                  {users.filter(u => u.verification_status && u.verification_status !== 'none').map(u => (
-                    <tr key={u.id} style={{ borderTop: '0.5px solid var(--b)', color: 'var(--t)' }}>
-                      <td style={{ padding: '14px 16px' }}>
-                        <div style={{ fontWeight: 500 }}>{u.full_name || u.username || 'Anonymous'}</div>
-                        <div style={{ fontSize: '11px', color: 'var(--t3)' }}>{u.email}</div>
-                      </td>
-                      <td style={{ padding: '14px 16px', color: 'var(--t2)', textTransform: 'capitalize' }}>{u.role}</td>
-                      <td style={{ padding: '14px 16px', fontSize: '12px', color: 'var(--t3)' }}>
-                        {u.verification_requested_at ? new Date(u.verification_requested_at).toLocaleDateString() : '—'}
-                      </td>
-                      <td style={{ padding: '14px 16px' }}>
-                        <span style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: u.verification_status === 'approved' ? 'rgba(38,212,160,0.12)' : u.verification_status === 'rejected' ? 'rgba(184,77,114,0.12)' : 'rgba(245,168,38,0.12)', color: u.verification_status === 'approved' ? '#26d4a0' : u.verification_status === 'rejected' ? '#b84d72' : '#f5a826' }}>
-                          {u.verification_status}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {verifications.length === 0 && (
+                <div style={{ background: 'var(--bg1)', border: '0.5px solid var(--b)', borderRadius: 'var(--rl)', padding: '3rem', textAlign: 'center', color: 'var(--t3)' }}>
+                  No verification submissions yet
+                </div>
+              )}
+              {verifications.map(v => {
+                const profile = v.profiles || {}
+                const statusColor = v.status === 'approved' ? '#26d4a0' : v.status === 'rejected' ? '#b84d72' : '#f5a826'
+                const statusBg = v.status === 'approved' ? 'rgba(38,212,160,0.1)' : v.status === 'rejected' ? 'rgba(184,77,114,0.1)' : 'rgba(245,168,38,0.1)'
+                return (
+                  <div key={v.id} style={{ background: 'var(--bg1)', border: '0.5px solid var(--b)', borderRadius: 'var(--rl)', padding: '1.25rem 1.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+                      <div>
+                        <div style={{ fontWeight: 500, fontSize: 14 }}>{profile.full_name || profile.username || 'Anonymous'}</div>
+                        <div style={{ fontSize: 12, color: 'var(--t3)', marginTop: 2 }}>{profile.email} · {profile.role || 'user'}</div>
+                        <div style={{ fontSize: 11, color: 'var(--t3)', marginTop: 4 }}>
+                          Submitted: {v.submitted_at ? new Date(v.submitted_at).toLocaleString() : '—'}
+                          {v.reviewed_at && ` · Reviewed: ${new Date(v.reviewed_at).toLocaleString()}`}
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ padding: '3px 10px', borderRadius: 20, fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: statusBg, color: statusColor }}>
+                          {v.status}
                         </span>
-                      </td>
-                      <td style={{ padding: '14px 16px' }}>
-                        {u.verification_status === 'pending' && (
-                          <div style={{ display: 'flex', gap: '6px' }}>
-                            <button onClick={() => approveVerification(u.id)} style={{ padding: '5px 12px', background: 'rgba(38,212,160,0.1)', border: '0.5px solid rgba(38,212,160,0.3)', borderRadius: '6px', color: '#26d4a0', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}>
-                              ✓ Approve
-                            </button>
-                            <button onClick={() => rejectVerification(u.id)} style={{ padding: '5px 12px', background: 'rgba(184,77,114,0.1)', border: '0.5px solid rgba(184,77,114,0.3)', borderRadius: '6px', color: '#b84d72', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}>
-                              ✗ Reject
-                            </button>
-                          </div>
+                        {v.status === 'pending' && (
+                          <>
+                            <button onClick={() => approveVerification(v.id, v.user_id)} style={{ padding: '6px 14px', background: 'rgba(38,212,160,0.1)', border: '0.5px solid rgba(38,212,160,0.3)', borderRadius: 6, color: '#26d4a0', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>✓ Approve</button>
+                            <button onClick={() => rejectVerification(v.id, v.user_id)} style={{ padding: '6px 14px', background: 'rgba(184,77,114,0.1)', border: '0.5px solid rgba(184,77,114,0.3)', borderRadius: 6, color: '#b84d72', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>✗ Reject</button>
+                          </>
                         )}
-                        {u.verification_status === 'approved' && (
-                          <button onClick={() => toggleUser(u.id, 'verified', u.verified)} style={{ padding: '5px 12px', background: 'rgba(255,255,255,0.04)', border: '0.5px solid var(--b)', borderRadius: '6px', color: 'var(--t3)', cursor: 'pointer', fontSize: '12px' }}>
-                            Revoke
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      </div>
+                    </div>
+                    {/* Document thumbnails */}
+                    <div style={{ display: 'flex', gap: 10, marginTop: '1rem', flexWrap: 'wrap' }}>
+                      {v.doc_front_url && (
+                        <a href={v.doc_front_url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', flexDirection: 'column', gap: 4, textDecoration: 'none' }}>
+                          <img src={v.doc_front_url} alt="ID Front" style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 8, border: '0.5px solid var(--b2)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                          <span style={{ fontSize: 10, color: 'var(--t3)', textAlign: 'center' }}>ID Front ↗</span>
+                        </a>
+                      )}
+                      {v.doc_back_url && (
+                        <a href={v.doc_back_url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', flexDirection: 'column', gap: 4, textDecoration: 'none' }}>
+                          <img src={v.doc_back_url} alt="ID Back" style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 8, border: '0.5px solid var(--b2)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                          <span style={{ fontSize: 10, color: 'var(--t3)', textAlign: 'center' }}>ID Back ↗</span>
+                        </a>
+                      )}
+                      {v.selfie_url && (
+                        <a href={v.selfie_url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', flexDirection: 'column', gap: 4, textDecoration: 'none' }}>
+                          <img src={v.selfie_url} alt="Selfie" style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 8, border: '0.5px solid var(--b2)' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                          <span style={{ fontSize: 10, color: 'var(--t3)', textAlign: 'center' }}>Selfie ↗</span>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           )}
 
