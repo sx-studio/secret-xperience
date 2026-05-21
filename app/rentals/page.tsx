@@ -214,6 +214,13 @@ export default async function RentalsPage() {
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([
+        { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.secretxperience.eu' },
+          { '@type': 'ListItem', position: 2, name: 'Rentals', item: 'https://www.secretxperience.eu/rentals' },
+        ]},
+        { '@context': 'https://schema.org', '@type': 'Service', name: 'Discreet Rentals', serviceType: 'Adult Space Rental', provider: { '@type': 'Organization', name: 'SecretXperience', url: 'https://www.secretxperience.eu' }, areaServed: ['BE','NL','DE','FR'], url: 'https://www.secretxperience.eu/rentals', description: 'Private, discreet rental spaces for intimate encounters — apartments, suites and studios across Europe.' },
+      ]) }} />
       <style>{`
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         .rental-card:hover { transform: translateY(-3px) !important; box-shadow: 0 14px 40px rgba(0,0,0,0.5) !important; border-color: var(--b3) !important; }

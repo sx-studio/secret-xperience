@@ -227,6 +227,13 @@ export default async function HotelsPage() {
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([
+        { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.secretxperience.eu' },
+          { '@type': 'ListItem', position: 2, name: 'Hotels', item: 'https://www.secretxperience.eu/hotels' },
+        ]},
+        { '@context': 'https://schema.org', '@type': 'Service', name: 'Discreet Hotels & Suites', serviceType: 'Adult Hospitality', provider: { '@type': 'Organization', name: 'SecretXperience', url: 'https://www.secretxperience.eu' }, areaServed: ['BE','NL','DE','FR'], url: 'https://www.secretxperience.eu/hotels', description: 'Curated adult-friendly hotels and suites for discreet stays across Europe.' },
+      ]) }} />
       <style>{`
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         .hotel-card:hover { transform: translateY(-2px) !important; box-shadow: 0 12px 36px rgba(0,0,0,0.45) !important; border-color: var(--b3) !important; }

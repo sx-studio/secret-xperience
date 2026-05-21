@@ -277,7 +277,30 @@ export default function EscortsPage() {
     selectedServices.length > 0,
   ].filter(Boolean).length
 
+  const jsonLd = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.secretxperience.eu' },
+        { '@type': 'ListItem', position: 2, name: 'Escorts', item: 'https://www.secretxperience.eu/escorts' },
+      ],
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Service',
+      name: 'Escort Services',
+      serviceType: 'Adult Escort Services',
+      provider: { '@type': 'Organization', name: 'SecretXperience', url: 'https://www.secretxperience.eu' },
+      areaServed: ['BE', 'NL', 'DE', 'FR'],
+      url: 'https://www.secretxperience.eu/escorts',
+      description: 'Browse verified independent escorts across Belgium, Netherlands, Germany and France. Filter by city, type, price and availability.',
+    },
+  ]
+
   return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--t)', fontFamily: 'var(--sans)' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap');
@@ -535,5 +558,6 @@ export default function EscortsPage() {
 
       <style>{`@keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:0.7} }`}</style>
     </div>
+    </>
   )
 }

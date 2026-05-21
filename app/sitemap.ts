@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { MetadataRoute } from 'next'
 
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
 const BASE = 'https://www.secretxperience.eu'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

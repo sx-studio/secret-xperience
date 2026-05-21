@@ -741,6 +741,34 @@ document.getElementById('signupSubmit').addEventListener('click',function(){
   },3200);
 });
 
+// ══ NEWSLETTER ══
+(function(){
+  var btn = document.getElementById('nlSubmit');
+  var form = document.getElementById('newsletterForm');
+  var success = document.getElementById('nlSuccess');
+  if (!btn) return;
+  btn.addEventListener('click', function() {
+    var emailEl = document.getElementById('nlEmail') as HTMLInputElement;
+    var email = emailEl ? emailEl.value.trim() : '';
+    if (!email || !email.includes('@')) { emailEl.style.borderColor = 'var(--rose)'; return; }
+    emailEl.style.borderColor = 'var(--b2)';
+    btn.textContent = '...';
+    (btn as HTMLButtonElement).disabled = true;
+    fetch('/api/newsletter', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    }).then(function(r){ return r.json(); }).then(function(){
+      if (form) form.style.display = 'none';
+      if (success) success.style.display = 'block';
+    }).catch(function(){
+      btn.textContent = 'Subscribe';
+      (btn as HTMLButtonElement).disabled = false;
+      showToast('Something went wrong — please try again.');
+    });
+  });
+})();
+
 // ══ BOOKING MODAL ══
 var bookStep=0,selDate='',selTime='',selDur='2 Hours',selPrice=350;
 var calYear=new Date().getFullYear(),calMonth=new Date().getMonth();
@@ -1737,7 +1765,30 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebSite', name: 'SecretXperience', url: 'https://secret-xperience.vercel.app', description: 'Premium adult services marketplace in Belgium.', potentialAction: { '@type': 'SearchAction', target: 'https://secret-xperience.vercel.app/?q={search_term_string}', 'query-input': 'required name=search_term_string' } }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([
+        {
+          '@context': 'https://schema.org',
+          '@type': 'WebSite',
+          name: 'SecretXperience',
+          url: 'https://www.secretxperience.eu',
+          description: 'Premium adult services marketplace across Europe — escorts, companions, nightlife, creators, rentals, hotels, events and more.',
+          potentialAction: {
+            '@type': 'SearchAction',
+            target: { '@type': 'EntryPoint', urlTemplate: 'https://www.secretxperience.eu/search?q={search_term_string}' },
+            'query-input': 'required name=search_term_string'
+          }
+        },
+        {
+          '@context': 'https://schema.org',
+          '@type': 'Organization',
+          name: 'SecretXperience',
+          url: 'https://www.secretxperience.eu',
+          logo: 'https://www.secretxperience.eu/icon-192.png',
+          description: 'Premium verified adult services marketplace serving Belgium, Netherlands, Germany, France and the EU.',
+          areaServed: ['BE', 'NL', 'DE', 'FR', 'LU'],
+          sameAs: []
+        }
+      ]) }} />
       <div dangerouslySetInnerHTML={{ __html: `<script>(function(){try{var exp=parseInt(localStorage.getItem('sx_age_ok')||'0');var ok=exp>Date.now();if(!ok){for(var k in localStorage){if(k.startsWith('sb-')&&k.endsWith('-auth-token')){try{if(JSON.parse(localStorage.getItem(k)||'{}').access_token){ok=true;localStorage.setItem('sx_age_ok',String(Date.now()+30*24*60*60*1000));break;}}catch(e){}}}}if(ok){var s=document.createElement('style');s.textContent='#gate{display:none!important}';document.head.appendChild(s);}}catch(e){}})();<\/script>
 <!-- ══ AGE GATE ══ -->
 <div id="gate" role="dialog" aria-modal="true" aria-label="Age verification" style="background:rgba(4,4,4,0.93);backdrop-filter:blur(14px);">
@@ -2348,6 +2399,20 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
           <a href="/cookies">Cookie Policy</a>
           <a href="/dmca">DMCA</a>
           <a href="/2257">18 U.S.C. § 2257</a>
+        </div>
+      </div>
+      <!-- ── Newsletter signup ── -->
+      <div style="border-top:0.5px solid var(--b);padding-top:2rem;margin-bottom:2rem;">
+        <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1.5rem;">
+          <div>
+            <div style="font-family:var(--serif);font-size:18px;color:var(--t);margin-bottom:0.35rem;">Stay in the loop</div>
+            <p style="font-size:13px;color:var(--t3);margin:0;">New listings, exclusive offers, and private events — delivered discreetly.</p>
+          </div>
+          <div id="newsletterForm" style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
+            <input type="email" id="nlEmail" placeholder="your@email.com" style="height:38px;padding:0 14px;background:var(--bg2);border:0.5px solid var(--b2);border-radius:10px;color:var(--t);font-family:inherit;font-size:13px;outline:none;min-width:220px;"/>
+            <button id="nlSubmit" style="height:38px;padding:0 18px;background:var(--grad-gold);border:none;border-radius:10px;color:#080808;font-weight:600;font-size:13px;cursor:pointer;font-family:inherit;letter-spacing:0.03em;white-space:nowrap;">Subscribe</button>
+          </div>
+          <div id="nlSuccess" style="display:none;font-size:13px;color:#26d4a0;"><i class="ti ti-circle-check"></i> You're on the list — thank you!</div>
         </div>
       </div>
       <div class="footer-bottom" style="border-top:0.5px solid var(--b);padding-top:1.5rem;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:1rem;">
