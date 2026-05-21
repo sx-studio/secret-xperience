@@ -1,6 +1,5 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { createPortal } from 'react-dom'
 import { createClient } from './lib/supabase'
 import SliderAds from './components/SliderAds/SliderAds'
 import CategoryAnimations from './components/CategoryAnimations/CategoryAnimations'
@@ -750,7 +749,12 @@ document.getElementById('signupSubmit').addEventListener('click',function(){
   btn.addEventListener('click', function() {
     var emailEl = document.getElementById('nlEmail') as HTMLInputElement;
     var email = emailEl ? emailEl.value.trim() : '';
-    if (!email || !email.includes('@')) { emailEl.style.borderColor = 'var(--rose)'; return; }
+    if (!email || !email.includes('@')) {
+      emailEl.style.borderColor = '#e05a6a';
+      emailEl.placeholder = 'Please enter a valid email';
+      emailEl.focus();
+      return;
+    }
     emailEl.style.borderColor = 'var(--b2)';
     btn.textContent = '...';
     (btn as HTMLButtonElement).disabled = true;
@@ -1757,11 +1761,6 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
 
   }, [])
 
-  const [catAnimsMount, setCatAnimsMount] = useState<Element | null>(null)
-  useEffect(() => {
-    const el = document.getElementById('catAnimsMount')
-    if (el) setCatAnimsMount(el)
-  }, [])
 
   return (
     <>
@@ -1965,9 +1964,9 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
     </div>
   </div>
 
-  <!-- How SecretXperience Works — full-width, above the sidebar/listings layout -->
-  <div id="catAnimsMount"></div>
-
+` }} />
+      <CategoryAnimations />
+      <div dangerouslySetInnerHTML={{ __html: `
   <div class="layout">
 
     <!-- ══ SIDEBAR ══ -->
@@ -3009,7 +3008,6 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
 </div><!-- #app -->` }} />
       {/* GSAP slider ads — rendered as React portal anchored after #featuredBanner */}
       <SliderAds />
-      {catAnimsMount && createPortal(<CategoryAnimations />, catAnimsMount)}
     </>
   )
 }
