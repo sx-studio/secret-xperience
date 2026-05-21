@@ -67,7 +67,15 @@ interface FormState {
   ethnicity:   string
   build:       string
   hair:        string
+  tier:        string
 }
+
+const LISTING_TIERS = [
+  { id: 'basic',    label: 'Basic',    tokens: 25,  days: 7,  desc: 'Standard grid listing',                      color: '#ffffff44' },
+  { id: 'featured', label: 'Featured', tokens: 50,  days: 7,  desc: 'Gold-border, priority in category grid',     color: '#c5a05a' },
+  { id: 'slider',   label: 'Slider Ad', tokens: 75, days: 7,  desc: 'Animated hero slider — site-wide visibility', color: '#7a8aee' },
+  { id: 'premium',  label: 'Premium',  tokens: 150, days: 30, desc: 'Top of category, 30 days, premium badge',    color: '#e0a0c8' },
+]
 
 interface UploadingImage {
   id:       string
@@ -152,8 +160,10 @@ export default function CreateListingPage() {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError]     = useState('')
+  const [wallet, setWallet]   = useState<{ balance: number } | null>(null)
 
   const [form, setForm] = useState<FormState>({
+    tier:        'basic',
     category:    '',
     subcategory: '',
     title:       '',
@@ -185,6 +195,10 @@ export default function CreateListingPage() {
       const { data: prof } = await supabase
         .from('profiles').select('*').eq('id', session.user.id).single()
       setProfile(prof)
+      // Load token wallet
+      const { data: w } = await supabase
+        .from('user_wallets').select('balance').eq('user_id', session.user.id).single()
+      setWallet(w)
       // Check for saved draft
       try {
         const saved = localStorage.getItem('sx_listing_draft')
@@ -298,7 +312,7 @@ export default function CreateListingPage() {
     }
     const finalTags = [...form.tags, ...statTags]
 
-    const { error: err } = await supabase.from('listings').insert({
+    const { data: newListing, error: err } = await supabase.from('listings').insert({
       profile_id:  session.user.id,
       title:       form.title,
       description: form.description || null,
@@ -313,10 +327,22 @@ export default function CreateListingPage() {
       images:      form.images.length > 0 ? form.images : null,
       tags:        finalTags.length > 0 ? finalTags : null,
       active:      true,
-    })
+      tier:        form.tier,
+    }).select('id').single()
 
     if (err) { setError(err.message); setLoading(false); return }
     try { localStorage.removeItem('sx_listing_draft') } catch(e) {}
+
+    // Spend tokens for the chosen tier (non-blocking — basic is free if no wallet)
+    if (newListing?.id && form.tier !== 'basic') {
+      try {
+        await fetch('/api/tokens/spend', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ listingId: newListing.id, tier: form.tier }),
+        })
+      } catch (e) { /* non-fatal */ }
+    }
 
     // Check if provider has Stripe connected
     const { data: profile } = await supabase
@@ -1227,6 +1253,52 @@ export default function CreateListingPage() {
           {step === 5 && (
             <div>
               <h2 className="cl-section-heading">Review &amp; Publish</h2>
+
+              {/* ── Tier picker ── */}
+              <div style={{ marginBottom:'2rem' }}>
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'0.75rem' }}>
+                  <p style={{ fontSize:13, fontWeight:600, color:'var(--t,#ece8e1)', letterSpacing:'0.04em' }}>Choose your listing tier</p>
+                  {wallet ? (
+                    <a href="/tokens" target="_blank" rel="noopener" style={{ fontSize:12, color:'var(--gold,#c5a05a)', textDecoration:'none' }}>
+                      ◈ {wallet.balance} tokens available
+                    </a>
+                  ) : (
+                    <a href="/tokens" target="_blank" rel="noopener" style={{ fontSize:12, color:'var(--gold,#c5a05a)', textDecoration:'none' }}>Buy tokens →</a>
+                  )}
+                </div>
+                <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))', gap:10 }}>
+                  {LISTING_TIERS.map(t => {
+                    const active = form.tier === t.id
+                    const canAfford = !wallet || wallet.balance >= t.tokens || t.id === 'basic'
+                    return (
+                      <button key={t.id} type="button"
+                        onClick={() => setForm(f => ({ ...f, tier: t.id }))}
+                        style={{
+                          background: active ? `${t.color}18` : 'var(--bg2,rgba(255,255,255,0.02))',
+                          border: `0.5px solid ${active ? t.color : 'rgba(255,255,255,0.08)'}`,
+                          borderRadius:12, padding:'1rem', textAlign:'left', cursor:'pointer',
+                          transition:'all .15s', opacity: canAfford ? 1 : 0.45,
+                        }}>
+                        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'0.4rem' }}>
+                          <span style={{ fontSize:13, fontWeight:600, color: active ? t.color : 'var(--t,#ece8e1)' }}>{t.label}</span>
+                          <span style={{ fontSize:11, fontWeight:700, color:t.color, background:`${t.color}18`, borderRadius:6, padding:'2px 7px' }}>
+                            {t.id === 'basic' ? 'Free' : `${t.tokens} ◈`}
+                          </span>
+                        </div>
+                        <p style={{ fontSize:11, color:'var(--t3,rgba(255,255,255,0.25))', lineHeight:1.5, marginBottom:'0.3rem' }}>{t.desc}</p>
+                        <p style={{ fontSize:10, color:'var(--t3,rgba(255,255,255,0.2))' }}>{t.days} days</p>
+                      </button>
+                    )
+                  })}
+                </div>
+                {form.tier !== 'basic' && wallet && wallet.balance < (LISTING_TIERS.find(t => t.id === form.tier)?.tokens ?? 0) && (
+                  <p style={{ fontSize:12, color:'#e05a5a', marginTop:'0.5rem' }}>
+                    Insufficient tokens for this tier.{' '}
+                    <a href="/tokens" target="_blank" rel="noopener" style={{ color:'var(--gold,#c5a05a)' }}>Buy tokens →</a>
+                  </p>
+                )}
+              </div>
+
               {/* Review card */}
               <div style={{
                 background: 'var(--bg2, rgba(255,255,255,0.02))',
