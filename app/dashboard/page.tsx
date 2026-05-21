@@ -157,6 +157,7 @@ export default function DashboardPage() {
   const [listings, setListings]     = useState<any[]>([])
   const [bookings, setBookings]     = useState<any[]>([])
   const [loading, setLoading]       = useState(true)
+  const [idVerifStatus, setIdVerifStatus] = useState<'not_submitted'|'pending'|'approved'|'rejected'>('not_submitted')
   const [editingProfile, setEditingProfile] = useState(false)
   const [profileDraft, setProfileDraft]     = useState<any>({})
   const [savingProfile, setSavingProfile]   = useState(false)
@@ -182,11 +183,13 @@ export default function DashboardPage() {
 
       setUser(session.user)
 
-      const [{ data: profile }, { data: listings }, { data: bookings }] = await Promise.all([
+      const [{ data: profile }, { data: listings }, { data: bookings }, { data: idVerif }] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', session.user.id).single(),
         supabase.from('listings').select('*').eq('profile_id', session.user.id),
         supabase.from('bookings').select('*').or(`client_id.eq.${session.user.id},provider_id.eq.${session.user.id}`),
+        supabase.from('identity_verifications').select('status').eq('user_id', session.user.id).single(),
       ])
+      if (idVerif?.status) setIdVerifStatus(idVerif.status as any)
 
       setProfile(profile)
       setListings(listings || [])
@@ -910,6 +913,36 @@ export default function DashboardPage() {
               </div>
             ))}
           </div>
+
+          {/* ── Identity Verification Card ── */}
+          {(() => {
+            const cfg = {
+              not_submitted: { icon: 'ti-id',           color: 'var(--gold,#c5a05a)',    bg: 'rgba(197,160,90,0.08)',   border: 'var(--gbrd,rgba(197,160,90,0.25))', label: 'Verify your identity',   sub: 'Submit your ID to unlock listing. Required before you can publish.', btn: 'Start verification →', btnStyle: 'db-quick-btn-gold' },
+              pending:       { icon: 'ti-clock',         color: 'rgba(245,168,38,0.9)',  bg: 'rgba(245,168,38,0.08)',   border: 'rgba(245,168,38,0.3)',              label: 'Verification under review', sub: 'We\'re reviewing your documents. Usually within 24–48 hours.',       btn: null,                   btnStyle: '' },
+              approved:      { icon: 'ti-shield-check',  color: 'var(--verified,#3ecf8e)', bg: 'rgba(62,207,142,0.08)', border: 'rgba(62,207,142,0.2)',              label: 'Identity verified ✓',    sub: 'Your identity is confirmed. You can publish listings.',               btn: null,                   btnStyle: '' },
+              rejected:      { icon: 'ti-shield-x',      color: '#e05a5a',               bg: 'rgba(224,90,90,0.08)',    border: 'rgba(224,90,90,0.25)',              label: 'Verification rejected',  sub: 'Your submission was rejected. Please re-submit with clearer documents.', btn: 'Re-submit →',         btnStyle: 'db-quick-btn-gold' },
+            }[idVerifStatus]
+            return (
+              <div className="db-card" style={{ marginBottom: '1.5rem', border: `0.5px solid ${cfg.border}` }}>
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:'1rem', flexWrap:'wrap' }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:'12px' }}>
+                    <div style={{ width:'40px', height:'40px', borderRadius:'10px', background:cfg.bg, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                      <i className={`ti ${cfg.icon}`} style={{ color:cfg.color, fontSize:'20px' }} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize:'15px', fontWeight:500, color:'var(--t,#ece8e1)', marginBottom:'3px' }}>{cfg.label}</div>
+                      <div style={{ fontSize:'12px', color:'var(--t2,#8c8880)', lineHeight:1.4 }}>{cfg.sub}</div>
+                    </div>
+                  </div>
+                  {cfg.btn && (
+                    <button className={cfg.btnStyle} onClick={() => window.location.href = '/verify'}>
+                      {cfg.btn}
+                    </button>
+                  )}
+                </div>
+              </div>
+            )
+          })()}
 
           {/* ── Verification Card ── */}
           {(profile?.role === 'provider' || profile?.role === 'venue' || profile?.role === 'creator') && !profile?.verified && (
