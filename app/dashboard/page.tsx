@@ -925,6 +925,44 @@ export default function DashboardPage() {
             ))}
           </div>
 
+          {/* ── Profile Completeness ── */}
+          {(() => {
+            const fields = [
+              { label: 'Name',         done: !!profile?.full_name },
+              { label: 'Bio',          done: !!profile?.bio && profile.bio.length > 20 },
+              { label: 'City',         done: !!profile?.city },
+              { label: 'Languages',    done: Array.isArray(profile?.languages) && profile.languages.length > 0 },
+              { label: 'Listing',      done: listings.length > 0 },
+              { label: 'Identity verified', done: idVerifStatus === 'approved' },
+              { label: 'Stripe connected', done: !!profile?.stripe_connect_account_id },
+            ]
+            const done = fields.filter(f => f.done).length
+            const pct  = Math.round((done / fields.length) * 100)
+            if (pct === 100) return null
+            const missing = fields.filter(f => !f.done)
+            return (
+              <div className="db-card" style={{ marginBottom: '1.5rem', background: 'linear-gradient(135deg,rgba(197,160,90,0.04),transparent)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.875rem' }}>
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--t)', marginBottom: 3 }}>Profile {pct}% complete</div>
+                    <div style={{ fontSize: 12, color: 'var(--t3)' }}>Complete your profile to attract more clients</div>
+                  </div>
+                  <span style={{ fontFamily: 'var(--serif)', fontSize: 26, color: 'var(--gold)', fontWeight: 400 }}>{pct}%</span>
+                </div>
+                <div style={{ height: 4, background: 'var(--bg2)', borderRadius: 4, overflow: 'hidden', marginBottom: '0.875rem' }}>
+                  <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(90deg,var(--gold),#e8c97e)', borderRadius: 4, transition: 'width 0.6s ease' }} />
+                </div>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {missing.map(f => (
+                    <span key={f.label} style={{ fontSize: 11, padding: '3px 10px', borderRadius: 20, background: 'var(--bg2)', border: '0.5px solid var(--b)', color: 'var(--t3)', fontFamily: 'var(--sans)' }}>
+                      + {f.label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )
+          })()}
+
           {/* ── Identity Verification Card ── */}
           {(() => {
             const cfg = {

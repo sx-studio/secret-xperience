@@ -42,7 +42,7 @@ export async function generateMetadata({ searchParams }: { searchParams: { q?: s
   }
 }
 
-export default async function SearchPage({ searchParams }: { searchParams: { q?: string; category?: string; city?: string; sort?: string; page?: string } }) {
+export default async function SearchPage({ searchParams }: { searchParams: { q?: string; category?: string; city?: string; sort?: string; page?: string; verified?: string; meet?: string; min?: string; max?: string } }) {
   const cookieStore = cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -55,6 +55,10 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
   const city     = searchParams.city || ''
   const sort     = searchParams.sort || 'relevance'
   const page     = Math.max(0, parseInt(searchParams.page || '0'))
+  const verified = searchParams.verified === '1'
+  const meet     = searchParams.meet || ''
+  const minPrice = searchParams.min ? parseInt(searchParams.min) : null
+  const maxPrice = searchParams.max ? parseInt(searchParams.max) : null
 
   // Escape PostgREST-significant chars (`,` `(` `)` `*`) so user input can't break the .or() parse
   const safeQ = q.replace(/[,()*\\]/g, ' ').trim()
@@ -72,6 +76,10 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
   }
   if (category && category !== 'all') query = query.ilike('category', category + '%')
   if (city && city !== 'All cities') query = query.ilike('city', city + '%')
+  if (verified) query = query.eq('verified', true)
+  if (meet) query = query.or(`meet_type.eq.${meet},meet_type.eq.both`)
+  if (minPrice != null) query = query.gte('price_from', minPrice)
+  if (maxPrice != null) query = query.lte('price_from', maxPrice)
 
   query = query.order('featured_until', { ascending: false, nullsFirst: false })
   if (sort === 'rating') query = query.order('rating', { ascending: false, nullsFirst: false })
@@ -210,6 +218,38 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
               ))}
             </div>
           </div>
+
+          {/* ADVANCED FILTERS */}
+          <form method="GET" action="/search" style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '0.5px solid var(--b)' }}>
+            {q && <input type="hidden" name="q" value={q} />}
+            {category !== 'all' && <input type="hidden" name="category" value={category} />}
+            {city && city !== 'All cities' && <input type="hidden" name="city" value={city} />}
+            {sort !== 'relevance' && <input type="hidden" name="sort" value={sort} />}
+
+            {/* Verified toggle */}
+            <button type="submit" name="verified" value={verified ? '' : '1'}
+              style={{ height: 32, padding: '0 14px', borderRadius: 20, border: `0.5px solid ${verified ? 'var(--gbrd)' : 'var(--b)'}`, background: verified ? 'var(--gbg)' : 'transparent', color: verified ? 'var(--gold)' : 'var(--t3)', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--sans)', display: 'flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap' }}>
+              ✓ Verified only
+            </button>
+
+            {/* Meet type */}
+            {(['', 'incall', 'outcall'] as const).map(m => (
+              <button key={m || 'all'} type="submit" name="meet" value={m}
+                style={{ height: 32, padding: '0 14px', borderRadius: 20, border: `0.5px solid ${meet === m ? 'var(--gbrd)' : 'var(--b)'}`, background: meet === m ? 'var(--gbg)' : 'transparent', color: meet === m ? 'var(--gold)' : 'var(--t3)', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--sans)', whiteSpace: 'nowrap' }}>
+                {m === '' ? 'Any location' : m === 'incall' ? 'Incall' : 'Outcall'}
+              </button>
+            ))}
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginLeft: 'auto' }}>
+              <span style={{ fontSize: 11, color: 'var(--t3)', whiteSpace: 'nowrap' }}>Price €</span>
+              <input type="number" name="min" defaultValue={minPrice ?? ''} placeholder="Min" min={0} step={10}
+                style={{ width: 68, height: 32, padding: '0 10px', background: 'var(--bg2)', border: '0.5px solid var(--b)', borderRadius: 8, color: 'var(--t)', fontSize: 12, fontFamily: 'var(--sans)', outline: 'none' }} />
+              <span style={{ fontSize: 11, color: 'var(--t3)' }}>—</span>
+              <input type="number" name="max" defaultValue={maxPrice ?? ''} placeholder="Max" min={0} step={10}
+                style={{ width: 68, height: 32, padding: '0 10px', background: 'var(--bg2)', border: '0.5px solid var(--b)', borderRadius: 8, color: 'var(--t)', fontSize: 12, fontFamily: 'var(--sans)', outline: 'none' }} />
+              <button type="submit" style={{ height: 32, padding: '0 14px', borderRadius: 8, background: 'var(--gbg)', border: '0.5px solid var(--gbrd)', color: 'var(--gold)', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--sans)', fontWeight: 600 }}>Filter</button>
+            </div>
+          </form>
 
           {/* RESULTS COUNT */}
           <div style={{ fontSize: '13px', color: 'var(--t3)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
