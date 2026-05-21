@@ -1276,7 +1276,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
           }))}'))">
           <div class="card-hero ${catClass}" style="height:180px;position:relative;display:flex;align-items:flex-end;padding:1rem;">
             ${l.images && l.images.length > 0 ? `<img src="${l.images[0]}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" alt="" />` : ''}
-            <div data-fav-lid="${l.id}" onclick="event.stopPropagation();((window as any).toggleFavorite||function(){})(\'${l.id}\',this)" style="position:absolute;top:0.6rem;right:0.6rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.30);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:2;cursor:pointer;transition:background .2s;"><i class="ti ti-heart" style="color:#fff;font-size:15px;"></i></div>
+            <div data-fav-lid="${l.id}" onclick="event.stopPropagation();(window.toggleFavorite||function(){})(\'${l.id}\',this)" style="position:absolute;top:0.6rem;right:0.6rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.30);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:2;cursor:pointer;transition:background .2s;"><i class="ti ti-heart" style="color:#fff;font-size:15px;"></i></div>
             <div class="card-badges" style="position:relative;z-index:2;">
               ${isFeatured ? '<span class="badge bf">✦ Featured</span>' : ''}
               ${l.verified ? '<span class="badge bv">✓ Verified</span>' : ''}
@@ -2122,7 +2122,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
 
         <div class="card" role="listitem" tabindex="0">
           <div class="card-hero cat-escort" style="height:180px;position:relative;display:flex;align-items:flex-end;padding:1rem;">
-            <div data-fav-lid="${l.id}" onclick="event.stopPropagation();((window as any).toggleFavorite||function(){})(\'${l.id}\',this)" style="position:absolute;top:0.6rem;right:0.6rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.30);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:2;cursor:pointer;transition:background .2s;"><i class="ti ti-heart" style="color:#fff;font-size:15px;"></i></div>
+            <div style="position:absolute;top:0.6rem;right:0.6rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.30);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:2;cursor:pointer;transition:background .2s;"><i class="ti ti-heart" style="color:#fff;font-size:15px;"></i></div>
             <div class="card-badges" style="position:relative;z-index:2;"><span class="badge bv">✓ Verified</span><span class="badge bp">Premium</span></div>
             <span style="font-family:var(--serif);font-size:72px;font-style:italic;font-weight:400;color:rgba(197,160,90,0.30);line-height:1;position:absolute;bottom:0.25rem;left:1rem;">So</span>
           </div>
@@ -2137,7 +2137,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
 
         <div class="card" role="listitem" tabindex="0">
           <div class="card-hero cat-escort" style="height:180px;position:relative;display:flex;align-items:flex-end;padding:1rem;">
-            <div data-fav-lid="${l.id}" onclick="event.stopPropagation();((window as any).toggleFavorite||function(){})(\'${l.id}\',this)" style="position:absolute;top:0.6rem;right:0.6rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.30);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:2;cursor:pointer;transition:background .2s;"><i class="ti ti-heart" style="color:#fff;font-size:15px;"></i></div>
+            <div style="position:absolute;top:0.6rem;right:0.6rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.30);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:2;cursor:pointer;transition:background .2s;"><i class="ti ti-heart" style="color:#fff;font-size:15px;"></i></div>
             <div class="card-badges" style="position:relative;z-index:2;"><span class="badge bv">✓ Verified</span><span class="badge be">VIP</span></div>
             <span style="font-family:var(--serif);font-size:72px;font-style:italic;font-weight:400;color:rgba(197,160,90,0.30);line-height:1;position:absolute;bottom:0.25rem;left:1rem;">El</span>
           </div>
@@ -2152,7 +2152,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
 
         <div class="card" role="listitem" tabindex="0">
           <div class="card-hero cat-escort" style="height:180px;position:relative;display:flex;align-items:flex-end;padding:1rem;">
-            <div data-fav-lid="${l.id}" onclick="event.stopPropagation();((window as any).toggleFavorite||function(){})(\'${l.id}\',this)" style="position:absolute;top:0.6rem;right:0.6rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.30);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:2;cursor:pointer;transition:background .2s;"><i class="ti ti-heart" style="color:#fff;font-size:15px;"></i></div>
+            <div style="position:absolute;top:0.6rem;right:0.6rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.30);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:2;cursor:pointer;transition:background .2s;"><i class="ti ti-heart" style="color:#fff;font-size:15px;"></i></div>
             <div class="card-badges" style="position:relative;z-index:2;"><span class="badge bv">✓ Verified</span></div>
             <span style="font-family:var(--serif);font-size:72px;font-style:italic;font-weight:400;color:rgba(197,160,90,0.30);line-height:1;position:absolute;bottom:0.25rem;left:1rem;">Na</span>
           </div>
@@ -2167,7 +2167,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
 
         <div class="card" role="listitem" tabindex="0">
           <div class="card-hero cat-nightlife" style="height:180px;position:relative;display:flex;align-items:flex-end;padding:1rem;">
-            <div data-fav-lid="${l.id}" onclick="event.stopPropagation();((window as any).toggleFavorite||function(){})(\'${l.id}\',this)" style="position:absolute;top:0.6rem;right:0.6rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.30);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:2;cursor:pointer;transition:background .2s;"><i class="ti ti-heart" style="color:#fff;font-size:15px;"></i></div>
+            <div style="position:absolute;top:0.6rem;right:0.6rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.30);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:2;cursor:pointer;transition:background .2s;"><i class="ti ti-heart" style="color:#fff;font-size:15px;"></i></div>
             <div class="card-badges" style="position:relative;z-index:2;"><span class="badge bt">Trending</span></div>
             <span style="font-family:var(--serif);font-size:72px;font-style:italic;font-weight:400;color:rgba(197,160,90,0.30);line-height:1;position:absolute;bottom:0.25rem;left:1rem;">Cl</span>
           </div>
@@ -2181,7 +2181,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
 
         <div class="card" role="listitem" tabindex="0">
           <div class="card-hero cat-creator" style="height:180px;position:relative;display:flex;align-items:flex-end;padding:1rem;">
-            <div data-fav-lid="${l.id}" onclick="event.stopPropagation();((window as any).toggleFavorite||function(){})(\'${l.id}\',this)" style="position:absolute;top:0.6rem;right:0.6rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.30);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:2;cursor:pointer;transition:background .2s;"><i class="ti ti-heart" style="color:#fff;font-size:15px;"></i></div>
+            <div style="position:absolute;top:0.6rem;right:0.6rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.30);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:2;cursor:pointer;transition:background .2s;"><i class="ti ti-heart" style="color:#fff;font-size:15px;"></i></div>
             <div class="card-badges" style="position:relative;z-index:2;"><span class="badge bv">✓ Verified</span></div>
             <span style="font-family:var(--serif);font-size:72px;font-style:italic;font-weight:400;color:rgba(197,160,90,0.30);line-height:1;position:absolute;bottom:0.25rem;left:1rem;">Lu</span>
           </div>
@@ -2195,7 +2195,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
 
         <div class="card" role="listitem" tabindex="0">
           <div class="card-hero cat-rental" style="height:180px;position:relative;display:flex;align-items:flex-end;padding:1rem;">
-            <div data-fav-lid="${l.id}" onclick="event.stopPropagation();((window as any).toggleFavorite||function(){})(\'${l.id}\',this)" style="position:absolute;top:0.6rem;right:0.6rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.30);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:2;cursor:pointer;transition:background .2s;"><i class="ti ti-heart" style="color:#fff;font-size:15px;"></i></div>
+            <div style="position:absolute;top:0.6rem;right:0.6rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.30);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:2;cursor:pointer;transition:background .2s;"><i class="ti ti-heart" style="color:#fff;font-size:15px;"></i></div>
             <div class="card-badges" style="position:relative;z-index:2;"><span class="badge bp">Premium</span></div>
             <span style="font-family:var(--serif);font-size:72px;font-style:italic;font-weight:400;color:rgba(197,160,90,0.30);line-height:1;position:absolute;bottom:0.25rem;left:1rem;">Le</span>
           </div>
@@ -2209,7 +2209,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
 
         <div class="card" role="listitem" tabindex="0">
           <div class="card-hero cat-creator" style="height:180px;position:relative;display:flex;align-items:flex-end;padding:1rem;">
-            <div data-fav-lid="${l.id}" onclick="event.stopPropagation();((window as any).toggleFavorite||function(){})(\'${l.id}\',this)" style="position:absolute;top:0.6rem;right:0.6rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.30);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:2;cursor:pointer;transition:background .2s;"><i class="ti ti-heart" style="color:#fff;font-size:15px;"></i></div>
+            <div style="position:absolute;top:0.6rem;right:0.6rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.30);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:2;cursor:pointer;transition:background .2s;"><i class="ti ti-heart" style="color:#fff;font-size:15px;"></i></div>
             <div class="card-badges" style="position:relative;z-index:2;"><span class="badge bv">✓ Verified</span><span class="badge bt">Trending</span></div>
             <span style="font-family:var(--serif);font-size:72px;font-style:italic;font-weight:400;color:rgba(197,160,90,0.30);line-height:1;position:absolute;bottom:0.25rem;left:1rem;">St</span>
           </div>
@@ -2223,7 +2223,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
 
         <div class="card" role="listitem" tabindex="0">
           <div class="card-hero cat-shop" style="height:180px;position:relative;display:flex;align-items:flex-end;padding:1rem;">
-            <div data-fav-lid="${l.id}" onclick="event.stopPropagation();((window as any).toggleFavorite||function(){})(\'${l.id}\',this)" style="position:absolute;top:0.6rem;right:0.6rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.30);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:2;cursor:pointer;transition:background .2s;"><i class="ti ti-heart" style="color:#fff;font-size:15px;"></i></div>
+            <div style="position:absolute;top:0.6rem;right:0.6rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.30);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:2;cursor:pointer;transition:background .2s;"><i class="ti ti-heart" style="color:#fff;font-size:15px;"></i></div>
             <div class="card-badges" style="position:relative;z-index:2;"><span class="badge bt">Trending</span></div>
             <span style="font-family:var(--serif);font-size:72px;font-style:italic;font-weight:400;color:rgba(197,160,90,0.30);line-height:1;position:absolute;bottom:0.25rem;left:1rem;">No</span>
           </div>
