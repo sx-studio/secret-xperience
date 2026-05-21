@@ -52,9 +52,14 @@ Live at **secretxperience.eu** (and www.secretxperience.eu). Owner email: heyoka
 - Price filter bug fixed in `/api/listings/search` (`price_to` not `price_from`)
 - Webhook: sends `listing_boosted` email notification after boost
 - **Dashboard improvements**: client vs provider bookings split, inline Confirm/Decline for providers, listing join for booking title, token balance stat card, profile completeness progress bar (auto-hides at 100%), listing view counts from `listing_views`, Discover quick-action
-- **Tokens page**: transaction ledger shows last 15 entries with type/amount/balance
 - **Escorts page**: Available Now badge (pulsing green), New badge (purple, <7 days), "Sort by availability" option, Discreet Mode toggle (blurs photos, persists localStorage), `isAvailableNow` helper
-- **NEW: `/discover`** — GSAP Draggable swipe-to-save page. Swipe right = save to favorites, left = skip. Category filters. Full portrait cards with price/verified badges. Linked in homepage nav, drawer, escorts, search, dashboard. Added to sitemap.
+- **NEW: `/discover`** — GSAP Draggable swipe-to-save page ("Private Gallery"). Swipe right = save to favorites, left = skip. Category filter pills with tabler icons (incl. Verified only + Available tonight). Full portrait cards, styled counter "01 of N portraits", Pass/View/Save action labels, keyboard hints. Linked in homepage nav, drawer, escorts, search, dashboard. Added to sitemap.
+- **NEW: `/partners`** — EU adult industry + lifestyle affiliate directory. 50+ curated real businesses across 13 categories. Each card has emoji, name, tagline, badge, description, visit link, affiliate network. Added to sitemap + homepage footer.
+- **SliderAds redesign** — Full-height "Velvet Stage" (480px portrait cards), side-peek adjacent cards (72px peek), ambient glow per category, progress bar, category plate label, scrolling ticker rail, touch swipe, click to listing.
+- **Login page redesign** — Split-panel layout: atmospheric left (gold orbs, floating particles, brand tagline "An evening that ends behind a closed door") + clean auth form right (Google OAuth with colored G SVG, role selector with tabler icons, shake animation on error, terms checkbox).
+- **Tokens/Wallet page redesign** — Hero balance counter (Cormorant Garamond 72px gold), 4-stat row (spent/purchased/tips/balance), 5-tier package grid (Starter/Casual/Connoisseur/Patron/Platinum) with featured card glow + banner, transaction table (Date/Description/Type/Amount/Balance) with tabler icons.
+- **Font stack fixed** — `globals.css` `--serif` now leads with `'Cormorant Garamond'` (was Playfair Display) — matches all page-level heading usage.
+- **Mobile improvements** — Viewport export in layout.tsx, single-col breakpoints on search/escorts/tokens, sidebar flex on escorts, touch targets, nav collapse at 640px.
 
 ## Pending
 - **Apply pending migrations in Supabase SQL editor** (run in order):
@@ -65,7 +70,13 @@ Live at **secretxperience.eu** (and www.secretxperience.eu). Owner email: heyoka
   - `20250521_messages.sql` (if messages table doesn't exist yet)
 - **CCBill integration** — blocked on credentials. Do NOT bring up unless user mentions it first.
 - **Stripcash affiliate verification** — draft email response is ready (in chat history), waiting for user to send.
-- **secretxperience.eu deployment visibility** — user has reported latest changes sometimes don't appear; could be browser cache (Ctrl+Shift+R) or Vercel domain alias issue. Worth checking deployments list via Vercel dashboard if it recurs.
+- **secretxperience.eu deployment visibility** — user has reported latest changes sometimes don't appear; could be browser cache (Ctrl+Shift+R) or Vercel domain alias issue.
+
+## Nice-to-do (not yet requested but noted)
+- Discreet Mode currently only on escorts page; could expand to nightlife/rentals/hotels
+- Available Now + New badges currently only on escorts + search; could add to other category pages
+- Homepage mobile bottom nav: Discover not yet in the 5-slot bottom navigation bar
+- Remove redundant Google Fonts `@import` in `app/discover/page.tsx` and `app/login/page.tsx` (fonts already loaded globally in `layout.tsx`)
 
 ## Constraints / things NOT to do
 - Don't push to non-main branches without explicit permission
@@ -79,13 +90,18 @@ Live at **secretxperience.eu** (and www.secretxperience.eu). Owner email: heyoka
 - `app/lib/supabase.ts` — browser client
 - `middleware.ts` — uses publishable key
 - `app/components/CategoryAnimations/` — animated category cards
+- `app/components/SliderAds/SliderAds.tsx` — featured ad slider (Velvet Stage, 480px, side-peek)
+- `app/globals.css` — global CSS variables (--serif, --sans, design tokens)
 - `app/sitemap.ts`, `app/robots.ts` — SEO
 - `app/api/newsletter/route.ts` — newsletter subscription
 - `app/api/notify/route.ts` — booking notification emails (Resend)
 - `app/api/bookings/request/route.ts` — meetup-only booking for escort categories (no payment)
 - `app/api/checkout/route.ts` — Stripe checkout for payable categories (rentals, hotels, events, shop)
 - `app/api/webhooks/stripe/route.ts` — Stripe webhook: confirms bookings, activates featured boosts
-- `app/discover/page.tsx` — NEW swipe-to-save discover page (GSAP Draggable)
+- `app/discover/page.tsx` — swipe-to-save discover page (GSAP Draggable, "Private Gallery")
+- `app/partners/page.tsx` — EU adult industry + lifestyle affiliate directory
+- `app/login/page.tsx` — split-panel auth page (atmospheric left, form right)
+- `app/tokens/page.tsx` — wallet/tokens page (hero counter, packages, transaction ledger)
 - `supabase/migrations/` — SQL migrations
 
 ## Payment category rules (IMPORTANT)
