@@ -171,6 +171,7 @@ export default function DashboardPage() {
   const [notification, setNotification]       = useState<string | null>(null)
   const [connectLoading, setConnectLoading]   = useState(false)
   const [connectLoginLoading, setConnectLoginLoading] = useState(false)
+  const [unreadMessages, setUnreadMessages]   = useState(0)
 
   useEffect(() => {
     async function load() {
@@ -184,14 +185,16 @@ export default function DashboardPage() {
 
       setUser(session.user)
 
-      const [{ data: profile }, { data: listings }, { data: bookings }, { data: idVerif }, { data: favData }] = await Promise.all([
+      const [{ data: profile }, { data: listings }, { data: bookings }, { data: idVerif }, { data: favData }, { count: unreadCount }] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', session.user.id).single(),
         supabase.from('listings').select('*').eq('profile_id', session.user.id),
         supabase.from('bookings').select('*').or(`client_id.eq.${session.user.id},provider_id.eq.${session.user.id}`),
         supabase.from('identity_verifications').select('status').eq('user_id', session.user.id).single(),
         supabase.from('favorites').select('listing_id, listings(id,title,category,city,country,price_from,images,active,tier)').eq('user_id', session.user.id),
+        supabase.from('messages').select('*', { count: 'exact', head: true }).eq('recipient_id', session.user.id).eq('read', false),
       ])
       if (idVerif?.status) setIdVerifStatus(idVerif.status as any)
+      setUnreadMessages(unreadCount || 0)
 
       setProfile(profile)
       setListings(listings || [])
@@ -899,7 +902,7 @@ export default function DashboardPage() {
             {[
               { label: 'Listings',  value: listings.length,         sub: `${activeListings} active`,         up: activeListings > 0 },
               { label: 'Bookings',  value: bookings.length,         sub: 'total bookings',                   up: bookings.length > 0 },
-              { label: 'Messages',  value: 0,                        sub: 'unread',                           up: undefined },
+              { label: 'Messages',  value: unreadMessages,           sub: 'unread',                           up: unreadMessages > 0 },
               { label: 'Active',    value: activeListings,           sub: 'live listings',                    up: activeListings > 0 },
             ].map(stat => (
               <div key={stat.label} className="db-stat-card">
@@ -1112,18 +1115,18 @@ export default function DashboardPage() {
                             {listing.city}
                           </span>
                         )}
-                        {(listing.price_min || listing.price_max) && (
+                        {(listing.price_from || listing.price_to) && (
                           <span style={{
                             fontSize: '13px',
                             color: 'var(--goldl, rgba(197,160,90,0.5))',
                             fontFamily: 'var(--sans)',
                             fontWeight: 300,
                           }}>
-                            {listing.price_min && listing.price_max
-                              ? `$${listing.price_min} – $${listing.price_max}`
-                              : listing.price_min
-                              ? `from $${listing.price_min}`
-                              : `up to $${listing.price_max}`}
+                            {listing.price_from && listing.price_to
+                              ? `€${listing.price_from} – €${listing.price_to}`
+                              : listing.price_from
+                              ? `from €${listing.price_from}`
+                              : `up to €${listing.price_to}`}
                           </span>
                         )}
                       </div>
@@ -1139,6 +1142,12 @@ export default function DashboardPage() {
                         <span className="db-status-pill-active">
                           ✓ Verified
                         </span>
+                      )}
+                      {listing.moderation_status === 'pending' && (
+                        <span className="db-status-pill-paused">⏳ Under review</span>
+                      )}
+                      {listing.moderation_status === 'rejected' && (
+                        <span className="db-status-pill-inactive" style={{ color: '#e05a5a', borderColor: 'rgba(224,90,90,0.35)' }}>✗ Rejected</span>
                       )}
                       <span className={listing.active ? 'db-status-pill-active' : 'db-status-pill-inactive'}>
                         {listing.active ? 'Live' : 'Inactive'}
