@@ -46,14 +46,22 @@ Live at **secretxperience.eu** (and www.secretxperience.eu). Owner email: heyoka
 - CategoryAnimations: replaced fragile portal pattern with direct JSX split — dangerouslySetInnerHTML split in two with `<CategoryAnimations />` in between. No longer disappears on re-render.
 - Newsletter signup: working end-to-end (confirmed live). Validation now shows red border + placeholder text on bad input.
 
+- Provider moderation status: fixed column name (`moderation_status` → `status`), badges now show correctly
+- Messages unread count: fixed column name (`recipient_id` → `receiver_id`)
+- Messages search: wired to filter by name/message/listing title
+- Listing detail: favorites toggle button wired to DB, duplicate CTA button removed
+- All API routes: replaced stale `secret-xperience.vercel.app` fallback with `www.secretxperience.eu`
+- `bookings` and `messages` table schemas added to migrations (were missing from version control)
+
 ## Pending
-- **Apply pending migrations in Supabase SQL editor**:
-  - `20250521_newsletter.sql`
-  - `20250521_tier_auto_expire.sql` (requires pg_cron extension enabled)
-  - `20250521_search_indexes.sql` (requires pg_trgm extension)
+- **Apply pending migrations in Supabase SQL editor** (run in order):
+  - `20250521_newsletter.sql` ✓ already applied
+  - `20250521_tier_auto_expire.sql` (requires pg_cron)
+  - `20250521_search_indexes.sql` (requires pg_trgm)
+  - `20250521_bookings.sql` (if bookings table doesn't exist yet)
+  - `20250521_messages.sql` (if messages table doesn't exist yet)
 - **CCBill integration** — blocked on credentials. Do NOT bring up unless user mentions it first.
 - **Stripcash affiliate verification** — draft email response is ready (in chat history), waiting for user to send.
-- **Provider moderation flow** — badges added but full end-to-end flow not verified in browser
 - **secretxperience.eu deployment visibility** — user has reported latest changes sometimes don't appear; could be browser cache (Ctrl+Shift+R) or Vercel domain alias issue. Worth checking deployments list via Vercel dashboard if it recurs.
 
 ## Constraints / things NOT to do
