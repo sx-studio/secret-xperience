@@ -1,10 +1,17 @@
 'use client'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { createClient } from './lib/supabase'
 import CategoryAnimations from './components/CategoryAnimations/CategoryAnimations'
 import SliderAds from './components/SliderAds/SliderAds'
 
 export default function Home() {
+  const [catAnchor, setCatAnchor] = useState<Element | null>(null)
+
+  useEffect(() => {
+    setCatAnchor(document.getElementById('category-animations-anchor'))
+  }, [])
+
   useEffect(() => {
     const supabase = createClient()
     let currentSession: any = null
@@ -2074,27 +2081,8 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         </div>
       </div>
 
-      <!-- How It Works -->
-      <section style="padding:2.5rem 0 2rem;border-bottom:0.5px solid var(--b);">
-        <h2 style="font-family:var(--serif);font-size:22px;font-weight:500;color:var(--t);margin-bottom:1.75rem;">How it works</h2>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;">
-          <div>
-            <div style="font-family:var(--serif);font-size:48px;font-style:italic;font-weight:400;color:var(--gold);line-height:1;margin-bottom:0.5rem;">01</div>
-            <h3 style="font-family:var(--serif);font-size:17px;font-weight:500;color:var(--t);margin-bottom:0.35rem;">Browse discreetly</h3>
-            <p style="font-size:13px;color:var(--t2);line-height:1.65;">Filter by city, type, and tier. No account needed to browse.</p>
-          </div>
-          <div>
-            <div style="font-family:var(--serif);font-size:48px;font-style:italic;font-weight:400;color:var(--gold);line-height:1;margin-bottom:0.5rem;">02</div>
-            <h3 style="font-family:var(--serif);font-size:17px;font-weight:500;color:var(--t);margin-bottom:0.35rem;">Request access</h3>
-            <p style="font-size:13px;color:var(--t2);line-height:1.65;">Send a booking request. Providers confirm — usually within 30 minutes.</p>
-          </div>
-          <div>
-            <div style="font-family:var(--serif);font-size:48px;font-style:italic;font-weight:400;color:var(--gold);line-height:1;margin-bottom:0.5rem;">03</div>
-            <h3 style="font-family:var(--serif);font-size:17px;font-weight:500;color:var(--t);margin-bottom:0.35rem;">Meet on your terms</h3>
-            <p style="font-size:13px;color:var(--t2);line-height:1.65;">All interactions are confidential. Verified profiles only.</p>
-          </div>
-        </div>
-      </section>
+      <!-- CategoryAnimations portal anchor -->
+      <div id="category-animations-anchor"></div>
 
       <!-- Featured -->
       <div class="featured" id="featuredBanner" style="display:none">
@@ -2954,7 +2942,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
   </nav>
 
 </div><!-- #app -->` }} />
-      <CategoryAnimations />
+      {catAnchor && createPortal(<CategoryAnimations />, catAnchor)}
       {/* GSAP slider ads — rendered as React portal anchored after #featuredBanner */}
       <SliderAds />
     </>
