@@ -1654,14 +1654,15 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
     <div style="position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:200px;height:200px;background:radial-gradient(circle,rgba(197,160,90,0.15) 0%,transparent 70%);pointer-events:none;"></div>
     <div style="font:600 11px/1 var(--sans);letter-spacing:0.32em;color:var(--gold);text-align:center;margin-bottom:1.5rem;text-transform:uppercase;position:relative;z-index:2;">SECRETXPERIENCE</div>
     <i class="ti ti-shield-lock" style="font-size:44px;color:var(--gold);filter:drop-shadow(0 0 18px rgba(197,160,90,0.35));display:block;text-align:center;margin-bottom:1rem;position:relative;z-index:2;" aria-hidden="true"></i>
-    <h2 style="font-family:var(--serif);font-size:28px;font-weight:300;text-align:center;margin:0 0 0.75rem;position:relative;z-index:2;">Are you 18 or older?</h2>
-    <p class="t-body-sm" style="max-width:300px;text-align:center;margin:0 auto 1.5rem;color:var(--t2);position:relative;z-index:2;">This website contains adult content and services intended for adults only. You must be at least 18 years of age — or the age of majority in your jurisdiction — to enter.</p>
+    <h2 style="font-family:var(--serif);font-size:26px;font-weight:400;text-align:center;margin:0 0 0.5rem;position:relative;z-index:2;">SecretXperience is an adult website.</h2>
+    <p class="t-body-sm" style="max-width:320px;text-align:center;margin:0 auto 1rem;color:var(--t2);font-size:13px;line-height:1.65;position:relative;z-index:2;">By continuing to browse, you declare that you are <strong style="color:var(--t)">18 years of age or older</strong> and you consent to the use of cookies and agree to our <a href="/terms" style="color:var(--gold)">Terms of Use</a>.</p>
+    <p class="t-body-sm" style="max-width:320px;text-align:center;margin:0 auto 1.5rem;color:var(--t3);font-size:12px;line-height:1.65;position:relative;z-index:2;">SecretXperience uses cookies for functional and analytical purposes. Via the settings button you can set your own preferences.</p>
     <div class="gate-btns" style="position:relative;z-index:2;">
-      <button class="g-yes" id="gyes" style="width:100%;padding:14px 20px;background:var(--grad-gold);border:none;border-radius:var(--r);color:#080808;font-weight:600;font-size:14px;cursor:pointer;font-family:var(--sans);letter-spacing:0.04em;margin-bottom:0.75rem;">Yes, I am 18+ — Enter Site</button>
-      <button class="g-no" id="gno" style="width:100%;padding:10px 20px;background:transparent;border:0.5px solid var(--b2);border-radius:var(--r);color:var(--t2);font-size:12px;cursor:pointer;font-family:var(--sans);">No — Exit</button>
+      <button class="g-yes" id="gyes" style="width:100%;padding:14px 20px;background:var(--grad-gold);border:none;border-radius:var(--r);color:#080808;font-weight:600;font-size:14px;cursor:pointer;font-family:var(--sans);letter-spacing:0.04em;margin-bottom:0.75rem;">I am 18+ — Enter Site</button>
+      <button class="g-no" id="gno" style="width:100%;padding:10px 20px;background:transparent;border:0.5px solid var(--b2);border-radius:var(--r);color:var(--t2);font-size:12px;cursor:pointer;font-family:var(--sans);">I am under 18 — Exit</button>
     </div>
     <div class="gate-legal" style="position:relative;z-index:2;">
-      By entering you confirm you have read and agree to our <a href="/terms">Terms of Use</a> and <a href="/privacy">Privacy Policy</a>. This site uses cookies for enhanced experience.
+      By entering you confirm you are 18 or older and agree to our <a href="/terms">Terms of Use</a>, <a href="/privacy">Privacy Policy</a>, and <a href="/cookies">Cookie Policy</a>.
     </div>
   </div>
 </div>
