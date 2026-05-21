@@ -144,6 +144,9 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
             Secret<em style={{ fontStyle: 'italic', fontWeight: 300 }}>Xperience</em>
           </Link>
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            <Link href="/discover" style={{ fontSize: '13px', color: 'var(--t2)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span>✦</span> Discover
+            </Link>
             <Link href="/events" style={{ fontSize: '13px', color: 'var(--t2)', textDecoration: 'none' }}>Events</Link>
             <Link href="/advertise" style={{ height: '34px', padding: '0 14px', background: 'linear-gradient(135deg,var(--gold),var(--goldd))', border: 'none', borderRadius: 'var(--r)', color: '#0a0a0a', fontSize: '13px', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <i className="ti ti-plus" /> List service

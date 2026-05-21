@@ -1405,6 +1405,12 @@ export default function DashboardPage() {
               </button>
               <button
                 className="db-quick-btn-dark"
+                onClick={() => window.location.href = '/discover'}
+              >
+                ✦ Discover
+              </button>
+              <button
+                className="db-quick-btn-dark"
                 onClick={() => { setProfileDraft({ full_name: profile?.full_name || '', bio: profile?.bio || '', availability: profile?.availability || '', city: profile?.city || '', country: profile?.country || '', phone: profile?.phone || '', age: profile?.age || '', languages: (profile?.languages || []).join(', ') }); setEditingProfile(true) }}
               >
                 Edit profile

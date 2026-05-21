@@ -373,6 +373,7 @@ export default function EscortsPage() {
           Secret<em style={{ fontStyle: 'normal' }}>X</em>perience
         </Link>
         <div style={{ flex: 1 }} />
+        <Link href="/discover" style={{ fontSize: '13px', color: 'var(--gold)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4, fontWeight: 500 }}>✦ Discover</Link>
         <Link href="/companionship" style={{ fontSize: '13px', color: 'var(--t2)', textDecoration: 'none' }}>Companionship</Link>
         <Link href="/massage" style={{ fontSize: '13px', color: 'var(--t2)', textDecoration: 'none' }}>Massage</Link>
         <Link href="/nightlife" style={{ fontSize: '13px', color: 'var(--t2)', textDecoration: 'none' }}>Nightlife</Link>
