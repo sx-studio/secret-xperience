@@ -2,6 +2,7 @@
 import { useEffect } from 'react'
 import { createClient } from './lib/supabase'
 import CategoryAnimations from './components/CategoryAnimations/CategoryAnimations'
+import SliderAds from './components/SliderAds/SliderAds'
 
 export default function Home() {
   useEffect(() => {
@@ -1052,6 +1053,15 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         if (ddName) ddName.textContent = name
         if (ddEmail) ddEmail.textContent = profile?.email || session.user.email || ''
 
+        // Set "My Profile" link to user's public listing or profile page
+        ;(async () => {
+          const { data: myListings } = await (supabase as any).from('listings').select('id').eq('profile_id', session.user.id).eq('active', true).order('created_at', { ascending: false }).limit(1)
+          const myProfileLink = document.getElementById('ddMyProfileLink') as HTMLAnchorElement | null
+          if (myProfileLink) {
+            myProfileLink.href = myListings && myListings.length > 0 ? `/listings/${myListings[0].id}` : `/profile/${session.user.id}`
+          }
+        })()
+
         // Admin: show Admin bar + swap nav button
         if (profile?.role === 'admin') {
           const adminBar = document.getElementById('adminBar')
@@ -1686,7 +1696,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
             <div id="ddEmail" style="font-size:12px;color:var(--t3);margin-top:2px;"></div>
           </div>
           <div style="padding:6px 0;">
-            <a href="/dashboard" style="display:flex;align-items:center;gap:10px;padding:10px 16px;color:var(--t);font-size:13px;text-decoration:none;" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''"><i class="ti ti-user-circle" style="font-size:16px;color:var(--t3);width:18px;text-align:center;"></i> My Profile</a>
+            <a id="ddMyProfileLink" href="/dashboard" style="display:flex;align-items:center;gap:10px;padding:10px 16px;color:var(--t);font-size:13px;text-decoration:none;" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''"><i class="ti ti-user-circle" style="font-size:16px;color:var(--t3);width:18px;text-align:center;"></i> My Profile</a>
             <a href="/dashboard" style="display:flex;align-items:center;gap:10px;padding:10px 16px;color:var(--t);font-size:13px;text-decoration:none;" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''"><i class="ti ti-layout-dashboard" style="font-size:16px;color:var(--t3);width:18px;text-align:center;"></i> Dashboard</a>
             <a href="/messages" style="display:flex;align-items:center;gap:10px;padding:10px 16px;color:var(--t);font-size:13px;text-decoration:none;" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''"><i class="ti ti-message" style="font-size:16px;color:var(--t3);width:18px;text-align:center;"></i> Messages <span id="ddMsgBadge" style="display:none;margin-left:auto;background:var(--gold);color:#0a0a0a;border-radius:10px;padding:1px 7px;font-size:11px;font-weight:700;"></span></a>
             <a href="/listings/create" style="display:flex;align-items:center;gap:10px;padding:10px 16px;color:var(--t);font-size:13px;text-decoration:none;" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''"><i class="ti ti-plus" style="font-size:16px;color:var(--t3);width:18px;text-align:center;"></i> List a service</a>
@@ -1948,6 +1958,9 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         </div>
         <button class="ft-btn" id="featuredBannerBtn">View listing <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
       </div>
+
+      <!-- Slider Ads mount point -->
+      <div id="sliderAdsMount"></div>
 
       <!-- Tabs -->
       <div class="tabs" role="tablist">
@@ -2819,6 +2832,8 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
 
 </div><!-- #app -->` }} />
       <CategoryAnimations />
+      {/* GSAP slider ads — rendered as React portal anchored after #featuredBanner */}
+      <SliderAds />
     </>
   )
 }
