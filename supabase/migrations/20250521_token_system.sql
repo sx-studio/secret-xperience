@@ -1,6 +1,6 @@
 -- ═══════════════════════════════════════════════════════════
 -- SecretXperience — Token System & Listing Tiers Migration
--- Run in Supabase SQL editor or via supabase db push
+-- Safe first-run version — no DROP statements
 -- ═══════════════════════════════════════════════════════════
 
 -- ── TOKEN PACKAGES ───────────────────────────────────────────
@@ -49,7 +49,6 @@ BEGIN
 END;
 $$;
 
-DROP TRIGGER IF EXISTS on_auth_user_created_wallet ON auth.users;
 CREATE TRIGGER on_auth_user_created_wallet
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION create_wallet_for_new_user();
@@ -58,11 +57,11 @@ CREATE TRIGGER on_auth_user_created_wallet
 CREATE TABLE IF NOT EXISTS token_ledger (
   id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id      uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  amount       int  NOT NULL,           -- positive = credit, negative = debit
+  amount       int  NOT NULL,
   balance_after int NOT NULL,
   type         text NOT NULL CHECK (type IN ('purchase','spend','refund','bonus','admin')),
   description  text,
-  reference_id text,                    -- listing_id, order_id, etc.
+  reference_id text,
   created_at   timestamptz DEFAULT now()
 );
 
@@ -77,7 +76,7 @@ CREATE TABLE IF NOT EXISTS payment_orders (
   tokens_granted    int  NOT NULL,
   amount_eur        numeric(8,2) NOT NULL,
   provider          text NOT NULL DEFAULT 'ccbill',
-  provider_order_id text,               -- CCBill subscriptionId
+  provider_order_id text,
   status            text NOT NULL DEFAULT 'pending'
     CHECK (status IN ('pending','completed','failed','refunded','chargeback')),
   webhook_payload   jsonb,
@@ -91,7 +90,7 @@ CREATE INDEX IF NOT EXISTS idx_payment_orders_provider_id ON payment_orders(prov
 
 -- ── LISTING TIERS ─────────────────────────────────────────────
 ALTER TABLE listings
-  ADD COLUMN IF NOT EXISTS tier          text NOT NULL DEFAULT 'basic'
+  ADD COLUMN IF NOT EXISTS tier            text NOT NULL DEFAULT 'basic'
     CHECK (tier IN ('basic','featured','slider','premium')),
   ADD COLUMN IF NOT EXISTS tier_expires_at timestamptz,
   ADD COLUMN IF NOT EXISTS token_order_id  uuid REFERENCES payment_orders(id);
@@ -118,12 +117,6 @@ ALTER TABLE user_wallets   ENABLE ROW LEVEL SECURITY;
 ALTER TABLE token_ledger   ENABLE ROW LEVEL SECURITY;
 ALTER TABLE payment_orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE affiliates     ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "public read token_packages" ON token_packages;
-DROP POLICY IF EXISTS "own wallet"    ON user_wallets;
-DROP POLICY IF EXISTS "own ledger"    ON token_ledger;
-DROP POLICY IF EXISTS "own orders"    ON payment_orders;
-DROP POLICY IF EXISTS "own affiliate" ON affiliates;
 
 CREATE POLICY "public read token_packages" ON token_packages FOR SELECT USING (active = true);
 CREATE POLICY "own wallet"    ON user_wallets   FOR ALL    USING (auth.uid() = user_id);
