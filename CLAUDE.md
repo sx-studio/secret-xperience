@@ -43,6 +43,8 @@ Live at **secretxperience.eu** (and www.secretxperience.eu). Owner email: heyoka
 - Tier expiry: created `expire_listing_tiers()` function + hourly pg_cron sweep (`supabase/migrations/20250521_tier_auto_expire.sql`) — **needs to be applied**
 - Search performance indexes (pg_trgm GIN on title/description/city/subcategory) — `supabase/migrations/20250521_search_indexes.sql` **needs to be applied**
 - Search UI: Premium/Featured badges now gated on `featured_until > now` (Premium displaces Featured when both apply)
+- CategoryAnimations: replaced fragile portal pattern with direct JSX split — dangerouslySetInnerHTML split in two with `<CategoryAnimations />` in between. No longer disappears on re-render.
+- Newsletter signup: working end-to-end (confirmed live). Validation now shows red border + placeholder text on bad input.
 
 ## Pending
 - **Apply pending migrations in Supabase SQL editor**:
