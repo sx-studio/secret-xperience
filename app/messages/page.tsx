@@ -218,7 +218,7 @@ export default function MessagesPage() {
   return (
     <div style={{ display: 'flex', height: 'calc(100vh - var(--nav-h, 60px))', overflow: 'hidden', fontFamily: 'var(--sans, "Jost", sans-serif)', color: 'var(--t, #ece8e1)' }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=Jost:wght@300;400;500&display=swap');
+        
         @import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css');
         *, *::before, *::after { box-sizing: border-box; }
         ::-webkit-scrollbar { width: 4px; }

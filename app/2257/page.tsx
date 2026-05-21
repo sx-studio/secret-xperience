@@ -5,7 +5,7 @@ const S = { bg: '#080808', t: '#e8e0d0', t2: '#888', gold: '#c5a05a', serif: "'C
 export default function Page2257() {
   return (
     <div style={{ background: S.bg, minHeight: '100vh', color: S.t, fontFamily: S.sans }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Jost:wght@300;400;500&display=swap');*{box-sizing:border-box;margin:0;padding:0}a{color:${S.gold};text-decoration:none}a:hover{text-decoration:underline}`}</style>
+      <style>{`*{box-sizing:border-box;margin:0;padding:0}a{color:${S.gold};text-decoration:none}a:hover{text-decoration:underline}`}</style>
       <header style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(8,8,8,0.95)', backdropFilter: 'blur(12px)', borderBottom: '0.5px solid #c5a05a22', padding: '0 24px', height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <a href="/" style={{ fontFamily: S.serif, fontSize: 18, fontWeight: 600, color: S.t, letterSpacing: '0.04em' }}>Secret<span style={{ color: S.gold }}>Xperience</span></a>
         <a href="/" style={{ fontSize: 13, color: S.t2 }}>← Back</a>

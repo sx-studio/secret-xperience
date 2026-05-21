@@ -234,7 +234,7 @@ export default function PartnersPage() {
   return (
     <div style={{ minHeight: '100vh', background: '#080608', color: '#ece8e1' }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@400;500;600&display=swap');
+        
         @import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         .cat-pill { height: 32px; padding: 0 13px; border-radius: 20px; border: 0.5px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.4); font: 500 11px 'DM Sans', sans-serif; cursor: pointer; white-space: nowrap; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; transition: all .15s; flex-shrink: 0; }

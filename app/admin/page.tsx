@@ -114,7 +114,7 @@ export default function AdminPage() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg, #050505)', color: 'var(--t, #ece8e1)', fontFamily: 'var(--sans)', display: 'flex' }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Cormorant+Garamond:wght@300;400&family=DM+Sans:wght@300;400;500;600&family=Jost:wght@300;400;500;600&display=swap');
+        
         @import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css');
         @keyframes spin{to{transform:rotate(360deg)}}
         *{box-sizing:border-box}

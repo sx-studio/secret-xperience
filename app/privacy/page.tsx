@@ -44,7 +44,7 @@ export default function PrivacyPage() {
   return (
     <div style={{ background: S.bg, minHeight: '100vh', color: S.t, fontFamily: S.sans }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500&display=swap');
+        
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; }
         ::-webkit-scrollbar { width: 6px; }

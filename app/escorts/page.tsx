@@ -348,7 +348,7 @@ export default function EscortsPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--t)', fontFamily: 'var(--sans)' }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap');
+        
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         .card-container:hover .card-hover-overlay { opacity: 1 !important; }
         .filter-select { background: var(--bg2); border: 0.5px solid var(--b2); border-radius: var(--r); color: var(--t); padding: 8px 12px; font-size: 13px; font-family: var(--sans); outline: none; width: 100%; cursor: pointer; }

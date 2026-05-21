@@ -260,7 +260,7 @@ export default function ProviderHubPage() {
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       flexDirection: 'column', gap: '16px',
     }}>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Jost:wght@300;400;500;600&display=swap'); @keyframes spin{to{transform:rotate(360deg)}}`}</style>
+      <style>{` @keyframes spin{to{transform:rotate(360deg)}}`}</style>
       <div style={{ width: '36px', height: '36px', borderRadius: '50%', border: '0.5px solid rgba(197,160,90,0.3)', borderTopColor: '#c5a05a', animation: 'spin 0.8s linear infinite' }} />
       <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '13px', fontFamily: 'var(--sans)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Loading</span>
     </div>
@@ -269,7 +269,7 @@ export default function ProviderHubPage() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap');
+        
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: var(--bg, #050505); }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }

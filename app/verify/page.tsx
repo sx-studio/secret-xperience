@@ -79,7 +79,7 @@ export default function VerifyPage() {
   return (
     <div style={{ background: S.bg, minHeight: '100vh', color: S.t, fontFamily: S.sans }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Jost:wght@300;400;500;600&display=swap');
+        
         *{box-sizing:border-box;margin:0;padding:0}
         a{color:${S.gold};text-decoration:none}
         .upload-zone{border:1.5px dashed #ffffff20;border-radius:12px;padding:2rem;text-align:center;cursor:pointer;transition:border-color .2s,background .2s}

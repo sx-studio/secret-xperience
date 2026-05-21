@@ -189,7 +189,7 @@ export default function TokensPage() {
   return (
     <div style={{ background: '#08060e', minHeight: '100vh', color: '#ece8e1', fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=DM+Sans:wght@300;400;500;600&display=swap');
+        
         @import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css');
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

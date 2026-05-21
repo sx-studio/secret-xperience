@@ -325,7 +325,7 @@ export default function DashboardPage() {
 
   if (loading) return (
     <>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap');`}</style>
+      <style>{``}</style>
       <div style={{
         minHeight: '100vh',
         background: 'var(--bg, #050505)',
@@ -365,7 +365,7 @@ export default function DashboardPage() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=DM+Sans:wght@300;400;500;600&family=Jost:wght@300;400;500;600&display=swap');
+        
         @import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css');
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
