@@ -22,7 +22,7 @@ export async function POST(request: Request) {
       email,
       password,
       user_metadata: { full_name: fullName || '', role },
-      email_confirm: false, // sends confirmation email
+      email_confirm: true, // skip email verification — platform handles ID verification separately
     })
 
     if (authError) {

@@ -69,8 +69,19 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password, fullName, role }),
       })
       const json = await res.json()
-      if (!res.ok) setError(json.error || 'Signup failed')
-      else setSuccess(true)
+      if (!res.ok) {
+        setError(json.error || 'Signup failed')
+      } else {
+        // Account created — sign in immediately
+        const { error: signInError } = await signIn(email, password)
+        if (signInError) {
+          // Account exists but sign-in failed — send them to login tab
+          setSuccess(true)
+        } else {
+          const isProviderRole = ['provider', 'venue', 'creator'].includes(role)
+          window.location.href = isProviderRole ? '/listings/create' : '/dashboard'
+        }
+      }
     }
     setLoading(false)
   }
