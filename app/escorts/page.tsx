@@ -6,7 +6,7 @@ import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)!
 )
 
 /* ── Types ──────────────────────────────────────────────── */
@@ -28,6 +28,8 @@ type Listing = {
   rating: number | null
   review_count: number | null
   tags: string[] | null
+  created_at: string
+  featured_until: string | null
 }
 
 /* ── Filter config ──────────────────────────────────────── */
@@ -78,10 +80,32 @@ function timeAgo(iso: string) {
 
 function cap(s: string) { return s.charAt(0).toUpperCase() + s.slice(1) }
 
+function isAvailableNow(tags: string[] | null | undefined): boolean {
+  if (!tags) return false
+  const days = ['sun','mon','tue','wed','thu','fri','sat']
+  const now = new Date()
+  const day = days[now.getDay()]
+  const whTag = tags.find(t => t.startsWith(`wh:${day}:`))
+  if (!whTag) return false
+  const range = whTag.split(':')[2]
+  if (!range || range === 'off') return false
+  const [startStr, endStr] = range.split('-')
+  if (!startStr || !endStr) return false
+  const sh = parseInt(startStr), eh = parseInt(endStr)
+  const cur = now.getHours()
+  return cur >= sh && cur < eh
+}
+
+function isNewListing(createdAt: string): boolean {
+  return (Date.now() - new Date(createdAt).getTime()) < 7 * 24 * 60 * 60 * 1000
+}
+
 /* ── Card component ─────────────────────────────────────── */
 function EscortCard({ l }: { l: Listing }) {
   const img = l.images?.[0]
   const price = l.price_from ? `€${l.price_from}/hr` : null
+  const availNow = isAvailableNow(l.tags)
+  const isNew = isNewListing(l.created_at)
 
   return (
     <Link href={`/listings/${l.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
@@ -124,6 +148,15 @@ function EscortCard({ l }: { l: Listing }) {
             )}
             {l.premium && (
               <span style={{ background: 'var(--grad-gold)', color: '#000', fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', letterSpacing: '0.06em' }}>VIP</span>
+            )}
+            {availNow && (
+              <span style={{ background: 'rgba(62,207,142,0.18)', border: '0.5px solid rgba(62,207,142,0.45)', color: '#3ecf8e', fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', letterSpacing: '0.06em', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#3ecf8e', display: 'inline-block', boxShadow: '0 0 4px #3ecf8e' }} />
+                AVAILABLE
+              </span>
+            )}
+            {isNew && !availNow && (
+              <span style={{ background: 'rgba(130,100,220,0.18)', border: '0.5px solid rgba(130,100,220,0.4)', color: '#a78bfa', fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', letterSpacing: '0.06em', backdropFilter: 'blur(6px)' }}>NEW</span>
             )}
           </div>
 
@@ -190,13 +223,13 @@ export default function EscortsPage() {
   const [hairColor, setHairColor]       = useState('Any')
   const [build, setBuild]               = useState('Any')
   const [selectedServices, setSelectedServices] = useState<string[]>([])
-  const [sortBy, setSortBy]             = useState<'rating' | 'price_asc' | 'price_desc' | 'newest'>('rating')
+  const [sortBy, setSortBy]             = useState<'rating' | 'price_asc' | 'price_desc' | 'newest' | 'available'>('rating')
 
   const fetchListings = useCallback(async () => {
     setLoading(true)
     let q = supabase
       .from('listings')
-      .select('id,title,description,category,subcategory,city,country,price_from,price_to,currency,meet_type,images,verified,premium,rating,review_count,tags')
+      .select('id,title,description,category,subcategory,city,country,price_from,price_to,currency,meet_type,images,verified,premium,rating,review_count,tags,created_at,featured_until')
       .eq('active', true)
       .in('category', ['escorts', 'companionship', 'domination', 'experiences', 'massage'])
 
@@ -206,9 +239,9 @@ export default function EscortsPage() {
     if (priceMin > 0) q = q.gte('price_from', priceMin)
     if (priceMax < 1000) q = q.lte('price_from', priceMax)
 
-    if (sortBy === 'rating') q = q.order('rating', { ascending: false })
-    else if (sortBy === 'price_asc') q = q.order('price_from', { ascending: true })
-    else if (sortBy === 'price_desc') q = q.order('price_from', { ascending: false })
+    if (sortBy === 'rating') q = q.order('rating', { ascending: false, nullsFirst: false })
+    else if (sortBy === 'price_asc') q = q.order('price_from', { ascending: true, nullsFirst: false })
+    else if (sortBy === 'price_desc') q = q.order('price_from', { ascending: false, nullsFirst: false })
     else q = q.order('created_at', { ascending: false })
 
     q = q.limit(60)
@@ -250,6 +283,14 @@ export default function EscortsPage() {
       results = results.filter(l => {
         const tags = (l.tags ?? []).map((t: string) => t.toLowerCase())
         return selectedServices.some(s => tags.includes(s.toLowerCase()))
+      })
+    }
+
+    if (sortBy === 'available') {
+      results = [...results].sort((a, b) => {
+        const aAvail = isAvailableNow(a.tags) ? 1 : 0
+        const bAvail = isAvailableNow(b.tags) ? 1 : 0
+        return bAvail - aAvail
       })
     }
 
@@ -504,6 +545,7 @@ export default function EscortsPage() {
                 style={{ width: 'auto', padding: '6px 10px' }}
               >
                 <option value="rating">Top rated</option>
+                <option value="available">Available now</option>
                 <option value="price_asc">Price: Low → High</option>
                 <option value="price_desc">Price: High → Low</option>
                 <option value="newest">Newest</option>
