@@ -265,7 +265,7 @@
    Universal type families
    ────────────────────────────────────────────────────────────── */
 :root {
-  --serif: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
+  --serif: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
   --sans:  'DM Sans', 'Jost', 'Helvetica Neue', system-ui, sans-serif;
 }
 

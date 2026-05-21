@@ -40,15 +40,68 @@ const ADD_ONS = [
   { label: 'Top boost (24 h)',        tokens: 75  },
 ]
 
-const S = {
-  bg:    '#080808',
-  bg2:   '#0e0c18',
-  t:     '#e8e0d0',
-  t2:    '#888',
-  t3:    '#555',
-  gold:  '#c5a05a',
-  serif: "'Cormorant Garamond', serif",
-  sans:  "'Jost', sans-serif",
+const FALLBACK_PACKAGES = [
+  {
+    id: 'starter',
+    name: 'Starter',
+    slug: 'starter',
+    tokens: 100,
+    bonus_tokens: 0,
+    price_eur: 10,
+    popular: false,
+    rate: '€0.100/token',
+    perks: ['Tip any creator', 'One booking deposit'],
+  },
+  {
+    id: 'casual',
+    name: 'Casual',
+    slug: 'casual',
+    tokens: 500,
+    bonus_tokens: 0,
+    price_eur: 45,
+    popular: false,
+    rate: '€0.090/token · save 10%',
+    perks: ['All Starter perks', 'Priority messages', 'One creator unlock'],
+  },
+  {
+    id: 'connoisseur',
+    name: 'Connoisseur',
+    slug: 'connoisseur',
+    tokens: 1500,
+    bonus_tokens: 0,
+    price_eur: 120,
+    popular: true,
+    rate: '€0.080/token · save 20%',
+    perks: ['One month Gold benefits', 'Five creator unlocks', 'Concierge support', 'No expiry'],
+  },
+  {
+    id: 'patron',
+    name: 'Patron',
+    slug: 'patron',
+    tokens: 5000,
+    bonus_tokens: 0,
+    price_eur: 375,
+    popular: false,
+    rate: '€0.075/token · save 25%',
+    perks: ['Three months Gold', 'Unlimited unlocks', 'Private concierge'],
+  },
+  {
+    id: 'platinum',
+    name: 'Platinum',
+    slug: 'platinum',
+    tokens: 12000,
+    bonus_tokens: 0,
+    price_eur: 840,
+    popular: false,
+    rate: '€0.070/token · save 30%',
+    perks: ['Platinum tier 1 year', 'Private events access', 'Personal account manager'],
+  },
+]
+
+function getPerkIcon(perk: string): string {
+  if (perk.toLowerCase().includes('gold') || perk.toLowerCase().includes('platinum') || perk.toLowerCase().includes('concierge') || perk.toLowerCase().includes('manager')) return 'ti-crown'
+  if (perk.toLowerCase().includes('creator') || perk.toLowerCase().includes('unlock') || perk.toLowerCase().includes('priority') || perk.toLowerCase().includes('events')) return 'ti-sparkles'
+  return 'ti-check'
 }
 
 export default function TokensPage() {
@@ -59,6 +112,7 @@ export default function TokensPage() {
   const [loading,  setLoading]  = useState(false)
   const [selected, setSelected] = useState<string | null>(null)
   const [status,   setStatus]   = useState<'idle' | 'success' | 'cancel'>('idle')
+  const [role,     setRole]     = useState<string>('Member')
 
   useEffect(() => {
     const sp = new URLSearchParams(window.location.search)
@@ -75,13 +129,20 @@ export default function TokensPage() {
           .then(({ data }) => setWallet(data))
         supabase.from('token_ledger').select('id,amount,type,description,created_at,balance_after').eq('user_id', session.user.id).order('created_at', { ascending: false }).limit(15)
           .then(({ data }) => setLedger(data || []))
+        supabase.from('profiles').select('role').eq('id', session.user.id).single()
+          .then(({ data }) => {
+            if (data?.role) {
+              const map: Record<string, string> = { user: 'Member', provider: 'Provider', venue: 'Venue', creator: 'Creator' }
+              setRole(map[data.role] || 'Member')
+            }
+          })
       }
     })
     supabase.from('token_packages').select('*').eq('active', true).order('sort_order')
       .then(({ data }) => setPackages(data || []))
   }, [])
 
-  async function handlePurchase(pkg: Package) {
+  async function handlePurchase(pkg: Package | typeof FALLBACK_PACKAGES[0]) {
     if (!session) { window.location.href = '/login?redirect=/tokens'; return }
     setLoading(true)
     setSelected(pkg.id)
@@ -102,210 +163,788 @@ export default function TokensPage() {
     }
   }
 
+  // Compute stats from ledger
+  const now = new Date()
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+  const spentThisMonth = ledger
+    .filter(e => e.type === 'spend' && new Date(e.created_at) >= startOfMonth)
+    .reduce((sum, e) => sum + Math.abs(e.amount), 0)
+  const tipsGiven = ledger
+    .filter(e => e.type === 'spend' && e.description?.toLowerCase().includes('tip'))
+    .reduce((sum, e) => sum + Math.abs(e.amount), 0)
+
+  const displayPackages = packages.length > 0
+    ? packages.map(pkg => ({
+        ...pkg,
+        rate: `€${(pkg.price_eur / (pkg.tokens + pkg.bonus_tokens)).toFixed(3)}/token`,
+        perks: [] as string[],
+      }))
+    : FALLBACK_PACKAGES
+
+  function fmtDate(iso: string) {
+    const d = new Date(iso)
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })
+  }
+
   return (
-    <div style={{ background: S.bg, minHeight: '100vh', color: S.t, fontFamily: S.sans }}>
+    <div style={{ background: '#08060e', minHeight: '100vh', color: '#ece8e1', fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Jost:wght@300;400;500;600&display=swap');
-        *{box-sizing:border-box;margin:0;padding:0}
-        a{color:${S.gold};text-decoration:none}
-        .pkg-card:hover{transform:translateY(-3px);box-shadow:0 16px 48px rgba(197,160,90,0.12)!important}
-        .pkg-card{transition:transform .2s,box-shadow .2s}
-        .buy-btn:hover{filter:brightness(1.12)}
-        .buy-btn{transition:filter .15s}
-        @media(max-width:640px){.pkg-grid{grid-template-columns:1fr!important}.tier-grid{grid-template-columns:1fr!important}.tok-hero-h1{font-size:clamp(28px,8vw,42px)!important}.tok-main{padding:2rem 16px 4rem!important}}
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=DM+Sans:wght@300;400;500;600&display=swap');
+        @import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css');
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(12px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(197,160,90,0.25); }
+          50%       { box-shadow: 0 0 0 8px rgba(197,160,90,0); }
+        }
+
+        .tok-nav-link {
+          font: 500 13px/1 'DM Sans', sans-serif;
+          color: rgba(236,232,225,0.45);
+          text-decoration: none;
+          letter-spacing: 0.03em;
+          transition: color 0.15s;
+        }
+        .tok-nav-link:hover { color: #ece8e1; }
+        .tok-nav-link.active { color: #c5a05a; }
+
+        .tok-pkg-card {
+          background: rgba(255,255,255,0.025);
+          border: 0.5px solid rgba(255,255,255,0.08);
+          border-radius: 16px;
+          padding: 1.75rem 1.5rem;
+          position: relative;
+          transition: transform 0.2s, box-shadow 0.2s;
+          display: flex;
+          flex-direction: column;
+        }
+        .tok-pkg-card:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+        }
+        .tok-pkg-card.featured {
+          border-color: rgba(197,160,90,0.45);
+          background: linear-gradient(145deg, rgba(197,160,90,0.06) 0%, rgba(255,255,255,0.02) 100%);
+          box-shadow: 0 0 0 1px rgba(197,160,90,0.15), 0 8px 32px rgba(197,160,90,0.1);
+          transform: scale(1.03);
+        }
+        .tok-pkg-card.featured:hover {
+          transform: scale(1.03) translateY(-3px);
+        }
+
+        .tok-cta-btn {
+          width: 100%;
+          padding: 12px 0;
+          border-radius: 10px;
+          font: 600 12px/1 'DM Sans', sans-serif;
+          letter-spacing: 0.07em;
+          text-transform: uppercase;
+          cursor: pointer;
+          transition: filter 0.15s, transform 0.15s;
+          margin-top: auto;
+          padding-top: 14px;
+        }
+        .tok-cta-btn:hover { filter: brightness(1.12); }
+        .tok-cta-btn:disabled { opacity: 0.45; cursor: default; }
+        .tok-cta-btn.primary {
+          background: linear-gradient(135deg, #c5a05a 0%, #a0803d 100%);
+          color: #080808;
+          border: none;
+          box-shadow: 0 4px 20px rgba(197,160,90,0.22);
+        }
+        .tok-cta-btn.secondary {
+          background: transparent;
+          color: #c5a05a;
+          border: 0.5px solid rgba(197,160,90,0.4);
+        }
+        .tok-cta-btn.secondary:hover { background: rgba(197,160,90,0.06); }
+
+        .tok-section-rule {
+          height: 0.5px;
+          background: linear-gradient(90deg, rgba(197,160,90,0.3) 0%, transparent 70%);
+          margin: 0.75rem 0 1.25rem;
+        }
+
+        .tok-table-row {
+          display: grid;
+          grid-template-columns: 80px 1fr 90px 80px 90px;
+          align-items: center;
+          gap: 12px;
+          padding: 13px 18px;
+          border-bottom: 0.5px solid rgba(255,255,255,0.04);
+          transition: background 0.15s;
+        }
+        .tok-table-row:last-child { border-bottom: none; }
+        .tok-table-row:hover { background: rgba(255,255,255,0.02); }
+        .tok-table-head {
+          font: 600 10px/1 'DM Sans', sans-serif;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: rgba(236,232,225,0.3);
+        }
+
+        @media (max-width: 768px) {
+          .tok-stats-row { grid-template-columns: 1fr 1fr !important; }
+          .tok-pkg-grid  { grid-template-columns: 1fr !important; }
+          .tok-pkg-card.featured { transform: none !important; }
+          .tok-pkg-card.featured:hover { transform: translateY(-3px) !important; }
+          .tok-table-row {
+            grid-template-columns: 70px 1fr 70px 70px !important;
+          }
+          .tok-table-col-balance { display: none; }
+          .tok-nav-links { display: none !important; }
+          .tok-hero-balance { font-size: clamp(52px, 15vw, 72px) !important; }
+          .tok-main { padding: 2rem 16px 4rem !important; }
+        }
       `}</style>
 
-      {/* Nav */}
-      <header style={{ position:'sticky', top:0, zIndex:100, background:'rgba(8,8,8,0.96)', backdropFilter:'blur(12px)', borderBottom:`0.5px solid #c5a05a22`, padding:'0 24px', height:56, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-        <a href="/" style={{ fontFamily:S.serif, fontSize:18, fontWeight:600, color:S.t, letterSpacing:'0.04em' }}>Secret<span style={{ color:S.gold }}>Xperience</span></a>
-        <div style={{ display:'flex', alignItems:'center', gap:16 }}>
+      {/* ── NAV ── */}
+      <header style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 100,
+        background: 'rgba(8,6,14,0.95)',
+        backdropFilter: 'blur(16px)',
+        borderBottom: '0.5px solid rgba(197,160,90,0.1)',
+        padding: '0 24px',
+        height: 58,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 16,
+      }}>
+        <a href="/" style={{
+          fontFamily: "'Cormorant Garamond', serif",
+          fontSize: 19,
+          fontWeight: 500,
+          color: '#c5a05a',
+          fontStyle: 'italic',
+          letterSpacing: '0.02em',
+          textDecoration: 'none',
+          flexShrink: 0,
+        }}>
+          Secret<em style={{ fontWeight: 300 }}>Xperience</em>
+        </a>
+
+        <nav className="tok-nav-links" style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+          <a href="/" className="tok-nav-link">Browse</a>
+          <a href="/discover" className="tok-nav-link">Discover</a>
+          <a href="/dashboard?tab=messages" className="tok-nav-link">Messages</a>
+          <a href="/tokens" className="tok-nav-link active">Wallet</a>
+        </nav>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>
           {wallet && (
-            <span style={{ fontSize:13, color:S.gold, fontWeight:600 }}>
-              ◈ {wallet.balance.toLocaleString()} tokens
-            </span>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 7,
+              background: 'rgba(197,160,90,0.08)',
+              border: '0.5px solid rgba(197,160,90,0.25)',
+              borderRadius: 20,
+              padding: '5px 12px',
+            }}>
+              <i className="ti ti-coin" style={{ fontSize: 14, color: '#c5a05a' }} />
+              <span style={{ fontSize: 13, fontWeight: 600, color: '#c5a05a' }}>
+                {wallet.balance.toLocaleString()}
+              </span>
+            </div>
           )}
-          <a href="/" style={{ fontSize:13, color:S.t2 }}>← Back</a>
+          <a href="/dashboard" style={{
+            fontSize: 12,
+            color: 'rgba(236,232,225,0.4)',
+            textDecoration: 'none',
+            letterSpacing: '0.04em',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 5,
+          }}>
+            <i className="ti ti-arrow-left" style={{ fontSize: 13 }} />
+            Back
+          </a>
         </div>
       </header>
 
-      {/* Status banners */}
+      {/* ── STATUS BANNERS ── */}
       {status === 'success' && (
-        <div style={{ background:'rgba(29,201,143,0.12)', border:'0.5px solid rgba(29,201,143,0.3)', padding:'14px 24px', textAlign:'center', fontSize:14, color:'#1dc98f' }}>
-          ✓ Payment successful — your tokens have been credited to your account!
+        <div style={{
+          background: 'rgba(29,201,143,0.08)',
+          border: '0.5px solid rgba(29,201,143,0.25)',
+          padding: '14px 24px',
+          textAlign: 'center',
+          fontSize: 13,
+          color: '#1dc98f',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 8,
+        }}>
+          <i className="ti ti-circle-check" style={{ fontSize: 16 }} />
+          Payment successful — your tokens have been credited to your account!
         </div>
       )}
       {status === 'cancel' && (
-        <div style={{ background:'rgba(224,90,90,0.1)', border:'0.5px solid rgba(224,90,90,0.3)', padding:'14px 24px', textAlign:'center', fontSize:14, color:'#e05a5a' }}>
+        <div style={{
+          background: 'rgba(224,90,90,0.08)',
+          border: '0.5px solid rgba(224,90,90,0.25)',
+          padding: '14px 24px',
+          textAlign: 'center',
+          fontSize: 13,
+          color: '#e05a5a',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 8,
+        }}>
+          <i className="ti ti-x" style={{ fontSize: 16 }} />
           Payment cancelled — no charges were made.
         </div>
       )}
 
-      <main className="tok-main" style={{ maxWidth:1080, margin:'0 auto', padding:'4rem 24px 6rem' }}>
+      <main className="tok-main" style={{ maxWidth: 1100, margin: '0 auto', padding: '4rem 24px 6rem', animation: 'fadeUp 0.4s ease' }}>
 
-        {/* Hero */}
-        <div style={{ textAlign:'center', marginBottom:'4rem' }}>
-          <p style={{ fontSize:11, letterSpacing:'0.16em', color:S.gold, textTransform:'uppercase', marginBottom:'1rem' }}>◈ Token Credits</p>
-          <h1 style={{ fontFamily:S.serif, fontSize:'clamp(36px,5vw,58px)', fontWeight:400, lineHeight:1.1, marginBottom:'1rem' }}>
-            Power your <em style={{ color:S.gold, fontStyle:'italic' }}>listings</em>
-          </h1>
-          <p style={{ fontSize:15, color:S.t2, maxWidth:520, margin:'0 auto', lineHeight:1.7 }}>
-            Purchase token credits to publish, feature, and boost your listings. Tokens never expire — use them whenever you're ready.
+        {/* ── HERO ── */}
+        <div style={{ marginBottom: '4rem' }}>
+          <p style={{
+            fontSize: 11,
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+            color: 'rgba(197,160,90,0.65)',
+            fontWeight: 500,
+            marginBottom: '0.75rem',
+            fontFamily: "'DM Sans', sans-serif",
+          }}>
+            Wallet · {role}
           </p>
-        </div>
 
-        {/* Wallet card (logged-in) */}
-        {wallet && (
-          <div style={{ background:'linear-gradient(135deg,#1a1408 0%,#0e0c08 100%)', border:`0.5px solid #c5a05a33`, borderRadius:16, padding:'1.5rem 2rem', marginBottom:'3rem', display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:16 }}>
-            <div>
-              <p style={{ fontSize:11, letterSpacing:'0.1em', color:S.gold, textTransform:'uppercase', marginBottom:'0.4rem' }}>Your balance</p>
-              <p style={{ fontFamily:S.serif, fontSize:42, fontWeight:400, color:S.t, lineHeight:1 }}>
-                {wallet.balance.toLocaleString()} <span style={{ fontSize:18, color:S.gold }}>tokens</span>
-              </p>
-            </div>
-            <div style={{ display:'flex', gap:32, flexWrap:'wrap' }}>
-              <div style={{ textAlign:'center' }}>
-                <p style={{ fontSize:11, color:S.t3, letterSpacing:'0.08em', textTransform:'uppercase' }}>Purchased</p>
-                <p style={{ fontSize:20, fontWeight:600, color:S.t }}>{wallet.total_purchased.toLocaleString()}</p>
-              </div>
-              <div style={{ textAlign:'center' }}>
-                <p style={{ fontSize:11, color:S.t3, letterSpacing:'0.08em', textTransform:'uppercase' }}>Spent</p>
-                <p style={{ fontSize:20, fontWeight:600, color:S.t }}>{wallet.total_spent.toLocaleString()}</p>
-              </div>
-              <div style={{ textAlign:'center' }}>
-                <p style={{ fontSize:11, color:S.t3, letterSpacing:'0.08em', textTransform:'uppercase' }}>Value left</p>
-                <p style={{ fontSize:20, fontWeight:600, color:S.gold }}>
-                  ≈ €{(wallet.balance * (75 / 850)).toFixed(2)}
-                </p>
-              </div>
-            </div>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: '0.5rem', flexWrap: 'wrap' }}>
+            <span
+              className="tok-hero-balance"
+              style={{
+                fontFamily: "'Cormorant Garamond', serif",
+                fontSize: 'clamp(52px, 8vw, 72px)',
+                fontWeight: 400,
+                color: '#c5a05a',
+                lineHeight: 1,
+                letterSpacing: '-0.01em',
+              }}
+            >
+              {wallet ? wallet.balance.toLocaleString() : '—'}
+            </span>
+            <span style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: 'clamp(20px, 3vw, 28px)',
+              fontWeight: 300,
+              color: 'rgba(197,160,90,0.55)',
+              fontStyle: 'italic',
+            }}>
+              tokens
+            </span>
           </div>
-        )}
 
-        {/* Transaction history */}
-        {ledger.length > 0 && (
-          <div style={{ marginBottom:'3rem' }}>
-            <h2 style={{ fontFamily:S.serif, fontSize:22, fontWeight:400, marginBottom:'1rem' }}>
-              Transaction <em style={{ color:S.gold, fontStyle:'italic' }}>history</em>
-            </h2>
-            <div style={{ background:'#0a0908', border:'0.5px solid #ffffff0f', borderRadius:12, overflow:'hidden' }}>
-              {ledger.map((entry, i) => (
-                <div key={entry.id} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 18px', borderBottom: i < ledger.length - 1 ? '0.5px solid #ffffff08' : 'none', gap:12 }}>
-                  <div style={{ display:'flex', alignItems:'center', gap:12, flex:1, minWidth:0 }}>
-                    <div style={{ width:32, height:32, borderRadius:8, background: entry.type === 'purchase' ? 'rgba(62,207,142,0.1)' : entry.type === 'spend' ? 'rgba(197,160,90,0.1)' : 'rgba(130,100,220,0.1)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontSize:14 }}>
-                      {entry.type === 'purchase' ? '↓' : entry.type === 'spend' ? '◈' : '↑'}
-                    </div>
-                    <div style={{ minWidth:0 }}>
-                      <div style={{ fontSize:13, color:S.t, fontWeight:500, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{entry.description}</div>
-                      <div style={{ fontSize:11, color:S.t3 }}>{new Date(entry.created_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })}</div>
-                    </div>
-                  </div>
-                  <div style={{ textAlign:'right', flexShrink:0 }}>
-                    <div style={{ fontSize:14, fontWeight:700, color: entry.type === 'purchase' ? '#3ecf8e' : entry.amount < 0 ? '#e2536b' : S.gold }}>
-                      {entry.amount > 0 ? '+' : ''}{entry.amount} ◈
-                    </div>
-                    <div style={{ fontSize:11, color:S.t3 }}>bal: {entry.balance_after}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+          <p style={{
+            fontSize: 14,
+            color: 'rgba(236,232,225,0.4)',
+            marginBottom: '2rem',
+            fontWeight: 300,
+          }}>
+            ≈ €{wallet ? (wallet.balance * 0.08).toFixed(2) : '0.00'} available
+          </p>
 
-        {/* Token packages */}
-        <h2 style={{ fontFamily:S.serif, fontSize:28, fontWeight:400, marginBottom:'1.5rem' }}>
-          Buy tokens <span style={{ color:S.gold }}>—</span> get more, save more
-        </h2>
-        <div className="pkg-grid" style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(240px,1fr))', gap:16, marginBottom:'4rem' }}>
-          {packages.map(pkg => {
-            const total = pkg.tokens + pkg.bonus_tokens
-            const ppt   = (pkg.price_eur / total).toFixed(3) // price per token
-            const isPop = pkg.popular
-            return (
-              <div key={pkg.id} className="pkg-card" style={{
-                position:'relative',
-                background: isPop ? 'linear-gradient(135deg,#1a1408 0%,#120e04 100%)' : '#0a0908',
-                border:`0.5px solid ${isPop ? '#c5a05a55' : '#ffffff14'}`,
-                borderRadius:16, padding:'1.75rem 1.5rem',
-                boxShadow: isPop ? '0 8px 32px rgba(197,160,90,0.1)' : 'none',
-              }}>
-                {isPop && (
-                  <div style={{ position:'absolute', top:-12, left:'50%', transform:'translateX(-50%)', background:'linear-gradient(90deg,#c5a05a,#e8c97e)', borderRadius:20, padding:'4px 14px', fontSize:10, fontWeight:700, color:'#080808', letterSpacing:'0.08em', whiteSpace:'nowrap' }}>
-                    MOST POPULAR
-                  </div>
-                )}
-                <p style={{ fontSize:13, fontWeight:600, color:S.t, letterSpacing:'0.04em', marginBottom:'0.5rem' }}>{pkg.name}</p>
-                <p style={{ fontFamily:S.serif, fontSize:42, fontWeight:400, color:S.gold, lineHeight:1, marginBottom:'0.25rem' }}>
-                  {pkg.tokens.toLocaleString()}
-                  {pkg.bonus_tokens > 0 && <span style={{ fontSize:16, color:'#1dc98f', marginLeft:6 }}>+{pkg.bonus_tokens}</span>}
-                </p>
-                <p style={{ fontSize:12, color:S.t3, marginBottom:'1.25rem' }}>tokens · €{ppt}/token</p>
-                <p style={{ fontFamily:S.serif, fontSize:26, fontWeight:400, color:S.t, marginBottom:'1.5rem' }}>€{pkg.price_eur.toFixed(2)}</p>
-                <button className="buy-btn" onClick={() => handlePurchase(pkg)}
-                  disabled={loading && selected === pkg.id}
-                  style={{
-                    width:'100%', padding:'12px 0',
-                    background: isPop ? 'linear-gradient(90deg,#c5a05a,#d4b06e)' : 'transparent',
-                    border:`0.5px solid ${isPop ? 'transparent' : '#c5a05a55'}`,
-                    borderRadius:8, color: isPop ? '#080808' : S.gold,
-                    fontFamily:S.sans, fontWeight:600, fontSize:13, cursor:'pointer',
-                    letterSpacing:'0.04em',
+          {/* Stats row */}
+          <div
+            className="tok-stats-row"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: 12,
+              maxWidth: 680,
+            }}
+          >
+            {[
+              {
+                label: 'Spent this month',
+                value: spentThisMonth.toLocaleString(),
+                icon: 'ti-trending-down',
+                color: 'rgba(224,90,90,0.7)',
+              },
+              {
+                label: 'Total purchased',
+                value: wallet ? wallet.total_purchased.toLocaleString() : '—',
+                icon: 'ti-shopping-cart',
+                color: '#c5a05a',
+              },
+              {
+                label: 'Tips given',
+                value: tipsGiven.toLocaleString(),
+                icon: 'ti-heart',
+                color: 'rgba(197,160,90,0.6)',
+              },
+              {
+                label: 'Balance',
+                value: wallet ? wallet.balance.toLocaleString() : '—',
+                icon: 'ti-coin',
+                color: '#c5a05a',
+              },
+            ].map(stat => (
+              <div
+                key={stat.label}
+                style={{
+                  background: 'rgba(255,255,255,0.025)',
+                  border: '0.5px solid rgba(255,255,255,0.07)',
+                  borderRadius: 12,
+                  padding: '1rem 1.1rem',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                  <i className={`ti ${stat.icon}`} style={{ fontSize: 13, color: stat.color }} />
+                  <span style={{
+                    fontSize: 10,
+                    fontWeight: 500,
+                    letterSpacing: '0.1em',
+                    textTransform: 'uppercase',
+                    color: 'rgba(236,232,225,0.35)',
                   }}>
-                  {loading && selected === pkg.id ? 'Redirecting…' : `Buy ${total.toLocaleString()} tokens`}
-                </button>
+                    {stat.label}
+                  </span>
+                </div>
+                <div style={{
+                  fontFamily: "'Cormorant Garamond', serif",
+                  fontSize: 24,
+                  fontWeight: 400,
+                  color: '#ece8e1',
+                  lineHeight: 1,
+                }}>
+                  {stat.value}
+                </div>
               </div>
-            )
-          })}
-        </div>
-
-        {/* How tokens are used */}
-        <h2 style={{ fontFamily:S.serif, fontSize:28, fontWeight:400, marginBottom:'0.5rem' }}>
-          Listing <em style={{ color:S.gold, fontStyle:'italic' }}>tiers</em>
-        </h2>
-        <p style={{ fontSize:14, color:S.t2, marginBottom:'2rem' }}>Choose the right visibility for your listing. Tiers stack — extend any time by spending more tokens.</p>
-        <div className="tier-grid" style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(220px,1fr))', gap:12, marginBottom:'3rem' }}>
-          {TIER_COSTS.map(t => (
-            <div key={t.tier} style={{ background:'#0a0908', border:'0.5px solid #ffffff14', borderRadius:12, padding:'1.25rem' }}>
-              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'0.6rem' }}>
-                <span style={{ fontSize:13, fontWeight:600, color:S.t }}>{t.label}</span>
-                <span style={{ fontSize:12, fontWeight:700, color:S.gold, background:'rgba(197,160,90,0.12)', borderRadius:6, padding:'2px 8px' }}>
-                  {t.tokens === 0 ? 'Free' : `${t.tokens} ◈`}
-                </span>
-              </div>
-              <p style={{ fontSize:12, color:S.t2, lineHeight:1.6, marginBottom:'0.6rem' }}>{t.desc}</p>
-              <p style={{ fontSize:11, color:S.t3 }}>Duration: {t.days === 1 ? '24 hours' : `${t.days} days`}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Add-ons */}
-        <h2 style={{ fontFamily:S.serif, fontSize:28, fontWeight:400, marginBottom:'1.25rem' }}>
-          Add‑ons
-        </h2>
-        <div style={{ display:'flex', flexWrap:'wrap', gap:10, marginBottom:'4rem' }}>
-          {ADD_ONS.map(a => (
-            <div key={a.label} style={{ background:'#0a0908', border:'0.5px solid #ffffff14', borderRadius:10, padding:'0.75rem 1.25rem', display:'flex', alignItems:'center', gap:12 }}>
-              <span style={{ fontSize:13, color:S.t }}>{a.label}</span>
-              <span style={{ fontSize:12, fontWeight:700, color:S.gold }}>{a.tokens} ◈</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Payment methods + compliance */}
-        <div style={{ borderTop:`0.5px solid #ffffff0a`, paddingTop:'2rem' }}>
-          <p style={{ fontSize:11, letterSpacing:'0.1em', color:S.t3, textTransform:'uppercase', marginBottom:'1rem' }}>Accepted payment methods</p>
-          <div style={{ display:'flex', flexWrap:'wrap', gap:10, marginBottom:'1.5rem' }}>
-            {['Visa', 'Mastercard', 'Cryptocurrency', 'Bank Transfer'].map(m => (
-              <span key={m} style={{ fontSize:12, color:S.t2, background:'#0f0f0f', border:'0.5px solid #ffffff14', borderRadius:8, padding:'6px 14px' }}>{m}</span>
             ))}
           </div>
-          <p style={{ fontSize:12, color:S.t3, lineHeight:1.8, maxWidth:640 }}>
-            Payments are processed securely via CCBill, an adult-friendly payment processor. All transactions are encrypted. Tokens are non-refundable except as required by applicable Belgian consumer law (14-day withdrawal right). Token purchases appear discreetly on your statement. By purchasing you agree to our <a href="/terms">Terms of Use</a>.
+        </div>
+
+        {/* ── BUY TOKENS SECTION ── */}
+        <div style={{ marginBottom: '4rem' }}>
+          <p style={{
+            fontSize: 10,
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+            color: 'rgba(197,160,90,0.55)',
+            fontWeight: 500,
+            marginBottom: '0.4rem',
+          }}>
+            Top up
+          </p>
+          <h2 style={{
+            fontFamily: "'Cormorant Garamond', serif",
+            fontSize: 'clamp(26px, 3.5vw, 36px)',
+            fontWeight: 400,
+            color: '#ece8e1',
+            lineHeight: 1.15,
+            marginBottom: '0.1rem',
+          }}>
+            Buy <em style={{ fontStyle: 'italic', color: '#c5a05a' }}>tokens</em>
+          </h2>
+          <div className="tok-section-rule" />
+          <p style={{
+            fontSize: 12,
+            color: 'rgba(236,232,225,0.35)',
+            fontWeight: 300,
+            letterSpacing: '0.04em',
+            marginBottom: '2rem',
+          }}>
+            Single purchase · no auto-renew
+          </p>
+
+          <div
+            className="tok-pkg-grid"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(5, 1fr)',
+              gap: 14,
+            }}
+          >
+            {displayPackages.map(pkg => {
+              const isFeatured = pkg.popular
+              const rate = (pkg as any).rate || `€${(pkg.price_eur / (pkg.tokens + pkg.bonus_tokens)).toFixed(3)}/token`
+              const perks: string[] = (pkg as any).perks || []
+              const total = pkg.tokens + pkg.bonus_tokens
+
+              return (
+                <div
+                  key={pkg.id}
+                  className={`tok-pkg-card${isFeatured ? ' featured' : ''}`}
+                >
+                  {/* Most popular banner */}
+                  {isFeatured && (
+                    <div style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      background: 'linear-gradient(90deg, #c5a05a 0%, #d4b46e 100%)',
+                      borderRadius: '15px 15px 0 0',
+                      padding: '6px 0',
+                      textAlign: 'center',
+                      fontSize: 9,
+                      fontWeight: 700,
+                      color: '#080808',
+                      letterSpacing: '0.12em',
+                      textTransform: 'uppercase',
+                    }}>
+                      Most Popular
+                    </div>
+                  )}
+
+                  <div style={{ paddingTop: isFeatured ? '1.75rem' : 0 }}>
+                    {/* Package name */}
+                    <p style={{
+                      fontSize: 10,
+                      fontWeight: 600,
+                      letterSpacing: '0.14em',
+                      textTransform: 'uppercase',
+                      color: isFeatured ? '#c5a05a' : 'rgba(236,232,225,0.5)',
+                      marginBottom: '0.6rem',
+                    }}>
+                      {pkg.name}
+                    </p>
+
+                    {/* Amount */}
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: '0.2rem' }}>
+                      <span style={{
+                        fontFamily: "'Cormorant Garamond', serif",
+                        fontSize: 38,
+                        fontWeight: 400,
+                        color: isFeatured ? '#c5a05a' : '#ece8e1',
+                        lineHeight: 1,
+                      }}>
+                        {total.toLocaleString()}
+                      </span>
+                    </div>
+                    <p style={{
+                      fontSize: 11,
+                      color: 'rgba(236,232,225,0.35)',
+                      marginBottom: '0.75rem',
+                      fontWeight: 300,
+                    }}>
+                      tokens
+                    </p>
+
+                    {/* Price */}
+                    <p style={{
+                      fontFamily: "'Cormorant Garamond', serif",
+                      fontSize: 26,
+                      fontWeight: 400,
+                      color: '#ece8e1',
+                      marginBottom: '0.2rem',
+                    }}>
+                      €{pkg.price_eur.toFixed(0)}
+                    </p>
+
+                    {/* Rate */}
+                    <p style={{
+                      fontSize: 10,
+                      color: 'rgba(197,160,90,0.6)',
+                      fontWeight: 400,
+                      marginBottom: perks.length ? '1rem' : '1.25rem',
+                      letterSpacing: '0.02em',
+                    }}>
+                      {rate}
+                    </p>
+
+                    {/* Perks */}
+                    {perks.length > 0 && (
+                      <ul style={{
+                        listStyle: 'none',
+                        padding: 0,
+                        margin: '0 0 1.25rem',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 6,
+                      }}>
+                        {perks.map(perk => (
+                          <li key={perk} style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 7,
+                            fontSize: 11,
+                            color: 'rgba(236,232,225,0.55)',
+                            fontWeight: 300,
+                          }}>
+                            <i
+                              className={`ti ${getPerkIcon(perk)}`}
+                              style={{ fontSize: 12, color: isFeatured ? '#c5a05a' : 'rgba(197,160,90,0.5)', flexShrink: 0 }}
+                            />
+                            {perk}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    {/* CTA */}
+                    <button
+                      className={`tok-cta-btn ${isFeatured ? 'primary' : 'secondary'}`}
+                      onClick={() => handlePurchase(pkg as any)}
+                      disabled={loading && selected === pkg.id}
+                    >
+                      {loading && selected === pkg.id ? 'Redirecting…' : 'Buy now'}
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* ── TRANSACTIONS SECTION ── */}
+        <div style={{ marginBottom: '4rem' }}>
+          <p style={{
+            fontSize: 10,
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+            color: 'rgba(197,160,90,0.55)',
+            fontWeight: 500,
+            marginBottom: '0.4rem',
+          }}>
+            Activity
+          </p>
+          <h2 style={{
+            fontFamily: "'Cormorant Garamond', serif",
+            fontSize: 'clamp(26px, 3.5vw, 36px)',
+            fontWeight: 400,
+            color: '#ece8e1',
+            lineHeight: 1.15,
+            marginBottom: '0.1rem',
+          }}>
+            Recent <em style={{ fontStyle: 'italic', color: '#c5a05a' }}>transactions</em>
+          </h2>
+          <div className="tok-section-rule" />
+          <p style={{
+            fontSize: 12,
+            color: 'rgba(236,232,225,0.35)',
+            fontWeight: 300,
+            letterSpacing: '0.04em',
+            marginBottom: '1.5rem',
+          }}>
+            Last 15 entries
+          </p>
+
+          <div style={{
+            background: 'rgba(255,255,255,0.02)',
+            border: '0.5px solid rgba(255,255,255,0.06)',
+            borderRadius: 14,
+            overflow: 'hidden',
+          }}>
+            {/* Header */}
+            <div className="tok-table-row" style={{ background: 'rgba(0,0,0,0.2)', borderBottom: '0.5px solid rgba(255,255,255,0.07)' }}>
+              <span className="tok-table-head">Date</span>
+              <span className="tok-table-head">Description</span>
+              <span className="tok-table-head">Type</span>
+              <span className="tok-table-head" style={{ textAlign: 'right' }}>Amount</span>
+              <span className="tok-table-head tok-table-col-balance" style={{ textAlign: 'right' }}>Balance</span>
+            </div>
+
+            {ledger.length === 0 ? (
+              <div style={{
+                padding: '3rem',
+                textAlign: 'center',
+                color: 'rgba(236,232,225,0.3)',
+                fontSize: 13,
+                fontWeight: 300,
+              }}>
+                {!session
+                  ? 'Sign in to view your transaction history'
+                  : 'No transactions yet — purchase tokens to get started'}
+              </div>
+            ) : (
+              ledger.map(entry => {
+                const isCredit = entry.type === 'purchase' || entry.type === 'refund'
+                const typeIcon = entry.type === 'purchase'
+                  ? 'ti-coin'
+                  : entry.type === 'refund'
+                  ? 'ti-arrow-up-right'
+                  : 'ti-arrow-down-right'
+                const typeColor = entry.type === 'purchase'
+                  ? '#c5a05a'
+                  : entry.type === 'refund'
+                  ? '#1dc98f'
+                  : 'rgba(236,232,225,0.35)'
+                const typeLabel = entry.type.charAt(0).toUpperCase() + entry.type.slice(1)
+
+                return (
+                  <div key={entry.id} className="tok-table-row">
+                    <span style={{ fontSize: 12, color: 'rgba(236,232,225,0.45)', fontWeight: 300 }}>
+                      {fmtDate(entry.created_at)}
+                    </span>
+                    <span style={{
+                      fontSize: 13,
+                      color: '#ece8e1',
+                      fontWeight: 400,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}>
+                      {entry.description}
+                    </span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                      <i className={`ti ${typeIcon}`} style={{ fontSize: 13, color: typeColor }} />
+                      <span style={{ fontSize: 11, color: typeColor, fontWeight: 500, letterSpacing: '0.04em' }}>
+                        {typeLabel}
+                      </span>
+                    </span>
+                    <span style={{
+                      textAlign: 'right',
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: isCredit ? '#1dc98f' : '#e2536b',
+                    }}>
+                      {isCredit ? '+' : '−'}{Math.abs(entry.amount).toLocaleString()}
+                    </span>
+                    <span className="tok-table-col-balance" style={{
+                      textAlign: 'right',
+                      fontSize: 12,
+                      color: 'rgba(236,232,225,0.4)',
+                      fontWeight: 300,
+                    }}>
+                      {entry.balance_after.toLocaleString()}
+                    </span>
+                  </div>
+                )
+              })
+            )}
+          </div>
+        </div>
+
+        {/* ── LISTING TIERS ── */}
+        <div style={{ marginBottom: '3.5rem' }}>
+          <p style={{
+            fontSize: 10,
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+            color: 'rgba(197,160,90,0.55)',
+            fontWeight: 500,
+            marginBottom: '0.4rem',
+          }}>
+            Usage
+          </p>
+          <h2 style={{
+            fontFamily: "'Cormorant Garamond', serif",
+            fontSize: 'clamp(26px, 3.5vw, 36px)',
+            fontWeight: 400,
+            color: '#ece8e1',
+            lineHeight: 1.15,
+            marginBottom: '0.1rem',
+          }}>
+            Listing <em style={{ fontStyle: 'italic', color: '#c5a05a' }}>tiers</em>
+          </h2>
+          <div className="tok-section-rule" />
+          <p style={{
+            fontSize: 12,
+            color: 'rgba(236,232,225,0.35)',
+            fontWeight: 300,
+            marginBottom: '1.5rem',
+          }}>
+            Tiers stack — extend any time by spending more tokens
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
+            {TIER_COSTS.map(t => (
+              <div key={t.tier} style={{
+                background: 'rgba(255,255,255,0.025)',
+                border: '0.5px solid rgba(255,255,255,0.07)',
+                borderRadius: 12,
+                padding: '1.25rem',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: '#ece8e1' }}>{t.label}</span>
+                  <span style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: '#c5a05a',
+                    background: 'rgba(197,160,90,0.1)',
+                    borderRadius: 6,
+                    padding: '2px 8px',
+                  }}>
+                    {t.tokens === 0 ? 'Free' : `${t.tokens} ◈`}
+                  </span>
+                </div>
+                <p style={{ fontSize: 12, color: 'rgba(236,232,225,0.45)', lineHeight: 1.6, marginBottom: '0.5rem', fontWeight: 300 }}>{t.desc}</p>
+                <p style={{ fontSize: 11, color: 'rgba(236,232,225,0.25)' }}>
+                  Duration: {t.days === 1 ? '24 hours' : `${t.days} days`}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── ADD-ONS ── */}
+        <div style={{ marginBottom: '3.5rem' }}>
+          <h2 style={{
+            fontFamily: "'Cormorant Garamond', serif",
+            fontSize: 'clamp(22px, 3vw, 30px)',
+            fontWeight: 400,
+            color: '#ece8e1',
+            marginBottom: '1.25rem',
+          }}>
+            Add‑ons
+          </h2>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+            {ADD_ONS.map(a => (
+              <div key={a.label} style={{
+                background: 'rgba(255,255,255,0.025)',
+                border: '0.5px solid rgba(255,255,255,0.07)',
+                borderRadius: 10,
+                padding: '0.75rem 1.25rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+              }}>
+                <span style={{ fontSize: 13, color: '#ece8e1' }}>{a.label}</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: '#c5a05a' }}>{a.tokens} ◈</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── PAYMENT COMPLIANCE ── */}
+        <div style={{ borderTop: '0.5px solid rgba(255,255,255,0.05)', paddingTop: '2rem' }}>
+          <p style={{ fontSize: 10, letterSpacing: '0.12em', color: 'rgba(236,232,225,0.25)', textTransform: 'uppercase', marginBottom: '1rem', fontWeight: 500 }}>
+            Accepted payment methods
+          </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: '1.5rem' }}>
+            {['Visa', 'Mastercard', 'Cryptocurrency', 'Bank Transfer'].map(m => (
+              <span key={m} style={{
+                fontSize: 11,
+                color: 'rgba(236,232,225,0.4)',
+                background: 'rgba(255,255,255,0.03)',
+                border: '0.5px solid rgba(255,255,255,0.08)',
+                borderRadius: 8,
+                padding: '5px 12px',
+              }}>
+                {m}
+              </span>
+            ))}
+          </div>
+          <p style={{ fontSize: 12, color: 'rgba(236,232,225,0.28)', lineHeight: 1.8, maxWidth: 640, fontWeight: 300 }}>
+            Payments are processed securely via CCBill, an adult-friendly payment processor. All transactions are encrypted. Tokens are non-refundable except as required by applicable Belgian consumer law (14-day withdrawal right). Token purchases appear discreetly on your statement. By purchasing you agree to our{' '}
+            <a href="/terms" style={{ color: 'rgba(197,160,90,0.6)', textDecoration: 'none' }}>Terms of Use</a>.
           </p>
         </div>
       </main>
 
-      <footer style={{ borderTop:`0.5px solid #c5a05a22`, padding:'2rem 24px', textAlign:'center' }}>
-        <p style={{ fontSize:12, color:S.t2 }}>© 2025 SecretXperience.eu · <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a> · <a href="/contact">Support</a></p>
+      <footer style={{ borderTop: '0.5px solid rgba(197,160,90,0.1)', padding: '2rem 24px', textAlign: 'center' }}>
+        <p style={{ fontSize: 11, color: 'rgba(236,232,225,0.25)', fontWeight: 300 }}>
+          © 2025 SecretXperience.eu ·{' '}
+          <a href="/terms" style={{ color: 'rgba(197,160,90,0.5)', textDecoration: 'none' }}>Terms</a>
+          {' '}·{' '}
+          <a href="/privacy" style={{ color: 'rgba(197,160,90,0.5)', textDecoration: 'none' }}>Privacy</a>
+          {' '}·{' '}
+          <a href="/contact" style={{ color: 'rgba(197,160,90,0.5)', textDecoration: 'none' }}>Support</a>
+        </p>
       </footer>
     </div>
   )

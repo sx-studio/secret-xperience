@@ -7,10 +7,10 @@ import { createClient } from '../lib/supabase'
 type Role = 'user' | 'provider' | 'venue' | 'creator'
 
 const ROLES: { value: Role; label: string; description: string; icon: string }[] = [
-  { value: 'user',     label: 'User / Client',     description: 'Discover & book experiences', icon: '◈' },
-  { value: 'provider', label: 'Service Provider',   description: 'Offer premium services',      icon: '◆' },
-  { value: 'venue',    label: 'Venue',              description: 'List your space',              icon: '◇' },
-  { value: 'creator',  label: 'Creator',            description: 'Share exclusive content',      icon: '✦' },
+  { value: 'user',     label: 'Member',   description: 'Discover & book experiences', icon: 'ti-user' },
+  { value: 'provider', label: 'Provider', description: 'Offer premium services',      icon: 'ti-sparkles' },
+  { value: 'venue',    label: 'Venue',    description: 'List your space',              icon: 'ti-building' },
+  { value: 'creator',  label: 'Creator',  description: 'Share exclusive content',      icon: 'ti-camera' },
 ]
 
 export default function LoginPage() {
@@ -24,6 +24,7 @@ export default function LoginPage() {
   const [showPass, setShowPass] = useState(false)
   const [shake, setShake]       = useState(false)
   const [success, setSuccess]   = useState(false)
+  const [termsChecked, setTermsChecked] = useState(false)
 
   useEffect(() => {
     if (error) {
@@ -85,7 +86,7 @@ export default function LoginPage() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Jost:wght@300;400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=DM+Sans:wght@300;400;500;600&display=swap');
         @import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css');
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -105,56 +106,100 @@ export default function LoginPage() {
           to   { opacity: 1; transform: translateY(0); }
         }
 
-        @keyframes scaleIn {
-          from { opacity: 0; transform: scale(0.94) translateY(8px); }
-          to   { opacity: 1; transform: scale(1) translateY(0); }
-        }
-
         @keyframes checkDraw {
           from { stroke-dashoffset: 30; }
           to   { stroke-dashoffset: 0; }
         }
 
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) scale(1); opacity: 0.5; }
+          50%       { transform: translateY(-18px) scale(1.1); opacity: 0.9; }
+        }
+
         .lx-page {
-          background: var(--grad-velvet, linear-gradient(160deg,#0b0b0b 0%,#060606 55%,#0e0b02 100%));
           min-height: 100vh;
+          display: flex;
+          font-family: 'DM Sans', sans-serif;
+          background: #08060e;
+        }
+
+        /* ── Left panel ── */
+        .lx-left {
+          width: 50%;
+          min-height: 100vh;
+          position: relative;
+          background: #080610;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-end;
+          padding: 4rem 3.5rem;
+        }
+
+        .lx-left-orb1 {
+          position: absolute;
+          top: -80px;
+          left: -80px;
+          width: 500px;
+          height: 500px;
+          background: radial-gradient(circle, rgba(197,160,90,0.13) 0%, transparent 65%);
+          pointer-events: none;
+        }
+
+        .lx-left-orb2 {
+          position: absolute;
+          bottom: 60px;
+          right: -120px;
+          width: 420px;
+          height: 420px;
+          background: radial-gradient(circle, rgba(197,160,90,0.08) 0%, transparent 65%);
+          pointer-events: none;
+        }
+
+        .lx-particles {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+        }
+
+        .lx-particle {
+          position: absolute;
+          width: 3px;
+          height: 3px;
+          border-radius: 50%;
+          background: rgba(197,160,90,0.6);
+        }
+
+        @media (max-width: 1023px) {
+          .lx-particles { display: none; }
+        }
+
+        /* ── Right panel ── */
+        .lx-right {
+          width: 50%;
+          min-height: 100vh;
+          background: #08060e;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-family: var(--sans, 'Jost', sans-serif);
+          padding: 3rem 2.5rem;
+          border-left: 0.5px solid rgba(197,160,90,0.1);
         }
 
-        .lx-card {
-          max-width: 420px;
+        .lx-form-inner {
           width: 100%;
-          padding: 2.5rem 2rem;
-          background: var(--bg1, #111111);
-          border: 0.5px solid var(--b3, rgba(255,255,255,0.09));
-          border-radius: var(--rxl, 20px);
-          box-shadow: var(--shadow-modal, 0 24px 80px rgba(0,0,0,0.6));
-          position: relative;
-          overflow: hidden;
-          animation: scaleIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .lx-glow-top {
-          position: absolute;
-          top: -60px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 200px;
-          height: 200px;
-          background: radial-gradient(circle, rgba(197,160,90,0.15) 0%, transparent 70%);
-          pointer-events: none;
+          max-width: 420px;
+          animation: fadeUp 0.4s ease;
         }
 
         /* ── Tabs ── */
         .lx-tabs-row {
-          background: var(--bg2, rgba(0,0,0,0.5));
-          border-radius: var(--r, 8px);
+          background: rgba(0,0,0,0.4);
+          border-radius: 10px;
           padding: 4px;
           display: flex;
-          margin-bottom: 1.5rem;
+          margin-bottom: 2rem;
+          border: 0.5px solid rgba(255,255,255,0.06);
         }
 
         .lx-tab {
@@ -162,92 +207,89 @@ export default function LoginPage() {
           height: 40px;
           border: none;
           background: transparent;
-          color: var(--t2, rgba(255,255,255,0.5));
-          font: 600 12px/1 var(--sans, 'Jost', sans-serif);
+          color: rgba(236,232,225,0.4);
+          font: 500 12px/1 'DM Sans', sans-serif;
           letter-spacing: 0.08em;
-          text-transform: uppercase;
-          border-radius: 6px;
+          border-radius: 7px;
           cursor: pointer;
           transition: color 0.2s, background 0.2s;
         }
 
         .lx-tab.active {
-          background: var(--bg3, rgba(255,255,255,0.06));
-          color: var(--gold, #c5a05a);
-          border-bottom: 2px solid var(--gold, #c5a05a);
+          background: rgba(197,160,90,0.1);
+          color: #c5a05a;
+          border: 0.5px solid rgba(197,160,90,0.3);
         }
 
-        /* ── Social buttons ── */
+        /* ── Social button ── */
         .lx-social-btn {
           width: 100%;
-          height: 44px;
-          background: var(--bg2, rgba(255,255,255,0.03));
-          border: 0.5px solid var(--b2, rgba(255,255,255,0.12));
-          border-radius: var(--r, 8px);
-          color: var(--t, #ece8e1);
-          font: 500 13px/1 var(--sans, 'Jost', sans-serif);
+          height: 46px;
+          background: rgba(255,255,255,0.03);
+          border: 0.5px solid rgba(255,255,255,0.1);
+          border-radius: 10px;
+          color: #ece8e1;
+          font: 500 13.5px/1 'DM Sans', sans-serif;
           display: flex;
           align-items: center;
           justify-content: center;
           gap: 10px;
-          margin-bottom: 0.75rem;
           cursor: pointer;
-          transition: border-color 0.22s, background 0.22s;
+          transition: border-color 0.2s, background 0.2s;
         }
         .lx-social-btn:hover {
-          border-color: var(--b3, rgba(255,255,255,0.22));
-          background: var(--bg3, rgba(255,255,255,0.055));
+          border-color: rgba(255,255,255,0.2);
+          background: rgba(255,255,255,0.055);
         }
-        .lx-social-btn i { font-size: 16px; }
 
-        /* ── OR divider ── */
+        /* ── Divider ── */
         .lx-divider {
           display: flex;
           align-items: center;
           gap: 12px;
-          margin: 1.25rem 0;
+          margin: 1.5rem 0;
         }
         .lx-divider-line {
           flex: 1;
           height: 0.5px;
-          background: var(--b, rgba(255,255,255,0.07));
+          background: rgba(255,255,255,0.07);
         }
         .lx-divider-label {
-          font: 600 9px var(--sans, 'Jost', sans-serif);
-          letter-spacing: 0.12em;
-          color: var(--t3, rgba(255,255,255,0.2));
+          font: 500 10px 'DM Sans', sans-serif;
+          letter-spacing: 0.14em;
+          color: rgba(236,232,225,0.3);
           text-transform: uppercase;
         }
 
-        /* ── Field labels ── */
+        /* ── Label ── */
         .lx-label {
-          font: 600 10px/1 var(--sans, 'Jost', sans-serif);
-          letter-spacing: 0.16em;
+          font: 600 10px/1 'DM Sans', sans-serif;
+          letter-spacing: 0.14em;
           text-transform: uppercase;
-          color: var(--t3, rgba(255,255,255,0.3));
-          margin-bottom: 6px;
+          color: rgba(236,232,225,0.35);
+          margin-bottom: 7px;
           display: block;
         }
 
-        /* ── Inputs ── */
+        /* ── Input ── */
         .lx-input {
-          height: 44px;
+          height: 46px;
           padding: 0 14px;
-          background: var(--bg3, rgba(255,255,255,0.025));
-          color: var(--t, #ece8e1);
-          border: 0.5px solid var(--b2, rgba(255,255,255,0.10));
-          border-radius: var(--r, 8px);
-          font: 400 14px var(--sans, 'Jost', sans-serif);
+          background: rgba(255,255,255,0.03);
+          color: #ece8e1;
+          border: 0.5px solid rgba(255,255,255,0.09);
+          border-radius: 10px;
+          font: 400 14px 'DM Sans', sans-serif;
           width: 100%;
           outline: none;
-          transition: border-color var(--t-fast, 0.15s), box-shadow var(--t-fast, 0.15s);
+          transition: border-color 0.15s, box-shadow 0.15s;
           appearance: none;
           -webkit-appearance: none;
         }
-        .lx-input::placeholder { color: var(--t3, rgba(255,255,255,0.22)); }
+        .lx-input::placeholder { color: rgba(236,232,225,0.22); }
         .lx-input:focus {
-          border-color: var(--gold, rgba(197,160,90,0.5));
-          box-shadow: 0 0 0 3px var(--gbg, rgba(197,160,90,0.08));
+          border-color: rgba(197,160,90,0.5);
+          box-shadow: 0 0 0 3px rgba(197,160,90,0.07);
         }
 
         /* ── Password wrap ── */
@@ -256,318 +298,465 @@ export default function LoginPage() {
 
         .lx-eye-btn {
           position: absolute;
-          right: 0;
+          right: 2px;
           top: 50%;
           transform: translateY(-50%);
-          width: 34px;
-          height: 34px;
+          width: 38px;
+          height: 38px;
           background: none;
           border: none;
           cursor: pointer;
-          color: var(--t3, rgba(255,255,255,0.28));
-          padding: 0;
+          color: rgba(236,232,225,0.28);
           display: flex;
           align-items: center;
           justify-content: center;
           font-size: 16px;
           transition: color 0.2s;
         }
-        .lx-eye-btn:hover { color: var(--gold, rgba(197,160,90,0.7)); }
+        .lx-eye-btn:hover { color: rgba(197,160,90,0.7); }
 
         /* ── Role cards ── */
+        .lx-role-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+        }
+
         .lx-role-card {
-          background: var(--bg2, rgba(255,255,255,0.02));
-          border: 0.5px solid var(--b2, rgba(255,255,255,0.08));
-          border-radius: var(--r, 8px);
-          padding: 14px;
+          background: rgba(255,255,255,0.02);
+          border: 0.5px solid rgba(255,255,255,0.07);
+          border-radius: 10px;
+          padding: 14px 12px;
           cursor: pointer;
-          transition: all var(--t-fast, 0.15s);
+          transition: border-color 0.15s, background 0.15s;
           text-align: left;
           width: 100%;
         }
         .lx-role-card:hover {
-          border-color: var(--gbrd, rgba(197,160,90,0.4));
-          background: var(--gbg, rgba(197,160,90,0.04));
+          border-color: rgba(197,160,90,0.35);
+          background: rgba(197,160,90,0.03);
         }
         .lx-role-card.selected {
-          border-color: var(--gbrd, rgba(197,160,90,0.6));
-          background: var(--gbg, rgba(197,160,90,0.07));
-          color: var(--gold, #c5a05a);
+          border-color: rgba(197,160,90,0.55);
+          background: rgba(197,160,90,0.07);
         }
 
-        /* ── Submit button ── */
+        /* ── Submit ── */
         .lx-submit-btn {
           width: 100%;
           padding: 14px 24px;
-          background: var(--grad-gold, linear-gradient(135deg,#c5a05a 0%,#a0803d 100%));
-          color: var(--t-on-gold, #080808);
+          background: linear-gradient(135deg, #c5a05a 0%, #a0803d 100%);
+          color: #080808;
           border: none;
-          border-radius: var(--r, 8px);
-          font: 600 13px/1 var(--sans, 'Jost', sans-serif);
-          letter-spacing: 0.06em;
+          border-radius: 10px;
+          font: 600 13px/1 'DM Sans', sans-serif;
+          letter-spacing: 0.07em;
           text-transform: uppercase;
-          box-shadow: var(--shadow-gold, 0 4px 24px rgba(197,160,90,0.25));
+          box-shadow: 0 4px 24px rgba(197,160,90,0.22);
           cursor: pointer;
           margin-top: 1.25rem;
-          position: relative;
-          overflow: hidden;
-          transition: transform var(--t-fast, 0.15s), box-shadow var(--t-fast, 0.15s);
-        }
-        .lx-submit-btn::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
-          pointer-events: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          transition: transform 0.15s, box-shadow 0.15s;
         }
         .lx-submit-btn:disabled { opacity: 0.48; cursor: default; }
         .lx-submit-btn:not(:disabled):hover {
           transform: translateY(-2px);
-          box-shadow: var(--shadow-gold-h, 0 8px 32px rgba(197,160,90,0.35));
+          box-shadow: 0 8px 32px rgba(197,160,90,0.32);
         }
         .lx-submit-btn:not(:disabled):active { transform: translateY(0); }
 
         /* ── Error pill ── */
         .lx-error {
-          background: var(--pbg, rgba(212,95,114,0.07));
-          color: var(--pink, #d45f72);
-          border-radius: var(--r, 8px);
+          background: rgba(212,95,114,0.08);
+          color: #d45f72;
+          border: 0.5px solid rgba(212,95,114,0.2);
+          border-radius: 10px;
           padding: 12px 14px;
-          font: 400 13px var(--sans, 'Jost', sans-serif);
-          margin-bottom: 1rem;
+          font: 400 13px 'DM Sans', sans-serif;
+          margin-top: 0.75rem;
           width: 100%;
+        }
+
+        /* ── Mobile ── */
+        @media (max-width: 1023px) {
+          .lx-page { flex-direction: column; }
+          .lx-left {
+            width: 100%;
+            min-height: 200px;
+            padding: 2.5rem 1.75rem 2rem;
+            justify-content: flex-end;
+          }
+          .lx-right {
+            width: 100%;
+            min-height: auto;
+            border-left: none;
+            border-top: 0.5px solid rgba(197,160,90,0.1);
+            padding: 2.5rem 1.5rem 3rem;
+          }
         }
       `}</style>
 
       <div className="lx-page">
-        <div className="lx-card">
 
-          {/* Gold glow at top */}
-          <div className="lx-glow-top" />
+        {/* ── LEFT PANEL ── */}
+        <div className="lx-left">
+          <div className="lx-left-orb1" />
+          <div className="lx-left-orb2" />
 
-          {/* Header */}
-          <div style={{ textAlign: 'center', marginBottom: '1.75rem', position: 'relative', zIndex: 1 }}>
-            <a href="/" style={{ textDecoration: 'none' }}>
-              <div style={{
-                fontFamily: 'var(--serif, "Cormorant Garamond", serif)',
-                fontSize: '22px',
-                fontWeight: 500,
-                color: 'var(--gold, #c5a05a)',
-                letterSpacing: '0.02em',
-              }}>
-                Secret<em style={{ fontStyle: 'italic', fontWeight: 300 }}>Xperience</em>
-              </div>
-            </a>
-            <div style={{
-              font: '600 10px/1 var(--sans, "Jost", sans-serif)',
-              letterSpacing: '0.16em',
-              color: 'var(--t3, rgba(255,255,255,0.3))',
-              textTransform: 'uppercase',
-              marginTop: '0.5rem',
-            }}>
-              Log in to SecretXperience
-            </div>
-          </div>
-
-          {/* Segmented tabs */}
-          <div className="lx-tabs-row">
-            {(['login', 'signup'] as const).map(m => (
-              <button
-                key={m}
-                className={`lx-tab${mode === m ? ' active' : ''}`}
-                onClick={() => switchMode(m)}
-              >
-                {m === 'login' ? 'Log In' : 'Sign Up'}
-              </button>
+          {/* Floating particles */}
+          <div className="lx-particles">
+            {[
+              { top: '18%', left: '12%', delay: '0s',    dur: '6s'  },
+              { top: '32%', left: '78%', delay: '1.2s',  dur: '7s'  },
+              { top: '55%', left: '25%', delay: '2.4s',  dur: '5.5s'},
+              { top: '70%', left: '65%', delay: '0.8s',  dur: '8s'  },
+              { top: '10%', left: '55%', delay: '3s',    dur: '6.5s'},
+              { top: '80%', left: '40%', delay: '1.8s',  dur: '7.5s'},
+              { top: '44%', left: '88%', delay: '0.4s',  dur: '5s'  },
+              { top: '90%', left: '15%', delay: '2s',    dur: '9s'  },
+            ].map((p, i) => (
+              <div
+                key={i}
+                className="lx-particle"
+                style={{
+                  top: p.top,
+                  left: p.left,
+                  animation: `float ${p.dur} ease-in-out ${p.delay} infinite`,
+                }}
+              />
             ))}
           </div>
 
-          {/* ── Success state ── */}
-          {success ? (
-            <div style={{ textAlign: 'center', padding: '2.25rem 0 1.5rem', animation: 'fadeUp 0.45s ease' }}>
-              <div style={{
-                width: '64px',
-                height: '64px',
-                borderRadius: '50%',
-                background: 'radial-gradient(circle, rgba(197,160,90,0.12) 0%, transparent 70%)',
-                border: '0.5px solid rgba(197,160,90,0.35)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 1.5rem',
-                boxShadow: '0 0 30px rgba(197,160,90,0.1)',
+          {/* Content */}
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <p style={{
+              fontSize: 11,
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+              color: 'rgba(197,160,90,0.7)',
+              marginBottom: '1.5rem',
+              fontFamily: "'DM Sans', sans-serif",
+              fontWeight: 500,
+            }}>
+              Private — Members Only
+            </p>
+
+            <h1 style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: 'clamp(32px, 4vw, 52px)',
+              fontWeight: 400,
+              color: '#ece8e1',
+              lineHeight: 1.15,
+              marginBottom: '1.5rem',
+              letterSpacing: '0.01em',
+            }}>
+              An evening that ends<br />
+              behind a <strong style={{ fontWeight: 600 }}>closed door.</strong>
+            </h1>
+
+            <p style={{
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: 14,
+              color: 'rgba(236,232,225,0.48)',
+              lineHeight: 1.75,
+              maxWidth: 400,
+              fontWeight: 300,
+              marginBottom: '2.5rem',
+            }}>
+              Belgium&apos;s discreet marketplace for companions, private rentals,
+              members&apos; nightlife and adult creators — verified, curated, and quietly run.
+            </p>
+
+            <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
+              <span style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: 12,
+                color: 'rgba(197,160,90,0.6)',
+                letterSpacing: '0.08em',
               }}>
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M5 12.5l4.5 4.5L19 7"
-                    stroke="#c5a05a"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeDasharray="30"
-                    style={{ animation: 'checkDraw 0.5s ease 0.15s forwards', strokeDashoffset: 30 }}
-                  />
-                </svg>
-              </div>
-              <p style={{
-                fontFamily: 'var(--serif, "Cormorant Garamond", serif)',
-                fontSize: '24px',
-                fontWeight: 400,
-                color: 'var(--t, #ece8e1)',
-                marginBottom: '0.65rem',
-                letterSpacing: '0.01em',
+                ◈ Brussels · since 2019
+              </span>
+              <span style={{
+                fontSize: 11,
+                color: 'rgba(236,232,225,0.25)',
+                fontFamily: "'DM Sans', sans-serif",
+                letterSpacing: '0.06em',
               }}>
-                Check your email
-              </p>
-              <p style={{
-                color: 'var(--t2, rgba(255,255,255,0.4))',
-                fontSize: '13px',
-                lineHeight: 1.7,
-                fontWeight: 300,
-              }}>
-                We sent a confirmation link to{' '}
-                <span style={{ color: 'var(--t, rgba(255,255,255,0.7))' }}>{email}</span>.
-                <br />Click it to activate your account.
-              </p>
+                18+ · ID verified · GDPR
+              </span>
             </div>
-          ) : (
-            <div style={{ animation: 'fadeUp 0.3s ease' }}>
+          </div>
+        </div>
 
-              {/* Social buttons */}
-              <button className="lx-social-btn" onClick={handleGoogle}>
-                <i className="ti ti-brand-google" />
-                Continue with Google
-              </button>
-              <button className="lx-social-btn" type="button" onClick={() => {}}>
-                <i className="ti ti-brand-apple" />
-                Continue with Apple
-              </button>
+        {/* ── RIGHT PANEL ── */}
+        <div className="lx-right">
+          <div className="lx-form-inner">
 
-              {/* OR divider */}
-              <div className="lx-divider">
-                <div className="lx-divider-line" />
-                <span className="lx-divider-label">or</span>
-                <div className="lx-divider-line" />
-              </div>
+            {/* Brand */}
+            <a href="/" style={{ textDecoration: 'none', display: 'block', marginBottom: '2rem' }}>
+              <span style={{
+                fontFamily: "'Cormorant Garamond', serif",
+                fontSize: 22,
+                fontWeight: 500,
+                color: '#c5a05a',
+                fontStyle: 'italic',
+                letterSpacing: '0.02em',
+              }}>
+                Secret<em style={{ fontWeight: 300 }}>Xperience</em>
+              </span>
+            </a>
 
-              {/* Form */}
-              <form
-                onSubmit={handleSubmit}
-                style={{ animation: shake ? 'shake 0.45s ease' : 'none' }}
+            {/* Tabs */}
+            <div className="lx-tabs-row">
+              <button
+                className={`lx-tab${mode === 'login' ? ' active' : ''}`}
+                onClick={() => switchMode('login')}
               >
-                {mode === 'signup' && (
-                  <>
-                    {/* Full name */}
-                    <div style={{ marginBottom: '12px' }}>
-                      <label className="lx-label">Full Name</label>
-                      <input
-                        className="lx-input"
-                        placeholder="Full name"
-                        value={fullName}
-                        onChange={e => setFullName(e.target.value)}
-                        required
-                        autoComplete="name"
-                      />
-                    </div>
+                Sign in
+              </button>
+              <button
+                className={`lx-tab${mode === 'signup' ? ' active' : ''}`}
+                onClick={() => switchMode('signup')}
+              >
+                Create account
+              </button>
+            </div>
 
-                    {/* Role selector 2×2 */}
-                    <div style={{ marginBottom: '14px' }}>
-                      <label className="lx-label">I am a…</label>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                        {ROLES.map(r => (
-                          <button
-                            key={r.value}
-                            type="button"
-                            className={`lx-role-card${role === r.value ? ' selected' : ''}`}
-                            onClick={() => setRole(r.value)}
-                          >
-                            <div style={{
-                              fontSize: '16px',
-                              color: role === r.value ? 'var(--gold, #c5a05a)' : 'var(--t3, rgba(255,255,255,0.25))',
-                              marginBottom: '6px',
-                              transition: 'color 0.2s',
-                              lineHeight: 1,
-                            }}>
-                              {r.icon}
-                            </div>
-                            <div style={{
-                              fontSize: '12px',
-                              fontWeight: 600,
-                              color: role === r.value ? 'var(--gold, #c5a05a)' : 'var(--t, #ece8e1)',
-                              marginBottom: '3px',
-                              fontFamily: 'var(--sans, "Jost", sans-serif)',
-                              letterSpacing: '0.03em',
-                              transition: 'color 0.2s',
-                            }}>
-                              {r.label}
-                            </div>
-                            <div style={{
-                              fontSize: '10.5px',
-                              color: 'var(--t2, rgba(255,255,255,0.4))',
-                              fontFamily: 'var(--sans, "Jost", sans-serif)',
-                              lineHeight: 1.4,
-                              fontWeight: 300,
-                            }}>
-                              {r.description}
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </>
-                )}
+            {/* Success state */}
+            {success ? (
+              <div style={{ textAlign: 'center', padding: '2rem 0 1rem', animation: 'fadeUp 0.45s ease' }}>
+                <div style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: '50%',
+                  background: 'radial-gradient(circle, rgba(197,160,90,0.12) 0%, transparent 70%)',
+                  border: '0.5px solid rgba(197,160,90,0.35)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 1.5rem',
+                  boxShadow: '0 0 30px rgba(197,160,90,0.1)',
+                }}>
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M5 12.5l4.5 4.5L19 7"
+                      stroke="#c5a05a"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeDasharray="30"
+                      style={{ animation: 'checkDraw 0.5s ease 0.15s forwards', strokeDashoffset: 30 }}
+                    />
+                  </svg>
+                </div>
+                <p style={{
+                  fontFamily: "'Cormorant Garamond', serif",
+                  fontSize: 26,
+                  fontWeight: 400,
+                  color: '#ece8e1',
+                  marginBottom: '0.6rem',
+                }}>
+                  Check your inbox
+                </p>
+                <p style={{
+                  color: 'rgba(236,232,225,0.45)',
+                  fontSize: 13,
+                  lineHeight: 1.7,
+                  fontWeight: 300,
+                }}>
+                  We sent a confirmation link to{' '}
+                  <span style={{ color: 'rgba(236,232,225,0.75)' }}>{email}</span>.
+                  <br />Click it to confirm your email and activate your account.
+                </p>
+              </div>
+            ) : (
+              <div style={{ animation: shake ? 'shake 0.45s ease' : 'none' }}>
 
-                {/* Email */}
-                <div style={{ marginBottom: '12px' }}>
-                  <label className="lx-label">Email</label>
-                  <input
-                    className="lx-input"
-                    type="email"
-                    placeholder="Email address"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    required
-                    autoComplete="email"
-                  />
+                {/* Google button */}
+                <button className="lx-social-btn" type="button" onClick={handleGoogle}>
+                  <svg viewBox="0 0 18 18" width="18" height="18">
+                    <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.12-.84 2.07-1.79 2.7v2.26h2.9c1.7-1.56 2.69-3.87 2.69-6.6z"/>
+                    <path fill="#34A853" d="M9 18c2.43 0 4.46-.8 5.95-2.18l-2.9-2.26c-.8.54-1.83.86-3.05.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z"/>
+                    <path fill="#FBBC05" d="M3.97 10.72A5.4 5.4 0 0 1 3.68 9c0-.6.1-1.18.29-1.72V4.95H.96A9 9 0 0 0 0 9c0 1.45.35 2.83.96 4.05l3.01-2.33z"/>
+                    <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A9 9 0 0 0 9 0a9 9 0 0 0-8.04 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/>
+                  </svg>
+                  Continue with Google
+                </button>
+
+                {/* Divider */}
+                <div className="lx-divider">
+                  <div className="lx-divider-line" />
+                  <span className="lx-divider-label">or with email</span>
+                  <div className="lx-divider-line" />
                 </div>
 
-                {/* Password */}
-                <div style={{ marginBottom: error ? '0' : '4px' }}>
-                  <label className="lx-label">Password</label>
-                  <div className="lx-pass-wrap">
+                {/* Form */}
+                <form onSubmit={handleSubmit}>
+                  {mode === 'signup' && (
+                    <>
+                      {/* Full name */}
+                      <div style={{ marginBottom: 14 }}>
+                        <label className="lx-label">Full Name</label>
+                        <input
+                          className="lx-input"
+                          placeholder="Your full name"
+                          value={fullName}
+                          onChange={e => setFullName(e.target.value)}
+                          required
+                          autoComplete="name"
+                        />
+                      </div>
+
+                      {/* Role selector */}
+                      <div style={{ marginBottom: 16 }}>
+                        <label className="lx-label">I am a…</label>
+                        <div className="lx-role-grid">
+                          {ROLES.map(r => (
+                            <button
+                              key={r.value}
+                              type="button"
+                              className={`lx-role-card${role === r.value ? ' selected' : ''}`}
+                              onClick={() => setRole(r.value)}
+                            >
+                              <i
+                                className={`ti ${r.icon}`}
+                                style={{
+                                  fontSize: 18,
+                                  color: role === r.value ? '#c5a05a' : 'rgba(236,232,225,0.25)',
+                                  display: 'block',
+                                  marginBottom: 7,
+                                  transition: 'color 0.15s',
+                                }}
+                              />
+                              <div style={{
+                                fontSize: 12,
+                                fontWeight: 600,
+                                color: role === r.value ? '#c5a05a' : '#ece8e1',
+                                marginBottom: 3,
+                                letterSpacing: '0.03em',
+                                transition: 'color 0.15s',
+                              }}>
+                                {r.label}
+                              </div>
+                              <div style={{
+                                fontSize: 10.5,
+                                color: 'rgba(236,232,225,0.38)',
+                                lineHeight: 1.4,
+                                fontWeight: 300,
+                              }}>
+                                {r.description}
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Email */}
+                  <div style={{ marginBottom: 14 }}>
+                    <label className="lx-label">Email</label>
                     <input
                       className="lx-input"
-                      type={showPass ? 'text' : 'password'}
-                      placeholder="Password"
-                      value={password}
-                      onChange={e => setPassword(e.target.value)}
+                      type="email"
+                      placeholder="your@email.com"
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
                       required
-                      autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                      autoComplete="email"
                     />
-                    <button
-                      type="button"
-                      className="lx-eye-btn"
-                      onClick={() => setShowPass(v => !v)}
-                      aria-label={showPass ? 'Hide password' : 'Show password'}
-                    >
-                      <i className={showPass ? 'ti ti-eye-off' : 'ti ti-eye'} />
-                    </button>
                   </div>
-                </div>
 
-                {/* Inline error */}
-                {error && (
-                  <div className="lx-error" style={{ marginTop: '0.75rem' }}>
-                    {error}
+                  {/* Password */}
+                  <div style={{ marginBottom: mode === 'signup' ? 14 : 4 }}>
+                    <label className="lx-label">Password</label>
+                    <div className="lx-pass-wrap">
+                      <input
+                        className="lx-input"
+                        type={showPass ? 'text' : 'password'}
+                        placeholder="Password"
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        required
+                        autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                      />
+                      <button
+                        type="button"
+                        className="lx-eye-btn"
+                        onClick={() => setShowPass(v => !v)}
+                        aria-label={showPass ? 'Hide password' : 'Show password'}
+                      >
+                        <i className={`ti ${showPass ? 'ti-eye-off' : 'ti-eye'}`} />
+                      </button>
+                    </div>
                   </div>
-                )}
 
-                <button className="lx-submit-btn" type="submit" disabled={loading}>
-                  {loading ? 'Please wait…' : mode === 'login' ? 'Log In' : 'Create Account'}
-                </button>
-              </form>
-            </div>
-          )}
+                  {/* Terms (signup only) */}
+                  {mode === 'signup' && (
+                    <label style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: 10,
+                      cursor: 'pointer',
+                      marginBottom: 4,
+                    }}>
+                      <input
+                        type="checkbox"
+                        checked={termsChecked}
+                        onChange={e => setTermsChecked(e.target.checked)}
+                        required
+                        style={{
+                          width: 16,
+                          height: 16,
+                          marginTop: 2,
+                          accentColor: '#c5a05a',
+                          flexShrink: 0,
+                        }}
+                      />
+                      <span style={{
+                        fontSize: 12,
+                        color: 'rgba(236,232,225,0.45)',
+                        lineHeight: 1.55,
+                        fontWeight: 300,
+                      }}>
+                        I&apos;m 18 or older and accept the{' '}
+                        <a href="/terms" style={{ color: '#c5a05a', textDecoration: 'none' }}>Members&apos; Code</a>
+                        {' '}and{' '}
+                        <a href="/privacy" style={{ color: '#c5a05a', textDecoration: 'none' }}>Privacy Policy</a>
+                      </span>
+                    </label>
+                  )}
+
+                  {/* Error */}
+                  {error && (
+                    <div className="lx-error">{error}</div>
+                  )}
+
+                  {/* Submit */}
+                  <button className="lx-submit-btn" type="submit" disabled={loading}>
+                    {loading ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create account'}
+                    {!loading && <i className="ti ti-arrow-right" style={{ fontSize: 15 }} />}
+                  </button>
+                </form>
+
+                {/* Legal footer */}
+                <p style={{
+                  fontSize: 11,
+                  color: 'rgba(236,232,225,0.25)',
+                  textAlign: 'center',
+                  marginTop: '1.5rem',
+                  lineHeight: 1.65,
+                  fontWeight: 300,
+                }}>
+                  We never share your identity with third parties.<br />
+                  GDPR-compliant · data encrypted at rest.
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </>
