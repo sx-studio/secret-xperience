@@ -53,6 +53,7 @@ interface EscortProfileProps {
   onBook: () => void
   onMessage: () => void
   onReviewSubmit: (rating: number, text: string) => Promise<void>
+  isBookable?: boolean
 }
 
 /* ── Tag classification ────────────────────────────────── */
@@ -159,7 +160,7 @@ const CATEGORY_TEXT: Record<string,string> = {
 }
 
 export default function EscortProfile({
-  listing, reviews, session, onBook, onMessage, onReviewSubmit,
+  listing, reviews, session, onBook, onMessage, onReviewSubmit, isBookable = false,
 }: EscortProfileProps) {
   const [imgIdx, setImgIdx]     = useState(0)
   const [lightbox, setLightbox] = useState(false)
@@ -414,7 +415,7 @@ export default function EscortProfile({
           {/* Mobile CTAs */}
           <div className="rl-mobile-cta" style={{ marginBottom: '1.75rem' }}>
             <button className="rl-btn-primary" onClick={onBook} style={{ background: `linear-gradient(135deg,${catText} 0%,#8a6a30 100%)`, color: '#080808' }}>
-              📩 Send Booking Request
+              {isBookable ? '📅 Book Now' : '📩 Send Message'}
             </button>
             <button className="rl-btn-outline" onClick={onMessage} style={{ border: `0.5px solid ${catText}66`, color: catText }}>
               💬 Send Message

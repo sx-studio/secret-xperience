@@ -289,6 +289,10 @@ export default function ListingDetailPage() {
     </>
   )
 
+  // Only rentals and hotels support on-platform booking/payments
+  const BOOKABLE_CATEGORIES = ['rentals', 'hotels', 'events']
+  const isBookable = BOOKABLE_CATEGORIES.includes(listing.category?.toLowerCase() || '')
+
   const cat       = listing.category
   const icon      = CATEGORY_ICONS[cat] || '◆'
   const catLabel  = CATEGORY_LABELS[cat] || cat
@@ -322,7 +326,8 @@ export default function ListingDetailPage() {
               listing={{ ...listing, tags: (listing as any).tags ?? [] }}
               reviews={reviews}
               session={session}
-              onBook={goToBook}
+              isBookable={isBookable}
+              onBook={isBookable ? goToBook : goToMessage}
               onMessage={goToMessage}
               onReviewSubmit={async (rating, text) => {
                 if (!session) return
@@ -1264,8 +1269,8 @@ export default function ListingDetailPage() {
 
               {/* CTA buttons */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <button type="button" className="ld-book-btn" onClick={goToBook}>
-                  Book Now
+                <button type="button" className="ld-book-btn" onClick={isBookable ? goToBook : goToMessage}>
+                  {isBookable ? 'Book Now' : 'Send Message'}
                 </button>
                 <button type="button" className="ld-msg-btn" onClick={goToMessage}>
                   Send Message

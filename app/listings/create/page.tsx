@@ -303,6 +303,23 @@ export default function CreateListingPage() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) { window.location.href = '/login'; return }
 
+    // Gate: provider must have approved identity verification
+    const { data: verif } = await supabase
+      .from('identity_verifications')
+      .select('status')
+      .eq('user_id', session.user.id)
+      .single()
+
+    if (!verif || verif.status !== 'approved') {
+      setError(
+        verif?.status === 'pending'
+          ? 'Your identity verification is still under review. You can publish once approved.'
+          : 'Identity verification is required before publishing a listing. Please verify your identity in your dashboard.'
+      )
+      setLoading(false)
+      return
+    }
+
     // Basic tier: enforce one listing per 24 hours
     if (form.tier === 'basic') {
       const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
@@ -347,13 +364,24 @@ export default function CreateListingPage() {
       meet_type:       form.meet_type,
       images:          form.images.length > 0 ? form.images : null,
       tags:            finalTags.length > 0 ? finalTags : null,
-      active:          true,
+      active:          false,   // stays false until moderation approves
+      status:          'pending',
       tier:            form.tier,
       tier_expires_at: tierExpiry.toISOString(),
     }).select('id').single()
 
     if (err) { setError(err.message); setLoading(false); return }
     try { localStorage.removeItem('sx_listing_draft') } catch(e) {}
+
+    // Trigger AI moderation (non-blocking — listing stays pending until resolved)
+    if (newListing?.id) {
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || ''
+      fetch(`${siteUrl}/api/moderation/check`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.NEXT_PUBLIC_INTERNAL_SECRET || 'sx-internal'}` },
+        body: JSON.stringify({ listingId: newListing.id, title: form.title, description: form.description, category: form.category }),
+      }).catch(() => {})
+    }
 
     // Spend tokens for the chosen tier (non-blocking — basic is free if no wallet)
     if (newListing?.id && form.tier !== 'basic') {
@@ -460,7 +488,7 @@ export default function CreateListingPage() {
             marginBottom: '0.75rem',
             letterSpacing: '-0.01em',
           }}>
-            Listing published
+            Listing submitted for review
           </h2>
           <p style={{
             color: 'var(--t2, rgba(255,255,255,0.4))',
@@ -469,7 +497,7 @@ export default function CreateListingPage() {
             letterSpacing: '0.03em',
             marginBottom: '2rem',
           }}>
-            Your listing is now live on SecretXperience.
+            Your listing is under review and will go live shortly. You'll be notified once approved.
           </p>
           <span style={{
             fontSize: '12px',

@@ -14,12 +14,16 @@ var gate = document.getElementById('gate');
 function dismissGate() {
   if (gate) gate.classList.add('gone');
   document.body.style.overflow = '';
-  localStorage.setItem('sx_age_ok', '1');
+  // Store with 30-day expiry timestamp
+  localStorage.setItem('sx_age_ok', String(Date.now() + 30 * 24 * 60 * 60 * 1000));
 }
-// Skip gate if already verified via localStorage
-if (localStorage.getItem('sx_age_ok') === '1') {
+// Skip gate if verified within last 30 days
+var _ageOk = parseInt(localStorage.getItem('sx_age_ok') || '0');
+if (_ageOk > Date.now()) {
   if (gate) gate.classList.add('gone');
 } else {
+  // Clear any stale/legacy value
+  localStorage.removeItem('sx_age_ok');
   // Block scroll while gate is visible
   document.body.style.overflow = 'hidden';
   // Also skip if user has an active Supabase session (already logged in)
@@ -1647,7 +1651,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebSite', name: 'SecretXperience', url: 'https://secret-xperience.vercel.app', description: 'Premium adult services marketplace in Belgium.', potentialAction: { '@type': 'SearchAction', target: 'https://secret-xperience.vercel.app/?q={search_term_string}', 'query-input': 'required name=search_term_string' } }) }} />
-      <div dangerouslySetInnerHTML={{ __html: `<script>(function(){try{var ok=localStorage.getItem('sx_age_ok')==='1';if(!ok){for(var k in localStorage){if(k.startsWith('sb-')&&k.endsWith('-auth-token')){try{if(JSON.parse(localStorage.getItem(k)||'{}').access_token){ok=true;localStorage.setItem('sx_age_ok','1');break;}}catch(e){}}}}if(ok){var s=document.createElement('style');s.textContent='#gate{display:none!important}';document.head.appendChild(s);}}catch(e){}})();<\/script>
+      <div dangerouslySetInnerHTML={{ __html: `<script>(function(){try{var exp=parseInt(localStorage.getItem('sx_age_ok')||'0');var ok=exp>Date.now();if(!ok){for(var k in localStorage){if(k.startsWith('sb-')&&k.endsWith('-auth-token')){try{if(JSON.parse(localStorage.getItem(k)||'{}').access_token){ok=true;localStorage.setItem('sx_age_ok',String(Date.now()+30*24*60*60*1000));break;}}catch(e){}}}}if(ok){var s=document.createElement('style');s.textContent='#gate{display:none!important}';document.head.appendChild(s);}}catch(e){}})();<\/script>
 <!-- ══ AGE GATE ══ -->
 <div id="gate" role="dialog" aria-modal="true" aria-label="Age verification" style="background:rgba(4,4,4,0.93);backdrop-filter:blur(14px);">
   <div class="gate-box" style="max-width:400px;padding:2.5rem 2rem;background:var(--grad-velvet);border:0.5px solid var(--b3);border-radius:var(--rxl);box-shadow:var(--shadow-modal);position:relative;overflow:hidden;animation:gateIn .4s var(--ease-out) both;">

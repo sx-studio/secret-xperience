@@ -27,6 +27,12 @@ export async function POST(req: NextRequest) {
 
   if (!listing) return NextResponse.json({ error: 'Listing not found' }, { status: 404 })
 
+  // On-platform payments only for rentals, hotels, events — not escorts/companions/creators
+  const BOOKABLE = ['rentals', 'hotels', 'events']
+  if (!BOOKABLE.includes((listing.category || '').toLowerCase())) {
+    return NextResponse.json({ error: 'On-platform payment is not available for this listing type.' }, { status: 400 })
+  }
+
   const { data: provider } = await supabase
     .from('profiles')
     .select('stripe_connect_account_id')
