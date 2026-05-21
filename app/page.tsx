@@ -1,7 +1,9 @@
 'use client'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { createClient } from './lib/supabase'
 import SliderAds from './components/SliderAds/SliderAds'
+import CategoryAnimations from './components/CategoryAnimations/CategoryAnimations'
 
 export default function Home() {
   useEffect(() => {
@@ -1727,6 +1729,12 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
 
   }, [])
 
+  const [catAnimsMount, setCatAnimsMount] = useState<Element | null>(null)
+  useEffect(() => {
+    const el = document.getElementById('catAnimsMount')
+    if (el) setCatAnimsMount(el)
+  }, [])
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ '@context': 'https://schema.org', '@type': 'WebSite', name: 'SecretXperience', url: 'https://secret-xperience.vercel.app', description: 'Premium adult services marketplace in Belgium.', potentialAction: { '@type': 'SearchAction', target: 'https://secret-xperience.vercel.app/?q={search_term_string}', 'query-input': 'required name=search_term_string' } }) }} />
@@ -2072,6 +2080,9 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
           <div class="astat"><div class="astat-v" id="statRevenue">—</div><div class="astat-l">Revenue this month</div></div>
         </div>
       </div>
+
+      <!-- How SecretXperience Works mount point -->
+      <div id="catAnimsMount"></div>
 
       <!-- Featured -->
       <div class="featured" id="featuredBanner" style="display:none">
@@ -2933,6 +2944,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
 </div><!-- #app -->` }} />
       {/* GSAP slider ads — rendered as React portal anchored after #featuredBanner */}
       <SliderAds />
+      {catAnimsMount && createPortal(<CategoryAnimations />, catAnimsMount)}
     </>
   )
 }
