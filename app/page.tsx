@@ -1746,7 +1746,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
           <input type="text" id="heroSearch" placeholder="Search listings, companions, venues…" style="width:100%;height:52px;padding:0 90px 0 42px;background:var(--bg2);border:0.5px solid var(--gbrd);border-radius:20px;color:var(--t);font:400 14px var(--sans);outline:none;" onkeydown="if(event.key==='Enter'){var q=this.value.trim();if(q){window.location.href='/search?q='+encodeURIComponent(q)}else{window.location.href='/search'}}" />
           <button id="heroSearchBtn" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);height:40px;padding:0 16px;background:var(--grad-gold);border:none;border-radius:16px;color:#000;font:600 13px var(--sans);cursor:pointer;letter-spacing:0.04em;">Search</button>
         </div>
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;">
+        <div class="hero-stats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;">
           <div><div id="statListings" style="font-family:var(--serif);font-size:28px;color:var(--gold);">40+</div><div class="t-meta" style="color:var(--t3);">LISTINGS</div></div>
           <div><div style="font-family:var(--serif);font-size:28px;color:var(--gold);">8</div><div class="t-meta" style="color:var(--t3);">CITIES</div></div>
           <div><div style="font-family:var(--serif);font-size:28px;color:var(--gold);">8</div><div class="t-meta" style="color:var(--t3);">CATEGORIES</div></div>
@@ -1754,14 +1754,14 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         </div>
       </div>
       <!-- MIDDLE: neon-X mascot -->
-      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;">
+      <div class="hero-promo-col" style="display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;">
         <div style="position:relative;background:var(--grad-silk);border-radius:var(--rl);padding:1rem;">
           <img src="/brand/logo-neon-x.jpg" alt="XperienceNights" style="width:260px;border-radius:var(--rl);mix-blend-mode:screen;filter:drop-shadow(0 0 60px rgba(123,78,179,0.40));" />
         </div>
         <p class="t-meta" style="color:var(--t3);margin-top:0.75rem;text-align:center;letter-spacing:0.16em;">XPERIENCE · NIGHTS</p>
       </div>
       <!-- RIGHT: featured listing card -->
-      <div id="heroFeaturedCard" style="width:100%;max-width:320px;border-radius:var(--rl);border:0.5px solid var(--b2);box-shadow:var(--shadow-card-h);overflow:hidden;cursor:pointer;" onclick="document.getElementById('heroFeaturedCard').style.transform='translateY(-3px)'">
+      <div class="hero-hero-col" id="heroFeaturedCard" style="width:100%;max-width:320px;border-radius:var(--rl);border:0.5px solid var(--b2);box-shadow:var(--shadow-card-h);overflow:hidden;cursor:pointer;" onclick="document.getElementById('heroFeaturedCard').style.transform='translateY(-3px)'">
         <div class="cat-escort" style="height:240px;position:relative;display:flex;align-items:flex-end;padding:1.25rem;">
           <div style="position:absolute;top:0.75rem;right:0.75rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.30);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;"><i class="ti ti-heart-filled" style="color:var(--pink);font-size:15px;"></i></div>
           <span style="font-family:var(--serif);font-size:96px;font-style:italic;font-weight:400;color:rgba(197,160,90,0.30);line-height:1;position:absolute;bottom:0.5rem;left:1.25rem;" id="heroMonogram">Sa</span>
@@ -1778,7 +1778,13 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
     </div>
     <style>
     @media(max-width:960px){#editorialHero>div{grid-template-columns:1fr 1fr!important}}
-    @media(max-width:640px){#editorialHero>div{grid-template-columns:1fr!important;gap:1.5rem}}
+    @media(max-width:640px){
+      #editorialHero>div{grid-template-columns:1fr!important;gap:1rem}
+      #editorialHero .hero-promo-col{display:none!important}
+      #editorialHero h1{font-size:clamp(32px,9vw,56px)!important}
+      #editorialHero .hero-stats{grid-template-columns:repeat(2,1fr)!important;gap:.75rem!important}
+      #editorialHero .hero-hero-col{display:none!important}
+    }
     </style>
   </section>
 
