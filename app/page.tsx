@@ -2414,6 +2414,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
           <a href="/contact">Contact support</a>
           <a href="/report">Report a listing</a>
           <a href="/advertise">List a service</a>
+          <a href="/partners">Partners &amp; Links</a>
         </div>
         <div class="footer-col">
           <div class="footer-col-title">Legal</div>
