@@ -1,17 +1,9 @@
 'use client'
-import { useEffect, useState } from 'react'
-import { createPortal } from 'react-dom'
+import { useEffect } from 'react'
 import { createClient } from './lib/supabase'
-import CategoryAnimations from './components/CategoryAnimations/CategoryAnimations'
 import SliderAds from './components/SliderAds/SliderAds'
 
 export default function Home() {
-  const [catAnchor, setCatAnchor] = useState<Element | null>(null)
-
-  useEffect(() => {
-    setCatAnchor(document.getElementById('category-animations-anchor'))
-  }, [])
-
   useEffect(() => {
     const supabase = createClient()
     let currentSession: any = null
@@ -2081,9 +2073,6 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         </div>
       </div>
 
-      <!-- CategoryAnimations portal anchor -->
-      <div id="category-animations-anchor"></div>
-
       <!-- Featured -->
       <div class="featured" id="featuredBanner" style="display:none">
         <div class="ft-left">
@@ -2942,7 +2931,6 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
   </nav>
 
 </div><!-- #app -->` }} />
-      {catAnchor && createPortal(<CategoryAnimations />, catAnchor)}
       {/* GSAP slider ads — rendered as React portal anchored after #featuredBanner */}
       <SliderAds />
     </>
