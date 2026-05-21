@@ -156,6 +156,7 @@ export default function DashboardPage() {
   const [profile, setProfile]       = useState<any>(null)
   const [listings, setListings]     = useState<any[]>([])
   const [bookings, setBookings]     = useState<any[]>([])
+  const [favorites, setFavorites]   = useState<any[]>([])
   const [loading, setLoading]       = useState(true)
   const [idVerifStatus, setIdVerifStatus] = useState<'not_submitted'|'pending'|'approved'|'rejected'>('not_submitted')
   const [editingProfile, setEditingProfile] = useState(false)
@@ -183,17 +184,19 @@ export default function DashboardPage() {
 
       setUser(session.user)
 
-      const [{ data: profile }, { data: listings }, { data: bookings }, { data: idVerif }] = await Promise.all([
+      const [{ data: profile }, { data: listings }, { data: bookings }, { data: idVerif }, { data: favData }] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', session.user.id).single(),
         supabase.from('listings').select('*').eq('profile_id', session.user.id),
         supabase.from('bookings').select('*').or(`client_id.eq.${session.user.id},provider_id.eq.${session.user.id}`),
         supabase.from('identity_verifications').select('status').eq('user_id', session.user.id).single(),
+        supabase.from('favorites').select('listing_id, listings(id,title,category,city,country,price_from,images,active,tier)').eq('user_id', session.user.id),
       ])
       if (idVerif?.status) setIdVerifStatus(idVerif.status as any)
 
       setProfile(profile)
       setListings(listings || [])
       setBookings(bookings || [])
+      setFavorites((favData || []).map((f: any) => f.listings).filter(Boolean))
       setLoading(false)
 
       const params = new URLSearchParams(window.location.search)
@@ -1231,6 +1234,35 @@ export default function DashboardPage() {
               </div>
             )}
           </div>
+
+          {/* ── Saved Listings ── */}
+          {favorites.length > 0 && (
+            <div className="db-card" style={{ marginBottom: '1.5rem' }}>
+              <div style={{ marginBottom: '1.375rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span className="db-section-title">Saved listings</span>
+                <span style={{ fontSize: 11, color: 'var(--t3)', fontFamily: 'var(--sans)', fontWeight: 300 }}>{favorites.length} saved</span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(160px,1fr))', gap: 10 }}>
+                {favorites.map((l: any) => (
+                  <a key={l.id} href={`/listings/${l.id}`} style={{ textDecoration: 'none', display: 'block', background: 'var(--bg2)', border: '0.5px solid var(--b2)', borderRadius: 10, overflow: 'hidden', transition: 'border-color .15s' }}>
+                    <div style={{ height: 100, background: 'var(--bg3)', position: 'relative', overflow: 'hidden' }}>
+                      {l.images?.[0]
+                        ? <img src={l.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--serif)', fontSize: 32, fontStyle: 'italic', color: 'rgba(197,160,90,0.25)' }}>{(l.title||'Xx').slice(0,2)}</div>
+                      }
+                      <div style={{ position: 'absolute', top: 6, right: 6, width: 22, height: 22, borderRadius: '50%', background: 'rgba(176,67,89,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <i className="ti ti-heart-filled" style={{ fontSize: 11, color: '#fff' }} />
+                      </div>
+                    </div>
+                    <div style={{ padding: '8px 10px' }}>
+                      <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--t)', fontFamily: 'var(--sans)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{l.title}</div>
+                      <div style={{ fontSize: 11, color: 'var(--t3)', fontFamily: 'var(--sans)', fontWeight: 300, marginTop: 2 }}>{l.city} · {l.price_from ? `€${l.price_from}` : 'POA'}</div>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* ── Quick Actions ── */}
           <div className="db-card">

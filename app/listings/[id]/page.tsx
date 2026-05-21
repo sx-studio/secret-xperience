@@ -147,6 +147,8 @@ export default function ListingDetailPage() {
       } else {
         setListing(data as any)
         if (data.images?.length) setActiveImg(data.images[0])
+        // Track view (fire-and-forget)
+        supabase.from('listing_views').insert({ listing_id: id, user_id: sess?.user?.id || null }).then(() => {})
         // Fetch similar listings by same category
         const { data: sims } = await supabase
           .from('listings')
