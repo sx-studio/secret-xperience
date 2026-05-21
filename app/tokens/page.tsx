@@ -19,7 +19,7 @@ interface Wallet {
 }
 
 const TIER_COSTS = [
-  { tier: 'basic',    label: 'Basic Listing',    tokens: 25,  days: 7,  desc: 'Standard grid listing, visible to all visitors.' },
+  { tier: 'basic',    label: 'Basic Listing',    tokens: 0,   days: 1,  desc: 'Standard grid listing — free, 24-hour duration, one per day.' },
   { tier: 'featured', label: 'Featured Listing',  tokens: 50,  days: 7,  desc: 'Gold-bordered card, priority placement in category grid.' },
   { tier: 'slider',   label: 'Slider Ad',         tokens: 75,  days: 7,  desc: 'Animated ad in the GSAP slider on every page — maximum visibility.' },
   { tier: 'premium',  label: 'Premium Listing',   tokens: 150, days: 30, desc: 'Top of category for 30 days, larger card, premium badge.' },
@@ -225,10 +225,12 @@ export default function TokensPage() {
             <div key={t.tier} style={{ background:'#0a0908', border:'0.5px solid #ffffff14', borderRadius:12, padding:'1.25rem' }}>
               <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'0.6rem' }}>
                 <span style={{ fontSize:13, fontWeight:600, color:S.t }}>{t.label}</span>
-                <span style={{ fontSize:12, fontWeight:700, color:S.gold, background:'rgba(197,160,90,0.12)', borderRadius:6, padding:'2px 8px' }}>{t.tokens} ◈</span>
+                <span style={{ fontSize:12, fontWeight:700, color:S.gold, background:'rgba(197,160,90,0.12)', borderRadius:6, padding:'2px 8px' }}>
+                  {t.tokens === 0 ? 'Free' : `${t.tokens} ◈`}
+                </span>
               </div>
               <p style={{ fontSize:12, color:S.t2, lineHeight:1.6, marginBottom:'0.6rem' }}>{t.desc}</p>
-              <p style={{ fontSize:11, color:S.t3 }}>Duration: {t.days} days</p>
+              <p style={{ fontSize:11, color:S.t3 }}>Duration: {t.days === 1 ? '24 hours' : `${t.days} days`}</p>
             </div>
           ))}
         </div>

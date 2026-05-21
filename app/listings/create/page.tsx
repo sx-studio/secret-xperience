@@ -71,10 +71,10 @@ interface FormState {
 }
 
 const LISTING_TIERS = [
-  { id: 'basic',    label: 'Basic',    tokens: 25,  days: 7,  desc: 'Standard grid listing',                      color: '#ffffff44' },
-  { id: 'featured', label: 'Featured', tokens: 50,  days: 7,  desc: 'Gold-border, priority in category grid',     color: '#c5a05a' },
-  { id: 'slider',   label: 'Slider Ad', tokens: 75, days: 7,  desc: 'Animated hero slider — site-wide visibility', color: '#7a8aee' },
-  { id: 'premium',  label: 'Premium',  tokens: 150, days: 30, desc: 'Top of category, 30 days, premium badge',    color: '#e0a0c8' },
+  { id: 'basic',    label: 'Basic',     tokens: 0,   days: 1,  desc: 'Standard grid listing — 24 hours, one per day', color: '#ffffff44' },
+  { id: 'featured', label: 'Featured',  tokens: 50,  days: 7,  desc: 'Gold-border, priority in category grid',        color: '#c5a05a' },
+  { id: 'slider',   label: 'Slider Ad', tokens: 75,  days: 7,  desc: 'Animated hero slider — site-wide visibility',   color: '#7a8aee' },
+  { id: 'premium',  label: 'Premium',   tokens: 150, days: 30, desc: 'Top of category, 30 days, premium badge',       color: '#e0a0c8' },
 ]
 
 interface UploadingImage {
@@ -303,6 +303,23 @@ export default function CreateListingPage() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) { window.location.href = '/login'; return }
 
+    // Basic tier: enforce one listing per 24 hours
+    if (form.tier === 'basic') {
+      const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+      const { data: recent } = await supabase
+        .from('listings')
+        .select('id')
+        .eq('profile_id', session.user.id)
+        .eq('tier', 'basic')
+        .gte('created_at', since)
+        .limit(1)
+      if (recent && recent.length > 0) {
+        setError('Basic listings are limited to one per 24 hours. Upgrade to Featured, Slider Ad, or Premium to list more.')
+        setLoading(false)
+        return
+      }
+    }
+
     // Build final tags array: service tags + physical stat tags
     const statTags: string[] = []
     if (STATS_CATEGORIES.includes(form.category)) {
@@ -312,22 +329,27 @@ export default function CreateListingPage() {
     }
     const finalTags = [...form.tags, ...statTags]
 
+    const tierDays: Record<string, number> = { basic: 1, featured: 7, slider: 7, premium: 30 }
+    const tierExpiry = new Date()
+    tierExpiry.setDate(tierExpiry.getDate() + (tierDays[form.tier] ?? 1))
+
     const { data: newListing, error: err } = await supabase.from('listings').insert({
-      profile_id:  session.user.id,
-      title:       form.title,
-      description: form.description || null,
-      category:    form.category,
-      subcategory: form.subcategory || null,
-      price_from:  form.price_from ? parseInt(form.price_from) : null,
-      price_to:    form.price_to   ? parseInt(form.price_to)   : null,
-      currency:    'EUR',
-      city:        form.city,
-      country:     form.country,
-      meet_type:   form.meet_type,
-      images:      form.images.length > 0 ? form.images : null,
-      tags:        finalTags.length > 0 ? finalTags : null,
-      active:      true,
-      tier:        form.tier,
+      profile_id:      session.user.id,
+      title:           form.title,
+      description:     form.description || null,
+      category:        form.category,
+      subcategory:     form.subcategory || null,
+      price_from:      form.price_from ? parseInt(form.price_from) : null,
+      price_to:        form.price_to   ? parseInt(form.price_to)   : null,
+      currency:        'EUR',
+      city:            form.city,
+      country:         form.country,
+      meet_type:       form.meet_type,
+      images:          form.images.length > 0 ? form.images : null,
+      tags:            finalTags.length > 0 ? finalTags : null,
+      active:          true,
+      tier:            form.tier,
+      tier_expires_at: tierExpiry.toISOString(),
     }).select('id').single()
 
     if (err) { setError(err.message); setLoading(false); return }
@@ -1282,7 +1304,7 @@ export default function CreateListingPage() {
                         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'0.4rem' }}>
                           <span style={{ fontSize:13, fontWeight:600, color: active ? t.color : 'var(--t,#ece8e1)' }}>{t.label}</span>
                           <span style={{ fontSize:11, fontWeight:700, color:t.color, background:`${t.color}18`, borderRadius:6, padding:'2px 7px' }}>
-                            {t.id === 'basic' ? 'Free' : `${t.tokens} ◈`}
+                            {t.id === 'basic' ? 'Free · 24h' : `${t.tokens} ◈`}
                           </span>
                         </div>
                         <p style={{ fontSize:11, color:'var(--t3,rgba(255,255,255,0.25))', lineHeight:1.5, marginBottom:'0.3rem' }}>{t.desc}</p>

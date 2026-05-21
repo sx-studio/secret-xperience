@@ -16,9 +16,9 @@ import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 
 export const TIER_COSTS: Record<string, { tokens: number; days: number; label: string }> = {
-  basic:    { tokens: 25,  days: 7,  label: 'Basic listing (7 days)'   },
+  basic:    { tokens: 0,   days: 1,  label: 'Basic listing (24 hours)'  },
   featured: { tokens: 50,  days: 7,  label: 'Featured listing (7 days)' },
-  slider:   { tokens: 75,  days: 7,  label: 'Slider Ad (7 days)'       },
+  slider:   { tokens: 75,  days: 7,  label: 'Slider Ad (7 days)'        },
   premium:  { tokens: 150, days: 30, label: 'Premium listing (30 days)' },
 }
 

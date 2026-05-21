@@ -89,6 +89,10 @@ CREATE INDEX IF NOT EXISTS idx_payment_orders_status      ON payment_orders(stat
 CREATE INDEX IF NOT EXISTS idx_payment_orders_provider_id ON payment_orders(provider_order_id);
 
 -- ── LISTING TIERS ─────────────────────────────────────────────
+-- basic    → free, 24 hours, max one per day per user
+-- featured → 50 tokens, 7 days
+-- slider   → 75 tokens, 7 days (GSAP slider placement)
+-- premium  → 150 tokens, 30 days, top of category
 ALTER TABLE listings
   ADD COLUMN IF NOT EXISTS tier            text NOT NULL DEFAULT 'basic'
     CHECK (tier IN ('basic','featured','slider','premium')),
