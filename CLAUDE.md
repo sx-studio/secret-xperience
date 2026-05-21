@@ -29,7 +29,7 @@ Live at **secretxperience.eu** (and www.secretxperience.eu). Owner email: heyoka
 - Token system migrations applied (`token_packages`, `user_wallets`, `token_ledger`, `payment_orders`)
 - Identity verification table + flow (`identity_verifications`)
 - Auto-expire pg_cron job
-- Supabase publishable key client helpers wired up
+- Supabase publishable key client helpers wired up; ALL pages/routes now use `PUBLISHABLE_KEY || ANON_KEY` fallback
 - Favorites wired to DB (`favorites` table, `__favSet`, `toggleFavorite`)
 - View tracking (`listing_views` table, fires on `openDetail`)
 - Saved listings section in dashboard
@@ -38,20 +38,23 @@ Live at **secretxperience.eu** (and www.secretxperience.eu). Owner email: heyoka
 - Homepage JSON-LD fixed — URL is `secretxperience.eu`, Organization schema added alongside WebSite
 - BreadcrumbList + Service JSON-LD on all 6 category pages (escorts, nightlife, creators, rentals, hotels, shop)
 - `/api/newsletter` POST endpoint + footer signup form on homepage
-- `newsletter_subscribers` migration created (`supabase/migrations/20250521_newsletter.sql`) — **needs to be applied in Supabase SQL editor**
-- Search page hardened: switched to publishable key, sanitized `q` input (escapes PostgREST-significant chars), added `subcategory` to search scope, client-side relevance bump for exact/prefix title matches
-- Tier expiry: created `expire_listing_tiers()` function + hourly pg_cron sweep (`supabase/migrations/20250521_tier_auto_expire.sql`) — **needs to be applied**
-- Search performance indexes (pg_trgm GIN on title/description/city/subcategory) — `supabase/migrations/20250521_search_indexes.sql` **needs to be applied**
-- Search UI: Premium/Featured badges now gated on `featured_until > now` (Premium displaces Featured when both apply)
-- CategoryAnimations: replaced fragile portal pattern with direct JSX split — dangerouslySetInnerHTML split in two with `<CategoryAnimations />` in between. No longer disappears on re-render.
-- Newsletter signup: working end-to-end (confirmed live). Validation now shows red border + placeholder text on bad input.
-
-- Provider moderation status: fixed column name (`moderation_status` → `status`), badges now show correctly
-- Messages unread count: fixed column name (`recipient_id` → `receiver_id`)
-- Messages search: wired to filter by name/message/listing title
-- Listing detail: favorites toggle button wired to DB, duplicate CTA button removed
-- All API routes: replaced stale `secret-xperience.vercel.app` fallback with `www.secretxperience.eu`
-- `bookings` and `messages` table schemas added to migrations (were missing from version control)
+- Search page: publishable key, sanitized q, subcategory scope, client-side relevance bump, **pagination** (24/page), **advanced filters** (verified-only, meet type, price range), **Available Now badge**
+- Tier expiry: `expire_listing_tiers()` + hourly pg_cron sweep (migration pending)
+- Search performance indexes: pg_trgm GIN (migration pending)
+- CategoryAnimations: dangerouslySetInnerHTML split in two with `<CategoryAnimations />` direct JSX. No portal.
+- Newsletter signup: working end-to-end
+- Provider moderation: fixed column name, badges work
+- Messages: search filter, unread count fixed, read receipts on open
+- Listing detail: favorites toggle, duplicate CTA removed
+- All API routes: `www.secretxperience.eu` fallback
+- Bookings/messages migrations in version control
+- Security: token spend blocking, PII logging removed, moderation auth hardened
+- Price filter bug fixed in `/api/listings/search` (`price_to` not `price_from`)
+- Webhook: sends `listing_boosted` email notification after boost
+- **Dashboard improvements**: client vs provider bookings split, inline Confirm/Decline for providers, listing join for booking title, token balance stat card, profile completeness progress bar (auto-hides at 100%), listing view counts from `listing_views`, Discover quick-action
+- **Tokens page**: transaction ledger shows last 15 entries with type/amount/balance
+- **Escorts page**: Available Now badge (pulsing green), New badge (purple, <7 days), "Sort by availability" option, Discreet Mode toggle (blurs photos, persists localStorage), `isAvailableNow` helper
+- **NEW: `/discover`** — GSAP Draggable swipe-to-save page. Swipe right = save to favorites, left = skip. Category filters. Full portrait cards with price/verified badges. Linked in homepage nav, drawer, escorts, search, dashboard. Added to sitemap.
 
 ## Pending
 - **Apply pending migrations in Supabase SQL editor** (run in order):
@@ -79,7 +82,25 @@ Live at **secretxperience.eu** (and www.secretxperience.eu). Owner email: heyoka
 - `app/sitemap.ts`, `app/robots.ts` — SEO
 - `app/api/newsletter/route.ts` — newsletter subscription
 - `app/api/notify/route.ts` — booking notification emails (Resend)
+- `app/api/bookings/request/route.ts` — meetup-only booking for escort categories (no payment)
+- `app/api/checkout/route.ts` — Stripe checkout for payable categories (rentals, hotels, events, shop)
+- `app/api/webhooks/stripe/route.ts` — Stripe webhook: confirms bookings, activates featured boosts
+- `app/discover/page.tsx` — NEW swipe-to-save discover page (GSAP Draggable)
 - `supabase/migrations/` — SQL migrations
+
+## Payment category rules (IMPORTANT)
+- **Meetup-request only** (no card payment): escorts, companionship, massage, domination, experiences, nightlife, creators
+- **Card payable via Stripe**: rentals, hotels, events, shop
+- Enforced at BOTH client and server level. Never allow card payment for escort/sexual services.
+
+## Key env vars (must be set in Vercel)
+- `NEXT_PUBLIC_SUPABASE_URL` — Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` — replaces ANON_KEY (or set both)
+- `SUPABASE_SERVICE_ROLE_KEY` — server-only, admin operations
+- `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` — payment processing
+- `INTERNAL_SECRET` AND `NEXT_PUBLIC_INTERNAL_SECRET` — must match, used for internal API calls (moderation, notify)
+- `RESEND_API_KEY` — email sending (optional, logs to console if absent)
+- `ANTHROPIC_API_KEY` — AI moderation (auto-approves listings if absent)
 
 ## How to verify a change shipped
 1. `git push -u origin main` (auto-deploys on Vercel)
