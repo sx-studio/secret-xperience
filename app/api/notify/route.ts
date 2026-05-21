@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
 
   // If RESEND_API_KEY is set, send via Resend; otherwise log
   if (process.env.RESEND_API_KEY) {
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://secret-xperience.vercel.app'
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.secretxperience.eu'
     const emailStyle = `
       body{margin:0;padding:0;background:#080808;font-family:'Helvetica Neue',Arial,sans-serif}
       .wrap{max-width:560px;margin:0 auto;background:#0f0f0f;border:1px solid rgba(197,160,90,0.15)}

@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
       .eq('id', session.user.id)
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://secret-xperience.vercel.app'
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.secretxperience.eu'
   const accountLink = await stripe.accountLinks.create({
     account: accountId,
     refresh_url: `${siteUrl}/dashboard?connect=refresh`,

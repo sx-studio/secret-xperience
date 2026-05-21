@@ -96,6 +96,8 @@ export default function ListingDetailPage() {
   const [pageLoading, setPageLoading] = useState(true)
   const [session,   setSession]   = useState<any>(null)
   const [activeImg, setActiveImg] = useState<string | null>(null)
+  const [isFaved,   setIsFaved]   = useState(false)
+  const [favLoading, setFavLoading] = useState(false)
 
   // Reviews state
   const [reviews,        setReviews]        = useState<Review[]>([])
@@ -142,6 +144,10 @@ export default function ListingDetailPage() {
           .single(),
       ])
       setSession(sess)
+      if (sess?.user?.id) {
+        supabase.from('favorites').select('listing_id').eq('user_id', sess.user.id).eq('listing_id', id).single()
+          .then(({ data: fav }) => setIsFaved(!!fav))
+      }
       if (error || !data) {
         setNotFound(true)
       } else {
@@ -218,6 +224,20 @@ export default function ListingDetailPage() {
   }
 
   /* ── Navigate to message/book (auth guard) ── */
+  async function toggleFavorite() {
+    if (!session) { window.location.href = `/login?next=/listings/${id}`; return }
+    setFavLoading(true)
+    const supabase = createClient()
+    if (isFaved) {
+      await supabase.from('favorites').delete().eq('user_id', session.user.id).eq('listing_id', listing!.id)
+      setIsFaved(false)
+    } else {
+      await supabase.from('favorites').upsert({ user_id: session.user.id, listing_id: listing!.id })
+      setIsFaved(true)
+    }
+    setFavLoading(false)
+  }
+
   function goToMessage() {
     if (!session) { window.location.href = `/login?next=/listings/${id}`; return }
     window.location.href = `/messages?provider_id=${listing!.profile_id}&listing_id=${listing!.id}&listing_title=${encodeURIComponent(listing!.title)}`
@@ -1274,8 +1294,27 @@ export default function ListingDetailPage() {
                 <button type="button" className="ld-book-btn" onClick={isBookable ? goToBook : goToMessage}>
                   {isBookable ? 'Book Now' : 'Send Message'}
                 </button>
-                <button type="button" className="ld-msg-btn" onClick={goToMessage}>
-                  Send Message
+                {isBookable && (
+                  <button type="button" className="ld-msg-btn" onClick={goToMessage}>
+                    Send Message
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={toggleFavorite}
+                  disabled={favLoading}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                    padding: '11px', borderRadius: 'var(--r, 8px)',
+                    border: `0.5px solid ${isFaved ? 'rgba(197,160,90,0.5)' : 'var(--b, rgba(255,255,255,0.08))'}`,
+                    background: isFaved ? 'rgba(197,160,90,0.1)' : 'transparent',
+                    color: isFaved ? 'var(--gold, #c5a05a)' : 'var(--t2, rgba(236,232,225,0.55))',
+                    cursor: favLoading ? 'default' : 'pointer',
+                    fontSize: '13px', fontFamily: 'var(--sans)', transition: 'all .2s',
+                  }}
+                >
+                  <i className={isFaved ? 'ti ti-heart-filled' : 'ti ti-heart'} />
+                  {isFaved ? 'Saved' : 'Save listing'}
                 </button>
               </div>
 

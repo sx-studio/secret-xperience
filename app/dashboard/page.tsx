@@ -191,7 +191,7 @@ export default function DashboardPage() {
         supabase.from('bookings').select('*').or(`client_id.eq.${session.user.id},provider_id.eq.${session.user.id}`),
         supabase.from('identity_verifications').select('status').eq('user_id', session.user.id).single(),
         supabase.from('favorites').select('listing_id, listings(id,title,category,city,country,price_from,images,active,tier)').eq('user_id', session.user.id),
-        supabase.from('messages').select('*', { count: 'exact', head: true }).eq('recipient_id', session.user.id).eq('read', false),
+        supabase.from('messages').select('*', { count: 'exact', head: true }).eq('receiver_id', session.user.id).eq('read', false),
       ])
       if (idVerif?.status) setIdVerifStatus(idVerif.status as any)
       setUnreadMessages(unreadCount || 0)
@@ -1143,10 +1143,10 @@ export default function DashboardPage() {
                           ✓ Verified
                         </span>
                       )}
-                      {listing.moderation_status === 'pending' && (
+                      {listing.status === 'pending' && (
                         <span className="db-status-pill-paused">⏳ Under review</span>
                       )}
-                      {listing.moderation_status === 'rejected' && (
+                      {listing.status === 'rejected' && (
                         <span className="db-status-pill-inactive" style={{ color: '#e05a5a', borderColor: 'rgba(224,90,90,0.35)' }}>✗ Rejected</span>
                       )}
                       <span className={listing.active ? 'db-status-pill-active' : 'db-status-pill-inactive'}>

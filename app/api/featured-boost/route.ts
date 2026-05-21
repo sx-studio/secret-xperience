@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
   if (!listing) return NextResponse.json({ error: 'Listing not found or unauthorized' }, { status: 404 })
 
   const p = PLANS[plan]
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://secret-xperience.vercel.app'
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.secretxperience.eu'
 
   const checkoutSession = await stripe.checkout.sessions.create({
     mode: 'payment',

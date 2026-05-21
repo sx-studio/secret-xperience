@@ -31,6 +31,7 @@ export default function MessagesPage() {
   const [body, setBody] = useState('')
   const [sending, setSending] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -440,6 +441,8 @@ export default function MessagesPage() {
             className="msg-search-input"
             placeholder="Search conversations…"
             type="search"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
           />
         </div>
 
@@ -463,7 +466,13 @@ export default function MessagesPage() {
             </button>
           </div>
         ) : (
-          conversations.map(c => (
+          conversations.filter(c => {
+            if (!searchQuery.trim()) return true
+            const q = searchQuery.toLowerCase()
+            return (c.other_name || '').toLowerCase().includes(q) ||
+                   (c.last_message || '').toLowerCase().includes(q) ||
+                   (c.listing_title || '').toLowerCase().includes(q)
+          }).map(c => (
             <div
               key={c.other_id}
               className={`msg-thread-row${activeConv?.other_id === c.other_id ? ' active' : ''}`}

@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
   if (bookingErr) return NextResponse.json({ error: bookingErr.message }, { status: 500 })
 
   // Notify provider of new booking request (fire-and-forget)
-  const siteOrigin = process.env.NEXT_PUBLIC_SITE_URL || 'https://secret-xperience.vercel.app'
+  const siteOrigin = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.secretxperience.eu'
   fetch(`${siteOrigin}/api/notify`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.INTERNAL_SECRET || 'sx-internal'}` },
@@ -83,8 +83,8 @@ export async function POST(req: NextRequest) {
       listing_id,
       client_id: session.user.id,
     },
-    success_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://secret-xperience.vercel.app'}/dashboard?booking=success`,
-    cancel_url:  `${process.env.NEXT_PUBLIC_SITE_URL || 'https://secret-xperience.vercel.app'}/?booking=cancelled`,
+    success_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.secretxperience.eu'}/dashboard?booking=success`,
+    cancel_url:  `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.secretxperience.eu'}/?booking=cancelled`,
   }
 
   if (provider?.stripe_connect_account_id) {
