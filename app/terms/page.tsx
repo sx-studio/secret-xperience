@@ -200,22 +200,21 @@ export default function TermsPage() {
           <div style={{ fontSize: 15, lineHeight: 1.85, color: '#999' }}>
             <p style={{ marginBottom: '1.5rem' }}>Platform services are purchased using tokens. Tokens are available in the following packages:</p>
 
-            {/* Token purchase table */}
             <div style={{ overflowX: 'auto', marginBottom: '2rem' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14, background: '#0a0908', borderRadius: 4, overflow: 'hidden' }}>
                 <thead>
                   <tr style={{ borderBottom: `1px solid #c5a05a22` }}>
-                    <th style={{ textAlign: 'left', padding: '10px 14px', color: S.gold, fontWeight: 500, fontFamily: S.sans, letterSpacing: '0.06em', fontSize: 11, textTransform: 'uppercase' }}>Price</th>
-                    <th style={{ textAlign: 'left', padding: '10px 14px', color: S.gold, fontWeight: 500, fontFamily: S.sans, letterSpacing: '0.06em', fontSize: 11, textTransform: 'uppercase' }}>Tokens</th>
-                    <th style={{ textAlign: 'left', padding: '10px 14px', color: S.gold, fontWeight: 500, fontFamily: S.sans, letterSpacing: '0.06em', fontSize: 11, textTransform: 'uppercase' }}>Bonus</th>
+                    <th style={{ textAlign: 'left', padding: '12px 16px', color: S.gold, fontWeight: 500, fontFamily: S.sans, letterSpacing: '0.08em', fontSize: 11, textTransform: 'uppercase' }}>Price</th>
+                    <th style={{ textAlign: 'left', padding: '12px 16px', color: S.gold, fontWeight: 500, fontFamily: S.sans, letterSpacing: '0.08em', fontSize: 11, textTransform: 'uppercase' }}>Tokens</th>
+                    <th style={{ textAlign: 'left', padding: '12px 16px', color: S.gold, fontWeight: 500, fontFamily: S.sans, letterSpacing: '0.08em', fontSize: 11, textTransform: 'uppercase' }}>Bonus</th>
                   </tr>
                 </thead>
                 <tbody>
                   {tokenPackages.map((pkg, i) => (
-                    <tr key={i} style={{ borderBottom: `0.5px solid #c5a05a11`, background: i % 2 === 0 ? '#0a0908' : 'transparent' }}>
-                      <td style={{ padding: '10px 14px', color: S.t, fontWeight: 500 }}>{pkg.price}</td>
-                      <td style={{ padding: '10px 14px', color: '#bbb' }}>{pkg.tokens} tokens</td>
-                      <td style={{ padding: '10px 14px', color: pkg.bonus ? S.gold : '#444', fontSize: 13 }}>{pkg.bonus || '—'}</td>
+                    <tr key={i} style={{ borderBottom: `0.5px solid #c5a05a11`, background: i % 2 === 0 ? '#0c0b09' : '#0a0908' }}>
+                      <td style={{ padding: '11px 16px', color: S.t, fontWeight: 500 }}>{pkg.price}</td>
+                      <td style={{ padding: '11px 16px', color: '#bbb' }}>{pkg.tokens} tokens</td>
+                      <td style={{ padding: '11px 16px', color: pkg.bonus ? S.gold : '#3a3a3a', fontSize: 13 }}>{pkg.bonus || '—'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -224,20 +223,19 @@ export default function TermsPage() {
 
             <p style={{ marginBottom: '1.5rem' }}>Tokens can be used for the following platform services:</p>
 
-            {/* Token usage table */}
             <div style={{ overflowX: 'auto', marginBottom: '1.5rem' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14, background: '#0a0908', borderRadius: 4, overflow: 'hidden' }}>
                 <thead>
                   <tr style={{ borderBottom: `1px solid #c5a05a22` }}>
-                    <th style={{ textAlign: 'left', padding: '10px 14px', color: S.gold, fontWeight: 500, fontFamily: S.sans, letterSpacing: '0.06em', fontSize: 11, textTransform: 'uppercase' }}>Service</th>
-                    <th style={{ textAlign: 'left', padding: '10px 14px', color: S.gold, fontWeight: 500, fontFamily: S.sans, letterSpacing: '0.06em', fontSize: 11, textTransform: 'uppercase' }}>Cost</th>
+                    <th style={{ textAlign: 'left', padding: '12px 16px', color: S.gold, fontWeight: 500, fontFamily: S.sans, letterSpacing: '0.08em', fontSize: 11, textTransform: 'uppercase' }}>Service</th>
+                    <th style={{ textAlign: 'left', padding: '12px 16px', color: S.gold, fontWeight: 500, fontFamily: S.sans, letterSpacing: '0.08em', fontSize: 11, textTransform: 'uppercase' }}>Cost</th>
                   </tr>
                 </thead>
                 <tbody>
                   {tokenUsage.map((item, i) => (
-                    <tr key={i} style={{ borderBottom: `0.5px solid #c5a05a11`, background: i % 2 === 0 ? '#0a0908' : 'transparent' }}>
-                      <td style={{ padding: '10px 14px', color: '#bbb' }}>{item.service}</td>
-                      <td style={{ padding: '10px 14px', color: S.t, fontWeight: 500 }}>{item.tokens} tokens</td>
+                    <tr key={i} style={{ borderBottom: `0.5px solid #c5a05a11`, background: i % 2 === 0 ? '#0c0b09' : '#0a0908' }}>
+                      <td style={{ padding: '11px 16px', color: '#bbb' }}>{item.service}</td>
+                      <td style={{ padding: '11px 16px', color: S.t, fontWeight: 500 }}>{item.tokens} tokens</td>
                     </tr>
                   ))}
                 </tbody>

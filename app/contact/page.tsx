@@ -1,40 +1,7 @@
 'use client'
 import { useState, FormEvent } from 'react'
 
-const STYLES = `
-  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500&display=swap');
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: #111; }
-  ::-webkit-scrollbar-thumb { background: #c5a05a44; border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: #c5a05a88; }
-  a { color: #c5a05a; text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  input, select, textarea {
-    background: #0d0b08;
-    border: 0.5px solid #c5a05a33;
-    color: #e8e0d0;
-    font-family: 'Jost', sans-serif;
-    font-size: 14px;
-    padding: 12px 14px;
-    border-radius: 3px;
-    width: 100%;
-    outline: none;
-    transition: border-color 0.2s;
-    appearance: none;
-  }
-  input:focus, select:focus, textarea:focus {
-    border-color: #c5a05a88;
-  }
-  input::placeholder, textarea::placeholder {
-    color: #444;
-  }
-  select option {
-    background: #111;
-    color: #e8e0d0;
-  }
-`
+const S = { bg: '#080808', t: '#e8e0d0', t2: '#888', t3: '#555', gold: '#c5a05a', b: '#c5a05a22', b2: '#ffffff18', serif: "'Cormorant Garamond', serif", sans: "'Jost', sans-serif" }
 
 const inputStyle: React.CSSProperties = {
   background: '#0d0b08',
@@ -46,6 +13,7 @@ const inputStyle: React.CSSProperties = {
   borderRadius: 3,
   width: '100%',
   outline: 'none',
+  appearance: 'none' as any,
 }
 
 export default function ContactPage() {
@@ -58,61 +26,69 @@ export default function ContactPage() {
   }
 
   return (
-    <div style={{ background: '#080808', minHeight: '100vh', color: '#e8e0d0', fontFamily: "'Jost', sans-serif" }}>
-      <style>{STYLES}</style>
+    <div style={{ background: S.bg, minHeight: '100vh', color: S.t, fontFamily: S.sans }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #111; }
+        ::-webkit-scrollbar-thumb { background: #c5a05a44; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #c5a05a88; }
+        a { color: #c5a05a; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        input, select, textarea {
+          background: #0d0b08;
+          border: 0.5px solid #c5a05a33;
+          color: #e8e0d0;
+          font-family: 'Jost', sans-serif;
+          font-size: 14px;
+          padding: 12px 14px;
+          border-radius: 3px;
+          width: 100%;
+          outline: none;
+          transition: border-color 0.2s;
+          appearance: none;
+        }
+        input:focus, select:focus, textarea:focus { border-color: #c5a05a88; }
+        input::placeholder, textarea::placeholder { color: #444; }
+        select option { background: #111; color: #e8e0d0; }
+      `}</style>
 
-      {/* Header */}
-      <header style={{
-        position: 'sticky', top: 0, zIndex: 100,
-        background: 'rgba(8,8,8,0.95)', backdropFilter: 'blur(12px)',
-        borderBottom: '0.5px solid #c5a05a22',
-        padding: '0 24px', height: 56,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16,
-      }}>
-        <a href="/" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 18, fontWeight: 600, color: '#e8e0d0', letterSpacing: '0.04em', textDecoration: 'none', whiteSpace: 'nowrap' }}>
-          Secret<span style={{ color: '#c5a05a' }}>Xperience</span>
+      <header style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(8,8,8,0.95)', backdropFilter: 'blur(12px)', borderBottom: `0.5px solid ${S.b}`, padding: '0 24px', height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+        <a href="/" style={{ fontFamily: S.serif, fontSize: 18, fontWeight: 600, color: S.t, letterSpacing: '0.04em', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+          Secret<span style={{ color: S.gold }}>Xperience</span>
         </a>
-        <a href="/" style={{ fontSize: 12, color: '#888', letterSpacing: '0.06em', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap' }}>
-          <span style={{ fontSize: 16, lineHeight: 1 }}>←</span> Back
-        </a>
+        <a href="/" style={{ fontSize: 13, color: S.t2 }}>← Back</a>
       </header>
 
-      {/* Hero */}
-      <div style={{
-        borderBottom: '0.5px solid #c5a05a18',
-        padding: '64px 24px 48px',
-        textAlign: 'center',
-        background: 'linear-gradient(180deg, #0d0b08 0%, #080808 100%)',
-      }}>
-        <div style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#c5a05a', marginBottom: 20 }}>
-          Get in Touch
-        </div>
-        <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(36px, 6vw, 60px)', fontWeight: 400, color: '#e8e0d0', lineHeight: 1.1, marginBottom: 16 }}>
-          Contact Support
-        </h1>
+      <div style={{ borderBottom: `0.5px solid #c5a05a18`, padding: '64px 24px 48px', textAlign: 'center', background: 'linear-gradient(180deg, #0d0b08 0%, #080808 100%)' }}>
+        <div style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.2em', textTransform: 'uppercase', color: S.gold, marginBottom: 20 }}>Get in Touch</div>
+        <h1 style={{ fontFamily: S.serif, fontSize: 'clamp(36px, 6vw, 60px)', fontWeight: 400, color: S.t, lineHeight: 1.1, marginBottom: 16 }}>Contact Us</h1>
         <p style={{ fontSize: 14, color: '#666', maxWidth: 480, margin: '0 auto', lineHeight: 1.7 }}>
-          Our support team responds within 24 hours. For urgent safety concerns, please use our <a href="/report">report page</a>.
+          Our support team responds within 24–48 hours. For urgent content concerns, please use our <a href="/report">report page</a>.
         </p>
+        <div style={{ marginTop: 24 }}>
+          <a href="mailto:support@secretxperience.eu" style={{ fontSize: 16, color: S.gold, fontFamily: S.serif, letterSpacing: '0.02em' }}>support@secretxperience.eu</a>
+        </div>
       </div>
 
-      {/* Content */}
-      <main style={{ maxWidth: 820, margin: '0 auto', padding: '64px 24px 120px' }}>
+      <main style={{ maxWidth: 820, margin: '0 auto', padding: '4rem 24px 6rem' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 280px', gap: 48, alignItems: 'flex-start' }}>
 
           {/* Form column */}
           <div>
             {submitted ? (
-              <div style={{ border: '0.5px solid #c5a05a44', borderRadius: 4, padding: '40px 32px', textAlign: 'center', background: '#0a0a0a' }}>
-                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 48, color: '#c5a05a', marginBottom: 16, lineHeight: 1 }}>✓</div>
-                <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 400, color: '#e8e0d0', marginBottom: 12 }}>
-                  Message Sent
-                </h2>
+              <div style={{ border: `0.5px solid #c5a05a44`, borderRadius: 4, padding: '40px 32px', textAlign: 'center', background: '#0a0a0a' }}>
+                <div style={{ fontFamily: S.serif, fontSize: 48, color: S.gold, marginBottom: 16, lineHeight: 1 }}>✓</div>
+                <h2 style={{ fontFamily: S.serif, fontSize: 28, fontWeight: 400, color: S.t, marginBottom: 12 }}>Message Sent</h2>
                 <p style={{ fontSize: 14, color: '#777', lineHeight: 1.8 }}>
-                  Thank you for reaching out. Our support team will review your message and respond to <strong style={{ color: '#c5a05a' }}>{form.email || 'your email'}</strong> within 24 hours.
+                  Thank you for reaching out. Our support team will review your message and respond to{' '}
+                  <strong style={{ color: S.gold }}>{form.email || 'your email'}</strong> within 24–48 hours.
                 </p>
                 <button
                   onClick={() => { setSubmitted(false); setForm({ name: '', email: '', subject: '', message: '' }) }}
-                  style={{ marginTop: 24, background: 'none', border: '0.5px solid #c5a05a44', color: '#c5a05a', cursor: 'pointer', padding: '10px 20px', borderRadius: 3, fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: "'Jost', sans-serif" }}
+                  style={{ marginTop: 24, background: 'none', border: `0.5px solid #c5a05a44`, color: S.gold, cursor: 'pointer', padding: '10px 20px', borderRadius: 3, fontSize: 12, letterSpacing: '0.08em', textTransform: 'uppercase', fontFamily: S.sans }}
                 >
                   Send another message
                 </button>
@@ -120,7 +96,7 @@ export default function ContactPage() {
             ) : (
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#555', marginBottom: 6 }}>Your Name</label>
+                  <label style={{ display: 'block', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: S.t3, marginBottom: 6 }}>Your Name</label>
                   <input
                     type="text"
                     required
@@ -131,7 +107,7 @@ export default function ContactPage() {
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#555', marginBottom: 6 }}>Email Address</label>
+                  <label style={{ display: 'block', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: S.t3, marginBottom: 6 }}>Email Address</label>
                   <input
                     type="email"
                     required
@@ -142,7 +118,7 @@ export default function ContactPage() {
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#555', marginBottom: 6 }}>Subject</label>
+                  <label style={{ display: 'block', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: S.t3, marginBottom: 6 }}>Subject</label>
                   <select
                     required
                     value={form.subject}
@@ -150,15 +126,16 @@ export default function ContactPage() {
                     style={{ ...inputStyle, cursor: 'pointer' }}
                   >
                     <option value="" disabled>Select a subject…</option>
-                    <option value="general">General inquiry</option>
-                    <option value="billing">Billing</option>
-                    <option value="technical">Technical issue</option>
-                    <option value="abuse">Report abuse</option>
+                    <option value="general">General Enquiry</option>
+                    <option value="advertise">Advertise</option>
+                    <option value="report">Report Content</option>
+                    <option value="support">Support</option>
+                    <option value="press">Press</option>
                     <option value="other">Other</option>
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#555', marginBottom: 6 }}>Message</label>
+                  <label style={{ display: 'block', fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: S.t3, marginBottom: 6 }}>Message</label>
                   <textarea
                     required
                     rows={6}
@@ -170,12 +147,7 @@ export default function ContactPage() {
                 </div>
                 <button
                   type="submit"
-                  style={{
-                    background: '#c5a05a', color: '#080808', border: 'none', cursor: 'pointer',
-                    padding: '14px 28px', borderRadius: 3, fontSize: 12,
-                    letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 500,
-                    fontFamily: "'Jost', sans-serif", alignSelf: 'flex-start',
-                  }}
+                  style={{ background: S.gold, color: '#080808', border: 'none', cursor: 'pointer', padding: '14px 28px', borderRadius: 3, fontSize: 12, letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 500, fontFamily: S.sans, alignSelf: 'flex-start' }}
                 >
                   Send Message
                 </button>
@@ -184,33 +156,61 @@ export default function ContactPage() {
           </div>
 
           {/* Info column */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-            <div style={{ border: '0.5px solid #c5a05a22', borderRadius: 4, padding: '20px', background: '#0a0a0a' }}>
-              <div style={{ fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#555', marginBottom: 8 }}>Email Support</div>
-              <a href="mailto:support@secret-xperience.eu" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 16, color: '#c5a05a', wordBreak: 'break-all' }}>
-                support@secret-xperience.eu
-              </a>
-            </div>
-            <div style={{ border: '0.5px solid #c5a05a22', borderRadius: 4, padding: '20px', background: '#0a0a0a' }}>
-              <div style={{ fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#555', marginBottom: 8 }}>Response Time</div>
-              <div style={{ fontSize: 14, color: '#777', lineHeight: 1.6 }}>Within 24 hours<br /><span style={{ color: '#444', fontSize: 12 }}>Mon – Sun, including weekends</span></div>
-            </div>
-            <div style={{ border: '0.5px solid #c5a05a22', borderRadius: 4, padding: '20px', background: '#0a0a0a' }}>
-              <div style={{ fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#555', marginBottom: 8 }}>Self-Service</div>
-              <a href="/faq" style={{ fontSize: 14, color: '#c5a05a', lineHeight: 1.7, display: 'block' }}>Browse the FAQ →</a>
-              <a href="/trust-safety" style={{ fontSize: 14, color: '#c5a05a66', lineHeight: 1.7, display: 'block' }}>Trust &amp; Safety →</a>
-            </div>
-            <div style={{ border: '0.5px solid #c5a05a11', borderRadius: 4, padding: '20px', background: '#0a0a0a' }}>
-              <div style={{ fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#444', marginBottom: 8 }}>Legal &amp; Press</div>
-              <div style={{ fontSize: 13, color: '#444', lineHeight: 1.8 }}>
-                Legal: <a href="mailto:legal@secret-xperience.eu" style={{ color: '#c5a05a55' }}>legal@…</a><br />
-                Press: <a href="mailto:press@secret-xperience.eu" style={{ color: '#c5a05a55' }}>press@…</a><br />
-                Privacy: <a href="mailto:privacy@secret-xperience.eu" style={{ color: '#c5a05a55' }}>privacy@…</a>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+            {/* Company card */}
+            <div style={{ border: `0.5px solid ${S.b}`, borderRadius: 4, padding: '20px', background: '#0a0a0a' }}>
+              <div style={{ fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: S.t3, marginBottom: 10 }}>Company</div>
+              <div style={{ fontSize: 14, color: S.t2, lineHeight: 2 }}>
+                <strong style={{ color: S.t, display: 'block', marginBottom: 2 }}>3S.lifestyle bv</strong>
+                Tangendallaan 23<br />
+                1850 Grimbergen<br />
+                Belgium<br />
+                <span style={{ color: S.t3, fontSize: 12 }}>VAT: BE 0749.661.728</span>
               </div>
             </div>
+
+            {/* Email */}
+            <div style={{ border: `0.5px solid ${S.b}`, borderRadius: 4, padding: '20px', background: '#0a0a0a' }}>
+              <div style={{ fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: S.t3, marginBottom: 8 }}>Email Support</div>
+              <a href="mailto:support@secretxperience.eu" style={{ fontFamily: S.serif, fontSize: 15, color: S.gold, wordBreak: 'break-all', display: 'block' }}>
+                support@secretxperience.eu
+              </a>
+            </div>
+
+            {/* Response time */}
+            <div style={{ border: `0.5px solid ${S.b}`, borderRadius: 4, padding: '20px', background: '#0a0a0a' }}>
+              <div style={{ fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: S.t3, marginBottom: 8 }}>Response Time</div>
+              <div style={{ fontSize: 14, color: S.t2, lineHeight: 1.7 }}>
+                Within 24–48 hours<br />
+                <span style={{ color: '#444', fontSize: 12 }}>Mon – Sun, including weekends</span>
+              </div>
+            </div>
+
+            {/* Report content */}
+            <div style={{ border: `0.5px solid ${S.b}`, borderRadius: 4, padding: '20px', background: '#0a0a0a' }}>
+              <div style={{ fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: S.t3, marginBottom: 8 }}>Report Content</div>
+              <div style={{ fontSize: 13, color: S.t2, lineHeight: 1.7, marginBottom: 8 }}>
+                To report illegal or harmful content, use our dedicated report page.
+              </div>
+              <a href="/report" style={{ fontSize: 13, color: S.gold }}>Report content →</a>
+            </div>
+
+            {/* Self-service */}
+            <div style={{ border: `0.5px solid #c5a05a11`, borderRadius: 4, padding: '20px', background: '#0a0a0a' }}>
+              <div style={{ fontSize: 11, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#444', marginBottom: 8 }}>Self-Service</div>
+              <a href="/faq" style={{ fontSize: 13, color: S.gold, lineHeight: 1.9, display: 'block' }}>Browse the FAQ →</a>
+              <a href="/how-it-works" style={{ fontSize: 13, color: '#c5a05a66', lineHeight: 1.9, display: 'block' }}>How it works →</a>
+              <a href="/advertise" style={{ fontSize: 13, color: '#c5a05a66', lineHeight: 1.9, display: 'block' }}>Advertise on the platform →</a>
+            </div>
+
           </div>
         </div>
       </main>
+
+      <footer style={{ borderTop: `0.5px solid ${S.b}`, padding: '2rem 24px', textAlign: 'center' }}>
+        <p style={{ fontSize: 12, color: S.t2 }}>© 2025 SecretXperience.eu · <a href="/terms">Terms of Use</a> · <a href="/privacy">Privacy Policy</a> · <a href="/cookies">Cookie Policy</a> · <a href="/dmca">DMCA</a> · <a href="/contact">Contact</a></p>
+      </footer>
     </div>
   )
 }
