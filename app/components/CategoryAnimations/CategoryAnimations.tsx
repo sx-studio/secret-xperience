@@ -2,36 +2,23 @@
 
 import { useEffect, useRef } from 'react'
 import Script from 'next/script'
-import Link from 'next/link'
 import './styles.css'
 
-/**
- * CategoryAnimations
- * ─────────────────────────────────────────────────────────────
- * Eight unique GSAP explainer animations — one per platform
- * category. Drops in at the bottom of the homepage.
- *
- * Loads GSAP + MotionPathPlugin from CDN via <Script>. After
- * both are ready, the animations module on `window.__catAnims`
- * boots and wires IntersectionObserver-based play/pause.
- *
- * Honours `prefers-reduced-motion`.
- */
 export default function CategoryAnimations() {
   const booted = useRef(false)
 
-  // boot once both GSAP scripts are ready
   function tryBoot() {
     if (booted.current) return
     if (typeof window === 'undefined') return
     // @ts-expect-error — gsap is loaded from CDN
     if (!window.gsap) return
     booted.current = true
-    // dynamic import keeps animations.js out of the initial bundle
     import('./animations.js').catch(err => console.warn('Category animations failed to boot', err))
   }
 
   useEffect(() => { tryBoot() }, [])
+
+  const go = (path: string) => () => { window.location.href = path }
 
   return (
     <>
@@ -52,17 +39,18 @@ export default function CategoryAnimations() {
           <header className="section-head">
             <span className="t-eyebrow t-eyebrow-gold">EIGHT WORLDS · ONE MEMBERSHIP</span>
             <h2 className="t-display section-title">
-              How <em>SecretXperience</em> Works
+              Discover what awaits<br /><em>after the door closes.</em>
             </h2>
             <p className="t-body section-sub">
-              Eight curated categories. Verified providers. One discreet membership.
+              From candlelit dinners to private nightlife, from creator subscriptions to weekend escapes —
+              every category is curated, verified, and built for the discreet.
             </p>
           </header>
 
           <div className="cat-grid">
 
             {/* 1. ESCORTS — Candleglow */}
-            <article className="cat-card" id="cat-escorts" data-anim="candleglow" onClick={() => window.location.href='/escorts'} style={{ cursor: 'pointer' }}>
+            <article className="cat-card" id="cat-escorts" data-anim="candleglow" onClick={go('/escorts')}>
               <div className="cat-canvas">
                 <svg viewBox="0 0 260 200" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
                   <defs>
@@ -100,12 +88,12 @@ export default function CategoryAnimations() {
               <div className="cat-meta">
                 <h3 className="cat-title">Escorts</h3>
                 <p className="cat-desc">Verified, discreet companions — by the hour, the evening, or the weekend.</p>
-                <Link href="/escorts" className="cat-cta" onClick={e => e.stopPropagation()}>Explore escorts →</Link>
+                <a href="/escorts" className="cat-cta" onClick={e => e.stopPropagation()}>Explore escorts →</a>
               </div>
             </article>
 
             {/* 2. COMPANIONS — Silk Thread */}
-            <article className="cat-card" id="cat-companions" data-anim="silk" onClick={() => window.location.href='/companionship'} style={{ cursor: 'pointer' }}>
+            <article className="cat-card" id="cat-companions" data-anim="silk" onClick={go('/companionship')}>
               <div className="cat-canvas">
                 <svg viewBox="0 0 260 200" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
                   <defs>
@@ -137,12 +125,12 @@ export default function CategoryAnimations() {
               <div className="cat-meta">
                 <h3 className="cat-title">Companions</h3>
                 <p className="cat-desc">Dinner-date companions, travel partners, plus-ones for the night.</p>
-                <Link href="/companionship" className="cat-cta" onClick={e => e.stopPropagation()}>Explore companions →</Link>
+                <a href="/companionship" className="cat-cta" onClick={e => e.stopPropagation()}>Explore companions →</a>
               </div>
             </article>
 
             {/* 3. NIGHTLIFE — Pulse Rings */}
-            <article className="cat-card" id="cat-nightlife" data-anim="pulse" onClick={() => window.location.href='/nightlife'} style={{ cursor: 'pointer' }}>
+            <article className="cat-card" id="cat-nightlife" data-anim="pulse" onClick={go('/nightlife')}>
               <div className="cat-canvas">
                 <svg viewBox="0 0 260 200" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
                   <defs>
@@ -177,12 +165,12 @@ export default function CategoryAnimations() {
               <div className="cat-meta">
                 <h3 className="cat-title">Nightlife</h3>
                 <p className="cat-desc">Private clubs, members-only lounges, after-hours by reservation.</p>
-                <Link href="/nightlife" className="cat-cta" onClick={e => e.stopPropagation()}>Explore venues →</Link>
+                <a href="/nightlife" className="cat-cta" onClick={e => e.stopPropagation()}>Explore venues →</a>
               </div>
             </article>
 
             {/* 4. CREATORS — Aperture */}
-            <article className="cat-card" id="cat-creators" data-anim="aperture" onClick={() => window.location.href='/creators'} style={{ cursor: 'pointer' }}>
+            <article className="cat-card" id="cat-creators" data-anim="aperture" onClick={go('/creators')}>
               <div className="cat-canvas">
                 <svg viewBox="0 0 260 200" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
                   <defs>
@@ -225,12 +213,12 @@ export default function CategoryAnimations() {
               <div className="cat-meta">
                 <h3 className="cat-title">Creators</h3>
                 <p className="cat-desc">Private content, custom commissions, subscriptions to your favorites.</p>
-                <Link href="/creators" className="cat-cta" onClick={e => e.stopPropagation()}>Browse creators →</Link>
+                <a href="/creators" className="cat-cta" onClick={e => e.stopPropagation()}>Browse creators →</a>
               </div>
             </article>
 
             {/* 5. RENTALS — Door Light */}
-            <article className="cat-card" id="cat-rentals" data-anim="door" onClick={() => window.location.href='/rentals'} style={{ cursor: 'pointer' }}>
+            <article className="cat-card" id="cat-rentals" data-anim="door" onClick={go('/rentals')}>
               <div className="cat-canvas">
                 <svg viewBox="0 0 260 200" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
                   <defs>
@@ -271,12 +259,12 @@ export default function CategoryAnimations() {
               <div className="cat-meta">
                 <h3 className="cat-title">Rentals</h3>
                 <p className="cat-desc">Private apartments and suites — discreet entry, hourly or nightly.</p>
-                <Link href="/rentals" className="cat-cta" onClick={e => e.stopPropagation()}>Find a space →</Link>
+                <a href="/rentals" className="cat-cta" onClick={e => e.stopPropagation()}>Find a space →</a>
               </div>
             </article>
 
             {/* 6. HOTELS — Key Card */}
-            <article className="cat-card" id="cat-hotels" data-anim="keycard" onClick={() => window.location.href='/hotels'} style={{ cursor: 'pointer' }}>
+            <article className="cat-card" id="cat-hotels" data-anim="keycard" onClick={go('/hotels')}>
               <div className="cat-canvas">
                 <svg viewBox="0 0 260 200" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
                   <defs>
@@ -307,12 +295,12 @@ export default function CategoryAnimations() {
               <div className="cat-meta">
                 <h3 className="cat-title">Hotels</h3>
                 <p className="cat-desc">Adult-friendly hotels, late check-in, no questions asked.</p>
-                <Link href="/hotels" className="cat-cta" onClick={e => e.stopPropagation()}>Book a room →</Link>
+                <a href="/hotels" className="cat-cta" onClick={e => e.stopPropagation()}>Book a room →</a>
               </div>
             </article>
 
             {/* 7. EVENTS — Champagne */}
-            <article className="cat-card" id="cat-events" data-anim="champagne" onClick={() => window.location.href='/events'} style={{ cursor: 'pointer' }}>
+            <article className="cat-card" id="cat-events" data-anim="champagne" onClick={go('/events')}>
               <div className="cat-canvas">
                 <svg viewBox="0 0 260 200" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
                   <defs>
@@ -360,12 +348,12 @@ export default function CategoryAnimations() {
               <div className="cat-meta">
                 <h3 className="cat-title">Events</h3>
                 <p className="cat-desc">Curated parties, soirées, and private events across the continent.</p>
-                <Link href="/events" className="cat-cta" onClick={e => e.stopPropagation()}>View events calendar →</Link>
+                <a href="/events" className="cat-cta" onClick={e => e.stopPropagation()}>View events calendar →</a>
               </div>
             </article>
 
             {/* 8. SHOP — Ribbon Untie */}
-            <article className="cat-card" id="cat-shop" data-anim="ribbon" onClick={() => window.location.href='/shop'} style={{ cursor: 'pointer' }}>
+            <article className="cat-card" id="cat-shop" data-anim="ribbon" onClick={go('/shop')}>
               <div className="cat-canvas">
                 <svg viewBox="0 0 260 200" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
                   <defs>
@@ -407,7 +395,7 @@ export default function CategoryAnimations() {
               <div className="cat-meta">
                 <h3 className="cat-title">Shop</h3>
                 <p className="cat-desc">Refined accessories, intimate gifts, lingerie — delivered discreetly.</p>
-                <Link href="/shop" className="cat-cta" onClick={e => e.stopPropagation()}>Shop now →</Link>
+                <a href="/shop" className="cat-cta" onClick={e => e.stopPropagation()}>Shop now →</a>
               </div>
             </article>
 

@@ -3,25 +3,6 @@
    Sits on the noir/velvet base; uses tokens from colors_and_type.css.
    ════════════════════════════════════════════════════════════════ */
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  background: var(--bg);
-  color: var(--t);
-  font-family: var(--sans);
-  font-size: 14px;
-  line-height: 1.65;
-  -webkit-font-smoothing: antialiased;
-  min-height: 100vh;
-  position: relative;
-}
-
-/* grain overlay — keeps the section on the noir mood */
-body::before {
-  content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background-image: var(--grain-url);
-  opacity: .4; mix-blend-mode: overlay;
-}
-
 .cat-anim-section {
   position: relative;
   z-index: 1;
@@ -95,7 +76,6 @@ body::before {
   cursor: pointer;
 }
 .cat-card::before {
-  /* faint per-card gradient backdrop — matches the noir card system */
   content: ''; position: absolute; inset: 0;
   background: var(--grad-noir);
   opacity: .6;
@@ -109,7 +89,7 @@ body::before {
 }
 .cat-card:hover .cat-canvas { background: rgba(255,255,255,0.015); }
 
-/* per-category accent (subtle — drives the inner-glow tint) */
+/* per-category accent glow on hover */
 #cat-escorts::after,
 #cat-companions::after,
 #cat-nightlife::after,
@@ -175,26 +155,24 @@ body::before {
   color: var(--t2);
   text-wrap: pretty;
   min-height: 2.6em;
-  margin-bottom: 1.1rem;
+  margin-bottom: 1rem;
 }
+
+/* ── CTA link ───────────────────────────────────────────────── */
 .cat-cta {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--sans);
+  letter-spacing: 0.04em;
   color: var(--gold);
   text-decoration: none;
   opacity: 0.75;
   transition: opacity var(--t-fast), gap var(--t-fast);
 }
-.cat-cta:hover { opacity: 1; gap: 10px; }
-.cat-card a.cat-link {
-  display: block;
-  text-decoration: none;
-  color: inherit;
-}
+.cat-cta:hover { opacity: 1; gap: 8px; }
 
 /* ── Section foot ───────────────────────────────────────────── */
 .section-foot {
