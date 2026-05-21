@@ -157,6 +157,7 @@ export default function DashboardPage() {
   const [listings, setListings]     = useState<any[]>([])
   const [bookings, setBookings]     = useState<any[]>([])
   const [favorites, setFavorites]   = useState<any[]>([])
+  const [tokenBalance, setTokenBalance] = useState<number | null>(null)
   const [loading, setLoading]       = useState(true)
   const [idVerifStatus, setIdVerifStatus] = useState<'not_submitted'|'pending'|'approved'|'rejected'>('not_submitted')
   const [editingProfile, setEditingProfile] = useState(false)
@@ -185,13 +186,14 @@ export default function DashboardPage() {
 
       setUser(session.user)
 
-      const [{ data: profile }, { data: listings }, { data: bookings }, { data: idVerif }, { data: favData }, { count: unreadCount }] = await Promise.all([
+      const [{ data: profile }, { data: listings }, { data: bookings }, { data: idVerif }, { data: favData }, { count: unreadCount }, { data: walletData }] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', session.user.id).single(),
         supabase.from('listings').select('*').eq('profile_id', session.user.id),
-        supabase.from('bookings').select('*').or(`client_id.eq.${session.user.id},provider_id.eq.${session.user.id}`),
+        supabase.from('bookings').select('*, listing:listings(title,category)').or(`client_id.eq.${session.user.id},provider_id.eq.${session.user.id}`).order('created_at', { ascending: false }).limit(20),
         supabase.from('identity_verifications').select('status').eq('user_id', session.user.id).single(),
         supabase.from('favorites').select('listing_id, listings(id,title,category,city,country,price_from,images,active,tier)').eq('user_id', session.user.id),
         supabase.from('messages').select('*', { count: 'exact', head: true }).eq('receiver_id', session.user.id).eq('read', false),
+        supabase.from('user_wallets').select('balance').eq('user_id', session.user.id).single(),
       ])
       if (idVerif?.status) setIdVerifStatus(idVerif.status as any)
       setUnreadMessages(unreadCount || 0)
@@ -200,6 +202,7 @@ export default function DashboardPage() {
       setListings(listings || [])
       setBookings(bookings || [])
       setFavorites((favData || []).map((f: any) => f.listings).filter(Boolean))
+      if (walletData?.balance != null) setTokenBalance(walletData.balance)
       setLoading(false)
 
       const params = new URLSearchParams(window.location.search)
@@ -344,8 +347,10 @@ export default function DashboardPage() {
     </>
   )
 
-  const recentBookings = bookings.slice(0, 5)
   const activeListings = listings.filter(l => l.active).length
+  const myBookings       = bookings.filter(b => b.client_id === user?.id)
+  const incomingBookings = bookings.filter(b => b.provider_id === user?.id)
+  const isProvider = profile?.role === 'provider' || profile?.role === 'venue' || profile?.role === 'creator'
 
   return (
     <>
@@ -903,7 +908,7 @@ export default function DashboardPage() {
               { label: 'Listings',  value: listings.length,         sub: `${activeListings} active`,         up: activeListings > 0 },
               { label: 'Bookings',  value: bookings.length,         sub: 'total bookings',                   up: bookings.length > 0 },
               { label: 'Messages',  value: unreadMessages,           sub: 'unread',                           up: unreadMessages > 0 },
-              { label: 'Active',    value: activeListings,           sub: 'live listings',                    up: activeListings > 0 },
+              { label: 'Tokens',    value: tokenBalance ?? '—',      sub: 'wallet balance',                   up: (tokenBalance ?? 0) > 0 },
             ].map(stat => (
               <div key={stat.label} className="db-stat-card">
                 <div className="db-stat-eyebrow">{stat.label}</div>
@@ -1184,65 +1189,103 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* ── Recent Bookings ── */}
-          <div className="db-card" style={{ marginBottom: '1.5rem' }}>
-            <div style={{ marginBottom: '1.375rem' }}>
-              <span className="db-section-title">Recent bookings</span>
-            </div>
-
-            {recentBookings.length === 0 ? (
-              <div className="db-empty-state">
-                <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--gbg)', border: '0.5px solid var(--gbrd)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <i className="ti ti-calendar" aria-hidden="true" style={{ fontSize: '22px', color: 'var(--gold)' }} />
-                </div>
-                <p style={{
-                  color: 'var(--t3, rgba(255,255,255,0.28))',
-                  fontSize: '13px',
-                  fontWeight: 300,
-                  fontFamily: 'var(--sans)',
-                  letterSpacing: '0.03em',
-                }}>
-                  No bookings yet. Once clients book your listings they will appear here.
-                </p>
+          {/* ── Incoming Booking Requests (provider view) ── */}
+          {isProvider && (
+            <div className="db-card" style={{ marginBottom: '1.5rem' }}>
+              <div style={{ marginBottom: '1.375rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span className="db-section-title">Incoming requests</span>
+                {incomingBookings.filter(b => b.status === 'pending').length > 0 && (
+                  <span style={{ fontSize: 11, fontWeight: 700, background: 'rgba(245,168,38,0.12)', color: '#f5a826', border: '0.5px solid rgba(245,168,38,0.3)', borderRadius: 20, padding: '3px 10px', fontFamily: 'var(--sans)', letterSpacing: '0.08em' }}>
+                    {incomingBookings.filter(b => b.status === 'pending').length} pending
+                  </span>
+                )}
               </div>
-            ) : (
+              {incomingBookings.length === 0 ? (
+                <div className="db-empty-state">
+                  <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--gbg)', border: '0.5px solid var(--gbrd)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <i className="ti ti-calendar" aria-hidden="true" style={{ fontSize: '22px', color: 'var(--gold)' }} />
+                  </div>
+                  <p style={{ color: 'var(--t3)', fontSize: '13px', fontWeight: 300, fontFamily: 'var(--sans)', letterSpacing: '0.03em' }}>
+                    No booking requests yet. Once clients book your listings they will appear here.
+                  </p>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {incomingBookings.slice(0, 8).map((booking, i) => (
+                    <div key={booking.id ?? i} className="db-booking-row">
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontFamily: 'var(--serif)', fontSize: '15px', fontWeight: 400, color: 'var(--t)', marginBottom: '3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {(booking.listing as any)?.title || booking.listing_id || 'Booking'}
+                        </div>
+                        <div style={{ fontSize: '12px', color: 'var(--t3)', fontFamily: 'var(--sans)', fontWeight: 300, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                          {booking.date && <span>{booking.date}{booking.time ? ` · ${booking.time}` : ''}</span>}
+                          {booking.duration_hours && <span>{booking.duration_hours}h</span>}
+                          {booking.total_amount > 0 && <span style={{ color: 'var(--gold)' }}>€{booking.total_amount}</span>}
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
+                        {booking.status === 'pending' && (
+                          <>
+                            <button
+                              onClick={async () => {
+                                const sb = (await import('../lib/supabase')).createClient()
+                                await sb.from('bookings').update({ status: 'confirmed' }).eq('id', booking.id)
+                                setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, status: 'confirmed' } : b))
+                              }}
+                              style={{ padding: '5px 12px', borderRadius: 8, border: '0.5px solid rgba(62,207,142,0.4)', background: 'rgba(62,207,142,0.08)', color: '#3ecf8e', cursor: 'pointer', fontSize: 12, fontWeight: 600, fontFamily: 'var(--sans)', letterSpacing: '0.04em' }}
+                            >Confirm</button>
+                            <button
+                              onClick={async () => {
+                                const sb = (await import('../lib/supabase')).createClient()
+                                await sb.from('bookings').update({ status: 'cancelled' }).eq('id', booking.id)
+                                setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, status: 'cancelled' } : b))
+                              }}
+                              style={{ padding: '5px 12px', borderRadius: 8, border: '0.5px solid rgba(226,83,107,0.3)', background: 'transparent', color: '#e2536b', cursor: 'pointer', fontSize: 12, fontWeight: 600, fontFamily: 'var(--sans)', letterSpacing: '0.04em' }}
+                            >Decline</button>
+                          </>
+                        )}
+                        <BookingBadge status={booking.status ?? 'pending'} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── My Bookings (client view) ── */}
+          {myBookings.length > 0 && (
+            <div className="db-card" style={{ marginBottom: '1.5rem' }}>
+              <div style={{ marginBottom: '1.375rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span className="db-section-title">My bookings</span>
+                <span style={{ fontSize: 11, color: 'var(--t3)', fontFamily: 'var(--sans)', fontWeight: 300 }}>{myBookings.length} total</span>
+              </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {recentBookings.map((booking, i) => (
+                {myBookings.slice(0, 6).map((booking, i) => (
                   <div key={booking.id ?? i} className="db-booking-row">
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{
-                        fontFamily: 'var(--serif)',
-                        fontSize: '15px',
-                        fontWeight: 400,
-                        color: 'var(--t, #ece8e1)',
-                        marginBottom: '3px',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                      }}>
-                        {booking.listing_title || booking.listing_id || 'Booking'}
+                      <div style={{ fontFamily: 'var(--serif)', fontSize: '15px', fontWeight: 400, color: 'var(--t)', marginBottom: '3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {(booking.listing as any)?.title || 'Booking'}
                       </div>
-                      {booking.created_at && (
-                        <div style={{
-                          fontSize: '13px',
-                          color: 'var(--t3, rgba(255,255,255,0.25))',
-                          fontFamily: 'var(--sans)',
-                          fontWeight: 300,
-                        }}>
-                          {new Date(booking.created_at).toLocaleDateString('en-GB', {
-                            day: 'numeric',
-                            month: 'short',
-                            year: 'numeric',
-                          })}
-                        </div>
+                      <div style={{ fontSize: '12px', color: 'var(--t3)', fontFamily: 'var(--sans)', fontWeight: 300, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                        {booking.date && <span>{booking.date}{booking.time ? ` · ${booking.time}` : ''}</span>}
+                        {booking.duration_hours && <span>{booking.duration_hours}h</span>}
+                        {booking.total_amount > 0 && <span style={{ color: 'var(--gold)' }}>€{booking.total_amount}</span>}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
+                      <BookingBadge status={booking.status ?? 'pending'} />
+                      {booking.status === 'confirmed' && (
+                        <a href="/messages" style={{ padding: '5px 12px', borderRadius: 8, border: '0.5px solid var(--b2)', background: 'transparent', color: 'var(--t2)', fontSize: 12, fontWeight: 600, fontFamily: 'var(--sans)', letterSpacing: '0.04em', textDecoration: 'none' }}>
+                          Message
+                        </a>
                       )}
                     </div>
-                    <BookingBadge status={booking.status ?? 'pending'} />
                   </div>
                 ))}
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* ── Saved Listings ── */}
           {favorites.length > 0 && (
@@ -1293,6 +1336,13 @@ export default function DashboardPage() {
                 onClick={() => window.location.href = '/messages'}
               >
                 View messages
+              </button>
+              <button
+                className="db-quick-btn-dark"
+                onClick={() => window.location.href = '/tokens'}
+                style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+              >
+                ◈ {tokenBalance != null ? `${tokenBalance} tokens` : 'Buy tokens'}
               </button>
               <button
                 className="db-quick-btn-dark"

@@ -18,6 +18,15 @@ interface Wallet {
   total_spent: number
 }
 
+interface LedgerEntry {
+  id: string
+  amount: number
+  type: 'purchase' | 'spend' | 'refund'
+  description: string
+  created_at: string
+  balance_after: number
+}
+
 const TIER_COSTS = [
   { tier: 'basic',    label: 'Basic Listing',    tokens: 0,   days: 1,  desc: 'Standard grid listing — free, 24-hour duration, one per day.' },
   { tier: 'featured', label: 'Featured Listing',  tokens: 50,  days: 7,  desc: 'Gold-bordered card, priority placement in category grid.' },
@@ -45,6 +54,7 @@ const S = {
 export default function TokensPage() {
   const [packages, setPackages] = useState<Package[]>([])
   const [wallet,   setWallet]   = useState<Wallet | null>(null)
+  const [ledger,   setLedger]   = useState<LedgerEntry[]>([])
   const [session,  setSession]  = useState<any>(null)
   const [loading,  setLoading]  = useState(false)
   const [selected, setSelected] = useState<string | null>(null)
@@ -63,6 +73,8 @@ export default function TokensPage() {
       if (session) {
         supabase.from('user_wallets').select('balance,total_purchased,total_spent').eq('user_id', session.user.id).single()
           .then(({ data }) => setWallet(data))
+        supabase.from('token_ledger').select('id,amount,type,description,created_at,balance_after').eq('user_id', session.user.id).order('created_at', { ascending: false }).limit(15)
+          .then(({ data }) => setLedger(data || []))
       }
     })
     supabase.from('token_packages').select('*').eq('active', true).order('sort_order')
@@ -165,6 +177,36 @@ export default function TokensPage() {
                   ≈ €{(wallet.balance * (75 / 850)).toFixed(2)}
                 </p>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Transaction history */}
+        {ledger.length > 0 && (
+          <div style={{ marginBottom:'3rem' }}>
+            <h2 style={{ fontFamily:S.serif, fontSize:22, fontWeight:400, marginBottom:'1rem' }}>
+              Transaction <em style={{ color:S.gold, fontStyle:'italic' }}>history</em>
+            </h2>
+            <div style={{ background:'#0a0908', border:'0.5px solid #ffffff0f', borderRadius:12, overflow:'hidden' }}>
+              {ledger.map((entry, i) => (
+                <div key={entry.id} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 18px', borderBottom: i < ledger.length - 1 ? '0.5px solid #ffffff08' : 'none', gap:12 }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:12, flex:1, minWidth:0 }}>
+                    <div style={{ width:32, height:32, borderRadius:8, background: entry.type === 'purchase' ? 'rgba(62,207,142,0.1)' : entry.type === 'spend' ? 'rgba(197,160,90,0.1)' : 'rgba(130,100,220,0.1)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontSize:14 }}>
+                      {entry.type === 'purchase' ? '↓' : entry.type === 'spend' ? '◈' : '↑'}
+                    </div>
+                    <div style={{ minWidth:0 }}>
+                      <div style={{ fontSize:13, color:S.t, fontWeight:500, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{entry.description}</div>
+                      <div style={{ fontSize:11, color:S.t3 }}>{new Date(entry.created_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })}</div>
+                    </div>
+                  </div>
+                  <div style={{ textAlign:'right', flexShrink:0 }}>
+                    <div style={{ fontSize:14, fontWeight:700, color: entry.type === 'purchase' ? '#3ecf8e' : entry.amount < 0 ? '#e2536b' : S.gold }}>
+                      {entry.amount > 0 ? '+' : ''}{entry.amount} ◈
+                    </div>
+                    <div style={{ fontSize:11, color:S.t3 }}>bal: {entry.balance_after}</div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}

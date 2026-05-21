@@ -28,6 +28,8 @@ const CAT_GRAD: Record<string, string> = {
   rentals:       'linear-gradient(140deg,#0f0a1a,#090610)',
 }
 
+const PAGE_SIZE = 24
+
 export async function generateMetadata({ searchParams }: { searchParams: { q?: string; category?: string; city?: string } }): Promise<Metadata> {
   const q = searchParams.q || ''
   const cat = searchParams.category || ''
@@ -40,7 +42,7 @@ export async function generateMetadata({ searchParams }: { searchParams: { q?: s
   }
 }
 
-export default async function SearchPage({ searchParams }: { searchParams: { q?: string; category?: string; city?: string; sort?: string } }) {
+export default async function SearchPage({ searchParams }: { searchParams: { q?: string; category?: string; city?: string; sort?: string; page?: string } }) {
   const cookieStore = cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -52,13 +54,14 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
   const category = searchParams.category || 'all'
   const city     = searchParams.city || ''
   const sort     = searchParams.sort || 'relevance'
+  const page     = Math.max(0, parseInt(searchParams.page || '0'))
 
   // Escape PostgREST-significant chars (`,` `(` `)` `*`) so user input can't break the .or() parse
   const safeQ = q.replace(/[,()*\\]/g, ' ').trim()
 
   let query = supabase
     .from('listings')
-    .select('id,title,description,category,subcategory,city,country,price_from,price_to,verified,premium,trending,rating,review_count,meet_type,featured_until,tags,images')
+    .select('id,title,description,category,subcategory,city,country,price_from,price_to,verified,premium,trending,rating,review_count,meet_type,featured_until,tags,images', { count: 'exact' })
     .eq('active', true)
 
   if (safeQ) {
@@ -81,7 +84,7 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
     query = query.order('created_at', { ascending: false })
   }
 
-  let { data: listings } = await query.limit(48)
+  let { data: listings, count: totalCount } = await query.range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1)
 
   // Client-side relevance bump: exact title matches first when there's a query
   if (safeQ && sort === 'relevance' && listings) {
@@ -209,11 +212,14 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
           </div>
 
           {/* RESULTS COUNT */}
-          <div style={{ fontSize: '13px', color: 'var(--t3)', marginBottom: '1.5rem' }}>
-            {(listings?.length || 0)} {(listings?.length || 0) === 1 ? 'listing' : 'listings'}
-            {q && <span> matching <em style={{ color: 'var(--t2)' }}>"{q}"</em></span>}
-            {category !== 'all' && <span> in <em style={{ color: 'var(--t2)', textTransform: 'capitalize' }}>{category}</em></span>}
-            {city && city !== 'All cities' && <span> · <em style={{ color: 'var(--t2)' }}>{city}</em></span>}
+          <div style={{ fontSize: '13px', color: 'var(--t3)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+            <span>
+              {totalCount ?? (listings?.length || 0)} {(totalCount ?? listings?.length ?? 0) === 1 ? 'listing' : 'listings'}
+              {q && <span> matching <em style={{ color: 'var(--t2)' }}>"{q}"</em></span>}
+              {category !== 'all' && <span> in <em style={{ color: 'var(--t2)', textTransform: 'capitalize' }}>{category}</em></span>}
+              {city && city !== 'All cities' && <span> · <em style={{ color: 'var(--t2)' }}>{city}</em></span>}
+            </span>
+            {page > 0 && <span style={{ color: 'var(--t3)' }}>Page {page + 1}</span>}
           </div>
 
           {/* FEATURED STRIP */}
@@ -247,6 +253,31 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
             </div>
           )}
 
+          {/* PAGINATION */}
+          {(totalCount ?? 0) > PAGE_SIZE && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginTop: '3rem' }}>
+              {page > 0 && (
+                <Link
+                  href={`/search?${new URLSearchParams({ ...(q && { q }), ...(category !== 'all' && { category }), ...(city && city !== 'All cities' && { city }), ...(sort !== 'relevance' && { sort }), page: String(page - 1) }).toString()}`}
+                  style={{ padding: '10px 20px', background: 'var(--bg1)', border: '0.5px solid var(--b)', borderRadius: 'var(--r)', color: 'var(--t2)', textDecoration: 'none', fontSize: '13px', display: 'flex', alignItems: 'center', gap: 6 }}
+                >
+                  ← Previous
+                </Link>
+              )}
+              <span style={{ fontSize: '12px', color: 'var(--t3)', padding: '0 8px' }}>
+                {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, totalCount ?? 0)} of {totalCount}
+              </span>
+              {(page + 1) * PAGE_SIZE < (totalCount ?? 0) && (
+                <Link
+                  href={`/search?${new URLSearchParams({ ...(q && { q }), ...(category !== 'all' && { category }), ...(city && city !== 'All cities' && { city }), ...(sort !== 'relevance' && { sort }), page: String(page + 1) }).toString()}`}
+                  style={{ padding: '10px 20px', background: 'var(--gbg)', border: '0.5px solid var(--gbrd)', borderRadius: 'var(--r)', color: 'var(--gold)', textDecoration: 'none', fontSize: '13px', display: 'flex', alignItems: 'center', gap: 6 }}
+                >
+                  Next →
+                </Link>
+              )}
+            </div>
+          )}
+
           {/* CTA */}
           <div style={{ marginTop: '4rem', padding: '2.5rem', background: 'var(--bg1)', border: '0.5px solid var(--b)', borderRadius: 'var(--rl)', textAlign: 'center' }}>
             <div style={{ fontFamily: 'var(--serif)', fontSize: '22px', marginBottom: '0.75rem' }}>Are you a provider?</div>
@@ -261,9 +292,29 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
   )
 }
 
+function isAvailableNow(tags: string[] | null | undefined): boolean {
+  if (!tags) return false
+  const now = new Date()
+  const days = ['sun','mon','tue','wed','thu','fri','sat']
+  const day = days[now.getDay()]
+  const whTag = tags.find(t => t.startsWith(`wh:${day}:`))
+  if (!whTag) return false
+  const range = whTag.split(':')[2]
+  if (!range || range === 'off') return false
+  const [startStr, endStr] = range.split('-')
+  if (!startStr || !endStr) return false
+  const [sh, sm = 0] = startStr.split(':').map(Number)
+  const [eh, em = 0] = endStr.split(':').map(Number)
+  const cur = now.getHours() * 60 + now.getMinutes()
+  const start = sh * 60 + (sm as number)
+  const end   = eh * 60 + (em as number)
+  return cur >= start && cur < end
+}
+
 function ListingCard({ l, isFeatured }: { l: any; isFeatured: boolean }) {
   const heroBg = (CAT_GRAD as any)[(l.category || '').toLowerCase()] || 'linear-gradient(140deg,#1a0a1a,#0d0610)'
   const monogram = (l.title || 'Xx').slice(0, 2)
+  const availNow = isAvailableNow(l.tags)
 
   return (
     <Link href={`/listings/${l.id}`} className="s-card">
@@ -275,6 +326,7 @@ function ListingCard({ l, isFeatured }: { l: any; isFeatured: boolean }) {
           {isFeatured && !l.premium && <span className="s-badge s-badge-feat">✦ Featured</span>}
           {l.premium && isFeatured && <span className="s-badge s-badge-prem">✦ Premium</span>}
           {l.verified && <span className="s-badge s-badge-ver">✓ Verified</span>}
+          {availNow && <span className="s-badge" style={{ background: 'rgba(62,207,142,0.15)', color: '#3ecf8e', border: '0.5px solid rgba(62,207,142,0.35)' }}>● Available now</span>}
         </div>
         <span style={{ fontFamily: 'var(--serif)', fontSize: '64px', fontStyle: 'italic', fontWeight: 400, color: 'rgba(197,160,90,0.25)', lineHeight: 1, position: 'absolute', bottom: '0.25rem', left: '1rem', zIndex: 1 }}>{monogram}</span>
       </div>
