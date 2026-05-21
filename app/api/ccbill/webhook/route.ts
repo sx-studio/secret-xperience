@@ -133,6 +133,5 @@ async function handle(req: NextRequest) {
     reference_id: orderId,
   })
 
-  console.log(`CCBill webhook: credited ${order.tokens_granted} tokens to ${userId}`)
   return new NextResponse('OK', { status: 200 })
 }

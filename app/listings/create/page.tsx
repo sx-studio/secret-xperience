@@ -383,15 +383,32 @@ export default function CreateListingPage() {
       }).catch(() => {})
     }
 
-    // Spend tokens for the chosen tier (non-blocking — basic is free if no wallet)
+    // Spend tokens for the chosen tier — must succeed before continuing
     if (newListing?.id && form.tier !== 'basic') {
       try {
-        await fetch('/api/tokens/spend', {
+        const spendRes = await fetch('/api/tokens/spend', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ listingId: newListing.id, tier: form.tier }),
         })
-      } catch (e) { /* non-fatal */ }
+        if (!spendRes.ok) {
+          const spendData = await spendRes.json().catch(() => ({}))
+          // Downgrade to basic if token spend fails (insufficient balance etc.)
+          await supabase.from('listings').update({ tier: 'basic', tier_expires_at: null }).eq('id', newListing.id)
+          if (spendRes.status === 402) {
+            setError('Insufficient tokens — listing saved as basic. Top up your wallet to upgrade.')
+          } else {
+            setError(spendData.error || 'Token spend failed — listing saved as basic tier.')
+          }
+          setLoading(false)
+          return
+        }
+      } catch (e) {
+        await supabase.from('listings').update({ tier: 'basic', tier_expires_at: null }).eq('id', newListing.id)
+        setError('Could not process token payment — listing saved as basic tier.')
+        setLoading(false)
+        return
+      }
     }
 
     // Check if provider has Stripe connected

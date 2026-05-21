@@ -481,7 +481,7 @@ export default function ProfilePage() {
     if (session) {
       window.location.href = `/messages?provider_id=${id}${titleParam}`
     } else {
-      window.location.href = `/login?redirect=/messages?provider_id=${id}${titleParam}`
+      window.location.href = `/login?next=${encodeURIComponent(`/messages?provider_id=${id}${titleParam}`)}`
     }
   }
 

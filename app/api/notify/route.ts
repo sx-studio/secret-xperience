@@ -155,8 +155,7 @@ export async function POST(req: NextRequest) {
       })
     }
   } else {
-    // Log for now when email service not configured
-    console.log(`[notify] type=${type} booking=${booking_id} client=${client?.email} provider=${provider?.email}`)
+    // Email service not configured — skip silently (set RESEND_API_KEY to enable)
   }
 
   return NextResponse.json({ ok: true })
