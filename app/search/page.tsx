@@ -133,7 +133,8 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
         .s-search { width:100%; height:52px; padding:0 50px 0 46px; background:var(--bg2); border:0.5px solid var(--b2); border-radius:26px; color:var(--t); font:400 14px var(--sans); }
         .s-search:focus { outline:none; border-color:var(--gbrd); }
         .s-search::placeholder { color:var(--t3); }
-        @media(max-width:640px) { .s-grid { grid-template-columns:1fr 1fr; gap:10px; } .s-card-hero { height:140px; } }
+        @media(max-width:640px) { .s-grid { grid-template-columns:1fr 1fr; gap:10px; } .s-card-hero { height:140px; } .s-nav { padding:0 1rem; } }
+        @media(max-width:480px) { .s-grid { grid-template-columns:1fr; } .s-card-hero { height:180px; } .s-price-row { width:100%; margin-left:0!important; } }
       `}</style>
 
       <div style={{ background: 'var(--bg)', minHeight: '100vh', color: 'var(--t)' }}>
@@ -243,14 +244,14 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
               </button>
             ))}
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginLeft: 'auto' }}>
+            <div className="s-price-row" style={{ display: 'flex', alignItems: 'center', gap: 6, marginLeft: 'auto' }}>
               <span style={{ fontSize: 11, color: 'var(--t3)', whiteSpace: 'nowrap' }}>Price €</span>
               <input type="number" name="min" defaultValue={minPrice ?? ''} placeholder="Min" min={0} step={10}
-                style={{ width: 68, height: 32, padding: '0 10px', background: 'var(--bg2)', border: '0.5px solid var(--b)', borderRadius: 8, color: 'var(--t)', fontSize: 12, fontFamily: 'var(--sans)', outline: 'none' }} />
+                style={{ width: 68, height: 36, padding: '0 10px', background: 'var(--bg2)', border: '0.5px solid var(--b)', borderRadius: 8, color: 'var(--t)', fontSize: 12, fontFamily: 'var(--sans)', outline: 'none' }} />
               <span style={{ fontSize: 11, color: 'var(--t3)' }}>—</span>
               <input type="number" name="max" defaultValue={maxPrice ?? ''} placeholder="Max" min={0} step={10}
-                style={{ width: 68, height: 32, padding: '0 10px', background: 'var(--bg2)', border: '0.5px solid var(--b)', borderRadius: 8, color: 'var(--t)', fontSize: 12, fontFamily: 'var(--sans)', outline: 'none' }} />
-              <button type="submit" style={{ height: 32, padding: '0 14px', borderRadius: 8, background: 'var(--gbg)', border: '0.5px solid var(--gbrd)', color: 'var(--gold)', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--sans)', fontWeight: 600 }}>Filter</button>
+                style={{ width: 68, height: 36, padding: '0 10px', background: 'var(--bg2)', border: '0.5px solid var(--b)', borderRadius: 8, color: 'var(--t)', fontSize: 12, fontFamily: 'var(--sans)', outline: 'none' }} />
+              <button type="submit" style={{ height: 36, padding: '0 14px', borderRadius: 8, background: 'var(--gbg)', border: '0.5px solid var(--gbrd)', color: 'var(--gold)', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--sans)', fontWeight: 600 }}>Filter</button>
             </div>
           </form>
 

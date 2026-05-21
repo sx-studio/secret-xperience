@@ -112,7 +112,7 @@ export default function TokensPage() {
         .pkg-card{transition:transform .2s,box-shadow .2s}
         .buy-btn:hover{filter:brightness(1.12)}
         .buy-btn{transition:filter .15s}
-        @media(max-width:640px){.pkg-grid{grid-template-columns:1fr!important}.tier-grid{grid-template-columns:1fr!important}}
+        @media(max-width:640px){.pkg-grid{grid-template-columns:1fr!important}.tier-grid{grid-template-columns:1fr!important}.tok-hero-h1{font-size:clamp(28px,8vw,42px)!important}.tok-main{padding:2rem 16px 4rem!important}}
       `}</style>
 
       {/* Nav */}
@@ -140,7 +140,7 @@ export default function TokensPage() {
         </div>
       )}
 
-      <main style={{ maxWidth:1080, margin:'0 auto', padding:'4rem 24px 6rem' }}>
+      <main className="tok-main" style={{ maxWidth:1080, margin:'0 auto', padding:'4rem 24px 6rem' }}>
 
         {/* Hero */}
         <div style={{ textAlign:'center', marginBottom:'4rem' }}>

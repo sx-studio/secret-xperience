@@ -1,13 +1,19 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import Script from 'next/script'
 import './globals.css'
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: '#080612',
+}
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.secretxperience.eu'),
   title: 'SecretXperience.eu — Premium Adult Services Platform',
   description: 'Discreet, verified, premium adult experiences across Europe. Browse escorts, companions, nightlife, creators, rentals, and more.',
   manifest: '/manifest.json',
-  themeColor: '#080612',
   appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'SecretXperience' },
   openGraph: {
     type: 'website',

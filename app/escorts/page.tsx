@@ -364,7 +364,13 @@ export default function EscortsPage() {
         @media (min-width: 900px) { .filter-panel { display: block !important; } .mobile-filter-toggle { display: none !important; } }
         .listing-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
         @media (max-width: 640px) { .listing-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; } }
-        @media (max-width: 380px) { .listing-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 480px) { .listing-grid { grid-template-columns: 1fr; } }
+        .filter-aside { width: 260px; flex-shrink: 0; }
+        @media (max-width: 899px) { .filter-aside { width: 100%; } }
+        .escorts-layout { display: flex; gap: 1.5rem; align-items: flex-start; }
+        @media (max-width: 899px) { .escorts-layout { flex-direction: column; } }
+        .escorts-nav-links { display: flex; align-items: center; gap: 1rem; }
+        @media (max-width: 640px) { .escorts-nav-links { display: none; } }
       `}</style>
 
       {/* Nav */}
@@ -373,11 +379,13 @@ export default function EscortsPage() {
           Secret<em style={{ fontStyle: 'normal' }}>X</em>perience
         </Link>
         <div style={{ flex: 1 }} />
-        <Link href="/discover" style={{ fontSize: '13px', color: 'var(--gold)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4, fontWeight: 500 }}>✦ Discover</Link>
-        <Link href="/companionship" style={{ fontSize: '13px', color: 'var(--t2)', textDecoration: 'none' }}>Companionship</Link>
-        <Link href="/massage" style={{ fontSize: '13px', color: 'var(--t2)', textDecoration: 'none' }}>Massage</Link>
-        <Link href="/nightlife" style={{ fontSize: '13px', color: 'var(--t2)', textDecoration: 'none' }}>Nightlife</Link>
-        <Link href="/events" style={{ fontSize: '13px', color: 'var(--t2)', textDecoration: 'none' }}>Events</Link>
+        <div className="escorts-nav-links">
+          <Link href="/discover" style={{ fontSize: '13px', color: 'var(--gold)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4, fontWeight: 500 }}>✦ Discover</Link>
+          <Link href="/companionship" style={{ fontSize: '13px', color: 'var(--t2)', textDecoration: 'none' }}>Companionship</Link>
+          <Link href="/massage" style={{ fontSize: '13px', color: 'var(--t2)', textDecoration: 'none' }}>Massage</Link>
+          <Link href="/nightlife" style={{ fontSize: '13px', color: 'var(--t2)', textDecoration: 'none' }}>Nightlife</Link>
+          <Link href="/events" style={{ fontSize: '13px', color: 'var(--t2)', textDecoration: 'none' }}>Events</Link>
+        </div>
         <button
           onClick={() => {
             const next = !discreetMode
@@ -418,10 +426,10 @@ export default function EscortsPage() {
         </div>
       </div>
 
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '1.5rem', display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
+      <div className="escorts-layout" style={{ maxWidth: '1280px', margin: '0 auto', padding: '1.5rem' }}>
 
         {/* ── Filter sidebar ── */}
-        <aside style={{ width: '260px', flexShrink: 0, position: 'sticky', top: '80px' }}>
+        <aside className="filter-aside" style={{ position: 'sticky', top: '80px' }}>
 
           {/* Mobile toggle */}
           <button

@@ -210,11 +210,11 @@ export default function DiscoverPage() {
         .disc-like-ind,.disc-skip-ind{position:absolute;top:32px;z-index:10;font-size:13px;font-weight:700;letter-spacing:.12em;padding:8px 18px;border-radius:10px;transition:none;pointer-events:none;opacity:0;text-transform:uppercase}
         .disc-like-ind{right:20px;color:#3ecf8e;border:2px solid #3ecf8e;background:rgba(62,207,142,0.12);transform:rotate(10deg)}
         .disc-skip-ind{left:20px;color:#e2536b;border:2px solid #e2536b;background:rgba(226,83,107,0.12);transform:rotate(-10deg)}
-        .disc-pill{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 14px;border-radius:20px;border:0.5px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);color:rgba(255,255,255,0.4);font:500 12px 'Jost',sans-serif;cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0}
+        .disc-pill{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:20px;border:0.5px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);color:rgba(255,255,255,0.4);font:500 12px 'Jost',sans-serif;cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0;min-height:36px}
         .disc-pill.active,.disc-pill:hover{border-color:rgba(197,160,90,0.45);background:rgba(197,160,90,0.08);color:#c5a05a}
         .disc-act{border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s,box-shadow .2s}
-        .disc-act.big{width:60px;height:60px;font-size:22px}
-        .disc-act.small{width:44px;height:44px;font-size:18px}
+        .disc-act.big{width:64px;height:64px;font-size:24px}
+        .disc-act.small{width:48px;height:48px;font-size:18px}
         .disc-act:hover{transform:scale(1.1)}
         .disc-act:active{transform:scale(0.9)}
         .disc-act.pass{background:rgba(226,83,107,0.1);border:0.5px solid rgba(226,83,107,0.35);color:#e2536b}
@@ -380,9 +380,9 @@ export default function DiscoverPage() {
 
             {/* Button labels */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginTop: -8 }}>
-              <div style={{ width: 60, textAlign: 'center', fontSize: 10, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.06em' }}>Pass</div>
-              <div style={{ width: 44, textAlign: 'center', fontSize: 10, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.06em' }}>View</div>
-              <div style={{ width: 60, textAlign: 'center', fontSize: 10, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.06em' }}>Save</div>
+              <div style={{ width: 64, textAlign: 'center', fontSize: 10, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.06em' }}>Pass</div>
+              <div style={{ width: 48, textAlign: 'center', fontSize: 10, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.06em' }}>View</div>
+              <div style={{ width: 64, textAlign: 'center', fontSize: 10, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.06em' }}>Save</div>
             </div>
 
             {/* Keyboard hint */}
