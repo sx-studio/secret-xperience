@@ -1843,6 +1843,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
       <button class="nb" id="locBtn" aria-label="Location"><i class="ti ti-map-pin" aria-hidden="true"></i> Brussels</button>
       <button onclick="__cycleTheme()" aria-label="Toggle theme" style="width:34px;height:34px;background:var(--bg2);border:0.5px solid var(--b2);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--t2);font-size:16px;flex-shrink:0;"><i class="ti ti-moon-stars" id="themeIcon"></i></button>
       <!-- logged-out -->
+      <a href="/discover" class="nb" style="text-decoration:none;display:flex;align-items:center;gap:5px;color:var(--gold);font-weight:500;" title="Swipe to discover"><i class="ti ti-sparkles" aria-hidden="true"></i> Discover</a>
       <a href="/events" class="nb" style="text-decoration:none;display:flex;align-items:center;gap:6px;"><i class="ti ti-calendar-event" aria-hidden="true"></i> Events</a>
       <button class="nb" id="loginBtn">Log in</button>
       <button class="nb pri" id="signupBtn" onclick="window.location.href='/advertise'">List your service</button>
@@ -1979,6 +1980,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
       <a href="/advertise" class="nav-drawer-link" id="ndSignup" style="display:none"><i class="ti ti-user-plus"></i> Sign Up</a>
       <!-- always-visible links -->
       <a href="/search" class="nav-drawer-link"><i class="ti ti-search"></i> Search</a>
+      <a href="/discover" class="nav-drawer-link" style="color:var(--gold)"><i class="ti ti-sparkles"></i> ✦ Discover</a>
       <a href="/events" class="nav-drawer-link"><i class="ti ti-calendar-event"></i> Events</a>
     </nav>
     <div class="nav-drawer-footer" id="navDrawerLogout" style="display:none">
