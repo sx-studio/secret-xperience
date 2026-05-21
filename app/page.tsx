@@ -1914,6 +1914,9 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
     </div>
   </div>
 
+  <!-- How SecretXperience Works — full-width, above the sidebar/listings layout -->
+  <div id="catAnimsMount"></div>
+
   <div class="layout">
 
     <!-- ══ SIDEBAR ══ -->
@@ -2080,9 +2083,6 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
           <div class="astat"><div class="astat-v" id="statRevenue">—</div><div class="astat-l">Revenue this month</div></div>
         </div>
       </div>
-
-      <!-- How SecretXperience Works mount point -->
-      <div id="catAnimsMount"></div>
 
       <!-- Featured -->
       <div class="featured" id="featuredBanner" style="display:none">
