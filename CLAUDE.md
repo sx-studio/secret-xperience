@@ -59,7 +59,10 @@ Live at **secretxperience.eu** (and www.secretxperience.eu). Owner email: heyoka
 - **Login page redesign** — Split-panel layout: atmospheric left (gold orbs, floating particles, brand tagline "An evening that ends behind a closed door") + clean auth form right (Google OAuth with colored G SVG, role selector with tabler icons, shake animation on error, terms checkbox).
 - **Tokens/Wallet page redesign** — Hero balance counter (Cormorant Garamond 72px gold), 4-stat row (spent/purchased/tips/balance), 5-tier package grid (Starter/Casual/Connoisseur/Patron/Platinum) with featured card glow + banner, transaction table (Date/Description/Type/Amount/Balance) with tabler icons.
 - **Font stack fixed** — `globals.css` `--serif` now leads with `'Cormorant Garamond'` (was Playfair Display) — matches all page-level heading usage.
+- **Redundant font imports removed** — Stripped `@import url(fonts.googleapis.com/...)` from all 27 page-level style tags; fonts load once in `layout.tsx`.
 - **Mobile improvements** — Viewport export in layout.tsx, single-col breakpoints on search/escorts/tokens, sidebar flex on escorts, touch targets, nav collapse at 640px.
+- **Mobile bottom nav** — Swapped Events → Discover (sparkles icon) in the 5-slot bottom nav on homepage.
+- **Signup fixed** — New `/api/auth/signup` server route uses service role key to create user + upsert profile + ensure wallet; bypasses failing `auth.users` trigger. Login page now POSTs to this route instead of calling `supabase.auth.signUp()` directly.
 
 ## Pending
 - **Apply pending migrations in Supabase SQL editor** (run in order):
@@ -73,10 +76,8 @@ Live at **secretxperience.eu** (and www.secretxperience.eu). Owner email: heyoka
 - **secretxperience.eu deployment visibility** — user has reported latest changes sometimes don't appear; could be browser cache (Ctrl+Shift+R) or Vercel domain alias issue.
 
 ## Nice-to-do (not yet requested but noted)
-- Discreet Mode currently only on escorts page; could expand to nightlife/rentals/hotels
-- Available Now + New badges currently only on escorts + search; could add to other category pages
-- Homepage mobile bottom nav: Discover not yet in the 5-slot bottom navigation bar
-- Remove redundant Google Fonts `@import` in `app/discover/page.tsx` and `app/login/page.tsx` (fonts already loaded globally in `layout.tsx`)
+- Events page not in mobile bottom nav (swapped for Discover) — if user wants both, consider a 6th slot or a "More" overflow menu
+- Consider a post-booking satisfaction survey flow in dashboard
 
 ## Constraints / things NOT to do
 - Don't push to non-main branches without explicit permission
