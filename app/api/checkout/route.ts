@@ -27,8 +27,8 @@ export async function POST(req: NextRequest) {
 
   if (!listing) return NextResponse.json({ error: 'Listing not found' }, { status: 404 })
 
-  // On-platform payments only for rentals, hotels, events — not escorts/companions/creators
-  const BOOKABLE = ['rentals', 'hotels', 'events']
+  // On-platform card payments only for rentals, hotels, events, shop — never for escort/sexual services
+  const BOOKABLE = ['rentals', 'hotels', 'events', 'shop']
   if (!BOOKABLE.includes((listing.category || '').toLowerCase())) {
     return NextResponse.json({ error: 'On-platform payment is not available for this listing type.' }, { status: 400 })
   }

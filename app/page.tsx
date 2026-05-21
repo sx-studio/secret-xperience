@@ -778,9 +778,13 @@ var bookStep=0,selDate='',selTime='',selDur='2 Hours',selPrice=350;
 var calYear=new Date().getFullYear(),calMonth=new Date().getMonth();
 var availDays=[0,1,2,3,4,5,6]; // All days available
 var currentListingId=null;
+var currentListingCat='';
+// These categories take online card payment. All others are meetup-request only.
+var PAYABLE_CATS=['rentals','hotels','events','shop'];
 
 function openBookModal(name,cat,listingId,basePrice){
   currentListingId=listingId||null;
+  currentListingCat=(cat||'').split(' · ')[0].toLowerCase().trim();
   document.getElementById('bookListingName').textContent=name||'Sophia A.';
   document.getElementById('bookListingCat').textContent=cat||'Escort · Independent · Brussels';
   document.getElementById('sumName').textContent=name||'Sophia A.';
@@ -906,11 +910,29 @@ document.getElementById('bookSubmit').addEventListener('click',async function(){
       var notes=document.getElementById('bookNotes')?.value||'';
       var meetType=document.getElementById('meetType')?.value||'Incall';
       var location=document.getElementById('locationInput')?.value||'';
-      var res=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({listing_id:currentListingId,date:selDate,time:selTime,duration:selDur,price:selPrice,notes:notes,meet_type:meetType,location:location})});
+      var isPayable=PAYABLE_CATS.includes(currentListingCat);
+      var apiUrl=isPayable?'/api/checkout':'/api/bookings/request';
+      var res=await fetch(apiUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({listing_id:currentListingId,date:selDate,time:selTime,duration:selDur,price:isPayable?selPrice:0,notes:notes,meet_type:meetType,location:location})});
       var json=await res.json();
-      if(json.url){window.location.href=json.url;}
-      else if(res.status===401){showToast('Please sign in to make a booking');setTimeout(function(){window.location.href='/login?next=/'},1500);btn.textContent='Confirm Booking';btn.disabled=false;}
-      else{showToast(json.error||'Checkout failed');btn.textContent='Confirm Booking';btn.disabled=false;}
+      if(isPayable){
+        if(json.url){window.location.href=json.url;}
+        else if(res.status===401){showToast('Please sign in to make a booking');setTimeout(function(){window.location.href='/login?next=/'},1500);btn.textContent='Confirm Booking';btn.disabled=false;}
+        else{showToast(json.error||'Checkout failed');btn.textContent='Confirm Booking';btn.disabled=false;}
+      } else {
+        if(res.status===401){showToast('Please sign in to send a request');setTimeout(function(){window.location.href='/login?next=/'},1500);btn.textContent='Confirm Booking';btn.disabled=false;return;}
+        if(!res.ok){showToast(json.error||'Something went wrong');btn.textContent='Confirm Booking';btn.disabled=false;return;}
+        document.getElementById('bookSuccess').classList.add('show');
+        btn.style.display='none';
+        document.getElementById('bookBack3').style.display='none';
+        setTimeout(function(){
+          closeModal('bookModal');
+          document.getElementById('bookSuccess').classList.remove('show');
+          document.getElementById('bookSubmit').style.display='';
+          document.getElementById('bookBack3').style.display='';
+          bookStep=0;selDate='';selTime='';updateBookSteps();
+          showToast('Request sent — the provider will confirm shortly');
+        },2500);
+      }
     }catch(err){showToast('Network error — please try again');btn.textContent='Confirm Booking';btn.disabled=false;}
   } else {
     document.getElementById('bookSuccess').classList.add('show');
@@ -922,8 +944,8 @@ document.getElementById('bookSubmit').addEventListener('click',async function(){
       document.getElementById('bookSubmit').style.display='';
       document.getElementById('bookBack3').style.display='';
       bookStep=0;selDate='';selTime='';updateBookSteps();
-      showToast('Booking request sent — awaiting confirmation');
-    },3000);
+      showToast('Request sent — the provider will confirm shortly');
+    },2500);
   }
 });
 

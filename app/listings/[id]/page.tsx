@@ -312,7 +312,7 @@ export default function ListingDetailPage() {
   )
 
   // Only rentals and hotels support on-platform booking/payments
-  const BOOKABLE_CATEGORIES = ['rentals', 'hotels', 'events']
+  const BOOKABLE_CATEGORIES = ['rentals', 'hotels', 'events', 'shop']
   const isBookable = BOOKABLE_CATEGORIES.includes(listing.category?.toLowerCase() || '')
 
   const cat       = listing.category
