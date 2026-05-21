@@ -2015,6 +2015,28 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         </div>
       </div>
 
+      <!-- How It Works -->
+      <section style="padding:2.5rem 0 2rem;border-bottom:0.5px solid var(--b);">
+        <h2 style="font-family:var(--serif);font-size:22px;font-weight:500;color:var(--t);margin-bottom:1.75rem;">How it works</h2>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;">
+          <div>
+            <div style="font-family:var(--serif);font-size:48px;font-style:italic;font-weight:400;color:var(--gold);line-height:1;margin-bottom:0.5rem;">01</div>
+            <h3 style="font-family:var(--serif);font-size:17px;font-weight:500;color:var(--t);margin-bottom:0.35rem;">Browse discreetly</h3>
+            <p style="font-size:13px;color:var(--t2);line-height:1.65;">Filter by city, type, and tier. No account needed to browse.</p>
+          </div>
+          <div>
+            <div style="font-family:var(--serif);font-size:48px;font-style:italic;font-weight:400;color:var(--gold);line-height:1;margin-bottom:0.5rem;">02</div>
+            <h3 style="font-family:var(--serif);font-size:17px;font-weight:500;color:var(--t);margin-bottom:0.35rem;">Request access</h3>
+            <p style="font-size:13px;color:var(--t2);line-height:1.65;">Send a booking request. Providers confirm — usually within 30 minutes.</p>
+          </div>
+          <div>
+            <div style="font-family:var(--serif);font-size:48px;font-style:italic;font-weight:400;color:var(--gold);line-height:1;margin-bottom:0.5rem;">03</div>
+            <h3 style="font-family:var(--serif);font-size:17px;font-weight:500;color:var(--t);margin-bottom:0.35rem;">Meet on your terms</h3>
+            <p style="font-size:13px;color:var(--t2);line-height:1.65;">All interactions are confidential. Verified profiles only.</p>
+          </div>
+        </div>
+      </section>
+
       <!-- Featured -->
       <div class="featured" id="featuredBanner" style="display:none">
         <div class="ft-left">
@@ -2240,30 +2262,6 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
       </div>
     </main>
   </div>
-
-  <!-- ══ HOW IT WORKS ══ -->
-  <section style="padding:4rem 1.5rem;background:var(--bg1);border-top:0.5px solid var(--b);">
-    <div style="max-width:1200px;margin:0 auto;">
-      <h2 style="font-family:var(--serif);font-size:26px;font-weight:500;color:var(--t);margin-bottom:2.5rem;">How it works</h2>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;">
-        <div>
-          <div style="font-family:var(--serif);font-size:64px;font-style:italic;font-weight:400;color:var(--gold);line-height:1;margin-bottom:0.75rem;">01</div>
-          <h3 style="font-family:var(--serif);font-size:19px;font-weight:500;color:var(--t);margin-bottom:0.5rem;">Browse discreetly</h3>
-          <p class="t-body" style="color:var(--t2);">Filter by city, type, and tier. No account needed to browse.</p>
-        </div>
-        <div>
-          <div style="font-family:var(--serif);font-size:64px;font-style:italic;font-weight:400;color:var(--gold);line-height:1;margin-bottom:0.75rem;">02</div>
-          <h3 style="font-family:var(--serif);font-size:19px;font-weight:500;color:var(--t);margin-bottom:0.5rem;">Request access</h3>
-          <p class="t-body" style="color:var(--t2);">Send a booking request to a provider. They confirm — usually within 30 minutes.</p>
-        </div>
-        <div>
-          <div style="font-family:var(--serif);font-size:64px;font-style:italic;font-weight:400;color:var(--gold);line-height:1;margin-bottom:0.75rem;">03</div>
-          <h3 style="font-family:var(--serif);font-size:19px;font-weight:500;color:var(--t);margin-bottom:0.5rem;">Meet on your terms</h3>
-          <p class="t-body" style="color:var(--t2);">All interactions are confidential. Verified profiles only.</p>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <!-- ══ FOOTER ══ -->
   <footer style="background:var(--bg1);border-top:0.5px solid var(--b);padding:4rem 1.5rem 2rem;">
