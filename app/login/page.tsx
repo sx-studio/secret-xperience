@@ -62,8 +62,14 @@ export default function LoginPage() {
         window.location.href = '/dashboard'
       }
     } else {
-      const { error } = await signUp(email, password, fullName, role)
-      if (error) setError(error.message)
+      // Use server-side route to avoid trigger failures on auth.users insert
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, fullName, role }),
+      })
+      const json = await res.json()
+      if (!res.ok) setError(json.error || 'Signup failed')
       else setSuccess(true)
     }
     setLoading(false)
