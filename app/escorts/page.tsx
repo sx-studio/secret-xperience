@@ -101,7 +101,7 @@ function isNewListing(createdAt: string): boolean {
 }
 
 /* ── Card component ─────────────────────────────────────── */
-function EscortCard({ l }: { l: Listing }) {
+function EscortCard({ l, discreet }: { l: Listing; discreet: boolean }) {
   const img = l.images?.[0]
   const price = l.price_from ? `€${l.price_from}/hr` : null
   const availNow = isAvailableNow(l.tags)
@@ -132,7 +132,7 @@ function EscortCard({ l }: { l: Listing }) {
         {/* Portrait image */}
         <div style={{ position: 'relative', aspectRatio: '3/4', background: 'var(--bg2)', overflow: 'hidden' }}>
           {img ? (
-            <img src={img} alt={l.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+            <img src={img} alt={l.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', filter: discreet ? 'blur(24px) brightness(0.5)' : 'none', transition: 'filter 0.3s ease' }} />
           ) : (
             <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--serif)', fontSize: '72px', fontStyle: 'italic', color: 'rgba(197,160,90,0.08)' }}>
               {l.title.charAt(0)}
@@ -210,6 +210,10 @@ export default function EscortsPage() {
   const [listings, setListings]         = useState<Listing[]>([])
   const [loading, setLoading]           = useState(true)
   const [showFilters, setShowFilters]   = useState(false)
+  const [discreetMode, setDiscreetMode] = useState(() => {
+    if (typeof window !== 'undefined') return localStorage.getItem('sx_discreet') === '1'
+    return false
+  })
 
   // Filter state
   const [escortType, setEscortType]     = useState('all')
@@ -373,6 +377,17 @@ export default function EscortsPage() {
         <Link href="/massage" style={{ fontSize: '13px', color: 'var(--t2)', textDecoration: 'none' }}>Massage</Link>
         <Link href="/nightlife" style={{ fontSize: '13px', color: 'var(--t2)', textDecoration: 'none' }}>Nightlife</Link>
         <Link href="/events" style={{ fontSize: '13px', color: 'var(--t2)', textDecoration: 'none' }}>Events</Link>
+        <button
+          onClick={() => {
+            const next = !discreetMode
+            setDiscreetMode(next)
+            localStorage.setItem('sx_discreet', next ? '1' : '0')
+          }}
+          title={discreetMode ? 'Exit discreet mode' : 'Discreet mode — blur photos'}
+          style={{ background: discreetMode ? 'rgba(197,160,90,0.15)' : 'transparent', border: `0.5px solid ${discreetMode ? 'var(--gbrd)' : 'var(--b2)'}`, borderRadius: 8, padding: '6px 12px', color: discreetMode ? 'var(--gold)' : 'var(--t3)', cursor: 'pointer', fontSize: 12, fontFamily: 'var(--sans)', display: 'flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap', transition: 'all .15s' }}
+        >
+          {discreetMode ? '👁 Discreet on' : '👁 Discreet'}
+        </button>
         <Link href="/listings/create" style={{ background: 'var(--grad-gold)', color: '#000', fontSize: '13px', fontWeight: 700, padding: '7px 16px', borderRadius: '999px', textDecoration: 'none', letterSpacing: '0.04em' }}>
           + Advertise
         </Link>
@@ -580,7 +595,7 @@ export default function EscortsPage() {
             </div>
           ) : (
             <div className="listing-grid">
-              {listings.map(l => <EscortCard key={l.id} l={l} />)}
+              {listings.map(l => <EscortCard key={l.id} l={l} discreet={discreetMode} />)}
             </div>
           )}
 

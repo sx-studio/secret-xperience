@@ -158,6 +158,7 @@ export default function DashboardPage() {
   const [bookings, setBookings]     = useState<any[]>([])
   const [favorites, setFavorites]   = useState<any[]>([])
   const [tokenBalance, setTokenBalance] = useState<number | null>(null)
+  const [viewCounts, setViewCounts] = useState<Record<string, number>>({})
   const [loading, setLoading]       = useState(true)
   const [idVerifStatus, setIdVerifStatus] = useState<'not_submitted'|'pending'|'approved'|'rejected'>('not_submitted')
   const [editingProfile, setEditingProfile] = useState(false)
@@ -203,6 +204,15 @@ export default function DashboardPage() {
       setBookings(bookings || [])
       setFavorites((favData || []).map((f: any) => f.listings).filter(Boolean))
       if (walletData?.balance != null) setTokenBalance(walletData.balance)
+
+      // Fetch view counts for all listings (secondary query)
+      const listingIds = (listings || []).map((l: any) => l.id)
+      if (listingIds.length > 0) {
+        const { data: views } = await supabase.from('listing_views').select('listing_id').in('listing_id', listingIds)
+        const counts: Record<string, number> = {}
+        for (const v of (views || [])) { counts[v.listing_id] = (counts[v.listing_id] || 0) + 1 }
+        setViewCounts(counts)
+      }
       setLoading(false)
 
       const params = new URLSearchParams(window.location.search)
@@ -1156,6 +1166,11 @@ export default function DashboardPage() {
                             fontWeight: 300,
                           }}>
                             {listing.city}
+                          </span>
+                        )}
+                        {viewCounts[listing.id] != null && (
+                          <span style={{ fontSize: '12px', color: 'var(--t3)', fontFamily: 'var(--sans)', display: 'flex', alignItems: 'center', gap: 3 }}>
+                            <i className="ti ti-eye" style={{ fontSize: 11 }} /> {viewCounts[listing.id].toLocaleString()} view{viewCounts[listing.id] !== 1 ? 's' : ''}
                           </span>
                         )}
                         {(listing.price_from || listing.price_to) && (
