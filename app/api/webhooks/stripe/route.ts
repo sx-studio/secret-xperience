@@ -40,6 +40,12 @@ export async function POST(req: NextRequest) {
         featured_until: base.toISOString(),
         premium: true,
       }).eq('id', meta.listing_id)
+      // Fire listing_boosted notification (fire-and-forget)
+      fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.secretxperience.eu'}/api/notify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.INTERNAL_SECRET || 'sx-internal'}` },
+        body: JSON.stringify({ type: 'listing_boosted', booking_id: meta.listing_id }),
+      }).catch(() => {})
     } else if (meta.booking_id) {
       await supabaseAdmin.from('bookings').update({
         status: 'confirmed',

@@ -31,7 +31,8 @@ Respond ONLY with valid JSON in this exact format:
 export async function POST(req: NextRequest) {
   // Only callable from internal API routes (webhook from listing create)
   const auth = req.headers.get('authorization')
-  if (auth !== `Bearer ${process.env.INTERNAL_SECRET || 'sx-internal'}`) {
+  const secret = process.env.INTERNAL_SECRET
+  if (!secret || auth !== `Bearer ${secret}`) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

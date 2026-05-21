@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
   if (verified) query = query.eq('verified', true)
   if (meetType) query = query.eq('meet_type', meetType)
   if (minPrice) query = query.gte('price_from', parseInt(minPrice))
-  if (maxPrice) query = query.lte('price_from', parseInt(maxPrice))
+  if (maxPrice) query = query.lte('price_to', parseInt(maxPrice))
 
   query = query.order('featured_until', { ascending: false, nullsFirst: false })
   if (sort === 'rating') query = query.order('rating', { ascending: false })
