@@ -1068,6 +1068,47 @@ footer{background:var(--bg1);border-top:0.5px solid var(--b);padding:2.5rem 1.5r
 @keyframes rotateSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 @keyframes shimmer{from{transform:translateX(-120%)}to{transform:translateX(200%)}}
 
+/* ── NAV DRAWER ── */
+.nav-drawer{
+  position:fixed;top:0;right:0;bottom:0;
+  width:80vw;max-width:300px;
+  background:var(--bg1);border-left:0.5px solid var(--b2);
+  z-index:850;
+  transform:translateX(100%);
+  transition:transform .3s cubic-bezier(.2,.8,.4,1);
+  padding:0;
+  display:flex;flex-direction:column;
+  overflow-y:auto;
+}
+.nav-drawer.open{transform:translateX(0)}
+.nav-drawer-hd{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.1rem 1.25rem;border-bottom:0.5px solid var(--b);
+  flex-shrink:0;
+}
+.nav-drawer-close{
+  background:transparent;border:none;color:var(--t3);
+  font-size:22px;cursor:pointer;line-height:1;padding:2px;
+}
+.nav-drawer-user{
+  padding:1rem 1.25rem;border-bottom:0.5px solid var(--b);
+  flex-shrink:0;
+}
+.nav-drawer-links{flex:1;padding:.5rem 0;}
+.nav-drawer-link{
+  display:flex;align-items:center;gap:12px;
+  padding:13px 1.25rem;color:var(--t);
+  font-size:14px;text-decoration:none;
+  background:none;border:none;cursor:pointer;
+  width:100%;text-align:left;font-family:var(--sans);
+  transition:background .15s;
+}
+.nav-drawer-link:hover,.nav-drawer-link:active{background:var(--bg2)}
+.nav-drawer-link i{font-size:18px;color:var(--t3);width:20px;text-align:center;flex-shrink:0}
+.nav-drawer-footer{
+  padding:1rem 1.25rem;border-top:0.5px solid var(--b);flex-shrink:0;
+}
+
 /* ── RESPONSIVE ── */
 @media(max-width:768px){
   :root{--nav-h:50px;--bnav-h:60px}

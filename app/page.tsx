@@ -57,12 +57,16 @@ document.getElementById('gno').addEventListener('click', function(){
 // ── Sidebar (mobile) ──
 var sidebar = document.getElementById('sidebar');
 var sov = document.getElementById('sov');
+var navDrawer = document.getElementById('navDrawer');
 function openSidebar(){ sidebar.classList.add('open'); sov.classList.add('show'); sov.setAttribute('aria-hidden','false'); }
 function closeSidebar(){ sidebar.classList.remove('open'); sov.classList.remove('show'); sov.setAttribute('aria-hidden','true'); }
-document.getElementById('menuBtn').addEventListener('click', openSidebar);
+function openNavDrawer(){ navDrawer.classList.add('open'); sov.classList.add('show'); sov.setAttribute('aria-hidden','false'); }
+function closeNavDrawer(){ navDrawer.classList.remove('open'); sov.classList.remove('show'); sov.setAttribute('aria-hidden','true'); }
+document.getElementById('menuBtn').addEventListener('click', openNavDrawer);
+document.getElementById('navDrawerClose').addEventListener('click', closeNavDrawer);
 document.getElementById('filterToggle').addEventListener('click', openSidebar);
 document.getElementById('sideClose').addEventListener('click', closeSidebar);
-sov.addEventListener('click', closeSidebar);
+sov.addEventListener('click', function(){ closeSidebar(); closeNavDrawer(); });
 
 // ── Location city picker ──
 ;(function(){
@@ -990,6 +994,7 @@ document.addEventListener('keydown',function(e){
       if(document.getElementById(id).classList.contains('open'))closeModal(id);
     });
     if(dpPanel.classList.contains('open'))closeDetail();
+    if(document.getElementById('navDrawer').classList.contains('open'))closeNavDrawer();
   }
 });
 
@@ -1086,9 +1091,25 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
           if (badge) { badge.textContent = label; badge.style.display = 'inline' }
           if (ddBadge) { ddBadge.textContent = label; ddBadge.style.display = 'inline' }
         }
+
+        // Populate nav drawer — logged-in state
+        const ndUser = document.getElementById('navDrawerUser')
+        const ndAvatar = document.getElementById('navDrawerAvatar')
+        const ndName = document.getElementById('navDrawerName')
+        const ndEmail = document.getElementById('navDrawerEmail')
+        if (ndUser) ndUser.style.display = 'block'
+        if (ndAvatar) ndAvatar.textContent = initials
+        if (ndName) ndName.textContent = name
+        if (ndEmail) ndEmail.textContent = profile?.email || session.user.email || ''
+        const ndShowLoggedIn = ['ndDashboard','ndVerify','ndTokens','ndCreate','ndMessages','navDrawerLogout']
+        ndShowLoggedIn.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = '' })
       } else {
         if (loginBtn) loginBtn.onclick = () => { window.location.href = '/login' }
         if (signupBtn) signupBtn.onclick = () => { window.location.href = '/advertise' }
+
+        // Populate nav drawer — logged-out state
+        const ndShowLoggedOut = ['ndLogin','ndSignup']
+        ndShowLoggedOut.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = '' })
       }
 
       // ── Mobile bottom nav ──
@@ -1792,6 +1813,40 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
     }
     </style>
   </section>
+
+  <!-- ══ NAV DRAWER ══ -->
+  <div class="nav-drawer" id="navDrawer" aria-label="Navigation menu" role="dialog">
+    <div class="nav-drawer-hd">
+      <span style="font-family:var(--serif);font-size:16px;color:var(--t);">Secret<em style="color:var(--gold);font-style:italic">Xperience</em></span>
+      <button class="nav-drawer-close" id="navDrawerClose" aria-label="Close menu"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="nav-drawer-user" id="navDrawerUser" style="display:none">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div id="navDrawerAvatar" style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--goldd));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#0a0a0a;flex-shrink:0;">A</div>
+        <div>
+          <div id="navDrawerName" style="font-size:14px;font-weight:500;color:var(--t)">Account</div>
+          <div id="navDrawerEmail" style="font-size:12px;color:var(--t3);margin-top:1px"></div>
+        </div>
+      </div>
+    </div>
+    <nav class="nav-drawer-links" id="navDrawerLinks">
+      <!-- logged-in links (hidden by default, shown by JS) -->
+      <a href="/dashboard" class="nav-drawer-link" id="ndDashboard" style="display:none"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+      <a href="/verify" class="nav-drawer-link" id="ndVerify" style="display:none"><i class="ti ti-id-badge"></i> Verify Identity</a>
+      <a href="/tokens" class="nav-drawer-link" id="ndTokens" style="display:none"><i class="ti ti-coins"></i> Buy Tokens</a>
+      <a href="/listings/create" class="nav-drawer-link" id="ndCreate" style="display:none"><i class="ti ti-plus"></i> List a Service</a>
+      <a href="/messages" class="nav-drawer-link" id="ndMessages" style="display:none"><i class="ti ti-message"></i> Messages</a>
+      <!-- logged-out links (hidden by default, shown by JS) -->
+      <a href="/login" class="nav-drawer-link" id="ndLogin" style="display:none"><i class="ti ti-login"></i> Log In</a>
+      <a href="/advertise" class="nav-drawer-link" id="ndSignup" style="display:none"><i class="ti ti-user-plus"></i> Sign Up</a>
+      <!-- always-visible links -->
+      <a href="/search" class="nav-drawer-link"><i class="ti ti-search"></i> Search</a>
+      <a href="/events" class="nav-drawer-link"><i class="ti ti-calendar-event"></i> Events</a>
+    </nav>
+    <div class="nav-drawer-footer" id="navDrawerLogout" style="display:none">
+      <button data-action="logout" class="nav-drawer-link" style="color:var(--wine);padding:0"><i class="ti ti-logout" style="color:var(--wine)"></i> Log Out</button>
+    </div>
+  </div>
 
   <div class="layout">
 
