@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
+import RentalsGrid from './RentalsGrid'
 
 export async function generateMetadata() {
   return {
@@ -30,168 +31,6 @@ const TYPE_FILTERS = [
   { value: 'studio', label: 'Studio' },
 ]
 
-const SPACE_GRADS = [
-  'linear-gradient(140deg, #1a1a2e 0%, #0d0d1a 100%)',
-  'linear-gradient(140deg, #1e1e2e 0%, #10101e 100%)',
-  'linear-gradient(140deg, #2a2018 0%, #181208 100%)',
-  'linear-gradient(140deg, #1a2020 0%, #0d1414 100%)',
-  'linear-gradient(140deg, #281a18 0%, #140d0d 100%)',
-]
-
-const CITY_FLAGS: Record<string, string> = {
-  brussels: '🇧🇪',
-  antwerp: '🇧🇪',
-  ghent: '🇧🇪',
-  amsterdam: '🇳🇱',
-  berlin: '🇩🇪',
-  cologne: '🇩🇪',
-  paris: '🇫🇷',
-  rotterdam: '🇳🇱',
-  vienna: '🇦🇹',
-  madrid: '🇪🇸',
-}
-
-function getFlag(city: string): string {
-  const lower = (city || '').toLowerCase()
-  return CITY_FLAGS[lower] || '🏙'
-}
-
-const AMENITY_ICONS: Record<string, string> = {
-  private: '🔑 Private entry',
-  jacuzzi: '🛁 Jacuzzi',
-  centre: '📍 City centre',
-  parking: '🚗 Parking',
-  kitchen: '🍽 Kitchen',
-  terrace: '🌿 Terrace',
-  sauna: '🧖 Sauna',
-  playroom: '🔒 Play room',
-}
-
-function RentalCard({ l, idx }: { l: any; idx: number }) {
-  const monogram = (l.title || 'Sx').slice(0, 2).toUpperCase()
-  const grad = SPACE_GRADS[idx % SPACE_GRADS.length]
-  const flag = getFlag(l.city)
-
-  // Derive sample amenities from subcategory/description
-  const amenities: string[] = []
-  if (l.subcategory?.toLowerCase().includes('private') || idx % 3 === 0) amenities.push('🔑 Private entry')
-  if (l.subcategory?.toLowerCase().includes('suite') || idx % 4 === 0) amenities.push('🛁 Jacuzzi')
-  amenities.push('📍 Centre')
-  if (idx % 2 === 0) amenities.push('🚗 Parking')
-
-  const isHourly = l.meet_type === 'incall' || idx % 2 === 0
-  const priceLabel = l.price_from
-    ? isHourly ? `€${l.price_from}/hr` : `€${l.price_from}/night`
-    : null
-
-  return (
-    <Link
-      href={`/listings/${l.id}`}
-      className="rental-card"
-      style={{
-        display: 'block',
-        textDecoration: 'none',
-        background: 'var(--bg1)',
-        border: '0.5px solid var(--b)',
-        borderRadius: '14px',
-        overflow: 'hidden',
-        transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.15s',
-      }}
-    >
-      {/* Image area */}
-      <div style={{
-        height: '180px',
-        background: grad,
-        position: 'relative',
-        overflow: 'hidden',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
-        {l.images?.[0] ? (
-          <img src={l.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }} />
-        ) : (
-          <span style={{
-            fontFamily: 'var(--serif)',
-            fontSize: '80px',
-            fontStyle: 'italic',
-            fontWeight: 400,
-            color: 'rgba(197,160,90,0.15)',
-            lineHeight: 1,
-            userSelect: 'none',
-          }}>{monogram}</span>
-        )}
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'linear-gradient(0deg, rgba(8,6,18,0.7) 0%, transparent 50%)',
-        }} />
-        {/* Meet type badge top-left */}
-        {l.meet_type && (
-          <div style={{
-            position: 'absolute', top: '10px', left: '10px', zIndex: 2,
-            fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '6px',
-            background: 'rgba(26,143,106,0.2)', color: '#26d4a0',
-            border: '0.5px solid rgba(26,143,106,0.4)',
-            backdropFilter: 'blur(4px)', textTransform: 'uppercase', letterSpacing: '0.08em',
-          }}>
-            {l.meet_type === 'incall' ? 'Incall only' : l.meet_type}
-          </div>
-        )}
-        {/* Price badge pinned bottom-right */}
-        {priceLabel && (
-          <div style={{
-            position: 'absolute', bottom: '10px', right: '10px', zIndex: 2,
-            background: 'linear-gradient(135deg,var(--gold),var(--goldd))',
-            color: '#0a0a0a', fontSize: '13px', fontWeight: 700,
-            padding: '5px 10px', borderRadius: '8px',
-            boxShadow: '0 2px 10px rgba(0,0,0,0.4)',
-            letterSpacing: '0.02em',
-          }}>
-            {priceLabel}
-          </div>
-        )}
-      </div>
-
-      {/* Card footer */}
-      <div style={{ padding: '0.9rem 1rem 1rem' }}>
-        <div style={{ fontFamily: 'var(--serif)', fontSize: '16px', color: 'var(--t)', marginBottom: '4px', lineHeight: 1.3, letterSpacing: '0.01em' }}>
-          {l.title}
-        </div>
-        <div style={{ fontSize: '12px', color: 'var(--t3)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <span>{flag}</span>
-          <span>{l.city}{l.country ? `, ${l.country}` : ''}</span>
-        </div>
-        {/* Amenity tags */}
-        <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginBottom: '8px' }}>
-          {amenities.slice(0, 3).map(a => (
-            <span key={a} style={{
-              fontSize: '11px', padding: '2px 7px', borderRadius: '6px',
-              background: 'var(--bg2)', border: '0.5px solid var(--b)',
-              color: 'var(--t2)', whiteSpace: 'nowrap',
-            }}>{a}</span>
-          ))}
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          {l.rating > 0 && (
-            <span style={{ fontSize: '12px', color: 'var(--t3)', display: 'flex', alignItems: 'center', gap: '3px' }}>
-              <span style={{ color: 'var(--gold)' }}>★</span> {Number(l.rating).toFixed(1)}
-            </span>
-          )}
-          {l.meet_type && (
-            <span style={{
-              fontSize: '10px', padding: '2px 8px', borderRadius: '8px',
-              background: 'rgba(197,160,90,0.1)', color: 'var(--gold)',
-              border: '0.5px solid rgba(197,160,90,0.3)', fontWeight: 600,
-              textTransform: 'uppercase', letterSpacing: '0.06em',
-            }}>
-              {l.meet_type}
-            </span>
-          )}
-        </div>
-      </div>
-    </Link>
-  )
-}
 
 export default async function RentalsPage() {
   const cookieStore = cookies()
@@ -203,7 +42,7 @@ export default async function RentalsPage() {
 
   const { data: listings } = await supabase
     .from('listings')
-    .select('id, title, description, category, subcategory, city, country, price_from, price_to, images, verified, premium, rating, review_count, meet_type, featured_until')
+    .select('id, title, description, category, subcategory, city, country, price_from, price_to, images, verified, premium, rating, review_count, meet_type, featured_until, created_at, tags')
     .eq('active', true)
     .eq('category', 'rentals')
     .order('featured_until', { ascending: false, nullsFirst: false })
@@ -338,30 +177,7 @@ export default async function RentalsPage() {
 
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2.5rem 1.5rem 6rem' }}>
 
-          {/* RESULTS META */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-            <span style={{ fontSize: '12px', color: 'var(--t3)' }}>
-              {allListings.length} spaces found
-            </span>
-          </div>
-
-          {/* RENTAL GRID */}
-          {allListings.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '5rem 2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.25rem' }}>
-              <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: 'rgba(122,170,238,0.08)', border: '0.5px solid rgba(122,170,238,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px' }}>🏠</div>
-              <div style={{ fontFamily: 'var(--serif)', fontSize: '24px' }}>No spaces yet</div>
-              <p style={{ fontSize: '14px', color: 'var(--t3)', maxWidth: '340px', lineHeight: 1.7 }}>
-                Be among the first to list your private space and attract discreet bookings from day one.
-              </p>
-              <Link href="/advertise" style={{ padding: '12px 28px', background: 'linear-gradient(135deg,var(--gold),var(--goldd))', borderRadius: 'var(--r)', color: '#0a0a0a', textDecoration: 'none', fontWeight: 700, fontSize: '14px' }}>
-                List your space →
-              </Link>
-            </div>
-          ) : (
-            <div className="rental-grid">
-              {allListings.map((l, i) => <RentalCard key={l.id} l={l} idx={i} />)}
-            </div>
-          )}
+          <RentalsGrid listings={allListings} />
 
           {/* HOST CTA */}
           {allListings.length > 0 && (

@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import NightlifeGrid from './NightlifeGrid'
 
 /* ─── Types ─────────────────────────────────────────────── */
 
@@ -15,29 +16,7 @@ interface Listing {
   active: boolean
   created_at: string
   tags: string[] | null
-}
-
-/* ─── Helpers ───────────────────────────────────────────── */
-
-function venueTypeFromSubcategory(sub: string | null): string {
-  if (!sub) return 'Venue'
-  const s = sub.toLowerCase()
-  if (s.includes('club')) return 'Club'
-  if (s.includes('bar')) return 'Bar'
-  if (s.includes('strip')) return 'Strip Club'
-  if (s.includes('private')) return 'Private Party'
-  if (s.includes('lounge')) return 'Lounge'
-  return sub
-}
-
-function isOpenNow(): boolean {
-  const h = new Date().getHours()
-  return h >= 21 || h < 4
-}
-
-function isTonightOpen(): boolean {
-  const h = new Date().getHours()
-  return h >= 16
+  verified?: boolean
 }
 
 /* ─── Supabase Server Client ─────────────────────────────── */
@@ -685,97 +664,7 @@ export default async function NightlifePage() {
       {/* Main Content */}
       <main className="nl-main">
 
-        {/* Count bar */}
-        <div className="nl-count-bar">
-          <div>
-            <span className="nl-count-label">Venues</span>
-            <span className="nl-count-num">{listings.length}</span>
-          </div>
-          <span style={{
-            fontFamily: 'var(--sans, "Jost", sans-serif)',
-            fontSize: '11px',
-            color: 'rgba(255,255,255,0.2)',
-            fontWeight: 300,
-            letterSpacing: '0.04em',
-          }}>
-            Updated nightly
-          </span>
-        </div>
-
-        {/* Venue Grid */}
-        <div className="nl-grid" id="nl-grid">
-          {listings.length === 0 ? (
-            <div className="nl-empty">
-              <div className="nl-empty-icon">◐</div>
-              <p className="nl-empty-text">The night is still young</p>
-              <p className="nl-empty-sub">No venues listed yet — be the first to list yours.</p>
-            </div>
-          ) : listings.map((listing, idx) => {
-            const openNow   = isOpenNow()
-            const tonightOk = isTonightOpen()
-            const vType = venueTypeFromSubcategory(listing.subcategory)
-            const img = listing.images?.[0] ?? null
-            const tags = listing.tags ?? []
-
-            return (
-              <a
-                key={listing.id}
-                href={`/listings/${listing.id}`}
-                className="nl-card"
-                data-city={listing.city ?? 'All'}
-                data-vtype={vType}
-                style={{ animationDelay: `${idx * 0.06}s`, textDecoration: 'none' }}
-              >
-                {/* Image area */}
-                <div className="nl-card-img">
-                  {img ? (
-                    <img src={img} alt={listing.title} />
-                  ) : (
-                    <div className="nl-card-img-placeholder">
-                      <span style={{ fontSize: '48px', opacity: 0.2, color: '#c5a05a' }}>◐</span>
-                    </div>
-                  )}
-                  <div className="nl-card-img-overlay" />
-                  <div className="nl-badge">
-                    {openNow && (
-                      <span className="nl-badge-pill nl-badge-open">Open Now</span>
-                    )}
-                    {!openNow && tonightOk && (
-                      <span className="nl-badge-pill nl-badge-tonight">Tonight</span>
-                    )}
-                  </div>
-                  <div className="nl-card-name">{listing.title}</div>
-                </div>
-
-                {/* Body */}
-                <div className="nl-card-body">
-                  <div className="nl-card-meta">
-                    {listing.city && (
-                      <span className="nl-card-city">{listing.city}</span>
-                    )}
-                    <span className="nl-card-type">{vType}</span>
-                  </div>
-
-                  {listing.description && (
-                    <p className="nl-card-desc">{listing.description}</p>
-                  )}
-
-                  {tags.length > 0 && (
-                    <div className="nl-card-tags">
-                      {tags.slice(0, 4).map(tag => (
-                        <span key={tag} className="nl-tag">{tag}</span>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="nl-card-cta">
-                    <span className="nl-cta-link">View venue →</span>
-                  </div>
-                </div>
-              </a>
-            )
-          })}
-        </div>
+        <NightlifeGrid listings={listings} />
 
         {/* List your venue CTA */}
         <div className="nl-cta-block">
