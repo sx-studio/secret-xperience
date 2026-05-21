@@ -39,13 +39,18 @@ Live at **secretxperience.eu** (and www.secretxperience.eu). Owner email: heyoka
 - BreadcrumbList + Service JSON-LD on all 6 category pages (escorts, nightlife, creators, rentals, hotels, shop)
 - `/api/newsletter` POST endpoint + footer signup form on homepage
 - `newsletter_subscribers` migration created (`supabase/migrations/20250521_newsletter.sql`) — **needs to be applied in Supabase SQL editor**
+- Search page hardened: switched to publishable key, sanitized `q` input (escapes PostgREST-significant chars), added `subcategory` to search scope, client-side relevance bump for exact/prefix title matches
+- Tier expiry: created `expire_listing_tiers()` function + hourly pg_cron sweep (`supabase/migrations/20250521_tier_auto_expire.sql`) — **needs to be applied**
+- Search performance indexes (pg_trgm GIN on title/description/city/subcategory) — `supabase/migrations/20250521_search_indexes.sql` **needs to be applied**
+- Search UI: Premium/Featured badges now gated on `featured_until > now` (Premium displaces Featured when both apply)
 
 ## Pending
-- **Apply newsletter migration** — `supabase/migrations/20250521_newsletter.sql` not yet run on production DB
+- **Apply pending migrations in Supabase SQL editor**:
+  - `20250521_newsletter.sql`
+  - `20250521_tier_auto_expire.sql` (requires pg_cron extension enabled)
+  - `20250521_search_indexes.sql` (requires pg_trgm extension)
 - **CCBill integration** — blocked on credentials. Do NOT bring up unless user mentions it first.
 - **Stripcash affiliate verification** — draft email response is ready (in chat history), waiting for user to send.
-- **Search API** — `/search` not wired to real `listings` table yet
-- **Tier expiry display** — featured badge still shows when `tier_expires_at` is past
 - **Provider moderation flow** — badges added but full end-to-end flow not verified in browser
 - **secretxperience.eu deployment visibility** — user has reported latest changes sometimes don't appear; could be browser cache (Ctrl+Shift+R) or Vercel domain alias issue. Worth checking deployments list via Vercel dashboard if it recurs.
 

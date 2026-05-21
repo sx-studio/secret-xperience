@@ -44,7 +44,7 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
   const cookieStore = cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
   )
 
@@ -53,22 +53,50 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
   const city     = searchParams.city || ''
   const sort     = searchParams.sort || 'relevance'
 
+  // Escape PostgREST-significant chars (`,` `(` `)` `*`) so user input can't break the .or() parse
+  const safeQ = q.replace(/[,()*\\]/g, ' ').trim()
+
   let query = supabase
     .from('listings')
-    .select('id,title,description,category,subcategory,city,country,price_from,price_to,verified,premium,trending,rating,review_count,meet_type,featured_until,images')
+    .select('id,title,description,category,subcategory,city,country,price_from,price_to,verified,premium,trending,rating,review_count,meet_type,featured_until,tags,images')
     .eq('active', true)
 
-  if (q) query = query.or(`title.ilike.%${q}%,description.ilike.%${q}%,city.ilike.%${q}%`)
+  if (safeQ) {
+    const pattern = `%${safeQ}%`
+    query = query.or(
+      `title.ilike.${pattern},description.ilike.${pattern},city.ilike.${pattern},subcategory.ilike.${pattern}`
+    )
+  }
   if (category && category !== 'all') query = query.ilike('category', category + '%')
   if (city && city !== 'All cities') query = query.ilike('city', city + '%')
 
   query = query.order('featured_until', { ascending: false, nullsFirst: false })
-  if (sort === 'rating') query = query.order('rating', { ascending: false })
+  if (sort === 'rating') query = query.order('rating', { ascending: false, nullsFirst: false })
   else if (sort === 'price_asc') query = query.order('price_from', { ascending: true, nullsFirst: false })
   else if (sort === 'price_desc') query = query.order('price_from', { ascending: false, nullsFirst: false })
-  else query = query.order('created_at', { ascending: false })
+  else if (sort === 'relevance' && safeQ) {
+    // Title matches first, then rating, then recency
+    query = query.order('rating', { ascending: false, nullsFirst: false })
+  } else {
+    query = query.order('created_at', { ascending: false })
+  }
 
-  const { data: listings } = await query.limit(48)
+  let { data: listings } = await query.limit(48)
+
+  // Client-side relevance bump: exact title matches first when there's a query
+  if (safeQ && sort === 'relevance' && listings) {
+    const needle = safeQ.toLowerCase()
+    listings = [...listings].sort((a: any, b: any) => {
+      const score = (l: any) => {
+        const t = (l.title || '').toLowerCase()
+        if (t === needle) return 100
+        if (t.startsWith(needle)) return 50
+        if (t.includes(needle)) return 25
+        return 0
+      }
+      return score(b) - score(a)
+    })
+  }
 
   const featured = (listings || []).filter(l => l.featured_until && new Date(l.featured_until) > new Date())
   const regular  = (listings || []).filter(l => !l.featured_until || new Date(l.featured_until) <= new Date())
@@ -244,9 +272,9 @@ function ListingCard({ l, isFeatured }: { l: any; isFeatured: boolean }) {
           <img src={l.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }} />
         )}
         <div style={{ position: 'absolute', top: '0.6rem', left: '0.6rem', display: 'flex', gap: '4px', flexWrap: 'wrap', zIndex: 2 }}>
-          {isFeatured && <span className="s-badge s-badge-feat">✦ Featured</span>}
+          {isFeatured && !l.premium && <span className="s-badge s-badge-feat">✦ Featured</span>}
+          {l.premium && isFeatured && <span className="s-badge s-badge-prem">✦ Premium</span>}
           {l.verified && <span className="s-badge s-badge-ver">✓ Verified</span>}
-          {l.premium && <span className="s-badge s-badge-prem">Premium</span>}
         </div>
         <span style={{ fontFamily: 'var(--serif)', fontSize: '64px', fontStyle: 'italic', fontWeight: 400, color: 'rgba(197,160,90,0.25)', lineHeight: 1, position: 'absolute', bottom: '0.25rem', left: '1rem', zIndex: 1 }}>{monogram}</span>
       </div>
