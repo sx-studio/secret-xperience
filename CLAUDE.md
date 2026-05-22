@@ -25,6 +25,23 @@ Live at **secretxperience.eu** (and www.secretxperience.eu). Owner email: heyoka
 - Static HTML in `dangerouslySetInnerHTML` is built at compile time — any `${var}` reference inside it must use variables that exist at JSX render scope, NOT inside useEffect-only scope. Heart buttons (`data-fav-lid`) go in the dynamic `renderCards` useEffect, NOT in the static template.
 - Provider/listing card category routes: `escorts → /escorts`, `companions → /companionship`, `nightlife → /nightlife`, `creators → /creators`, `rentals → /rentals`, `hotels → /hotels`, `events → /events`, `shop → /shop`.
 
+## ⚡ Next Session — Resume Here (2026-05-22)
+Last thing completed: **Mobile listing card redesign** (commit `40668f5` on `main`).
+
+What was done:
+- Homepage listing cards: 2-col grid forced at ALL mobile widths (420px no longer collapses to 1 col)
+- Photo slider added per card — prev/next arrows + "1/N" counter, `window.__slideCard` swaps `img#si-{id}` src
+- Card hero: full-bleed cover image with gradient overlay, 200px mobile / 175px small phone
+- Card body: compact layout — name + price on same row, location below, category label hidden on mobile
+- Slider state tracked per card via `window.__sliderIdx`
+
+What's next (user hasn't asked for these yet, don't do proactively):
+- The category pages (escorts, nightlife, etc.) have their own card components — they may also need the same mobile 2-col + slider treatment if user requests it
+- Pending Supabase migrations still need to be applied (see Pending section)
+- CCBill — do NOT mention, waiting on credentials
+
+---
+
 ## Done (recent work, don't redo)
 - Token system migrations applied (`token_packages`, `user_wallets`, `token_ledger`, `payment_orders`)
 - Identity verification table + flow (`identity_verifications`)
