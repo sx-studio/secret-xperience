@@ -197,7 +197,7 @@ export default function CreateListingPage() {
       setProfile(prof)
       // Load token wallet
       const { data: w } = await supabase
-        .from('user_wallets').select('balance').eq('user_id', session.user.id).single()
+        .from('user_wallets').select('balance').eq('user_id', session.user.id).maybeSingle()
       setWallet(w)
       // Check for saved draft
       try {

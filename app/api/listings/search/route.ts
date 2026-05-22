@@ -28,7 +28,9 @@ export async function GET(req: NextRequest) {
     .eq('active', true)
 
   if (q) {
-    query = query.or(`title.ilike.%${q}%,description.ilike.%${q}%,city.ilike.%${q}%`)
+    // Escape PostgREST or() special chars before embedding in filter string
+    const safe = q.replace(/[%_(),"\\]/g, '\\$&')
+    query = query.or(`title.ilike.%${safe}%,description.ilike.%${safe}%,city.ilike.%${safe}%`)
   }
   if (category && category !== 'all') query = query.ilike('category', category + '%')
   if (city) query = query.ilike('city', city + '%')

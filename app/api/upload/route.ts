@@ -4,14 +4,14 @@ import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif']
-const MAX_SIZE = 10 * 1024 * 1024 // 10 MB
+const MAX_SIZE = 4 * 1024 * 1024 // 4 MB (Vercel serverless body limit is 4.5 MB)
 
 export async function POST(req: NextRequest) {
   const cookieStore = cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)!,
-    { cookies: { get: (name) => cookieStore.get(name)?.value } }
+    { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
   )
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

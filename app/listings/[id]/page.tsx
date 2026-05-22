@@ -145,7 +145,7 @@ export default function ListingDetailPage() {
       ])
       setSession(sess)
       if (sess?.user?.id) {
-        supabase.from('favorites').select('listing_id').eq('user_id', sess.user.id).eq('listing_id', id).single()
+        supabase.from('favorites').select('listing_id').eq('user_id', sess.user.id).eq('listing_id', id).maybeSingle()
           .then(({ data: fav }) => setIsFaved(!!fav))
       }
       if (error || !data) {
