@@ -426,7 +426,7 @@ async function loadSimilarListings(excludeId, category) {
         pricing:l.price_from?[{dur:'Rate',amt:'€'+l.price_from,note:l.category,feat:true}]:[{dur:'Rate',amt:'POA',note:'',feat:true}],
         price_from:l.price_from||0,featured_until:l.featured_until||null,images:l.images||[]
       }))
-      return '<div class="dp-sim-card" onclick="openDetail(JSON.parse(decodeURIComponent(\''+dStr+'\')))" style="cursor:pointer">' +
+      return '<div class="dp-sim-card" onclick="window.location.href=\'/listings/\'+' + "(l.id||'')" + '" style="cursor:pointer">' +
         '<div class="dp-sim-img"><i class="ti '+icon+'" aria-hidden="true"></i><div class="card-badges" style="position:absolute;top:5px;left:5px">'+badges.join('')+'</div></div>' +
         '<div class="dp-sim-body"><div class="dp-sim-cat">'+(l.category||'')+(l.subcategory?' · '+l.subcategory:'')+'</div><div class="dp-sim-name">'+(l.title||'')+'</div><div class="dp-sim-price">'+(l.price_from?'From €'+l.price_from+' · ':'')+(l.city||'')+'</div></div>' +
         '</div>'
@@ -1316,20 +1316,8 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         const monogram = (l.title || 'Xx').slice(0,2)
         return `<div class="card" role="listitem" tabindex="0"
           data-lid="${l.id||''}" data-pid="${l.profile_id||''}"
-          onclick="openDetail(JSON.parse(decodeURIComponent('${encodeURIComponent(JSON.stringify({
-            id:l.id||'',profile_id:l.profile_id||'',
-            icon:getCategoryIcon(l.category),badges,
-            cat:(l.category||'')+(l.subcategory?' · '+l.subcategory:''),
-            type:l.subcategory||l.category||'',name:l.title||'',
-            rating:l.rating||'—',city:(l.city||'—')+', '+(l.country||''),
-            s1:String(l.review_count||0),s2:l.rating?l.rating.toFixed(1):'—',s3:'—',s4:'—',
-            desc:l.description||'No description provided.',
-            tags:l.subcategory?[l.subcategory,l.category]:[l.category],
-            pricing,
-            price_from: l.price_from||0,
-            featured_until: l.featured_until||null,
-            images: l.images||[]
-          }))}'))">
+          onclick="window.location.href='/listings/${l.id||''}'"
+          style="cursor:pointer">
           <div class="card-hero ${catClass}" style="height:180px;position:relative;display:flex;align-items:flex-end;padding:1rem;">
             ${l.images && l.images.length > 0 ? `<img src="${l.images[0]}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" alt="" />` : ''}
             <div data-fav-lid="${l.id}" onclick="event.stopPropagation();(window.toggleFavorite||function(){})(\'${l.id}\',this)" style="position:absolute;top:0.6rem;right:0.6rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.30);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:2;cursor:pointer;transition:background .2s;"><i class="ti ti-heart" style="color:#fff;font-size:15px;"></i></div>
@@ -1402,18 +1390,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
           if (titleEl) titleEl.textContent = topFeatured.title || '—'
           if (subEl) subEl.textContent = [(topFeatured.category || ''), topFeatured.verified ? 'Verified' : '', topFeatured.city || ''].filter(Boolean).join(' · ')
           if (btn) btn.onclick = function() {
-            const isFeatured = topFeatured.featured_until && new Date(topFeatured.featured_until) > new Date()
-            openDetail({
-              id:topFeatured.id||'',profile_id:topFeatured.profile_id||'',
-              icon:getCategoryIcon(topFeatured.category),badges:isFeatured?[{cls:'bf',txt:'✦ Featured'}]:[],
-              cat:topFeatured.category||'',type:topFeatured.subcategory||topFeatured.category||'',
-              name:topFeatured.title||'',rating:topFeatured.rating||'—',
-              city:(topFeatured.city||'—')+', '+(topFeatured.country||''),
-              s1:String(topFeatured.review_count||0),s2:topFeatured.rating?topFeatured.rating.toFixed(1):'—',s3:'—',s4:'—',
-              desc:topFeatured.description||'',tags:[topFeatured.category],
-              pricing:topFeatured.price_from?[{dur:'Rate',amt:'€'+topFeatured.price_from,note:topFeatured.category,feat:true}]:[{dur:'Rate',amt:'POA',note:'',feat:true}],
-              price_from:topFeatured.price_from||0,featured_until:topFeatured.featured_until||null
-            })
+            if (topFeatured.id) window.location.href = '/listings/' + topFeatured.id
           }
           banner.style.display = ''
         } else {
@@ -1456,7 +1433,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
             pricing:l.price_from?[{dur:'Rate',amt:'€'+l.price_from,note:l.category,feat:true}]:[{dur:'Rate',amt:'POA',note:'',feat:true}],
             price_from:l.price_from||0,featured_until:l.featured_until||null
           }))
-          return `<div onclick="openDetail(JSON.parse(decodeURIComponent('${dataStr}')))" style="flex-shrink:0;width:140px;cursor:pointer;background:rgba(255,255,255,0.03);border:0.5px solid rgba(255,255,255,0.07);border-radius:10px;padding:.75rem;transition:border-color .15s" onmouseover="this.style.borderColor='rgba(197,160,90,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.07)'">
+          return `<div onclick="window.location.href='/listings/${l.id||''}'" style="flex-shrink:0;width:140px;cursor:pointer;background:rgba(255,255,255,0.03);border:0.5px solid rgba(255,255,255,0.07);border-radius:10px;padding:.75rem;transition:border-color .15s" onmouseover="this.style.borderColor='rgba(197,160,90,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.07)'">
             <div style="width:32px;height:32px;border-radius:8px;background:rgba(197,160,90,0.08);display:flex;align-items:center;justify-content:center;font-size:14px;margin-bottom:.5rem"><i class="ti ${getCategoryIcon(l.category)}"></i></div>
             <div style="font-size:12px;color:#ece8e1;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px">${l.title||''}</div>
             <div style="font-size:11px;color:#4c4a47">${l.price_from?'€'+l.price_from:'POA'}</div>
@@ -1753,27 +1730,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
       const urlParams = new URLSearchParams(window.location.search)
       const deepId = urlParams.get('listing')
       if (deepId) {
-        const { data: l } = await (supabase as any).from('listings').select('*').eq('id', deepId).single()
-        if (l) {
-          const badges: any[] = []
-          if (l.verified) badges.push({cls:'bv',txt:'✓ Verified'})
-          if (l.premium) badges.push({cls:'bp',txt:'Premium'})
-          if (l.trending) badges.push({cls:'bt',txt:'Trending'})
-          const pricing: any[] = l.price_from
-            ? [{dur:'Standard rate',amt:'€'+l.price_from+(l.price_to?'–€'+l.price_to:''),note:l.subcategory||l.category,feat:true}]
-            : [{dur:'Contact for rates',amt:'POA',note:'',feat:true}]
-          openDetail({
-            id:l.id, profile_id:l.profile_id,
-            icon:getCategoryIcon(l.category), badges,
-            cat:(l.category||'')+(l.subcategory?' · '+l.subcategory:''),
-            type:l.subcategory||l.category||'', name:l.title||'',
-            rating:l.rating||'—', city:(l.city||'—')+', '+(l.country||''),
-            s1:String(l.review_count||0), s2:l.rating?l.rating.toFixed(1):'—', s3:'—', s4:'—',
-            desc:l.description||'No description provided.',
-            tags:l.subcategory?[l.subcategory,l.category]:[l.category],
-            pricing
-          })
-        }
+        window.location.replace('/listings/' + deepId)
       }
     })
 
