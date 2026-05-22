@@ -39,7 +39,7 @@ export default function VerifyPage() {
   useEffect(() => {
     const supabase = createClient()
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) { window.location.href = '/login?redirect=/verify'; return }
+      if (!session) { window.location.href = '/login?next=/verify'; return }
       setSession(session)
       supabase.from('identity_verifications').select('status').eq('user_id', session.user.id).maybeSingle()
         .then(({ data }) => { if (data?.status) setStatus(data.status as VerifStatus) })

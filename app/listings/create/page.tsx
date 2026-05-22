@@ -308,7 +308,7 @@ export default function CreateListingPage() {
       .from('identity_verifications')
       .select('status')
       .eq('user_id', session.user.id)
-      .single()
+      .maybeSingle()
 
     if (!verif || verif.status !== 'approved') {
       setError(
