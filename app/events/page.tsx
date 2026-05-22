@@ -13,59 +13,73 @@ function formatDate(d: string) {
   return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
+const CATEGORY_GRAD: Record<string, string> = {
+  fetish:    'linear-gradient(140deg,#1a0a12,#2a0d1a)',
+  nightlife: 'linear-gradient(140deg,#0a0a2a,#110a22)',
+  lifestyle: 'linear-gradient(140deg,#1a1020,#240e2c)',
+  wellness:  'linear-gradient(140deg,#0a1a12,#0e240e)',
+}
+
 function EventCard({ event }: { event: any }) {
   const flag = COUNTRY_FLAGS[event.country] || '🌍'
   const isFree = !event.price_from || event.price_from === 0
-  const isUpcoming = event.date_start && new Date(event.date_start) >= new Date()
 
   return (
     <Link href={`/events/${event.slug}`} style={{ textDecoration: 'none', display: 'block' }}>
-      <article style={{ background: 'var(--bg1)', border: '0.5px solid var(--b)', borderRadius: 'var(--rl)', overflow: 'hidden', transition: 'border-color .2s, transform .2s', cursor: 'pointer' }}
-        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--b3)'; (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)' }}
-        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--b)'; (e.currentTarget as HTMLElement).style.transform = '' }}>
+      <article style={{ background: 'var(--bg1)', border: '0.5px solid var(--b)', borderRadius: 'var(--rl)', overflow: 'hidden', transition: 'border-color .2s, transform .2s, box-shadow .2s', cursor: 'pointer' }}
+        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(197,160,90,0.4)'; (e.currentTarget as HTMLElement).style.transform = 'translateY(-3px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 40px rgba(0,0,0,0.4)' }}
+        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--b)'; (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = '' }}>
 
-        {/* Date strip */}
-        <div style={{ background: 'var(--grad-noir)', padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '0.5px solid var(--b)' }}>
-          <div>
-            <div style={{ fontFamily: 'var(--serif)', fontSize: '1.6rem', fontWeight: 400, color: 'var(--gold)', lineHeight: 1 }}>
+        {/* Cover image */}
+        <div style={{ position: 'relative', height: '180px', overflow: 'hidden', background: CATEGORY_GRAD[event.category] || 'linear-gradient(140deg,#0f0a18,#1a0d24)' }}>
+          {event.image_url && (
+            <img
+              src={event.image_url}
+              alt={event.title}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: 0.82 }}
+              onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
+            />
+          )}
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.6) 100%)', pointerEvents: 'none' }} />
+          {/* Date badge */}
+          <div style={{ position: 'absolute', top: '12px', left: '14px', background: 'rgba(8,6,18,0.82)', backdropFilter: 'blur(8px)', borderRadius: '10px', padding: '6px 12px', border: '0.5px solid rgba(197,160,90,0.25)' }}>
+            <div style={{ fontFamily: 'var(--serif)', fontSize: '1.2rem', fontWeight: 400, color: 'var(--gold)', lineHeight: 1 }}>
               {event.date_start ? new Date(event.date_start).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'TBA'}
             </div>
-            {event.date_end && event.date_end !== event.date_start && (
-              <div style={{ fontSize: '11px', color: 'var(--t3)', marginTop: '2px' }}>— {new Date(event.date_end).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
-            )}
-            {!event.date_end && event.date_start && (
-              <div style={{ fontSize: '11px', color: 'var(--t3)', marginTop: '2px' }}>{new Date(event.date_start).getFullYear()}</div>
-            )}
+            {event.date_end && event.date_end !== event.date_start
+              ? <div style={{ fontSize: '10px', color: 'var(--t3)', marginTop: '1px' }}>— {new Date(event.date_end).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</div>
+              : event.date_start && <div style={{ fontSize: '10px', color: 'var(--t3)', marginTop: '1px' }}>{new Date(event.date_start).getFullYear()}</div>
+            }
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
-            {event.featured && <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', background: 'var(--gbg)', color: 'var(--gold)', border: '0.5px solid var(--gbrd)', borderRadius: '10px', padding: '2px 10px' }}>FEATURED</span>}
-            {event.recurring !== 'one-time' && <span style={{ fontSize: '10px', color: 'var(--t3)', textTransform: 'capitalize' }}>{event.recurring}</span>}
+          {/* Badges top-right */}
+          <div style={{ position: 'absolute', top: '12px', right: '14px', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '5px' }}>
+            {event.featured && <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.1em', background: 'var(--gbg)', color: 'var(--gold)', border: '0.5px solid var(--gbrd)', borderRadius: '10px', padding: '2px 10px', backdropFilter: 'blur(6px)' }}>FEATURED</span>}
+            {event.recurring && event.recurring !== 'one-time' && <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.7)', background: 'rgba(0,0,0,0.5)', borderRadius: '10px', padding: '2px 8px', textTransform: 'capitalize', backdropFilter: 'blur(6px)' }}>{event.recurring}</span>}
+          </div>
+          {/* Category label bottom-right */}
+          <div style={{ position: 'absolute', bottom: '10px', right: '12px' }}>
+            <span style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', background: 'rgba(8,6,18,0.75)', color: 'var(--t2)', borderRadius: '6px', padding: '3px 9px', backdropFilter: 'blur(6px)', border: '0.5px solid rgba(255,255,255,0.08)' }}>
+              {CATEGORY_LABELS[event.category] || event.category}
+            </span>
           </div>
         </div>
 
         {/* Content */}
-        <div style={{ padding: '1.25rem' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', marginBottom: '.75rem' }}>
-            <h3 style={{ fontFamily: 'var(--serif)', fontSize: '18px', fontWeight: 500, margin: 0, color: 'var(--t)', lineHeight: 1.3 }}>{event.title}</h3>
-            <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', background: 'var(--bg2)', color: 'var(--t2)', border: '0.5px solid var(--b)', borderRadius: '8px', padding: '3px 10px', flexShrink: 0 }}>
-              {CATEGORY_LABELS[event.category] || event.category}
-            </span>
-          </div>
-          <p style={{ fontSize: '13px', color: 'var(--t2)', lineHeight: 1.6, margin: '0 0 1rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{event.description}</p>
+        <div style={{ padding: '1.1rem 1.25rem' }}>
+          <h3 style={{ fontFamily: 'var(--serif)', fontSize: '18px', fontWeight: 500, margin: '0 0 .5rem', color: 'var(--t)', lineHeight: 1.3 }}>{event.title}</h3>
+          <p style={{ fontSize: '13px', color: 'var(--t2)', lineHeight: 1.6, margin: '0 0 .9rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{event.description}</p>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'var(--t3)' }}>
               <span>{flag}</span>
-              <span>{event.city}, {event.country}</span>
-              {event.venue_name && <span style={{ color: 'var(--b3)' }}>·</span>}
-              {event.venue_name && <span>{event.venue_name}</span>}
+              <span>{event.city}{event.venue_name ? ` · ${event.venue_name}` : ''}</span>
             </div>
             <div style={{ fontSize: '13px', fontWeight: 600, color: isFree ? '#26d4a0' : 'var(--gold)' }}>
               {isFree ? 'Free entry' : `From €${event.price_from}`}
             </div>
           </div>
           {event.tags?.length > 0 && (
-            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '10px' }}>
-              {event.tags.slice(0, 4).map((t: string) => (
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '9px' }}>
+              {event.tags.slice(0, 3).map((t: string) => (
                 <span key={t} style={{ fontSize: '11px', color: 'var(--t3)', background: 'var(--bg2)', border: '0.5px solid var(--b)', borderRadius: '6px', padding: '2px 8px' }}>#{t}</span>
               ))}
             </div>

@@ -47,9 +47,19 @@ export default function EventDetailPage({ params }: { params: { slug: string } }
       </nav>
 
       {/* HERO */}
-      <div style={{ background: heroBg, padding: '4rem 1.5rem 3rem', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 30% 50%,rgba(197,160,90,0.12) 0%,transparent 60%)', pointerEvents: 'none' }} />
-        <div style={{ maxWidth: '860px', margin: '0 auto', position: 'relative' }}>
+      <div style={{ background: heroBg, position: 'relative', overflow: 'hidden', minHeight: '340px', display: 'flex', alignItems: 'flex-end' }}>
+        {/* Cover image */}
+        {event.image_url && (
+          <img
+            src={event.image_url}
+            alt={event.title}
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.45 }}
+            onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
+          />
+        )}
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(8,6,18,0.85) 100%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 30% 50%,rgba(197,160,90,0.1) 0%,transparent 60%)', pointerEvents: 'none' }} />
+        <div style={{ maxWidth: '860px', margin: '0 auto', position: 'relative', width: '100%', padding: '4rem 1.5rem 3rem' }}>
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
             {event.featured && <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', background: 'var(--gbg)', color: 'var(--gold)', border: '0.5px solid var(--gbrd)', borderRadius: '10px', padding: '3px 12px' }}>FEATURED</span>}
             {event.verified && <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.1em', background: 'rgba(38,212,160,0.12)', color: '#26d4a0', border: '0.5px solid rgba(38,212,160,0.3)', borderRadius: '10px', padding: '3px 12px' }}>✓ VERIFIED</span>}
