@@ -7,7 +7,7 @@ Premium adult services marketplace for the EU (BE/NL/DE/FR/LU primary).
 Live at **secretxperience.eu** (and www.secretxperience.eu). Owner email: heyokanaga@gmail.com.
 
 ## Stack
-- **Next.js 14** App Router, TypeScript, deployed on **Vercel**
+- **Next.js 13.5.1** App Router, TypeScript, deployed on **Vercel** (NOT 14 — important for cookie API behavior)
   - Team: `team_8bUh79wAVTN5pyFKcCQGIXEy`
   - Project: `prj_uE7mmweTEj1NwLhddYWXiI1Pbw1T`
   - Auto-deploys on push to `main`
@@ -71,6 +71,21 @@ Live at **secretxperience.eu** (and www.secretxperience.eu). Owner email: heyoka
   - Login redirect: `/login?redirect=` → `/login?next=` to match login page's param reader
   - `.single()` → `.maybeSingle()` on `identity_verifications` in dashboard and listings/create
   - Admin panel verification tab now shows all pending submissions with profile data
+- **Platform-wide audit fixes (2026-05-22)**:
+  - `@supabase/ssr` cookie adapter: ALL routes now use `getAll/setAll` pattern (tokens/spend, featured-boost were still on old `get`-only)
+  - `favorites` and `listing_views` tables: created with proper schema, RLS, FKs, grants via migration
+  - service_role grants: every core table now has full SELECT/INSERT/UPDATE/DELETE for service_role
+  - Wallet security: authenticated role CANNOT INSERT/UPDATE/DELETE user_wallets — only service_role (prevents balance manipulation)
+  - Admin verification approval: added `admin update all verifications` RLS policy so admin can approve/reject from browser client
+  - Admin notifications: added `admin insert notifications` RLS policy so approve/reject sends user notification
+  - Duplicate RLS policies cleaned up (listings, profiles, messages had redundant duplicate policies)
+  - Listing detail, tokens/spend: `.single()` → `.maybeSingle()` where row absence is possible
+  - Upload size cap: 4MB (was 10MB, Vercel limit is 4.5MB — prevents silent 413)
+  - Search query: special chars sanitized before embedding in PostgREST `.or()` filter
+  - Admin client auth options: `{ autoRefreshToken: false, persistSession: false }` on all service_role clients
+  - `app/api/tokens/spend/route.ts`: cookie adapter fixed + admin client hardened
+  - `app/api/featured-boost/route.ts`: cookie adapter fixed
+  - Next.js version confirmed as **13.5.1** — `cookies()` is synchronous (no `await`), important for all server code
 
 ## Pending
 - **Apply pending migrations in Supabase SQL editor** (run in order):
@@ -86,6 +101,13 @@ Live at **secretxperience.eu** (and www.secretxperience.eu). Owner email: heyoka
 ## Nice-to-do (not yet requested but noted)
 - Events page not in mobile bottom nav (swapped for Discover) — if user wants both, consider a 6th slot or a "More" overflow menu
 - Consider a post-booking satisfaction survey flow in dashboard
+
+## Critical patterns (don't break these)
+- `cookies()` from `next/headers` is **synchronous** in Next.js 13.5.1 — NEVER `await cookies()`
+- Supabase SSR cookie adapter MUST use `{ cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }` — never the old `{ cookies: { get: (n) => ... } }` pattern
+- Admin client (service_role) MUST include `{ auth: { autoRefreshToken: false, persistSession: false } }` 
+- `.single()` is fine when followed by a null/error check; use `.maybeSingle()` when you want to silently ignore missing rows
+- Wallet balance mutations ONLY via service_role routes — never via authenticated browser client (RLS enforces this now)
 
 ## Constraints / things NOT to do
 - Don't push to non-main branches without explicit permission
