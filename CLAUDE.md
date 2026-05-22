@@ -63,6 +63,14 @@ Live at **secretxperience.eu** (and www.secretxperience.eu). Owner email: heyoka
 - **Mobile improvements** — Viewport export in layout.tsx, single-col breakpoints on search/escorts/tokens, sidebar flex on escorts, touch targets, nav collapse at 640px.
 - **Mobile bottom nav** — Swapped Events → Discover (sparkles icon) in the 5-slot bottom nav on homepage.
 - **Signup fixed** — New `/api/auth/signup` server route uses service role key to create user + upsert profile + ensure wallet; bypasses failing `auth.users` trigger. Login page now POSTs to this route instead of calling `supabase.auth.signUp()` directly.
+- **Identity verification flow fixed (full end-to-end)**:
+  - `create_wallet_for_new_user()` trigger: added `SET search_path = public` (was "relation user_wallets does not exist")
+  - `identity_verifications` table: granted SELECT/INSERT/UPDATE/DELETE to `service_role` and `authenticated` (table was created without standard Supabase grants)
+  - `identity_verifications` FK: added `user_id → public.profiles(id)` so PostgREST can resolve embedded join in admin panel (existing FK pointed to `auth.users`, invisible to PostgREST)
+  - File upload: switched from FormData through Vercel (413 too large) to client→Supabase Storage direct upload; route now accepts JSON paths and creates signed URLs server-side
+  - Login redirect: `/login?redirect=` → `/login?next=` to match login page's param reader
+  - `.single()` → `.maybeSingle()` on `identity_verifications` in dashboard and listings/create
+  - Admin panel verification tab now shows all pending submissions with profile data
 
 ## Pending
 - **Apply pending migrations in Supabase SQL editor** (run in order):
