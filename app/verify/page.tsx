@@ -41,8 +41,8 @@ export default function VerifyPage() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) { window.location.href = '/login?redirect=/verify'; return }
       setSession(session)
-      supabase.from('identity_verifications').select('status').eq('user_id', session.user.id).single()
-        .then(({ data }) => { if (data) setStatus(data.status as VerifStatus) })
+      supabase.from('identity_verifications').select('status').eq('user_id', session.user.id).maybeSingle()
+        .then(({ data }) => { if (data?.status) setStatus(data.status as VerifStatus) })
     })
   }, [])
 
