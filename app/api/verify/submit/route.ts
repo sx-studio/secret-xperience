@@ -1,8 +1,8 @@
 /**
- * Identity verification document submission
- * Providers upload front-of-ID, back-of-ID, and a selfie.
- * Files are stored in Supabase Storage (private bucket: identity-docs).
- * Creates / updates the identity_verifications record.
+ * Identity verification document submission.
+ * Client uploads files directly to Supabase Storage (bypasses Vercel's 4.5MB body limit),
+ * then POSTs the storage paths here. This route creates 10-year signed URLs for admin
+ * review and upserts the identity_verifications record.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
@@ -32,36 +32,38 @@ export async function POST(req: NextRequest) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
-  const formData = await req.formData()
-  const docFront = formData.get('doc_front') as File | null
-  const docBack  = formData.get('doc_back')  as File | null
-  const selfie   = formData.get('selfie')    as File | null
-
-  if (!docFront || !selfie) {
-    return NextResponse.json({ error: 'doc_front and selfie are required' }, { status: 400 })
+  let body: any
+  try {
+    body = await req.json()
+  } catch {
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
   }
 
-  const uid     = session.user.id
-  const bucket  = 'identity-docs'
-  const prefix  = `${uid}/${Date.now()}`
+  const { frontPath, backPath, selfiePath } = body
+  if (!frontPath || !selfiePath) {
+    return NextResponse.json({ error: 'frontPath and selfiePath are required' }, { status: 400 })
+  }
 
-  async function uploadFile(file: File, name: string): Promise<string> {
-    const bytes = await file.arrayBuffer()
-    const { error } = await admin.storage.from(bucket).upload(
-      `${prefix}/${name}`,
-      Buffer.from(bytes),
-      { contentType: file.type, upsert: true }
-    )
-    if (error) throw new Error(error.message)
-    // Return a signed URL valid 10 years (for admin review)
-    const { data } = await admin.storage.from(bucket).createSignedUrl(`${prefix}/${name}`, 315360000)
+  const bucket = 'identity-docs'
+  const uid    = session.user.id
+
+  // Verify the uploaded paths belong to this user
+  if (!frontPath.startsWith(`${uid}/`) || !selfiePath.startsWith(`${uid}/`)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+  if (backPath && !backPath.startsWith(`${uid}/`)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  async function signPath(path: string): Promise<string> {
+    const { data } = await admin.storage.from(bucket).createSignedUrl(path, 315360000)
     return data?.signedUrl || ''
   }
 
   try {
-    const frontUrl  = await uploadFile(docFront, 'doc_front')
-    const backUrl   = docBack ? await uploadFile(docBack, 'doc_back') : null
-    const selfieUrl = await uploadFile(selfie, 'selfie')
+    const frontUrl  = await signPath(frontPath)
+    const backUrl   = backPath ? await signPath(backPath) : null
+    const selfieUrl = await signPath(selfiePath)
 
     const { error } = await admin.from('identity_verifications').upsert({
       user_id:       uid,
@@ -77,7 +79,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, status: 'pending' })
   } catch (e: any) {
-    console.error('[verify/submit] caught error:', e?.message, e)
-    return NextResponse.json({ error: e.message || 'Upload failed' }, { status: 500 })
+    console.error('[verify/submit] error:', e?.message, e)
+    return NextResponse.json({ error: e.message || 'Failed to record submission' }, { status: 500 })
   }
 }

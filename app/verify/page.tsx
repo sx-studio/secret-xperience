@@ -55,27 +55,38 @@ export default function VerifyPage() {
 
   async function handleSubmit() {
     if (!frontFile || !selfieFile) { setError('Front of ID and selfie are required.'); return }
+    if (!session) { window.location.href = '/login?next=/verify'; return }
     setLoading(true); setError('')
-    const fd = new FormData()
-    fd.append('doc_front', frontFile)
-    if (backFile) fd.append('doc_back', backFile)
-    fd.append('selfie', selfieFile)
 
     try {
-      const res = await fetch('/api/verify/submit', { method: 'POST', body: fd })
-      let data: any = {}
-      try {
-        data = await res.json()
-      } catch (jsonErr: any) {
-        setError(`Server error (HTTP ${res.status}) — response was not JSON. ${jsonErr?.message || ''}`)
-        setLoading(false)
-        return
+      const supabase = createClient()
+      const uid = session.user.id
+      const prefix = `${uid}/${Date.now()}`
+      const bucket = 'identity-docs'
+
+      async function uploadToStorage(file: File, name: string): Promise<string> {
+        const { error } = await supabase.storage.from(bucket).upload(
+          `${prefix}/${name}`, file, { contentType: file.type, upsert: true }
+        )
+        if (error) throw new Error(`Upload failed (${name}): ${error.message}`)
+        return `${prefix}/${name}`
       }
+
+      const frontPath  = await uploadToStorage(frontFile, 'doc_front')
+      const backPath   = backFile ? await uploadToStorage(backFile, 'doc_back') : null
+      const selfiePath = await uploadToStorage(selfieFile, 'selfie')
+
+      const res = await fetch('/api/verify/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ frontPath, backPath, selfiePath }),
+      })
+      const data = await res.json()
       if (!res.ok) { setError(data.error || 'Submission failed'); setLoading(false); return }
       setStatus('pending')
       setSubmitted(true)
     } catch (e: any) {
-      setError(`Fetch error: ${e?.message || String(e)}`)
+      setError(e?.message || 'Submission failed — please try again')
     } finally {
       setLoading(false)
     }
