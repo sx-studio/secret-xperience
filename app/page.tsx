@@ -1353,7 +1353,9 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
           <div class="card-body">
             <div class="card-name-row">
               <span class="card-name">${l.title}</span>
-              <span class="card-price">${l.price_from ? '€'+l.price_from : 'Contact'}</span>
+              ${['escorts','companionship','massage','domination'].includes((l.category||'').toLowerCase())
+                ? (l.age ? `<span class="card-age">${l.age}</span>` : '')
+                : (l.price_from ? `<span class="card-price">€${l.price_from}</span>` : '')}
             </div>
             <div class="card-loc"><i class="ti ti-map-pin" aria-hidden="true"></i> ${l.city || '—'}</div>
           </div>

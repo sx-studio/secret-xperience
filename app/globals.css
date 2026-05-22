@@ -983,6 +983,7 @@ select.input { appearance: none; padding-right: 32px; background-image: linear-g
 .card-name-row{display:flex;justify-content:space-between;align-items:baseline;gap:4px;margin-bottom:2px}
 .card-name-row .card-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .card-name-row .card-price{flex-shrink:0;font-size:13px}
+.card-age{flex-shrink:0;font-size:13px;color:var(--t2);font-weight:400}
 
 /* Photo slider controls */
 .slide-btn{

@@ -61,6 +61,7 @@ interface FormState {
   country:     string
   price_from:  string
   price_to:    string
+  age:         string
   meet_type:   string
   images:      string[]
   tags:        string[]
@@ -172,6 +173,7 @@ export default function CreateListingPage() {
     country:     'Belgium',
     price_from:  '',
     price_to:    '',
+    age:         '',
     meet_type:   'both',
     images:      [],
     tags:        [],
@@ -358,6 +360,7 @@ export default function CreateListingPage() {
       subcategory:     form.subcategory || null,
       price_from:      form.price_from ? parseInt(form.price_from) : null,
       price_to:        form.price_to   ? parseInt(form.price_to)   : null,
+      age:             form.age        ? parseInt(form.age)        : null,
       currency:        'EUR',
       city:            form.city,
       country:         form.country,
@@ -1108,6 +1111,21 @@ export default function CreateListingPage() {
                   borderRadius: 'var(--rl, 13px)',
                   padding: '1.25rem',
                 }}>
+                  {STATS_CATEGORIES.includes(form.category) && (
+                    <div style={{ marginBottom: '12px' }}>
+                      <label style={label}>Your age</label>
+                      <input
+                        type="number"
+                        min="18"
+                        max="99"
+                        className="cl-inp"
+                        style={{ ...inpField, width: '120px' }}
+                        value={form.age}
+                        onChange={e => set('age', e.target.value)}
+                        placeholder="25"
+                      />
+                    </div>
+                  )}
                   <div
                     className="cl-price-grid"
                     style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}
