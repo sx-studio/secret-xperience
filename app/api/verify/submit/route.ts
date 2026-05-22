@@ -77,6 +77,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, status: 'pending' })
   } catch (e: any) {
+    console.error('[verify/submit] caught error:', e?.message, e)
     return NextResponse.json({ error: e.message || 'Upload failed' }, { status: 500 })
   }
 }

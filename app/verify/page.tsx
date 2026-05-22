@@ -62,13 +62,20 @@ export default function VerifyPage() {
     fd.append('selfie', selfieFile)
 
     try {
-      const res  = await fetch('/api/verify/submit', { method: 'POST', body: fd })
-      const data = await res.json()
+      const res = await fetch('/api/verify/submit', { method: 'POST', body: fd })
+      let data: any = {}
+      try {
+        data = await res.json()
+      } catch (jsonErr: any) {
+        setError(`Server error (HTTP ${res.status}) — response was not JSON. ${jsonErr?.message || ''}`)
+        setLoading(false)
+        return
+      }
       if (!res.ok) { setError(data.error || 'Submission failed'); setLoading(false); return }
       setStatus('pending')
       setSubmitted(true)
-    } catch {
-      setError('Network error — please try again')
+    } catch (e: any) {
+      setError(`Fetch error: ${e?.message || String(e)}`)
     } finally {
       setLoading(false)
     }
