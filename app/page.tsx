@@ -576,6 +576,22 @@ document.getElementById('dpSave').addEventListener('click', function(){
   ;(window as any).toggleFavorite(listingId, this);
 });
 
+// Photo slider for mobile cards
+;(window as any).__sliderIdx = {};
+;(window as any).__slideCard = function(id: string, dir: number, e: Event) {
+  e.stopPropagation();
+  var card = document.querySelector('[data-lid="'+id+'"]') as HTMLElement|null;
+  if (!card) return;
+  var imgs: string[] = JSON.parse(card.dataset.images || '[]');
+  if (imgs.length < 2) return;
+  var idx = (((window as any).__sliderIdx[id] || 0) + dir + imgs.length) % imgs.length;
+  (window as any).__sliderIdx[id] = idx;
+  var img = document.getElementById('si-'+id) as HTMLImageElement|null;
+  var ctr = document.getElementById('sc-'+id);
+  if (img) img.src = imgs[idx];
+  if (ctr) ctr.textContent = (idx+1)+'/'+imgs.length;
+};
+
 // Global favorites helpers
 ;(window as any).toggleFavorite = async function(listingId: string, btnEl: Element) {
   var userId = (window as any).__userId;
@@ -1314,29 +1330,32 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         const catClassMap: any = {escorts:'cat-escort',companionship:'cat-companion',nightlife:'cat-nightlife',creators:'cat-creator',creator:'cat-creator',adult:'cat-shop',rentals:'cat-rental',hotels:'cat-hotel',events:'cat-event',shop:'cat-shop'}
         const catClass = catClassMap[(l.category||'').toLowerCase()] || 'cat-escort'
         const monogram = (l.title || 'Xx').slice(0,2)
+        const imgsJson = JSON.stringify(l.images || []).replace(/"/g, '&quot;')
+        const hasSlider = l.images && l.images.length > 1
         return `<div class="card" role="listitem" tabindex="0"
-          data-lid="${l.id||''}" data-pid="${l.profile_id||''}"
+          data-lid="${l.id||''}" data-pid="${l.profile_id||''}" data-images="${imgsJson}"
           onclick="window.location.href='/listings/${l.id||''}'"
           style="cursor:pointer">
-          <div class="card-hero ${catClass}" style="height:180px;position:relative;display:flex;align-items:flex-end;padding:1rem;">
-            ${l.images && l.images.length > 0 ? `<img src="${l.images[0]}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" alt="" />` : ''}
-            <div data-fav-lid="${l.id}" onclick="event.stopPropagation();(window.toggleFavorite||function(){})(\'${l.id}\',this)" style="position:absolute;top:0.6rem;right:0.6rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.30);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:2;cursor:pointer;transition:background .2s;"><i class="ti ti-heart" style="color:#fff;font-size:15px;"></i></div>
-            <div class="card-badges" style="position:relative;z-index:2;">
-              ${isFeatured ? '<span class="badge bf">✦ Featured</span>' : ''}
-              ${l.verified ? '<span class="badge bv">✓ Verified</span>' : ''}
-              ${l.premium ? '<span class="badge bp">Premium</span>' : ''}
-              ${l.trending ? '<span class="badge bt">Trending</span>' : ''}
+          <div class="card-hero ${catClass}" style="height:220px;position:relative;overflow:hidden;">
+            ${l.images && l.images.length > 0 ? `<img id="si-${l.id}" src="${l.images[0]}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" alt="" />` : `<span style="font-family:var(--serif);font-size:72px;font-style:italic;font-weight:400;color:rgba(197,160,90,0.30);line-height:1;position:absolute;bottom:0.25rem;left:1rem;">${monogram}</span>`}
+            <div style="position:absolute;inset:0;background:linear-gradient(0deg,rgba(8,8,8,0.65) 0%,transparent 45%);pointer-events:none;"></div>
+            ${hasSlider ? `
+            <button class="slide-btn slide-prev" onclick="(window.__slideCard||function(){})('${l.id}',-1,event)" aria-label="Previous photo"><i class="ti ti-chevron-left"></i></button>
+            <button class="slide-btn slide-next" onclick="(window.__slideCard||function(){})('${l.id}',1,event)" aria-label="Next photo"><i class="ti ti-chevron-right"></i></button>
+            <span id="sc-${l.id}" class="slide-ctr">1/${l.images.length}</span>
+            ` : ''}
+            <div data-fav-lid="${l.id}" onclick="event.stopPropagation();(window.toggleFavorite||function(){})(\'${l.id}\',this)" style="position:absolute;top:0.5rem;right:0.5rem;width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,0.35);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:3;cursor:pointer;transition:background .2s;"><i class="ti ti-heart" style="color:#fff;font-size:14px;"></i></div>
+            <div class="card-badges" style="position:absolute;top:0.5rem;left:0.5rem;z-index:3;display:flex;gap:3px;flex-wrap:wrap;">
+              ${isFeatured ? '<span class="badge bf">✦</span>' : ''}
+              ${l.verified ? '<span class="badge bv">✓</span>' : ''}
             </div>
-            <span style="font-family:var(--serif);font-size:72px;font-style:italic;font-weight:400;color:rgba(197,160,90,0.30);line-height:1;position:absolute;bottom:0.25rem;left:1rem;">${monogram}</span>
           </div>
           <div class="card-body">
-            <div class="card-cat">${l.category}${l.subcategory ? ' · ' + l.subcategory : ''}</div>
-            <div class="card-name">${l.title}</div>
-            <div class="card-meta">
-              <span class="card-price">${l.price_from ? '€' + l.price_from + (l.price_to ? '–€' + l.price_to : '') : 'Contact'}</span>
-              <span class="card-rating"><i class="ti ti-star-filled" aria-hidden="true"></i> ${l.rating ? l.rating.toFixed(1) : '—'}</span>
+            <div class="card-name-row">
+              <span class="card-name">${l.title}</span>
+              <span class="card-price">${l.price_from ? '€'+l.price_from : 'Contact'}</span>
             </div>
-            <div class="card-loc"><i class="ti ti-map-pin" aria-hidden="true"></i> ${l.city || '—'}, ${l.country || ''}</div>
+            <div class="card-loc"><i class="ti ti-map-pin" aria-hidden="true"></i> ${l.city || '—'}</div>
           </div>
         </div>`
       }).join('')
