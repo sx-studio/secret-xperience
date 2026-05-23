@@ -273,7 +273,7 @@
    RESET + BASE
    ════════════════════════════════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: hidden; }
 body {
   background: var(--bg);
   color: var(--t);
@@ -906,7 +906,7 @@ select.input { appearance: none; padding-right: 32px; background-image: linear-g
 .tier.plat-tier{background:var(--tbg);border-color:rgba(26,143,106,.3);color:#1dc9a0}
 
 /* ── MOBILE SIDEBAR OVERLAY ── */
-.sov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:700;backdrop-filter:blur(4px)}
+.sov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:700}
 .sov.show{display:block}
 
 /* ── MAIN ── */
@@ -1145,7 +1145,7 @@ footer{background:var(--bg1);border-top:0.5px solid var(--b);padding:2.5rem 1.5r
 .nav-drawer{
   position:fixed;top:0;right:0;bottom:0;
   width:80vw;max-width:300px;
-  background:var(--bg1);border-left:0.5px solid var(--b2);
+  background:var(--bg);border-left:0.5px solid var(--b2);
   z-index:850;
   transform:translateX(100%);
   transition:transform .3s cubic-bezier(.2,.8,.4,1);
