@@ -62,11 +62,15 @@ function openSidebar(){ sidebar.classList.add('open'); sov.classList.add('show')
 function closeSidebar(){ sidebar.classList.remove('open'); sov.classList.remove('show'); sov.setAttribute('aria-hidden','true'); }
 function openNavDrawer(){ navDrawer.classList.add('open'); sov.classList.add('show'); sov.setAttribute('aria-hidden','false'); }
 function closeNavDrawer(){ navDrawer.classList.remove('open'); sov.classList.remove('show'); sov.setAttribute('aria-hidden','true'); }
-document.getElementById('menuBtn').addEventListener('click', openNavDrawer);
+document.getElementById('menuBtn').addEventListener('click', function(e){ e.stopPropagation(); openNavDrawer(); });
 document.getElementById('navDrawerClose').addEventListener('click', closeNavDrawer);
-document.getElementById('filterToggle').addEventListener('click', openSidebar);
+document.getElementById('filterToggle').addEventListener('click', function(e){ e.stopPropagation(); openSidebar(); });
 document.getElementById('sideClose').addEventListener('click', closeSidebar);
-sov.addEventListener('click', function(){ closeSidebar(); closeNavDrawer(); });
+// Stop clicks inside the drawer/sidebar from bubbling to the outside-click handler
+navDrawer.addEventListener('click', function(e){ e.stopPropagation(); });
+if(sidebar) sidebar.addEventListener('click', function(e){ e.stopPropagation(); });
+// Close drawer/sidebar when tapping outside (sov is pointer-events:none, use document)
+document.addEventListener('click', function(){ closeSidebar(); closeNavDrawer(); });
 
 // ── Location city picker ──
 ;(function(){

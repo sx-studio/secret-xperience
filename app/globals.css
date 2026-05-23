@@ -906,7 +906,7 @@ select.input { appearance: none; padding-right: 32px; background-image: linear-g
 .tier.plat-tier{background:var(--tbg);border-color:rgba(26,143,106,.3);color:#1dc9a0}
 
 /* ── MOBILE SIDEBAR OVERLAY ── */
-.sov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:700}
+.sov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:700;pointer-events:none}
 .sov.show{display:block}
 
 /* ── MAIN ── */
