@@ -1911,11 +1911,13 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
           Escorts
           <span class="cat-group-item-sub">Provider travels to you</span>
         </a>
-        <span class="cat-group-label">Incall · Private Reception</span>
-        <a class="cat-group-item" href="/companionship" role="menuitem">Companionship</a>
-        <a class="cat-group-item" href="/massage" role="menuitem">Massage</a>
-        <a class="cat-group-item" href="/domination" role="menuitem">Domination</a>
-        <a class="cat-group-item" href="/experiences" role="menuitem">Experiences</a>
+        <a class="cat-group-item" href="/private-reception" role="menuitem" style="color:var(--gold);font-size:11px;text-transform:uppercase;letter-spacing:0.1em;padding:6px 14px 4px;font-weight:600;">
+          Incall · Private Reception →
+        </a>
+        <a class="cat-group-item" href="/private-reception?cat=companionship" role="menuitem">Companionship</a>
+        <a class="cat-group-item" href="/private-reception?cat=massage" role="menuitem">Massage</a>
+        <a class="cat-group-item" href="/private-reception?cat=domination" role="menuitem">Domination</a>
+        <a class="cat-group-item" href="/private-reception?cat=experiences" role="menuitem">Experiences</a>
       </div>
     </div>
 
@@ -2026,10 +2028,10 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
       <!-- ── CATEGORY GROUPS ── -->
       <div class="nd-group-hd">Companions</div>
       <a href="/escorts" class="nd-sub-link"><i class="ti ti-heart-handshake"></i> Escorts <span style="font-size:10px;color:var(--t3);margin-left:4px;">(outcall)</span></a>
-      <a href="/companionship" class="nd-sub-link"><i class="ti ti-users"></i> Companionship</a>
-      <a href="/massage" class="nd-sub-link"><i class="ti ti-hand-stop"></i> Massage</a>
-      <a href="/domination" class="nd-sub-link"><i class="ti ti-crown"></i> Domination</a>
-      <a href="/experiences" class="nd-sub-link"><i class="ti ti-sparkles"></i> Experiences</a>
+      <a href="/private-reception" class="nd-sub-link" style="color:var(--gold)"><i class="ti ti-home"></i> Private Reception <span style="font-size:10px;color:var(--t3);margin-left:4px;">(incall)</span></a>
+      <a href="/private-reception?cat=massage" class="nd-sub-link" style="padding-left:40px;font-size:12px"><i class="ti ti-hand-stop"></i> Massage</a>
+      <a href="/private-reception?cat=domination" class="nd-sub-link" style="padding-left:40px;font-size:12px"><i class="ti ti-crown"></i> Domination</a>
+      <a href="/private-reception?cat=experiences" class="nd-sub-link" style="padding-left:40px;font-size:12px"><i class="ti ti-sparkles"></i> Experiences</a>
       <div class="nd-group-hd">Venues</div>
       <a href="/nightlife" class="nd-sub-link"><i class="ti ti-glass-cocktail"></i> Nightlife</a>
       <a href="/rentals" class="nd-sub-link"><i class="ti ti-building"></i> Rentals</a>
