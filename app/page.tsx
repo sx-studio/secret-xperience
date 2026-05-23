@@ -123,6 +123,36 @@ document.querySelectorAll('.cat').forEach(function(c){
     this.classList.add('active');
   });
 });
+
+// ── Category group dropdowns (catbar) ──
+(function(){
+  function closeAllGroups(){
+    document.querySelectorAll('.cat-group-menu').forEach(function(m){ m.classList.remove('open'); });
+    document.querySelectorAll('.cat-group-pill').forEach(function(p){ p.classList.remove('open'); });
+  }
+  document.querySelectorAll('.cat-group-pill').forEach(function(pill){
+    pill.addEventListener('click', function(e){
+      e.stopPropagation();
+      var menu = pill.parentElement ? pill.parentElement.querySelector('.cat-group-menu') : null;
+      var isOpen = menu && menu.classList.contains('open');
+      closeAllGroups();
+      if (!isOpen && menu){
+        // Position fixed below the pill so it escapes the catbar overflow container
+        var rect = pill.getBoundingClientRect();
+        (menu as HTMLElement).style.left = rect.left + 'px';
+        (menu as HTMLElement).style.top = (rect.bottom + 8) + 'px';
+        menu.classList.add('open');
+        pill.classList.add('open');
+        (pill as HTMLElement).setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+  document.addEventListener('click', function(){
+    closeAllGroups();
+    document.querySelectorAll('.cat-group-pill').forEach(function(p){ p.setAttribute('aria-expanded','false'); });
+  });
+})();
+
 document.querySelectorAll('.pp').forEach(function(p){
   p.addEventListener('click', function(){
     document.querySelectorAll('.pp').forEach(function(x){ x.classList.remove('active'); });
@@ -1855,22 +1885,44 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
 
   <!-- CATEGORY BAR -->
   <div class="catbar" role="navigation" aria-label="Categories" id="catBar">
-    <div class="cat active" data-cat="all" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:var(--gbg);color:var(--gold);border-color:var(--gbrd);font-weight:500;display:inline-flex;align-items:center;">All</div>
-    <div class="cat" data-cat="escorts" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Escorts</div>
-    <div class="cat" data-cat="companionship" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Companionship</div>
-    <div class="cat" data-cat="massage" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Massage</div>
-    <div class="cat" data-cat="nightlife" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Nightlife</div>
-    <div class="cat" data-cat="domination" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Domination</div>
-    <div class="cat" data-cat="creators" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Creators</div>
-    <div class="cat" data-cat="adult" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Adult Services</div>
-    <div class="cat" data-cat="rentals" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Rentals</div>
-    <div class="cat" data-cat="hotels" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Hotels</div>
-    <div class="cat" data-cat="events" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Event Spaces</div>
-    <div class="cat" data-cat="photo" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Photo / Video</div>
-    <div class="cat" data-cat="affiliate" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Affiliate</div>
-    <div class="cat" data-cat="memberships" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Memberships</div>
-    <div class="cat" data-cat="experiences" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Experiences</div>
-    <div class="cat" data-cat="shop" style="height:32px;padding:0 14px;border-radius:20px;border:0.5px solid var(--b);background:transparent;color:var(--t2);display:inline-flex;align-items:center;">Adult Shop</div>
+    <!-- All -->
+    <div class="cat active" data-cat="all">All</div>
+
+    <!-- COMPANIONS group: Escorts + incall personal services -->
+    <div class="cat-group">
+      <button class="cat-group-pill" aria-haspopup="true" aria-expanded="false">
+        Companions <i class="ti ti-chevron-down cg-chev"></i>
+      </button>
+      <div class="cat-group-menu" role="menu">
+        <span class="cat-group-label">Outcall</span>
+        <a class="cat-group-item" href="/escorts" role="menuitem">
+          Escorts
+          <span class="cat-group-item-sub">Provider travels to you</span>
+        </a>
+        <span class="cat-group-label">Incall · Private Reception</span>
+        <a class="cat-group-item" href="/companionship" role="menuitem">Companionship</a>
+        <a class="cat-group-item" href="/massage" role="menuitem">Massage</a>
+        <a class="cat-group-item" href="/domination" role="menuitem">Domination</a>
+        <a class="cat-group-item" href="/experiences" role="menuitem">Experiences</a>
+      </div>
+    </div>
+
+    <!-- VENUES group -->
+    <div class="cat-group">
+      <button class="cat-group-pill" aria-haspopup="true" aria-expanded="false">
+        Venues <i class="ti ti-chevron-down cg-chev"></i>
+      </button>
+      <div class="cat-group-menu" role="menu">
+        <a class="cat-group-item" href="/nightlife" role="menuitem">Nightlife</a>
+        <a class="cat-group-item" href="/rentals" role="menuitem">Rentals</a>
+        <a class="cat-group-item" href="/hotels" role="menuitem">Hotels</a>
+      </div>
+    </div>
+
+    <!-- Standalone categories -->
+    <div class="cat" data-cat="creators">Creators</div>
+    <div class="cat" data-cat="events">Events</div>
+    <div class="cat" data-cat="shop">Adult Shop</div>
   </div>
 
   <!-- ══ EDITORIAL HERO ══ -->
@@ -1956,10 +2008,24 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
       <!-- logged-out links (hidden by default, shown by JS) -->
       <a href="/login" class="nav-drawer-link" id="ndLogin" style="display:none"><i class="ti ti-login"></i> Log In</a>
       <a href="/advertise" class="nav-drawer-link" id="ndSignup" style="display:none"><i class="ti ti-user-plus"></i> Sign Up</a>
-      <!-- always-visible links -->
+      <!-- always-visible: quick actions -->
       <a href="/search" class="nav-drawer-link"><i class="ti ti-search"></i> Search</a>
       <a href="/discover" class="nav-drawer-link" style="color:var(--gold)"><i class="ti ti-sparkles"></i> ✦ Discover</a>
-      <a href="/events" class="nav-drawer-link"><i class="ti ti-calendar-event"></i> Events</a>
+      <!-- ── CATEGORY GROUPS ── -->
+      <div class="nd-group-hd">Companions</div>
+      <a href="/escorts" class="nd-sub-link"><i class="ti ti-heart-handshake"></i> Escorts <span style="font-size:10px;color:var(--t3);margin-left:4px;">(outcall)</span></a>
+      <a href="/companionship" class="nd-sub-link"><i class="ti ti-users"></i> Companionship</a>
+      <a href="/massage" class="nd-sub-link"><i class="ti ti-hand-stop"></i> Massage</a>
+      <a href="/domination" class="nd-sub-link"><i class="ti ti-crown"></i> Domination</a>
+      <a href="/experiences" class="nd-sub-link"><i class="ti ti-sparkles"></i> Experiences</a>
+      <div class="nd-group-hd">Venues</div>
+      <a href="/nightlife" class="nd-sub-link"><i class="ti ti-glass-cocktail"></i> Nightlife</a>
+      <a href="/rentals" class="nd-sub-link"><i class="ti ti-building"></i> Rentals</a>
+      <a href="/hotels" class="nd-sub-link"><i class="ti ti-bed"></i> Hotels</a>
+      <div class="nd-group-hd">More</div>
+      <a href="/creators" class="nd-sub-link"><i class="ti ti-camera"></i> Creators</a>
+      <a href="/events" class="nd-sub-link"><i class="ti ti-calendar-event"></i> Events</a>
+      <a href="/shop" class="nd-sub-link"><i class="ti ti-shopping-bag"></i> Adult Shop</a>
     </nav>
     <div class="nav-drawer-footer" id="navDrawerLogout" style="display:none">
       <button data-action="logout" class="nav-drawer-link" style="color:var(--wine);padding:0"><i class="ti ti-logout" style="color:var(--wine)"></i> Log Out</button>

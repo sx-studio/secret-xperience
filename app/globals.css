@@ -806,6 +806,55 @@ select.input { appearance: none; padding-right: 32px; background-image: linear-g
 .cat:hover{border-color:var(--b2);color:var(--t)}
 .cat.active{background:var(--gbg);border-color:var(--gbrd);color:var(--gold);font-weight:500}
 
+/* ── CATEGORY GROUP DROPDOWNS ── */
+.cat-group{position:relative;display:inline-flex;flex-shrink:0}
+.cat-group-pill{
+  height:32px;padding:0 12px;border-radius:20px;
+  border:0.5px solid var(--b);
+  font-size:13px;cursor:pointer;white-space:nowrap;
+  background:transparent;color:var(--t2);font-family:var(--sans);
+  transition:all .18s;letter-spacing:.02em;
+  display:inline-flex;align-items:center;gap:5px;
+}
+.cat-group-pill:hover{border-color:var(--b2);color:var(--t)}
+.cat-group-pill.open,.cat-group-pill.active{background:var(--gbg);border-color:var(--gbrd);color:var(--gold);font-weight:500}
+.cat-group-pill .cg-chev{font-size:10px;transition:transform .18s}
+.cat-group-pill.open .cg-chev{transform:rotate(180deg)}
+.cat-group-menu{
+  display:none;position:fixed;
+  min-width:200px;background:var(--bg1);
+  border:0.5px solid var(--b2);border-radius:14px;
+  padding:6px;box-shadow:0 16px 48px rgba(0,0,0,0.7);z-index:500;
+}
+.cat-group-menu.open{display:block}
+.cat-group-item{
+  display:block;padding:9px 14px;border-radius:10px;
+  font-size:13px;color:var(--t2);cursor:pointer;font-family:var(--sans);
+  text-decoration:none;transition:background .15s,color .15s;white-space:nowrap;
+}
+.cat-group-item:hover{background:var(--bg2);color:var(--t)}
+.cat-group-item-sub{font-size:11px;color:var(--t3);margin-top:1px;display:block}
+.cat-group-label{
+  font-size:10px;text-transform:uppercase;letter-spacing:0.1em;
+  color:var(--t3);padding:8px 14px 4px;pointer-events:none;display:block;
+}
+
+/* ── DRAWER CATEGORY GROUPS ── */
+.nd-group-hd{
+  font-size:10px;text-transform:uppercase;letter-spacing:0.12em;
+  color:var(--t3);padding:14px 16px 6px;margin-top:4px;
+  border-top:0.5px solid var(--b);
+}
+.nd-group-hd:first-of-type{border-top:none;padding-top:6px;margin-top:0}
+.nd-sub-link{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 16px 8px 28px;
+  color:var(--t2);font-size:13px;text-decoration:none;
+  transition:color .15s,background .15s;border-radius:8px;
+}
+.nd-sub-link:hover{color:var(--t);background:var(--bg2)}
+.nd-sub-link i{font-size:15px;width:18px;text-align:center;color:var(--t3)}
+
 /* ── LAYOUT ── */
 .layout{display:grid;grid-template-columns:230px 1fr;align-items:start}
 
