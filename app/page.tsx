@@ -125,32 +125,44 @@ document.querySelectorAll('.cat').forEach(function(c){
 });
 
 // ── Category group dropdowns (catbar) ──
+// Menus are moved to <body> so no parent stacking context can trap them
 (function(){
+  // Portal: move each menu to body so position:fixed is always root-relative
+  document.querySelectorAll('.cat-group-pill').forEach(function(pill){
+    var groupId = (pill as HTMLElement).dataset.group;
+    if (!groupId) return;
+    var menu = document.getElementById('cgm-' + groupId);
+    if (menu) document.body.appendChild(menu);
+  });
+
   function closeAllGroups(){
     document.querySelectorAll('.cat-group-menu').forEach(function(m){ m.classList.remove('open'); });
-    document.querySelectorAll('.cat-group-pill').forEach(function(p){ p.classList.remove('open'); });
+    document.querySelectorAll('.cat-group-pill').forEach(function(p){
+      p.classList.remove('open');
+      (p as HTMLElement).setAttribute('aria-expanded','false');
+    });
   }
+
   document.querySelectorAll('.cat-group-pill').forEach(function(pill){
     pill.addEventListener('click', function(e){
       e.stopPropagation();
-      var menu = pill.parentElement ? pill.parentElement.querySelector('.cat-group-menu') : null;
+      var groupId = (pill as HTMLElement).dataset.group;
+      if (!groupId) return;
+      var menu = document.getElementById('cgm-' + groupId);
       var isOpen = menu && menu.classList.contains('open');
       closeAllGroups();
       if (!isOpen && menu){
-        // Position fixed below the pill so it escapes the catbar overflow container
         var rect = pill.getBoundingClientRect();
         (menu as HTMLElement).style.left = rect.left + 'px';
         (menu as HTMLElement).style.top = (rect.bottom + 8) + 'px';
         menu.classList.add('open');
         pill.classList.add('open');
-        (pill as HTMLElement).setAttribute('aria-expanded', 'true');
+        (pill as HTMLElement).setAttribute('aria-expanded','true');
       }
     });
   });
-  document.addEventListener('click', function(){
-    closeAllGroups();
-    document.querySelectorAll('.cat-group-pill').forEach(function(p){ p.setAttribute('aria-expanded','false'); });
-  });
+
+  document.addEventListener('click', closeAllGroups);
 })();
 
 document.querySelectorAll('.pp').forEach(function(p){
@@ -1890,10 +1902,10 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
 
     <!-- COMPANIONS group: Escorts + incall personal services -->
     <div class="cat-group">
-      <button class="cat-group-pill" aria-haspopup="true" aria-expanded="false">
+      <button class="cat-group-pill" data-group="companions" aria-haspopup="true" aria-expanded="false">
         Companions <i class="ti ti-chevron-down cg-chev"></i>
       </button>
-      <div class="cat-group-menu" role="menu">
+      <div class="cat-group-menu" id="cgm-companions" role="menu">
         <span class="cat-group-label">Outcall</span>
         <a class="cat-group-item" href="/escorts" role="menuitem">
           Escorts
@@ -1909,10 +1921,10 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
 
     <!-- VENUES group -->
     <div class="cat-group">
-      <button class="cat-group-pill" aria-haspopup="true" aria-expanded="false">
+      <button class="cat-group-pill" data-group="venues" aria-haspopup="true" aria-expanded="false">
         Venues <i class="ti ti-chevron-down cg-chev"></i>
       </button>
-      <div class="cat-group-menu" role="menu">
+      <div class="cat-group-menu" id="cgm-venues" role="menu">
         <a class="cat-group-item" href="/nightlife" role="menuitem">Nightlife</a>
         <a class="cat-group-item" href="/rentals" role="menuitem">Rentals</a>
         <a class="cat-group-item" href="/hotels" role="menuitem">Hotels</a>
