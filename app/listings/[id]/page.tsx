@@ -76,6 +76,7 @@ interface Listing {
   verified:    boolean
   premium:     boolean
   trending:    boolean
+  age:         number | null
   profile_id:  string
   profile: {
     full_name:  string | null
@@ -84,6 +85,8 @@ interface Listing {
     verified:   boolean
   }
 }
+
+const PERSONAL_CATS = new Set(['escorts','companionship','massage','domination','experiences'])
 
 /* ─── Page ──────────────────────────────────────────────── */
 
@@ -109,6 +112,8 @@ export default function ListingDetailPage() {
   const [submitting,     setSubmitting]     = useState(false)
   const [submitError,    setSubmitError]    = useState<string | null>(null)
   const [similarListings, setSimilarListings] = useState<any[]>([])
+  const [hasConfirmedBooking, setHasConfirmedBooking] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   async function fetchReviews() {
     if (!id) return
@@ -147,6 +152,8 @@ export default function ListingDetailPage() {
       if (sess?.user?.id) {
         supabase.from('favorites').select('listing_id').eq('user_id', sess.user.id).eq('listing_id', id).maybeSingle()
           .then(({ data: fav }) => setIsFaved(!!fav))
+        supabase.from('bookings').select('id').eq('client_id', sess.user.id).eq('listing_id', id).eq('status', 'confirmed').limit(1)
+          .then(({ data: bk }) => setHasConfirmedBooking(!!(bk && bk.length > 0)))
       }
       if (error || !data) {
         setNotFound(true)
@@ -246,6 +253,19 @@ export default function ListingDetailPage() {
   function goToBook() {
     if (!session) { window.location.href = `/login?next=/listings/${id}`; return }
     window.location.href = `/messages?provider_id=${listing!.profile_id}&listing_id=${listing!.id}&listing_title=${encodeURIComponent(listing!.title)}&preset=book`
+  }
+
+  async function shareLink() {
+    const url = window.location.href
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: listing?.title || 'SecretXperience', url })
+      } else {
+        await navigator.clipboard.writeText(url)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      }
+    } catch {}
   }
 
   /* ── Shared styles ── */
@@ -659,7 +679,7 @@ export default function ListingDetailPage() {
                       {listing.title}
                     </h1>
 
-                    {/* City + meet type row */}
+                    {/* City + meet type + age row */}
                     <div style={{
                       display: 'flex', flexWrap: 'wrap', gap: '12px', alignItems: 'center',
                     }}>
@@ -683,6 +703,17 @@ export default function ListingDetailPage() {
                           letterSpacing: '0.05em',
                         }}>
                           {meetLabel}
+                        </span>
+                      )}
+                      {PERSONAL_CATS.has(listing.category) && listing.age && (
+                        <span style={{
+                          fontFamily: "'Jost', sans-serif",
+                          fontSize: '13px',
+                          color: 'rgba(255,255,255,0.45)',
+                          fontWeight: 300,
+                          letterSpacing: '0.03em',
+                        }}>
+                          {listing.age} yrs
                         </span>
                       )}
                     </div>
@@ -807,7 +838,7 @@ export default function ListingDetailPage() {
                 const avgRating = reviews.length > 0
                   ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
                   : 0
-                const canReview = !!session && session.user.id !== listing.profile_id
+                const canReview = !!session && session.user.id !== listing.profile_id && hasConfirmedBooking
                 return (
                   <div style={{
                     background: 'rgba(255,255,255,0.02)',
@@ -1316,6 +1347,41 @@ export default function ListingDetailPage() {
                   <i className={isFaved ? 'ti ti-heart-filled' : 'ti ti-heart'} />
                   {isFaved ? 'Saved' : 'Save listing'}
                 </button>
+
+                {/* Share button */}
+                <button
+                  type="button"
+                  onClick={shareLink}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                    padding: '11px', borderRadius: 'var(--r, 8px)',
+                    border: 'var(--b, 0.5px solid rgba(255,255,255,0.08))',
+                    background: 'transparent',
+                    color: copied ? '#3ecf8e' : 'var(--t2, rgba(236,232,225,0.55))',
+                    cursor: 'pointer', fontSize: '13px', fontFamily: 'var(--sans)', transition: 'all .2s',
+                  }}
+                >
+                  <i className={copied ? 'ti ti-check' : 'ti ti-share'} />
+                  {copied ? 'Link copied!' : 'Share'}
+                </button>
+
+                {/* Report link */}
+                <a
+                  href={`/report?listing_id=${listing.id}&listing_title=${encodeURIComponent(listing.title)}`}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                    padding: '9px', borderRadius: 'var(--r, 8px)',
+                    color: 'rgba(255,255,255,0.2)', fontSize: '11px',
+                    fontFamily: 'var(--sans)', textDecoration: 'none',
+                    letterSpacing: '0.06em', textTransform: 'uppercase',
+                    transition: 'color .2s',
+                  }}
+                  onMouseOver={e => (e.currentTarget.style.color = 'rgba(200,80,80,0.7)')}
+                  onMouseOut={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.2)')}
+                >
+                  <i className="ti ti-flag" style={{ fontSize: '12px' }} />
+                  Report listing
+                </a>
               </div>
 
             </div>

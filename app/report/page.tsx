@@ -1,13 +1,49 @@
 'use client'
-import { useState, FormEvent } from 'react'
+import { useState, useEffect, FormEvent } from 'react'
+import { createClient } from '../lib/supabase'
 
 const S = { bg: '#080808', t: '#e8e0d0', t2: '#888', gold: '#c5a05a', serif: "'Cormorant Garamond', serif", sans: "'Jost', sans-serif" }
 const inp: React.CSSProperties = { width: '100%', background: '#0d0b08', border: '0.5px solid #c5a05a33', color: S.t, fontFamily: S.sans, fontSize: 14, padding: '12px 14px', borderRadius: 3, outline: 'none' }
 
 export default function ReportPage() {
   const [done, setDone] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
   const [form, setForm] = useState({ url: '', reason: '', detail: '', email: '' })
   const set = (k: string) => (e: any) => setForm(f => ({ ...f, [k]: e.target.value }))
+
+  // Pre-fill listing URL if arriving from a listing page
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const listingId = params.get('listing_id')
+    const title = params.get('listing_title')
+    if (listingId) {
+      const url = `${window.location.origin}/listings/${listingId}`
+      setForm(f => ({ ...f, url: title ? `${url} (${title})` : url }))
+    }
+  }, [])
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault()
+    if (!form.url || !form.reason || !form.detail) return
+    setSubmitting(true)
+    try {
+      const supabase = createClient()
+      // Extract listing_id from URL if present
+      const match = form.url.match(/\/listings\/([a-f0-9-]{36})/)
+      const listing_id = match ? match[1] : null
+      await supabase.from('reports').insert({
+        listing_id,
+        url: form.url,
+        reason: form.reason,
+        detail: form.detail,
+        email: form.email || null,
+      })
+      setDone(true)
+    } catch {
+      setSubmitting(false)
+    }
+  }
+
   return (
     <div style={{ background: S.bg, minHeight: '100vh', color: S.t, fontFamily: S.sans }}>
       <style>{`*{box-sizing:border-box;margin:0;padding:0}a{color:${S.gold};text-decoration:none}a:hover{text-decoration:underline}input:focus,select:focus,textarea:focus{border-color:${S.gold}66!important}`}</style>
@@ -26,15 +62,11 @@ export default function ReportPage() {
             <p style={{ color: S.t2, fontSize: 14 }}>Our moderation team will review this within 24 hours. If you provided an email, we'll update you on the outcome.</p>
           </div>
         ) : (
-          <form onSubmit={(e: FormEvent) => { e.preventDefault(); if (form.url && form.reason && form.detail) setDone(true) }} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            {[
-              { label: 'Listing URL', key: 'url', placeholder: 'https://secretxperience.eu/listings/...', type: 'url' },
-            ].map(f => (
-              <div key={f.key}>
-                <label style={{ display: 'block', fontSize: 11, letterSpacing: '0.08em', color: S.t2, textTransform: 'uppercase', marginBottom: 6 }}>{f.label}</label>
-                <input style={inp} type={f.type} required placeholder={f.placeholder} value={(form as any)[f.key]} onChange={set(f.key)} />
-              </div>
-            ))}
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: 11, letterSpacing: '0.08em', color: S.t2, textTransform: 'uppercase', marginBottom: 6 }}>Listing URL</label>
+              <input style={inp} type="text" required placeholder="https://secretxperience.eu/listings/..." value={form.url} onChange={set('url')} />
+            </div>
             <div>
               <label style={{ display: 'block', fontSize: 11, letterSpacing: '0.08em', color: S.t2, textTransform: 'uppercase', marginBottom: 6 }}>Reason for report</label>
               <select required style={{ ...inp, cursor: 'pointer' }} value={form.reason} onChange={set('reason')}>
@@ -50,7 +82,9 @@ export default function ReportPage() {
               <label style={{ display: 'block', fontSize: 11, letterSpacing: '0.08em', color: S.t2, textTransform: 'uppercase', marginBottom: 6 }}>Your email <span style={{ color: '#555' }}>(optional — for follow-up)</span></label>
               <input style={inp} type="email" placeholder="you@example.com" value={form.email} onChange={set('email')} />
             </div>
-            <button type="submit" style={{ background: 'linear-gradient(135deg,#9b3030,#7a2020)', border: 'none', borderRadius: 10, padding: '13px 24px', color: '#fff', fontFamily: S.sans, fontWeight: 600, fontSize: 14, cursor: 'pointer', letterSpacing: '0.04em' }}>Submit report →</button>
+            <button type="submit" disabled={submitting} style={{ background: 'linear-gradient(135deg,#9b3030,#7a2020)', border: 'none', borderRadius: 10, padding: '13px 24px', color: '#fff', fontFamily: S.sans, fontWeight: 600, fontSize: 14, cursor: submitting ? 'default' : 'pointer', letterSpacing: '0.04em', opacity: submitting ? 0.7 : 1 }}>
+              {submitting ? 'Submitting…' : 'Submit report →'}
+            </button>
           </form>
         )}
       </main>

@@ -47,6 +47,14 @@ export default function AdminPage() {
     const supabase = createClient()
     await supabase.from('listings').update({ [field]: !current }).eq('id', id)
     setListings(prev => prev.map(l => l.id === id ? { ...l, [field]: !current } : l))
+    // Send approval/rejection email when toggling active status
+    if (field === 'active') {
+      fetch('/api/admin/listing-moderation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ listing_id: id, action: current ? 'reject' : 'approve' }),
+      }).catch(() => {})
+    }
   }
 
   async function featureListing(id: string, days: number) {

@@ -189,6 +189,13 @@ export default function MessagesPage() {
     if (textareaRef.current) { textareaRef.current.style.height = 'auto' }
     await supabase.from('messages').insert({ sender_id: userId, receiver_id: activeConv.other_id, listing_id: activeConv.listing_id, body: optimistic.body })
     setSending(false)
+    // Notify receiver by email (fire-and-forget)
+    const senderProfile = conversations.find(c => c.other_id === activeConv.other_id)
+    fetch('/api/messages/notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ receiver_id: activeConv.other_id, sender_name: (senderProfile as any)?.sender_name || null, listing_title: activeConv.listing_title || null, listing_id: activeConv.listing_id }),
+    }).catch(() => {})
     // Fix 3: update conversations list locally after send so sender sees the bump
     setConversations(prev => {
       const updated = prev.map(c => c.other_id === activeConv.other_id ? { ...c, last_message: optimistic.body, last_at: optimistic.created_at } : c)

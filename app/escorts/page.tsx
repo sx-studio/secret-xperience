@@ -30,6 +30,7 @@ type Listing = {
   tags: string[] | null
   created_at: string
   featured_until: string | null
+  age: number | null
 }
 
 /* ── Filter config ──────────────────────────────────────── */
@@ -102,10 +103,16 @@ function isNewListing(createdAt: string): boolean {
 
 /* ── Card component ─────────────────────────────────────── */
 function EscortCard({ l, discreet }: { l: Listing; discreet: boolean }) {
-  const img = l.images?.[0]
-  const price = l.price_from ? `€${l.price_from}/hr` : null
+  const [imgIdx, setImgIdx] = useState(0)
+  const imgs = l.images || []
+  const img = imgs[imgIdx] || imgs[0] || null
   const availNow = isAvailableNow(l.tags)
   const isNew = isNewListing(l.created_at)
+
+  function slide(dir: number, e: React.MouseEvent) {
+    e.preventDefault(); e.stopPropagation()
+    setImgIdx(i => (i + dir + imgs.length) % imgs.length)
+  }
 
   return (
     <Link href={`/listings/${l.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
@@ -129,7 +136,7 @@ function EscortCard({ l, discreet }: { l: Listing; discreet: boolean }) {
           el.style.borderColor = 'var(--b)'
         }}
       >
-        {/* Portrait image */}
+        {/* Portrait image with slider */}
         <div style={{ position: 'relative', aspectRatio: '3/4', background: 'var(--bg2)', overflow: 'hidden' }}>
           {img ? (
             <img src={img} alt={l.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', filter: discreet ? 'blur(24px) brightness(0.5)' : 'none', transition: 'filter 0.3s ease' }} />
@@ -140,6 +147,15 @@ function EscortCard({ l, discreet }: { l: Listing; discreet: boolean }) {
           )}
           {/* Gradient overlay */}
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(0deg, rgba(5,5,5,0.85) 0%, rgba(5,5,5,0.2) 45%, transparent 70%)', pointerEvents: 'none' }} />
+
+          {/* Slider arrows */}
+          {imgs.length > 1 && (
+            <>
+              <button onClick={e => slide(-1, e)} className="slide-btn slide-prev" aria-label="Previous"><i className="ti ti-chevron-left" /></button>
+              <button onClick={e => slide(1, e)} className="slide-btn slide-next" aria-label="Next"><i className="ti ti-chevron-right" /></button>
+              <span className="slide-ctr">{imgIdx + 1}/{imgs.length}</span>
+            </>
+          )}
 
           {/* Badges */}
           <div style={{ position: 'absolute', top: '10px', left: '10px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
@@ -160,29 +176,15 @@ function EscortCard({ l, discreet }: { l: Listing; discreet: boolean }) {
             )}
           </div>
 
-          {/* Price badge */}
-          {price && (
-            <div style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', border: '0.5px solid rgba(197,160,90,0.35)', borderRadius: '8px', padding: '4px 10px', fontSize: '13px', fontWeight: 700, color: 'var(--gold)' }}>
-              {price}
-            </div>
-          )}
-
-          {/* Bottom info overlay */}
+          {/* Bottom info overlay: name + age + location */}
           <div style={{ position: 'absolute', bottom: '12px', left: '12px', right: '12px' }}>
-            <div style={{ fontFamily: 'var(--serif)', fontSize: '20px', fontStyle: 'italic', fontWeight: 400, color: '#ece8e1', lineHeight: 1.15, marginBottom: '4px' }}>
-              {l.title}
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '6px', marginBottom: '4px' }}>
+              <span style={{ fontFamily: 'var(--serif)', fontSize: '20px', fontStyle: 'italic', fontWeight: 400, color: '#ece8e1', lineHeight: 1.15, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {l.title}
+              </span>
+              {l.age && <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', fontFamily: 'var(--sans)', flexShrink: 0 }}>{l.age}</span>}
             </div>
-            <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.55)' }}>📍 {l.city}</span>
-              {l.meet_type && l.meet_type !== 'both' && (
-                <span style={{ fontSize: '10px', padding: '1px 7px', borderRadius: '4px', background: 'rgba(197,160,90,0.15)', color: 'var(--gold)', border: '0.5px solid rgba(197,160,90,0.3)' }}>
-                  {cap(l.meet_type)}
-                </span>
-              )}
-              {l.meet_type === 'both' && (
-                <span style={{ fontSize: '10px', padding: '1px 7px', borderRadius: '4px', background: 'rgba(197,160,90,0.15)', color: 'var(--gold)', border: '0.5px solid rgba(197,160,90,0.3)' }}>In+Out</span>
-              )}
-            </div>
+            <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.55)' }}>📍 {l.city}</span>
           </div>
 
           {/* Hover overlay */}
@@ -233,7 +235,7 @@ export default function EscortsPage() {
     setLoading(true)
     let q = supabase
       .from('listings')
-      .select('id,title,description,category,subcategory,city,country,price_from,price_to,currency,meet_type,images,verified,premium,rating,review_count,tags,created_at,featured_until')
+      .select('id,title,description,category,subcategory,city,country,price_from,price_to,currency,meet_type,images,verified,premium,rating,review_count,tags,created_at,featured_until,age')
       .eq('active', true)
       .in('category', ['escorts', 'companionship', 'domination', 'experiences', 'massage'])
 
@@ -364,7 +366,7 @@ export default function EscortsPage() {
         @media (min-width: 900px) { .filter-panel { display: block !important; } .mobile-filter-toggle { display: none !important; } }
         .listing-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
         @media (max-width: 640px) { .listing-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; } }
-        @media (max-width: 480px) { .listing-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 480px) { .listing-grid { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; } }
         .filter-aside { width: 260px; flex-shrink: 0; }
         @media (max-width: 899px) { .filter-aside { width: 100%; } }
         .escorts-layout { display: flex; gap: 1.5rem; align-items: flex-start; }
