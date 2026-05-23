@@ -95,7 +95,70 @@ function isNewListing(createdAt: string): boolean {
   return (Date.now() - new Date(createdAt).getTime()) < 7 * 24 * 60 * 60 * 1000
 }
 
-function HostCard({ l, discreet }: { l: Listing; discreet: boolean }) {
+function SpotlightStrip({ items, discreet }: { items: Listing[]; discreet: boolean }) {
+  const [idx, setIdx] = useState(0)
+  useEffect(() => {
+    if (items.length <= 1) return
+    const t = setInterval(() => setIdx(i => (i + 1) % items.length), 5000)
+    return () => clearInterval(t)
+  }, [items.length])
+  if (!items.length) return null
+  return (
+    <div style={{ background: 'linear-gradient(135deg, rgba(130,100,220,0.06) 0%, transparent 70%)', borderBottom: '0.5px solid rgba(197,160,90,0.15)', padding: '1.25rem 1.5rem' }}>
+      <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1rem' }}>
+          <span style={{ fontSize: '9px', letterSpacing: '0.28em', textTransform: 'uppercase', color: 'var(--gold)', fontWeight: 800, fontFamily: 'var(--sans)' }}>✦ Featured Tonight</span>
+          <div style={{ flex: 1, height: '0.5px', background: 'linear-gradient(90deg, rgba(197,160,90,0.4), transparent)' }} />
+          <span style={{ fontSize: '11px', color: 'var(--t3)', fontFamily: 'var(--sans)' }}>{idx + 1}/{items.length}</span>
+          <button onClick={() => setIdx(i => (i - 1 + items.length) % items.length)} style={{ width: 28, height: 28, borderRadius: '50%', border: '0.5px solid var(--b2)', background: 'var(--bg1)', color: 'var(--t2)', cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--sans)' }}>‹</button>
+          <button onClick={() => setIdx(i => (i + 1) % items.length)} style={{ width: 28, height: 28, borderRadius: '50%', border: '0.5px solid var(--b2)', background: 'var(--bg1)', color: 'var(--t2)', cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--sans)' }}>›</button>
+        </div>
+        <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', scrollbarWidth: 'none', alignItems: 'flex-end', paddingBottom: '4px' }}>
+          {items.map((l, i) => {
+            const img = l.images?.[0] || null
+            const active = i === idx
+            const availNow = isAvailableNow(l.tags)
+            return (
+              <Link key={l.id} href={`/listings/${l.id}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
+                <div style={{ width: active ? 260 : 140, height: active ? 360 : 200, borderRadius: 'var(--rl)', overflow: 'hidden', position: 'relative', transition: 'all 0.4s cubic-bezier(0.34,1.56,0.64,1)', border: active ? '1.5px solid rgba(197,160,90,0.5)' : '0.5px solid var(--b)', boxShadow: active ? '0 0 28px rgba(197,160,90,0.18), 0 8px 32px rgba(0,0,0,0.5)' : 'none', opacity: active ? 1 : 0.5, cursor: 'pointer' }}>
+                  {img
+                    ? <img src={img} alt={l.title} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: discreet ? 'blur(20px) brightness(0.4)' : 'none', transition: 'filter 0.3s' }} />
+                    : <div style={{ width: '100%', height: '100%', background: 'var(--bg2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--serif)', fontSize: '48px', fontStyle: 'italic', color: 'rgba(197,160,90,0.1)' }}>{l.title.charAt(0)}</div>
+                  }
+                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(0deg, rgba(5,5,5,0.9) 0%, transparent 55%)', pointerEvents: 'none' }} />
+                  <div style={{ position: 'absolute', top: 8, left: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <span style={{ background: 'var(--grad-gold)', color: '#000', fontSize: '8px', fontWeight: 800, padding: '2px 7px', borderRadius: '4px', letterSpacing: '0.12em', display: 'inline-block' }}>✦ SPOTLIGHT</span>
+                    {availNow && <span style={{ background: 'rgba(62,207,142,0.2)', border: '0.5px solid rgba(62,207,142,0.45)', color: '#3ecf8e', fontSize: '8px', fontWeight: 700, padding: '2px 6px', borderRadius: '4px', letterSpacing: '0.08em', display: 'inline-flex', alignItems: 'center', gap: 3 }}><span style={{ width: 4, height: 4, borderRadius: '50%', background: '#3ecf8e', display: 'inline-block' }} />LIVE</span>}
+                  </div>
+                  {active && (
+                    <div style={{ position: 'absolute', bottom: 14, left: 14, right: 14 }}>
+                      <div style={{ fontFamily: 'var(--serif)', fontSize: '20px', fontStyle: 'italic', color: '#ece8e1', lineHeight: 1.15, marginBottom: 4 }}>
+                        {l.title}{l.age ? <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', fontStyle: 'normal', marginLeft: 5 }}>{l.age}</span> : null}
+                      </div>
+                      <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.55)', marginBottom: 8 }}>
+                        📍 {l.city}{l.price_from ? <span style={{ color: 'var(--gold)', marginLeft: 6 }}>from €{l.price_from}</span> : null}
+                      </div>
+                      <span style={{ background: 'var(--grad-gold)', color: '#000', fontSize: '11px', fontWeight: 700, padding: '6px 14px', borderRadius: '999px', letterSpacing: '0.04em' }}>View Profile →</span>
+                    </div>
+                  )}
+                </div>
+              </Link>
+            )
+          })}
+        </div>
+        {items.length > 1 && (
+          <div style={{ display: 'flex', gap: 5, justifyContent: 'center', marginTop: '10px' }}>
+            {items.map((_, i) => (
+              <button key={i} onClick={() => setIdx(i)} style={{ width: i === idx ? 18 : 5, height: 4, borderRadius: 2, background: i === idx ? 'var(--gold)' : 'rgba(197,160,90,0.2)', border: 'none', cursor: 'pointer', transition: 'all 0.25s', padding: 0 }} />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function HostCard({ l, discreet, isPremier }: { l: Listing; discreet: boolean; isPremier?: boolean }) {
   const [imgIdx, setImgIdx] = useState(0)
   const imgs = l.images || []
   const img = imgs[imgIdx] || imgs[0] || null
@@ -118,10 +181,11 @@ function HostCard({ l, discreet }: { l: Listing; discreet: boolean }) {
     <Link href={`/listings/${l.id}`} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
       <article
         style={{
-          background: 'var(--bg1)', border: '0.5px solid var(--b)',
+          background: 'var(--bg1)', border: isPremier ? '1.5px solid rgba(197,160,90,0.35)' : '0.5px solid var(--b)',
           borderRadius: 'var(--rl)', overflow: 'hidden',
           transition: 'transform 0.2s, box-shadow 0.2s, border-color 0.15s',
           cursor: 'pointer', position: 'relative',
+          boxShadow: isPremier ? '0 0 18px rgba(197,160,90,0.08)' : 'none',
         }}
         onMouseEnter={e => {
           const el = e.currentTarget as HTMLElement
@@ -155,10 +219,13 @@ function HostCard({ l, discreet }: { l: Listing; discreet: boolean }) {
           )}
 
           <div style={{ position: 'absolute', top: '10px', left: '10px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
+            {isPremier && (
+              <span style={{ background: 'rgba(197,160,90,0.15)', border: '0.5px solid rgba(197,160,90,0.5)', color: 'var(--gold)', fontSize: '9px', fontWeight: 800, padding: '3px 8px', borderRadius: '5px', letterSpacing: '0.1em', backdropFilter: 'blur(6px)' }}>PREMIÈRE</span>
+            )}
             {l.verified && (
               <span style={{ background: 'rgba(38,212,160,0.15)', border: '0.5px solid rgba(38,212,160,0.4)', color: '#26d4a0', fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', letterSpacing: '0.06em', backdropFilter: 'blur(6px)' }}>VERIFIED</span>
             )}
-            {l.premium && (
+            {l.premium && !isPremier && (
               <span style={{ background: 'var(--grad-gold)', color: '#000', fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', letterSpacing: '0.06em' }}>VIP</span>
             )}
             {availNow && (
@@ -371,6 +438,8 @@ export default function PrivateReceptionPage() {
           @media (max-width: 899px) { .pr-layout { flex-direction: column; } }
           .pr-nav-links { display: flex; align-items: center; gap: 1rem; }
           @media (max-width: 640px) { .pr-nav-links { display: none; } }
+          .premier-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.1rem; }
+          @media (max-width: 640px) { .premier-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; } }
         `}</style>
 
         {/* Nav */}
@@ -433,6 +502,13 @@ export default function PrivateReceptionPage() {
             </button>
           ))}
         </div>
+
+        {/* ── Spotlight: premium listings with active featured boost ── */}
+        {!loading && (() => {
+          const now = new Date().toISOString()
+          const sl = listings.filter(l => l.premium && l.featured_until && l.featured_until > now)
+          return <SpotlightStrip items={sl} discreet={discreetMode} />
+        })()}
 
         <div className="pr-layout" style={{ maxWidth: '1280px', margin: '0 auto', padding: '1.5rem' }}>
 
@@ -573,11 +649,39 @@ export default function PrivateReceptionPage() {
                 <p style={{ fontSize: '14px', marginBottom: '1.5rem' }}>Try adjusting your filters</p>
                 <button onClick={resetFilters} style={{ background: 'var(--grad-gold)', border: 'none', borderRadius: '999px', padding: '10px 24px', color: '#000', fontWeight: 700, fontSize: '13px', cursor: 'pointer', fontFamily: 'var(--sans)' }}>Clear all filters</button>
               </div>
-            ) : (
-              <div className="listing-grid">
-                {listings.map(l => <HostCard key={l.id} l={l} discreet={discreetMode} />)}
-              </div>
-            )}
+            ) : (() => {
+                const now = new Date().toISOString()
+                const premierList  = listings.filter(l => l.premium && !(l.featured_until && l.featured_until > now))
+                const standardList = listings.filter(l => !l.premium)
+                const firstBatch   = standardList.slice(0, 8)
+                const restBatch    = standardList.slice(8)
+                return (
+                  <>
+                    {firstBatch.length > 0 && (
+                      <div className="listing-grid">
+                        {firstBatch.map(l => <HostCard key={l.id} l={l} discreet={discreetMode} />)}
+                      </div>
+                    )}
+                    {premierList.length > 0 && (
+                      <div style={{ marginTop: firstBatch.length > 0 ? '2.5rem' : 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1.25rem' }}>
+                          <span style={{ fontFamily: 'var(--serif)', fontSize: '18px', fontStyle: 'italic', color: 'var(--t)', whiteSpace: 'nowrap' }}>★ Première Collection</span>
+                          <div style={{ flex: 1, height: '0.5px', background: 'linear-gradient(90deg, rgba(197,160,90,0.35), transparent)' }} />
+                          <Link href="/advertise" style={{ fontSize: '11px', color: 'var(--gold)', textDecoration: 'none', opacity: 0.75, whiteSpace: 'nowrap' }}>Get placement →</Link>
+                        </div>
+                        <div className="premier-grid">
+                          {premierList.map(l => <HostCard key={l.id} l={l} discreet={discreetMode} isPremier />)}
+                        </div>
+                      </div>
+                    )}
+                    {restBatch.length > 0 && (
+                      <div className="listing-grid" style={{ marginTop: '1.5rem' }}>
+                        {restBatch.map(l => <HostCard key={l.id} l={l} discreet={discreetMode} />)}
+                      </div>
+                    )}
+                  </>
+                )
+              })()}
 
             <div style={{ marginTop: '4rem', background: 'var(--bg1)', border: '0.5px solid var(--b2)', borderRadius: 'var(--rl)', padding: '2.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '2rem', flexWrap: 'wrap' }}>
               <div>
