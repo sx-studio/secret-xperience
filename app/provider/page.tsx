@@ -89,7 +89,7 @@ function StatusBadge({ status }: { status: string }) {
       fontSize: '10px', fontWeight: 600, letterSpacing: '0.12em',
       textTransform: 'uppercase', padding: '3px 10px', borderRadius: '20px',
       background: s.bg, color: s.color, border: `0.5px solid ${s.border}`,
-      fontFamily: 'var(--sans, "Jost", sans-serif)', flexShrink: 0,
+      fontFamily: 'var(--sans, "Poppins", sans-serif)', flexShrink: 0,
     }}>
       {status?.charAt(0).toUpperCase() + status?.slice(1) || 'Pending'}
     </span>
@@ -281,7 +281,7 @@ export default function ProviderHubPage() {
           border: 0.5px solid rgba(255,255,255,0.1);
           background: transparent;
           color: rgba(255,255,255,0.35);
-          font-family: var(--sans, 'Jost', sans-serif);
+          font-family: var(--sans, 'Poppins', sans-serif);
           font-size: 13px;
           font-weight: 500;
           letter-spacing: 0.05em;
@@ -311,7 +311,7 @@ export default function ProviderHubPage() {
           border: 0.5px solid rgba(197,160,90,0.35);
           background: transparent;
           color: #c5a05a;
-          font-family: var(--sans, 'Jost', sans-serif);
+          font-family: var(--sans, 'Poppins', sans-serif);
           font-size: 12px;
           font-weight: 500;
           letter-spacing: 0.05em;
@@ -328,7 +328,7 @@ export default function ProviderHubPage() {
           border: 0.5px solid rgba(212,95,114,0.3);
           background: transparent;
           color: #d45f72;
-          font-family: var(--sans, 'Jost', sans-serif);
+          font-family: var(--sans, 'Poppins', sans-serif);
           font-size: 12px;
           font-weight: 500;
           letter-spacing: 0.05em;
@@ -345,7 +345,7 @@ export default function ProviderHubPage() {
           border: 0.5px solid rgba(62,207,142,0.3);
           background: transparent;
           color: #3ecf8e;
-          font-family: var(--sans, 'Jost', sans-serif);
+          font-family: var(--sans, 'Poppins', sans-serif);
           font-size: 12px;
           font-weight: 500;
           letter-spacing: 0.05em;
@@ -362,7 +362,7 @@ export default function ProviderHubPage() {
           border: none;
           background: linear-gradient(135deg, #c5a05a 0%, #a0803d 100%);
           color: #080808;
-          font-family: var(--sans, 'Jost', sans-serif);
+          font-family: var(--sans, 'Poppins', sans-serif);
           font-size: 13px;
           font-weight: 600;
           letter-spacing: 0.06em;
@@ -383,7 +383,7 @@ export default function ProviderHubPage() {
           border: 0.5px solid rgba(255,255,255,0.1);
           border-radius: var(--r, 8px);
           color: var(--t, #ece8e1);
-          font-family: var(--sans, 'Jost', sans-serif);
+          font-family: var(--sans, 'Poppins', sans-serif);
           font-size: 13px;
           font-weight: 300;
           outline: none;
@@ -400,7 +400,7 @@ export default function ProviderHubPage() {
           display: flex;
           align-items: center;
           justify-content: center;
-          font-family: var(--sans, 'Jost', sans-serif);
+          font-family: var(--sans, 'Poppins', sans-serif);
           font-size: 12px;
           font-weight: 400;
           cursor: pointer;
@@ -435,7 +435,7 @@ export default function ProviderHubPage() {
         }
         .ph-bar-label {
           width: 48px;
-          font-family: var(--sans, 'Jost', sans-serif);
+          font-family: var(--sans, 'Poppins', sans-serif);
           font-size: 11px;
           color: rgba(255,255,255,0.3);
           flex-shrink: 0;
@@ -456,7 +456,7 @@ export default function ProviderHubPage() {
         }
         .ph-bar-amount {
           width: 56px;
-          font-family: var(--sans, 'Jost', sans-serif);
+          font-family: var(--sans, 'Poppins', sans-serif);
           font-size: 12px;
           color: rgba(197,160,90,0.7);
           flex-shrink: 0;
@@ -511,7 +511,7 @@ export default function ProviderHubPage() {
             <h1 style={{ fontFamily: 'var(--serif, "Cormorant Garamond", serif)', fontSize: 'clamp(28px, 5vw, 40px)', fontWeight: 300, color: 'var(--t, #ece8e1)', letterSpacing: '-0.01em', lineHeight: 1.2, marginBottom: '8px' }}>
               Provider Hub
             </h1>
-            <p style={{ fontFamily: 'var(--sans, "Jost", sans-serif)', fontSize: '13px', color: 'rgba(255,255,255,0.3)', fontWeight: 300, letterSpacing: '0.03em' }}>
+            <p style={{ fontFamily: 'var(--sans, "Poppins", sans-serif)', fontSize: '13px', color: 'rgba(255,255,255,0.3)', fontWeight: 300, letterSpacing: '0.03em' }}>
               Manage your requests, bookings, earnings and availability.
             </p>
           </div>

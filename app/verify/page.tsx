@@ -5,7 +5,7 @@ import { createClient } from '../lib/supabase'
 const S = {
   bg: '#080808', bg2: '#0e0c18', t: '#e8e0d0', t2: '#888', t3: '#444',
   gold: '#c5a05a', green: '#1dc98f', red: '#e05a5a',
-  serif: "'Cormorant Garamond', serif", sans: "'Jost', sans-serif",
+  serif: "'Cormorant Garamond', serif", sans: "'Poppins', sans-serif",
 }
 
 type VerifStatus = 'not_submitted' | 'pending' | 'approved' | 'rejected'

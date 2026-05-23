@@ -298,7 +298,7 @@ export default function ListingDetailPage() {
       <div style={{
         minHeight: '100vh', background: '#050505', color: '#ece8e1',
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        fontFamily: "'Jost', sans-serif", gap: '1.5rem', padding: '2rem',
+        fontFamily: "'Poppins', sans-serif", gap: '1.5rem', padding: '2rem',
       }}>
         <div style={{
           width: '64px', height: '64px', borderRadius: '50%',
@@ -321,7 +321,7 @@ export default function ListingDetailPage() {
         </p>
         <a href="/" style={{
           display: 'inline-flex', alignItems: 'center', gap: '8px',
-          color: '#c5a05a', fontSize: '13px', fontFamily: "'Jost', sans-serif",
+          color: '#c5a05a', fontSize: '13px', fontFamily: "'Poppins', sans-serif",
           fontWeight: 500, letterSpacing: '0.06em', textDecoration: 'none',
           textTransform: 'uppercase',
         }}>
@@ -400,7 +400,7 @@ export default function ListingDetailPage() {
           padding: 3px 10px;
           border-radius: 20px;
           font-size: 12px;
-          font-family: 'Jost', sans-serif;
+          font-family: 'Poppins', sans-serif;
           font-weight: 500;
           letter-spacing: 0.1em;
           text-transform: uppercase;
@@ -413,7 +413,7 @@ export default function ListingDetailPage() {
           border: 0.5px solid rgba(255,255,255,0.1);
           color: rgba(255,255,255,0.45);
           font-size: 12px;
-          font-family: 'Jost', sans-serif;
+          font-family: 'Poppins', sans-serif;
           font-weight: 400;
           letter-spacing: 0.05em;
         }
@@ -439,7 +439,7 @@ export default function ListingDetailPage() {
           border: none;
           border-radius: 12px;
           color: #080808;
-          font-family: 'Jost', sans-serif;
+          font-family: 'Poppins', sans-serif;
           font-size: 14px;
           font-weight: 600;
           letter-spacing: 0.08em;
@@ -463,7 +463,7 @@ export default function ListingDetailPage() {
           border: 0.5px solid rgba(197,160,90,0.4);
           border-radius: 12px;
           color: #c5a05a;
-          font-family: 'Jost', sans-serif;
+          font-family: 'Poppins', sans-serif;
           font-size: 13px;
           font-weight: 500;
           letter-spacing: 0.06em;
@@ -499,7 +499,7 @@ export default function ListingDetailPage() {
           border: none;
           border-radius: 10px;
           color: #080808;
-          font-family: 'Jost', sans-serif;
+          font-family: 'Poppins', sans-serif;
           font-size: 13px;
           font-weight: 600;
           letter-spacing: 0.07em;
@@ -523,7 +523,7 @@ export default function ListingDetailPage() {
           border: 0.5px solid rgba(255,255,255,0.12);
           border-radius: 10px;
           color: rgba(255,255,255,0.35);
-          font-family: 'Jost', sans-serif;
+          font-family: 'Poppins', sans-serif;
           font-size: 13px;
           font-weight: 400;
           letter-spacing: 0.05em;
@@ -537,7 +537,7 @@ export default function ListingDetailPage() {
           border: 0.5px solid rgba(197,160,90,0.35);
           border-radius: 10px;
           color: #c5a05a;
-          font-family: 'Jost', sans-serif;
+          font-family: 'Poppins', sans-serif;
           font-size: 12px;
           font-weight: 500;
           letter-spacing: 0.07em;
@@ -685,7 +685,7 @@ export default function ListingDetailPage() {
                     }}>
                       {listing.city && (
                         <span style={{
-                          fontFamily: "'Jost', sans-serif",
+                          fontFamily: "'Poppins', sans-serif",
                           fontSize: '13px',
                           color: 'rgba(255,255,255,0.4)',
                           fontWeight: 300,
@@ -696,7 +696,7 @@ export default function ListingDetailPage() {
                       )}
                       {meetLabel && (
                         <span style={{
-                          fontFamily: "'Jost', sans-serif",
+                          fontFamily: "'Poppins', sans-serif",
                           fontSize: '13px',
                           color: 'rgba(197,160,90,0.55)',
                           fontWeight: 400,
@@ -707,7 +707,7 @@ export default function ListingDetailPage() {
                       )}
                       {PERSONAL_CATS.has(listing.category) && listing.age && (
                         <span style={{
-                          fontFamily: "'Jost', sans-serif",
+                          fontFamily: "'Poppins', sans-serif",
                           fontSize: '13px',
                           color: 'rgba(255,255,255,0.45)',
                           fontWeight: 300,
@@ -746,7 +746,7 @@ export default function ListingDetailPage() {
                         : `up to €${listing.price_to}`}
                     </span>
                     <span style={{
-                      fontFamily: "'Jost', sans-serif",
+                      fontFamily: "'Poppins', sans-serif",
                       fontSize: '12px',
                       color: 'rgba(197,160,90,0.45)',
                       fontWeight: 300,
@@ -810,7 +810,7 @@ export default function ListingDetailPage() {
                   marginBottom: '1.5rem',
                 }}>
                   <p style={{
-                    fontFamily: "'Jost', sans-serif",
+                    fontFamily: "'Poppins', sans-serif",
                     fontSize: '12px',
                     letterSpacing: '0.14em',
                     textTransform: 'uppercase',
@@ -821,7 +821,7 @@ export default function ListingDetailPage() {
                     About this service
                   </p>
                   <p style={{
-                    fontFamily: "'Jost', sans-serif",
+                    fontFamily: "'Poppins', sans-serif",
                     fontSize: '14px',
                     color: 'rgba(255,255,255,0.55)',
                     fontWeight: 300,
@@ -851,7 +851,7 @@ export default function ListingDetailPage() {
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '12px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                         <p style={{
-                          fontFamily: "'Jost', sans-serif",
+                          fontFamily: "'Poppins', sans-serif",
                           fontSize: '12px',
                           letterSpacing: '0.14em',
                           textTransform: 'uppercase',
@@ -865,7 +865,7 @@ export default function ListingDetailPage() {
                           <>
                             <span style={{ color: 'rgba(255,255,255,0.08)', fontSize: '12px' }}>·</span>
                             <span style={{
-                              fontFamily: "'Jost', sans-serif",
+                              fontFamily: "'Poppins', sans-serif",
                               fontSize: '12px',
                               color: '#c5a05a',
                               fontWeight: 500,
@@ -875,7 +875,7 @@ export default function ListingDetailPage() {
                             </span>
                             <span style={{ color: 'rgba(255,255,255,0.08)', fontSize: '12px' }}>·</span>
                             <span style={{
-                              fontFamily: "'Jost', sans-serif",
+                              fontFamily: "'Poppins', sans-serif",
                               fontSize: '12px',
                               color: 'rgba(255,255,255,0.28)',
                               fontWeight: 300,
@@ -946,7 +946,7 @@ export default function ListingDetailPage() {
                             borderRadius: '10px',
                             padding: '12px 14px',
                             color: 'rgba(255,255,255,0.7)',
-                            fontFamily: "'Jost', sans-serif",
+                            fontFamily: "'Poppins', sans-serif",
                             fontSize: '13px',
                             fontWeight: 300,
                             lineHeight: 1.65,
@@ -959,7 +959,7 @@ export default function ListingDetailPage() {
 
                         {submitError && (
                           <p style={{
-                            fontFamily: "'Jost', sans-serif",
+                            fontFamily: "'Poppins', sans-serif",
                             fontSize: '12px',
                             color: 'rgba(220,80,80,0.85)',
                             fontWeight: 300,
@@ -1008,7 +1008,7 @@ export default function ListingDetailPage() {
                       </div>
                     ) : reviews.length === 0 ? (
                       <p style={{
-                        fontFamily: "'Jost', sans-serif",
+                        fontFamily: "'Poppins', sans-serif",
                         fontSize: '13px',
                         color: 'rgba(255,255,255,0.25)',
                         fontWeight: 300,
@@ -1045,7 +1045,7 @@ export default function ListingDetailPage() {
                                   {reviewerName}
                                 </span>
                                 <span style={{
-                                  fontFamily: "'Jost', sans-serif",
+                                  fontFamily: "'Poppins', sans-serif",
                                   fontSize: '12px',
                                   color: 'rgba(255,255,255,0.2)',
                                   fontWeight: 300,
@@ -1068,7 +1068,7 @@ export default function ListingDetailPage() {
                               {/* Review content */}
                               {review.content && (
                                 <p style={{
-                                  fontFamily: "'Jost', sans-serif",
+                                  fontFamily: "'Poppins', sans-serif",
                                   fontSize: '13px',
                                   color: 'rgba(255,255,255,0.5)',
                                   fontWeight: 300,
@@ -1098,7 +1098,7 @@ export default function ListingDetailPage() {
                   marginBottom: '1.5rem',
                 }}>
                   <p style={{
-                    fontFamily: "'Jost', sans-serif",
+                    fontFamily: "'Poppins', sans-serif",
                     fontSize: '12px',
                     letterSpacing: '0.14em',
                     textTransform: 'uppercase',
@@ -1121,7 +1121,7 @@ export default function ListingDetailPage() {
             {/* ── Similar listings ── */}
             {similarListings.length > 0 && (
               <div style={{ marginBottom: '2rem' }}>
-                <p style={{ fontFamily: "'Jost', sans-serif", fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', fontWeight: 600, marginBottom: '1rem' }}>
+                <p style={{ fontFamily: "'Poppins', sans-serif", fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', fontWeight: 600, marginBottom: '1rem' }}>
                   Similar listings
                 </p>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '12px' }}>
@@ -1130,17 +1130,17 @@ export default function ListingDetailPage() {
                       onMouseOver={e => (e.currentTarget.style.borderColor = 'rgba(197,160,90,0.3)')}
                       onMouseOut={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)')}
                     >
-                      <div style={{ fontFamily: "'Jost', sans-serif", fontSize: '11px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px' }}>
+                      <div style={{ fontFamily: "'Poppins', sans-serif", fontSize: '11px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '4px' }}>
                         {s.category}{s.subcategory ? ' · ' + s.subcategory : ''}
                       </div>
                       <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '16px', color: '#ece8e1', marginBottom: '6px', fontWeight: 400 }}>
                         {s.title}
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <span style={{ fontFamily: "'Jost', sans-serif", fontSize: '13px', color: '#c5a05a' }}>
+                        <span style={{ fontFamily: "'Poppins', sans-serif", fontSize: '13px', color: '#c5a05a' }}>
                           {s.price_from ? `€${s.price_from}` : 'POA'}
                         </span>
-                        <span style={{ fontFamily: "'Jost', sans-serif", fontSize: '12px', color: 'rgba(255,255,255,0.25)' }}>
+                        <span style={{ fontFamily: "'Poppins', sans-serif", fontSize: '12px', color: 'rgba(255,255,255,0.25)' }}>
                           {s.city || ''}
                         </span>
                       </div>
@@ -1162,7 +1162,7 @@ export default function ListingDetailPage() {
                 marginBottom: '1rem',
               }}>
                 <p style={{
-                  fontFamily: "'Jost', sans-serif",
+                  fontFamily: "'Poppins', sans-serif",
                   fontSize: '12px',
                   letterSpacing: '0.14em',
                   textTransform: 'uppercase',
@@ -1218,7 +1218,7 @@ export default function ListingDetailPage() {
                         <span style={{
                           fontSize: '13px',
                           color: 'rgba(100,200,150,0.85)',
-                          fontFamily: "'Jost', sans-serif",
+                          fontFamily: "'Poppins', sans-serif",
                           fontWeight: 500,
                         }}>
                           ✓
@@ -1227,7 +1227,7 @@ export default function ListingDetailPage() {
                     </div>
                     {prof?.username && (
                       <span style={{
-                        fontFamily: "'Jost', sans-serif",
+                        fontFamily: "'Poppins', sans-serif",
                         fontSize: '13px',
                         color: 'rgba(255,255,255,0.28)',
                         fontWeight: 300,
@@ -1252,7 +1252,7 @@ export default function ListingDetailPage() {
                     border: '0.5px solid rgba(255,255,255,0.1)',
                     borderRadius: '10px',
                     color: 'rgba(255,255,255,0.5)',
-                    fontFamily: "'Jost', sans-serif",
+                    fontFamily: "'Poppins', sans-serif",
                     fontSize: '13px',
                     fontWeight: 500,
                     letterSpacing: '0.06em',
@@ -1277,7 +1277,7 @@ export default function ListingDetailPage() {
                   marginBottom: '1rem',
                 }}>
                   <p style={{
-                    fontFamily: "'Jost', sans-serif",
+                    fontFamily: "'Poppins', sans-serif",
                     fontSize: '12px',
                     letterSpacing: '0.14em',
                     textTransform: 'uppercase',
@@ -1289,30 +1289,30 @@ export default function ListingDetailPage() {
                   </p>
                   {listing.price_from && (
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span style={{ fontFamily: "'Jost', sans-serif", fontSize: '13px', color: 'rgba(255,255,255,0.3)', fontWeight: 300 }}>
+                      <span style={{ fontFamily: "'Poppins', sans-serif", fontSize: '13px', color: 'rgba(255,255,255,0.3)', fontWeight: 300 }}>
                         Starting from
                       </span>
-                      <span style={{ fontFamily: "'Jost', sans-serif", fontSize: '13px', color: '#c5a05a', fontWeight: 400 }}>
+                      <span style={{ fontFamily: "'Poppins', sans-serif", fontSize: '13px', color: '#c5a05a', fontWeight: 400 }}>
                         €{listing.price_from}
                       </span>
                     </div>
                   )}
                   {listing.price_to && (
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span style={{ fontFamily: "'Jost', sans-serif", fontSize: '13px', color: 'rgba(255,255,255,0.3)', fontWeight: 300 }}>
+                      <span style={{ fontFamily: "'Poppins', sans-serif", fontSize: '13px', color: 'rgba(255,255,255,0.3)', fontWeight: 300 }}>
                         Up to
                       </span>
-                      <span style={{ fontFamily: "'Jost', sans-serif", fontSize: '13px', color: '#c5a05a', fontWeight: 400 }}>
+                      <span style={{ fontFamily: "'Poppins', sans-serif", fontSize: '13px', color: '#c5a05a', fontWeight: 400 }}>
                         €{listing.price_to}
                       </span>
                     </div>
                   )}
                   {listing.meet_type && (
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ fontFamily: "'Jost', sans-serif", fontSize: '13px', color: 'rgba(255,255,255,0.3)', fontWeight: 300 }}>
+                      <span style={{ fontFamily: "'Poppins', sans-serif", fontSize: '13px', color: 'rgba(255,255,255,0.3)', fontWeight: 300 }}>
                         Meet type
                       </span>
-                      <span style={{ fontFamily: "'Jost', sans-serif", fontSize: '13px', color: 'rgba(255,255,255,0.55)', fontWeight: 400 }}>
+                      <span style={{ fontFamily: "'Poppins', sans-serif", fontSize: '13px', color: 'rgba(255,255,255,0.55)', fontWeight: 400 }}>
                         {meetLabel}
                       </span>
                     </div>

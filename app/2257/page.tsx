@@ -1,6 +1,6 @@
 'use client'
 
-const S = { bg: '#080808', t: '#e8e0d0', t2: '#888', gold: '#c5a05a', serif: "'Cormorant Garamond', serif", sans: "'Jost', sans-serif" }
+const S = { bg: '#080808', t: '#e8e0d0', t2: '#888', gold: '#c5a05a', serif: "'Cormorant Garamond', serif", sans: "'Poppins', sans-serif" }
 
 export default function Page2257() {
   return (

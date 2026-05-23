@@ -237,14 +237,14 @@ export default function PartnersPage() {
         
         @import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        .cat-pill { height: 32px; padding: 0 13px; border-radius: 20px; border: 0.5px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.4); font: 500 11px 'DM Sans', sans-serif; cursor: pointer; white-space: nowrap; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; transition: all .15s; flex-shrink: 0; }
+        .cat-pill { height: 32px; padding: 0 13px; border-radius: 20px; border: 0.5px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.4); font: 500 11px 'Poppins', sans-serif; cursor: pointer; white-space: nowrap; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; transition: all .15s; flex-shrink: 0; }
         .cat-pill:hover { border-color: rgba(197,160,90,0.4); background: rgba(197,160,90,0.07); color: #c5a05a; }
         .p-card { background: #0e0c12; border: 0.5px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 1rem 1.1rem; display: flex; flex-direction: column; gap: 0.65rem; transition: border-color .2s, transform .15s; }
         .p-card:hover { border-color: rgba(197,160,90,0.18); transform: translateY(-2px); }
-        .p-visit { display: inline-flex; align-items: center; gap: 4px; padding: 6px 13px; background: rgba(197,160,90,0.07); border: 0.5px solid rgba(197,160,90,0.25); border-radius: 7px; color: #c5a05a; font: 600 11px 'DM Sans', sans-serif; text-decoration: none; transition: background .15s; white-space: nowrap; }
+        .p-visit { display: inline-flex; align-items: center; gap: 4px; padding: 6px 13px; background: rgba(197,160,90,0.07); border: 0.5px solid rgba(197,160,90,0.25); border-radius: 7px; color: #c5a05a; font: 600 11px 'Poppins', sans-serif; text-decoration: none; transition: background .15s; white-space: nowrap; }
         .p-visit:hover { background: rgba(197,160,90,0.14); border-color: rgba(197,160,90,0.45); }
         .p-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
-        .sec-label { font: 700 9px 'DM Sans',sans-serif; letter-spacing: .16em; text-transform: uppercase; color: rgba(197,160,90,0.55); margin: 2.5rem 0 0.75rem; display: flex; align-items: center; gap: 8px; }
+        .sec-label { font: 700 9px 'Poppins',sans-serif; letter-spacing: .16em; text-transform: uppercase; color: rgba(197,160,90,0.55); margin: 2.5rem 0 0.75rem; display: flex; align-items: center; gap: 8px; }
         .sec-label::after { content:''; flex:1; height:.5px; background:rgba(255,255,255,0.05); }
         .group-head { padding: 2rem 0 1.5rem; border-top: 0.5px solid rgba(255,255,255,0.05); margin-top: 2rem; }
         @media(max-width:640px){ .p-grid{grid-template-columns:1fr} .p-main{padding:2rem 1rem 5rem!important} .p-nav{padding:0 1rem!important} }
@@ -334,7 +334,7 @@ export default function PartnersPage() {
                         {new URL(p.url).hostname.replace('www.','')} <i className="ti ti-external-link" style={{ fontSize:10 }} />
                       </a>
                       {p.network && (
-                        <span style={{ fontSize:9, color:'rgba(255,255,255,0.18)', fontFamily:"'DM Sans',sans-serif" }}>
+                        <span style={{ fontSize:9, color:'rgba(255,255,255,0.18)', fontFamily:"'Poppins',sans-serif" }}>
                           via {p.network}
                         </span>
                       )}
@@ -391,7 +391,7 @@ export default function PartnersPage() {
                         {new URL(p.url).hostname.replace('www.','')} <i className="ti ti-external-link" style={{ fontSize:10 }} />
                       </a>
                       {p.network && (
-                        <span style={{ fontSize:9, color:'rgba(255,255,255,0.18)', fontFamily:"'DM Sans',sans-serif" }}>
+                        <span style={{ fontSize:9, color:'rgba(255,255,255,0.18)', fontFamily:"'Poppins',sans-serif" }}>
                           via {p.network}
                         </span>
                       )}

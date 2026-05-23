@@ -23,7 +23,7 @@ export default function CookieBanner() {
       borderTop: '0.5px solid rgba(197,160,90,0.2)',
       padding: '14px 20px',
       display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap',
-      fontFamily: "'Jost', sans-serif",
+      fontFamily: "'Poppins', sans-serif",
     }}>
       <p style={{ flex: 1, fontSize: '13px', color: 'rgba(236,232,225,0.55)', margin: 0, lineHeight: 1.5, minWidth: '200px' }}>
         We use essential cookies to keep the platform working.{' '}
@@ -37,7 +37,7 @@ export default function CookieBanner() {
           background: 'linear-gradient(135deg,#c5a05a,#a07840)',
           border: 'none', borderRadius: '8px',
           padding: '10px 24px', color: '#000',
-          fontFamily: "'Jost', sans-serif", fontWeight: 700,
+          fontFamily: "'Poppins', sans-serif", fontWeight: 700,
           fontSize: '13px', letterSpacing: '0.05em',
           cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
         }}

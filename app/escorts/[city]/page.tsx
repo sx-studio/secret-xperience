@@ -78,7 +78,7 @@ export default async function EscortsCityPage({ params }: { params: { city: stri
   const S = {
     bg: '#050505', bg2: '#0e0e0e', t: '#ece8e1', t2: 'rgba(236,232,225,0.5)',
     gold: '#c5a05a', b: 'rgba(255,255,255,0.07)', serif: "'Cormorant Garamond', serif",
-    sans: "'Jost', sans-serif",
+    sans: "'Poppins', sans-serif",
   }
 
   return (

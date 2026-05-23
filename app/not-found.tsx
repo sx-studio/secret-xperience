@@ -9,7 +9,7 @@ export default function NotFound() {
       background: '#080808',
       minHeight: '100vh',
       color: '#e8e0d0',
-      fontFamily: "'Jost', sans-serif",
+      fontFamily: "'Poppins', sans-serif",
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',

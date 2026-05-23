@@ -1,13 +1,13 @@
 'use client'
 import { useState, FormEvent } from 'react'
 
-const S = { bg: '#080808', t: '#e8e0d0', t2: '#888', t3: '#555', gold: '#c5a05a', b: '#c5a05a22', b2: '#ffffff18', serif: "'Cormorant Garamond', serif", sans: "'Jost', sans-serif" }
+const S = { bg: '#080808', t: '#e8e0d0', t2: '#888', t3: '#555', gold: '#c5a05a', b: '#c5a05a22', b2: '#ffffff18', serif: "'Cormorant Garamond', serif", sans: "'Poppins', sans-serif" }
 
 const inputStyle: React.CSSProperties = {
   background: '#0d0b08',
   border: '0.5px solid #c5a05a33',
   color: '#e8e0d0',
-  fontFamily: "'Jost', sans-serif",
+  fontFamily: "'Poppins', sans-serif",
   fontSize: 14,
   padding: '12px 14px',
   borderRadius: 3,
@@ -41,7 +41,7 @@ export default function ContactPage() {
           background: #0d0b08;
           border: 0.5px solid #c5a05a33;
           color: #e8e0d0;
-          font-family: 'Jost', sans-serif;
+          font-family: 'Poppins', sans-serif;
           font-size: 14px;
           padding: 12px 14px;
           border-radius: 3px;

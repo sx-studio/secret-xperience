@@ -223,7 +223,7 @@ export default function MessagesPage() {
   const hasProviderParam = params.get('provider_id')
 
   return (
-    <div style={{ display: 'flex', height: 'calc(100vh - var(--nav-h, 60px))', overflow: 'hidden', fontFamily: 'var(--sans, "Jost", sans-serif)', color: 'var(--t, #ece8e1)' }}>
+    <div style={{ display: 'flex', height: 'calc(100vh - var(--nav-h, 60px))', overflow: 'hidden', fontFamily: 'var(--sans, "Poppins", sans-serif)', color: 'var(--t, #ece8e1)' }}>
       <style>{`
         
         @import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css');
@@ -262,7 +262,7 @@ export default function MessagesPage() {
           border: none;
           border-bottom: 0.5px solid var(--b, rgba(255,255,255,0.06));
           color: var(--t, #ece8e1);
-          font: 400 13px var(--sans, 'Jost', sans-serif);
+          font: 400 13px var(--sans, 'Poppins', sans-serif);
           outline: none;
         }
         .msg-search-input::placeholder { color: var(--t3, rgba(255,255,255,0.3)); }
@@ -300,7 +300,7 @@ export default function MessagesPage() {
           border-radius: 50%;
           min-width: 18px;
           height: 18px;
-          font: 700 10px/18px var(--sans, 'Jost', sans-serif);
+          font: 700 10px/18px var(--sans, 'Poppins', sans-serif);
           text-align: center;
           padding: 0 4px;
           flex-shrink: 0;
@@ -340,7 +340,7 @@ export default function MessagesPage() {
           border-radius: 14px 14px 4px 14px;
           padding: 10px 14px;
           max-width: 70%;
-          font: 400 13px var(--sans, 'Jost', sans-serif);
+          font: 400 13px var(--sans, 'Poppins', sans-serif);
         }
 
         .msg-bubble-theirs {
@@ -350,7 +350,7 @@ export default function MessagesPage() {
           border-radius: 14px 14px 14px 4px;
           padding: 10px 14px;
           max-width: 70%;
-          font: 400 13px var(--sans, 'Jost', sans-serif);
+          font: 400 13px var(--sans, 'Poppins', sans-serif);
         }
 
         .msg-composer {
@@ -372,7 +372,7 @@ export default function MessagesPage() {
           border-radius: var(--r, 8px);
           padding: 10px 14px;
           color: var(--t, #ece8e1);
-          font: 400 13px var(--sans, 'Jost', sans-serif);
+          font: 400 13px var(--sans, 'Poppins', sans-serif);
           resize: none;
           outline: none;
           line-height: 1.5;
@@ -505,7 +505,7 @@ export default function MessagesPage() {
                     {c.other_name}
                   </div>
                   <div style={{
-                    font: '400 11px var(--sans, "Jost", sans-serif)',
+                    font: '400 11px var(--sans, "Poppins", sans-serif)',
                     color: 'var(--t3, rgba(255,255,255,0.3))',
                     flexShrink: 0,
                     marginLeft: '8px',
@@ -620,7 +620,7 @@ export default function MessagesPage() {
                       color: 'var(--t3, rgba(255,255,255,0.3))',
                       marginTop: '4px',
                       textAlign: mine ? 'right' : 'left',
-                      font: '400 11px var(--sans, "Jost", sans-serif)',
+                      font: '400 11px var(--sans, "Poppins", sans-serif)',
                     }}>
                       {fmt(m.created_at)}
                     </div>

@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 
-const S = { bg: '#080808', t: '#e8e0d0', t2: '#888', t3: '#555', gold: '#c5a05a', b: '#c5a05a22', b2: '#ffffff18', serif: "'Cormorant Garamond', serif", sans: "'Jost', sans-serif" }
+const S = { bg: '#080808', t: '#e8e0d0', t2: '#888', t3: '#555', gold: '#c5a05a', b: '#c5a05a22', b2: '#ffffff18', serif: "'Cormorant Garamond', serif", sans: "'Poppins', sans-serif" }
 
 const sections = [
   { num: '01', title: 'About SecretXperience' },

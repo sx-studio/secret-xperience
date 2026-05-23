@@ -93,7 +93,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
           textAlign: 'left',
         }}
       >
-        <span style={{ fontFamily: "'Jost', sans-serif", fontSize: 15, fontWeight: 400, color: open ? '#c5a05a' : '#e8e0d0', lineHeight: 1.5, flex: 1, transition: 'color 0.2s' }}>
+        <span style={{ fontFamily: "'Poppins', sans-serif", fontSize: 15, fontWeight: 400, color: open ? '#c5a05a' : '#e8e0d0', lineHeight: 1.5, flex: 1, transition: 'color 0.2s' }}>
           {q}
         </span>
         <span style={{ color: '#c5a05a', fontSize: 18, lineHeight: 1, flexShrink: 0, marginTop: 2, transition: 'transform 0.2s', transform: open ? 'rotate(45deg)' : 'rotate(0deg)', display: 'inline-block' }}>
@@ -111,7 +111,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 
 export default function FaqPage() {
   return (
-    <div style={{ background: '#080808', minHeight: '100vh', color: '#e8e0d0', fontFamily: "'Jost', sans-serif" }}>
+    <div style={{ background: '#080808', minHeight: '100vh', color: '#e8e0d0', fontFamily: "'Poppins', sans-serif" }}>
       <style>{STYLES}</style>
 
       {/* Header */}

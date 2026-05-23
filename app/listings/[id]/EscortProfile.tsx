@@ -261,10 +261,10 @@ export default function EscortProfile({
         .rl-detail-val { font-size:13px;color:rgba(255,255,255,0.72);font-weight:500;line-height:1.4; }
 
         /* CTAs */
-        .rl-btn-primary { width:100%;padding:15px;border:none;border-radius:10px;font-family:'Jost',sans-serif;font-size:14px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;position:relative;overflow:hidden;transition:opacity 0.2s,transform 0.15s;margin-bottom:8px; }
+        .rl-btn-primary { width:100%;padding:15px;border:none;border-radius:10px;font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;position:relative;overflow:hidden;transition:opacity 0.2s,transform 0.15s;margin-bottom:8px; }
         .rl-btn-primary:hover { opacity:0.88;transform:translateY(-1px); }
         .rl-btn-primary::after { content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.14) 0%,transparent 60%);pointer-events:none; }
-        .rl-btn-outline { width:100%;padding:12px;border-radius:10px;font-family:'Jost',sans-serif;font-size:13px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;background:transparent;transition:border-color 0.2s,background 0.2s; }
+        .rl-btn-outline { width:100%;padding:12px;border-radius:10px;font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;background:transparent;transition:border-color 0.2s,background 0.2s; }
         .rl-btn-outline:hover { background:rgba(197,160,90,0.05); }
 
         /* Review */
@@ -475,7 +475,7 @@ export default function EscortProfile({
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.9rem' }}>
               <div className="rl-section-title" style={{ marginBottom: 0 }}>Reviews <span style={{ color: C.t3, fontWeight: 400, letterSpacing: 0, textTransform: 'none', fontSize: '12px' }}>({reviews.length})</span></div>
               {session && !showRvForm && (
-                <button onClick={() => setShowRvForm(true)} style={{ background: 'none', border: `0.5px solid ${C.b2}`, borderRadius: '8px', color: C.gold, fontSize: '12px', padding: '5px 12px', cursor: 'pointer', fontFamily: "'Jost',sans-serif" }}>
+                <button onClick={() => setShowRvForm(true)} style={{ background: 'none', border: `0.5px solid ${C.b2}`, borderRadius: '8px', color: C.gold, fontSize: '12px', padding: '5px 12px', cursor: 'pointer', fontFamily: "'Poppins',sans-serif" }}>
                   + Leave review
                 </button>
               )}
@@ -491,13 +491,13 @@ export default function EscortProfile({
                 <textarea
                   value={rvText} onChange={e => setRvText(e.target.value)}
                   placeholder="Describe your experience (optional)…" rows={3}
-                  style={{ width: '100%', background: C.bg2, border: `0.5px solid ${C.b}`, borderRadius: '8px', color: C.t, padding: '10px 12px', fontSize: '14px', resize: 'vertical', fontFamily: "'Jost',sans-serif", outline: 'none' }}
+                  style={{ width: '100%', background: C.bg2, border: `0.5px solid ${C.b}`, borderRadius: '8px', color: C.t, padding: '10px 12px', fontSize: '14px', resize: 'vertical', fontFamily: "'Poppins',sans-serif", outline: 'none' }}
                 />
                 <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
-                  <button disabled={rvRating === 0 || rvBusy} onClick={handleRvSubmit} style={{ padding: '9px 22px', background: 'linear-gradient(135deg,#c5a05a,#a0803d)', border: 'none', borderRadius: '8px', color: '#080808', fontWeight: 600, fontSize: '12px', cursor: rvRating === 0 ? 'not-allowed' : 'pointer', opacity: rvRating === 0 ? 0.4 : 1, fontFamily: "'Jost',sans-serif" }}>
+                  <button disabled={rvRating === 0 || rvBusy} onClick={handleRvSubmit} style={{ padding: '9px 22px', background: 'linear-gradient(135deg,#c5a05a,#a0803d)', border: 'none', borderRadius: '8px', color: '#080808', fontWeight: 600, fontSize: '12px', cursor: rvRating === 0 ? 'not-allowed' : 'pointer', opacity: rvRating === 0 ? 0.4 : 1, fontFamily: "'Poppins',sans-serif" }}>
                     {rvBusy ? 'Submitting…' : 'Submit review'}
                   </button>
-                  <button onClick={() => setShowRvForm(false)} style={{ padding: '9px 18px', background: 'none', border: `0.5px solid ${C.b}`, borderRadius: '8px', color: C.t3, fontSize: '12px', cursor: 'pointer', fontFamily: "'Jost',sans-serif" }}>Cancel</button>
+                  <button onClick={() => setShowRvForm(false)} style={{ padding: '9px 18px', background: 'none', border: `0.5px solid ${C.b}`, borderRadius: '8px', color: C.t3, fontSize: '12px', cursor: 'pointer', fontFamily: "'Poppins',sans-serif" }}>Cancel</button>
                 </div>
               </div>
             )}

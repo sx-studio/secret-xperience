@@ -202,7 +202,7 @@ export default function DiscoverPage() {
   const card = cards[index]
 
   return (
-    <div style={{ minHeight: '100vh', background: '#080608', color: '#ece8e1', fontFamily: "'Jost', sans-serif", display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100vh', background: '#080608', color: '#ece8e1', fontFamily: "'Poppins', sans-serif", display: 'flex', flexDirection: 'column' }}>
       <style>{`
         
         @import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css');
@@ -210,7 +210,7 @@ export default function DiscoverPage() {
         .disc-like-ind,.disc-skip-ind{position:absolute;top:32px;z-index:10;font-size:13px;font-weight:700;letter-spacing:.12em;padding:8px 18px;border-radius:10px;transition:none;pointer-events:none;opacity:0;text-transform:uppercase}
         .disc-like-ind{right:20px;color:#3ecf8e;border:2px solid #3ecf8e;background:rgba(62,207,142,0.12);transform:rotate(10deg)}
         .disc-skip-ind{left:20px;color:#e2536b;border:2px solid #e2536b;background:rgba(226,83,107,0.12);transform:rotate(-10deg)}
-        .disc-pill{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:20px;border:0.5px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);color:rgba(255,255,255,0.4);font:500 12px 'Jost',sans-serif;cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0;min-height:36px}
+        .disc-pill{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:20px;border:0.5px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);color:rgba(255,255,255,0.4);font:500 12px 'Poppins',sans-serif;cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0;min-height:36px}
         .disc-pill.active,.disc-pill:hover{border-color:rgba(197,160,90,0.45);background:rgba(197,160,90,0.08);color:#c5a05a}
         .disc-act{border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s,box-shadow .2s}
         .disc-act.big{width:64px;height:64px;font-size:24px}
@@ -223,7 +223,7 @@ export default function DiscoverPage() {
         .disc-act.save:hover{box-shadow:0 0 24px rgba(62,207,142,0.3)}
         .disc-act.info{background:rgba(255,255,255,0.05);border:0.5px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.35)}
         .disc-act.info:hover{border-color:rgba(197,160,90,0.4);color:#c5a05a}
-        kbd{display:inline-flex;align-items:center;justify-content:center;padding:2px 7px;border-radius:5px;border:0.5px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);font:500 11px 'Jost',sans-serif;color:rgba(255,255,255,0.3)}
+        kbd{display:inline-flex;align-items:center;justify-content:center;padding:2px 7px;border-radius:5px;border:0.5px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.05);font:500 11px 'Poppins',sans-serif;color:rgba(255,255,255,0.3)}
       `}</style>
 
       {/* Top bar — "Private Gallery" */}
@@ -268,7 +268,7 @@ export default function DiscoverPage() {
             <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontStyle: 'italic' }}>You've seen them all</div>
             <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', maxWidth: 260, lineHeight: 1.65 }}>Check your saved listings or browse the full catalogue.</p>
             <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={() => { localStorage.removeItem(SKIP_KEY); loadCards(category) }} style={{ padding: '10px 20px', border: '0.5px solid rgba(197,160,90,0.35)', borderRadius: 10, background: 'transparent', color: '#c5a05a', cursor: 'pointer', fontSize: 13, fontFamily: "'Jost',sans-serif" }}>
+              <button onClick={() => { localStorage.removeItem(SKIP_KEY); loadCards(category) }} style={{ padding: '10px 20px', border: '0.5px solid rgba(197,160,90,0.35)', borderRadius: 10, background: 'transparent', color: '#c5a05a', cursor: 'pointer', fontSize: 13, fontFamily: "'Poppins',sans-serif" }}>
                 Start over
               </button>
               <a href="/dashboard" style={{ padding: '10px 20px', background: 'linear-gradient(135deg,#c5a05a,#a0803d)', borderRadius: 10, color: '#080808', fontSize: 13, fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center' }}>

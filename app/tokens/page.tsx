@@ -187,7 +187,7 @@ export default function TokensPage() {
   }
 
   return (
-    <div style={{ background: '#08060e', minHeight: '100vh', color: '#ece8e1', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ background: '#08060e', minHeight: '100vh', color: '#ece8e1', fontFamily: "'Poppins', sans-serif" }}>
       <style>{`
         
         @import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css');
@@ -205,7 +205,7 @@ export default function TokensPage() {
         }
 
         .tok-nav-link {
-          font: 500 13px/1 'DM Sans', sans-serif;
+          font: 500 13px/1 'Poppins', sans-serif;
           color: rgba(236,232,225,0.45);
           text-decoration: none;
           letter-spacing: 0.03em;
@@ -242,7 +242,7 @@ export default function TokensPage() {
           width: 100%;
           padding: 12px 0;
           border-radius: 10px;
-          font: 600 12px/1 'DM Sans', sans-serif;
+          font: 600 12px/1 'Poppins', sans-serif;
           letter-spacing: 0.07em;
           text-transform: uppercase;
           cursor: pointer;
@@ -283,7 +283,7 @@ export default function TokensPage() {
         .tok-table-row:last-child { border-bottom: none; }
         .tok-table-row:hover { background: rgba(255,255,255,0.02); }
         .tok-table-head {
-          font: 600 10px/1 'DM Sans', sans-serif;
+          font: 600 10px/1 'Poppins', sans-serif;
           letter-spacing: 0.12em;
           text-transform: uppercase;
           color: rgba(236,232,225,0.3);
@@ -418,7 +418,7 @@ export default function TokensPage() {
             color: 'rgba(197,160,90,0.65)',
             fontWeight: 500,
             marginBottom: '0.75rem',
-            fontFamily: "'DM Sans', sans-serif",
+            fontFamily: "'Poppins', sans-serif",
           }}>
             Wallet · {role}
           </p>

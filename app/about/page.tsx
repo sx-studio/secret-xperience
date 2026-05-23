@@ -87,7 +87,7 @@ Last updated: May 2025`,
 
 export default function AboutPage() {
   return (
-    <div style={{ background: '#080808', minHeight: '100vh', color: '#e8e0d0', fontFamily: "'Jost', sans-serif" }}>
+    <div style={{ background: '#080808', minHeight: '100vh', color: '#e8e0d0', fontFamily: "'Poppins', sans-serif" }}>
       <style>{STYLES}</style>
 
       {/* Header */}

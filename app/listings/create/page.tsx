@@ -126,7 +126,7 @@ function StepIndicator({ current }: { current: number }) {
               ) : (
                 <span style={{
                   fontSize: '12px',
-                  fontFamily: 'var(--sans, "Jost", sans-serif)',
+                  fontFamily: 'var(--sans, "Poppins", sans-serif)',
                   fontWeight: active ? 500 : 400,
                   color: active ? 'var(--gold, #c5a05a)' : 'var(--t3, rgba(255,255,255,0.2))',
                   lineHeight: 1,
@@ -448,7 +448,7 @@ export default function CreateListingPage() {
     color: 'var(--t, #ece8e1)',
     fontSize: '14px',
     outline: 'none',
-    fontFamily: 'var(--sans, "Jost", sans-serif)',
+    fontFamily: 'var(--sans, "Poppins", sans-serif)',
     fontWeight: 300,
     letterSpacing: '0.02em',
     transition: 'border-color var(--t-fast, 0.15s), box-shadow var(--t-fast, 0.15s)',
@@ -463,7 +463,7 @@ export default function CreateListingPage() {
 
   const label: React.CSSProperties = {
     display: 'block',
-    font: '600 10px/1 var(--sans, "Jost", sans-serif)',
+    font: '600 10px/1 var(--sans, "Poppins", sans-serif)',
     letterSpacing: '0.16em',
     textTransform: 'uppercase' as const,
     color: 'var(--t3, rgba(255,255,255,0.3))',
@@ -485,7 +485,7 @@ export default function CreateListingPage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontFamily: 'var(--sans, "Jost", sans-serif)',
+        fontFamily: 'var(--sans, "Poppins", sans-serif)',
       }}>
         <div style={{ textAlign: 'center', color: 'var(--t, #ece8e1)', animation: 'fadeUp 0.5s ease' }}>
           <div style={{
@@ -609,7 +609,7 @@ export default function CreateListingPage() {
           color: var(--t-on-gold, #080808);
           padding: 12px 28px;
           cursor: pointer;
-          font: 600 13px/1 var(--sans, 'Jost', sans-serif);
+          font: 600 13px/1 var(--sans, 'Poppins', sans-serif);
           letter-spacing: 0.06em;
           text-transform: uppercase;
           box-shadow: var(--shadow-gold, 0 4px 24px rgba(197,160,90,0.25));
@@ -638,7 +638,7 @@ export default function CreateListingPage() {
           color: var(--t2, rgba(255,255,255,0.4));
           padding: 12px 24px;
           cursor: pointer;
-          font: 400 13px/1 var(--sans, 'Jost', sans-serif);
+          font: 400 13px/1 var(--sans, 'Poppins', sans-serif);
           letter-spacing: 0.04em;
           transition: border-color 0.2s, color 0.2s;
         }
@@ -656,7 +656,7 @@ export default function CreateListingPage() {
           border: 0.5px solid var(--b2, rgba(255,255,255,0.12));
           background: var(--bg2, rgba(255,255,255,0.02));
           color: var(--t2, rgba(255,255,255,0.4));
-          font-family: var(--sans, 'Jost', sans-serif);
+          font-family: var(--sans, 'Poppins', sans-serif);
           font-size: 12px;
           font-weight: 400;
           letter-spacing: 0.03em;
@@ -804,7 +804,7 @@ export default function CreateListingPage() {
           {/* Header sub */}
           <div style={{ marginBottom: '1.5rem' }}>
             <p style={{
-              fontFamily: 'var(--sans, "Jost", sans-serif)',
+              fontFamily: 'var(--sans, "Poppins", sans-serif)',
               fontSize: '10px',
               letterSpacing: '0.18em',
               textTransform: 'uppercase',
@@ -826,12 +826,12 @@ export default function CreateListingPage() {
               background: 'var(--gbg, rgba(197,160,90,0.07))',
               border: '0.5px solid var(--gbrd, rgba(197,160,90,0.25))',
               borderRadius: 'var(--r, 8px)', padding: '10px 14px', marginBottom: '1.5rem',
-              fontFamily: 'var(--sans, "Jost", sans-serif)', fontSize: '13px',
+              fontFamily: 'var(--sans, "Poppins", sans-serif)', fontSize: '13px',
             }}>
               <span style={{ color: 'var(--t2, rgba(255,255,255,0.55))', fontWeight: 300 }}>Resume draft? You have unsaved progress.</span>
               <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                <button type="button" onClick={restoreDraft} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--gold, #c5a05a)', fontSize: '13px', fontFamily: 'var(--sans, "Jost", sans-serif)', fontWeight: 500, padding: 0 }}>Resume</button>
-                <button type="button" onClick={() => { localStorage.removeItem('sx_listing_draft'); setDraftBanner(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--t3, rgba(255,255,255,0.25))', fontSize: '13px', fontFamily: 'var(--sans, "Jost", sans-serif)', fontWeight: 300, padding: 0 }}>Dismiss</button>
+                <button type="button" onClick={restoreDraft} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--gold, #c5a05a)', fontSize: '13px', fontFamily: 'var(--sans, "Poppins", sans-serif)', fontWeight: 500, padding: 0 }}>Resume</button>
+                <button type="button" onClick={() => { localStorage.removeItem('sx_listing_draft'); setDraftBanner(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--t3, rgba(255,255,255,0.25))', fontSize: '13px', fontFamily: 'var(--sans, "Poppins", sans-serif)', fontWeight: 300, padding: 0 }}>Dismiss</button>
               </div>
             </div>
           )}
@@ -867,7 +867,7 @@ export default function CreateListingPage() {
                       {cat.icon}
                     </span>
                     <span style={{
-                      fontFamily: 'var(--sans, "Jost", sans-serif)',
+                      fontFamily: 'var(--sans, "Poppins", sans-serif)',
                       fontSize: '12px',
                       fontWeight: form.category === cat.value ? 500 : 400,
                       color: form.category === cat.value ? 'var(--gold, #c5a05a)' : 'var(--t2, rgba(255,255,255,0.5))',
@@ -925,7 +925,7 @@ export default function CreateListingPage() {
                 <div style={{
                   fontSize: '11px',
                   color: 'var(--t3, rgba(255,255,255,0.18))',
-                  fontFamily: 'var(--sans, "Jost", sans-serif)',
+                  fontFamily: 'var(--sans, "Poppins", sans-serif)',
                   marginTop: '6px',
                   fontWeight: 300,
                 }}>
@@ -950,7 +950,7 @@ export default function CreateListingPage() {
                 <div style={fieldWrap}>
                   <label style={label}>Services &amp; Tags</label>
                   <p style={{
-                    fontFamily: 'var(--sans, "Jost", sans-serif)',
+                    fontFamily: 'var(--sans, "Poppins", sans-serif)',
                     fontSize: '12px',
                     color: 'var(--t3, rgba(255,255,255,0.22))',
                     fontWeight: 300,
@@ -973,7 +973,7 @@ export default function CreateListingPage() {
                   </div>
                   {form.tags.length > 0 && (
                     <p style={{
-                      fontFamily: 'var(--sans, "Jost", sans-serif)',
+                      fontFamily: 'var(--sans, "Poppins", sans-serif)',
                       fontSize: '11px',
                       color: 'var(--gold, rgba(197,160,90,0.5))',
                       marginTop: '8px',
@@ -991,7 +991,7 @@ export default function CreateListingPage() {
                 <div style={fieldWrap}>
                   <label style={label}>Physical Stats <span style={{ fontWeight: 300, textTransform: 'none', letterSpacing: 0 }}>(optional)</span></label>
                   <p style={{
-                    fontFamily: 'var(--sans, "Jost", sans-serif)',
+                    fontFamily: 'var(--sans, "Poppins", sans-serif)',
                     fontSize: '12px',
                     color: 'var(--t3, rgba(255,255,255,0.22))',
                     fontWeight: 300,
@@ -1053,7 +1053,7 @@ export default function CreateListingPage() {
               <h2 className="cl-section-heading">Location &amp; Pricing</h2>
               <div style={{ marginBottom: '1.75rem' }}>
                 <p style={{
-                  fontFamily: 'var(--sans, "Jost", sans-serif)',
+                  fontFamily: 'var(--sans, "Poppins", sans-serif)',
                   fontSize: '10px',
                   letterSpacing: '0.14em',
                   textTransform: 'uppercase',
@@ -1094,7 +1094,7 @@ export default function CreateListingPage() {
               {/* Pricing */}
               <div style={{ marginBottom: '1.75rem' }}>
                 <p style={{
-                  fontFamily: 'var(--sans, "Jost", sans-serif)',
+                  fontFamily: 'var(--sans, "Poppins", sans-serif)',
                   fontSize: '10px',
                   letterSpacing: '0.14em',
                   textTransform: 'uppercase',
@@ -1161,7 +1161,7 @@ export default function CreateListingPage() {
               {/* Meet type */}
               <div style={{ marginBottom: '1rem' }}>
                 <p style={{
-                  fontFamily: 'var(--sans, "Jost", sans-serif)',
+                  fontFamily: 'var(--sans, "Poppins", sans-serif)',
                   fontSize: '10px',
                   letterSpacing: '0.14em',
                   textTransform: 'uppercase',
@@ -1180,7 +1180,7 @@ export default function CreateListingPage() {
                       onClick={() => set('meet_type', mt.value)}
                     >
                       <span style={{
-                        fontFamily: 'var(--sans, "Jost", sans-serif)',
+                        fontFamily: 'var(--sans, "Poppins", sans-serif)',
                         fontSize: '13px',
                         fontWeight: 500,
                         color: form.meet_type === mt.value ? 'var(--gold, #c5a05a)' : 'var(--t2, rgba(255,255,255,0.55))',
@@ -1190,7 +1190,7 @@ export default function CreateListingPage() {
                         {mt.label}
                       </span>
                       <span style={{
-                        fontFamily: 'var(--sans, "Jost", sans-serif)',
+                        fontFamily: 'var(--sans, "Poppins", sans-serif)',
                         fontSize: '10px',
                         color: 'var(--t3, rgba(255,255,255,0.22))',
                         fontWeight: 300,
@@ -1236,7 +1236,7 @@ export default function CreateListingPage() {
               >
                 <i className="ti ti-cloud-upload" style={{ fontSize: 48, color: 'var(--t3, rgba(255,255,255,0.25))', display: 'block', marginBottom: '1rem' }} />
                 <span style={{
-                  fontFamily: 'var(--sans, "Jost", sans-serif)',
+                  fontFamily: 'var(--sans, "Poppins", sans-serif)',
                   fontSize: '14px',
                   fontWeight: 500,
                   color: 'var(--t2, rgba(255,255,255,0.65))',
@@ -1245,7 +1245,7 @@ export default function CreateListingPage() {
                   Add Photos
                 </span>
                 <span style={{
-                  fontFamily: 'var(--sans, "Jost", sans-serif)',
+                  fontFamily: 'var(--sans, "Poppins", sans-serif)',
                   fontSize: '12px',
                   fontWeight: 300,
                   color: 'var(--t2, rgba(255,255,255,0.25))',
@@ -1255,7 +1255,7 @@ export default function CreateListingPage() {
                 </span>
                 {form.images.length + uploadingImages.filter(u => u.loading).length >= 5 && (
                   <span style={{
-                    fontFamily: 'var(--sans, "Jost", sans-serif)',
+                    fontFamily: 'var(--sans, "Poppins", sans-serif)',
                     fontSize: '11px',
                     fontWeight: 400,
                     color: 'var(--gold, rgba(197,160,90,0.5))',
@@ -1321,7 +1321,7 @@ export default function CreateListingPage() {
 
               {/* Count indicator */}
               <p style={{
-                fontFamily: 'var(--sans, "Jost", sans-serif)',
+                fontFamily: 'var(--sans, "Poppins", sans-serif)',
                 fontSize: '11px',
                 color: 'var(--t3, rgba(255,255,255,0.2))',
                 fontWeight: 300,
@@ -1403,7 +1403,7 @@ export default function CreateListingPage() {
                     border: '0.5px solid var(--gbrd, rgba(197,160,90,0.25))',
                     color: 'var(--gold, rgba(197,160,90,0.7))',
                     fontSize: '10px',
-                    fontFamily: 'var(--sans, "Jost", sans-serif)',
+                    fontFamily: 'var(--sans, "Poppins", sans-serif)',
                     fontWeight: 500,
                     letterSpacing: '0.1em',
                     textTransform: 'uppercase',
@@ -1428,7 +1428,7 @@ export default function CreateListingPage() {
                 {/* Description preview */}
                 {form.description && (
                   <p style={{
-                    fontFamily: 'var(--sans, "Jost", sans-serif)',
+                    fontFamily: 'var(--sans, "Poppins", sans-serif)',
                     fontSize: '13px',
                     color: 'var(--t2, rgba(255,255,255,0.4))',
                     fontWeight: 300,
@@ -1453,7 +1453,7 @@ export default function CreateListingPage() {
                 }}>
                   {form.city && (
                     <span style={{
-                      fontFamily: 'var(--sans, "Jost", sans-serif)',
+                      fontFamily: 'var(--sans, "Poppins", sans-serif)',
                       fontSize: '12px',
                       color: 'var(--t2, rgba(255,255,255,0.35))',
                       fontWeight: 300,
@@ -1463,7 +1463,7 @@ export default function CreateListingPage() {
                   )}
                   {(form.price_from || form.price_to) && (
                     <span style={{
-                      fontFamily: 'var(--sans, "Jost", sans-serif)',
+                      fontFamily: 'var(--sans, "Poppins", sans-serif)',
                       fontSize: '12px',
                       color: 'var(--gold, rgba(197,160,90,0.6))',
                       fontWeight: 400,
@@ -1476,7 +1476,7 @@ export default function CreateListingPage() {
                     </span>
                   )}
                   <span style={{
-                    fontFamily: 'var(--sans, "Jost", sans-serif)',
+                    fontFamily: 'var(--sans, "Poppins", sans-serif)',
                     fontSize: '12px',
                     color: 'var(--t3, rgba(255,255,255,0.28))',
                     fontWeight: 300,
@@ -1486,7 +1486,7 @@ export default function CreateListingPage() {
                   </span>
                   {form.images.length > 0 && (
                     <span style={{
-                      fontFamily: 'var(--sans, "Jost", sans-serif)',
+                      fontFamily: 'var(--sans, "Poppins", sans-serif)',
                       fontSize: '12px',
                       color: 'var(--t3, rgba(255,255,255,0.28))',
                       fontWeight: 300,
@@ -1534,7 +1534,7 @@ export default function CreateListingPage() {
                   marginBottom: '1.75rem',
                 }}>
                   <p style={{
-                    fontFamily: 'var(--sans, "Jost", sans-serif)',
+                    fontFamily: 'var(--sans, "Poppins", sans-serif)',
                     fontSize: '10px',
                     letterSpacing: '0.14em',
                     textTransform: 'uppercase',
@@ -1545,7 +1545,7 @@ export default function CreateListingPage() {
                     Admin flags
                   </p>
                   <p style={{
-                    fontFamily: 'var(--sans, "Jost", sans-serif)',
+                    fontFamily: 'var(--sans, "Poppins", sans-serif)',
                     fontSize: '12px',
                     color: 'var(--t3, rgba(255,255,255,0.25))',
                     fontWeight: 300,
@@ -1562,7 +1562,7 @@ export default function CreateListingPage() {
                   borderRadius: 'var(--r, 8px)',
                   padding: '12px 16px',
                   marginBottom: '1.25rem',
-                  fontFamily: 'var(--sans, "Jost", sans-serif)',
+                  fontFamily: 'var(--sans, "Poppins", sans-serif)',
                   fontSize: '13px',
                   color: 'var(--pink, #d45f72)',
                   fontWeight: 400,
@@ -1597,7 +1597,7 @@ export default function CreateListingPage() {
                   onClick={saveDraft}
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                    fontFamily: 'var(--sans, "Jost", sans-serif)', fontSize: '12px', fontWeight: 300,
+                    fontFamily: 'var(--sans, "Poppins", sans-serif)', fontSize: '12px', fontWeight: 300,
                     color: draftSaved ? 'var(--gold, #c5a05a)' : 'var(--t3, rgba(255,255,255,0.22))',
                     letterSpacing: '0.04em', transition: 'color 0.2s',
                   }}

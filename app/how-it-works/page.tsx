@@ -107,7 +107,7 @@ function StepCard({ step, index }: { step: typeof clientSteps[0], index: number 
 
 export default function HowItWorksPage() {
   return (
-    <div style={{ background: '#080808', minHeight: '100vh', color: '#e8e0d0', fontFamily: "'Jost', sans-serif" }}>
+    <div style={{ background: '#080808', minHeight: '100vh', color: '#e8e0d0', fontFamily: "'Poppins', sans-serif" }}>
       <style>{STYLES}</style>
 
       {/* Header */}

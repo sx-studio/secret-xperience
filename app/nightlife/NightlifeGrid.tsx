@@ -76,7 +76,7 @@ export default function NightlifeGrid({ listings }: { listings: Listing[] }) {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <span style={{
-            fontFamily: 'var(--sans, "Jost", sans-serif)',
+            fontFamily: 'var(--sans, "Poppins", sans-serif)',
             fontSize: '11px',
             color: 'rgba(255,255,255,0.2)',
             fontWeight: 300,
@@ -104,7 +104,7 @@ export default function NightlifeGrid({ listings }: { listings: Listing[] }) {
               display: 'flex',
               alignItems: 'center',
               gap: 6,
-              fontFamily: 'var(--sans, "Jost", sans-serif)',
+              fontFamily: 'var(--sans, "Poppins", sans-serif)',
             }}
           >
             <i className={`ti ${discreet ? 'ti-eye-off' : 'ti-eye'}`} />

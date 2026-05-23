@@ -136,7 +136,7 @@ export default function LoginPage() {
         .lx-page {
           min-height: 100vh;
           display: flex;
-          font-family: 'DM Sans', sans-serif;
+          font-family: 'Poppins', sans-serif;
           background: #08060e;
         }
 
@@ -225,7 +225,7 @@ export default function LoginPage() {
           border: none;
           background: transparent;
           color: rgba(236,232,225,0.4);
-          font: 500 12px/1 'DM Sans', sans-serif;
+          font: 500 12px/1 'Poppins', sans-serif;
           letter-spacing: 0.08em;
           border-radius: 7px;
           cursor: pointer;
@@ -246,7 +246,7 @@ export default function LoginPage() {
           border: 0.5px solid rgba(255,255,255,0.1);
           border-radius: 10px;
           color: #ece8e1;
-          font: 500 13.5px/1 'DM Sans', sans-serif;
+          font: 500 13.5px/1 'Poppins', sans-serif;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -272,7 +272,7 @@ export default function LoginPage() {
           background: rgba(255,255,255,0.07);
         }
         .lx-divider-label {
-          font: 500 10px 'DM Sans', sans-serif;
+          font: 500 10px 'Poppins', sans-serif;
           letter-spacing: 0.14em;
           color: rgba(236,232,225,0.3);
           text-transform: uppercase;
@@ -280,7 +280,7 @@ export default function LoginPage() {
 
         /* ── Label ── */
         .lx-label {
-          font: 600 10px/1 'DM Sans', sans-serif;
+          font: 600 10px/1 'Poppins', sans-serif;
           letter-spacing: 0.14em;
           text-transform: uppercase;
           color: rgba(236,232,225,0.35);
@@ -296,7 +296,7 @@ export default function LoginPage() {
           color: #ece8e1;
           border: 0.5px solid rgba(255,255,255,0.09);
           border-radius: 10px;
-          font: 400 14px 'DM Sans', sans-serif;
+          font: 400 14px 'Poppins', sans-serif;
           width: 100%;
           outline: none;
           transition: border-color 0.15s, box-shadow 0.15s;
@@ -366,7 +366,7 @@ export default function LoginPage() {
           color: #080808;
           border: none;
           border-radius: 10px;
-          font: 600 13px/1 'DM Sans', sans-serif;
+          font: 600 13px/1 'Poppins', sans-serif;
           letter-spacing: 0.07em;
           text-transform: uppercase;
           box-shadow: 0 4px 24px rgba(197,160,90,0.22);
@@ -392,7 +392,7 @@ export default function LoginPage() {
           border: 0.5px solid rgba(212,95,114,0.2);
           border-radius: 10px;
           padding: 12px 14px;
-          font: 400 13px 'DM Sans', sans-serif;
+          font: 400 13px 'Poppins', sans-serif;
           margin-top: 0.75rem;
           width: 100%;
         }
@@ -455,7 +455,7 @@ export default function LoginPage() {
               textTransform: 'uppercase',
               color: 'rgba(197,160,90,0.7)',
               marginBottom: '1.5rem',
-              fontFamily: "'DM Sans', sans-serif",
+              fontFamily: "'Poppins', sans-serif",
               fontWeight: 500,
             }}>
               Private — Members Only
@@ -475,7 +475,7 @@ export default function LoginPage() {
             </h1>
 
             <p style={{
-              fontFamily: "'DM Sans', sans-serif",
+              fontFamily: "'Poppins', sans-serif",
               fontSize: 14,
               color: 'rgba(236,232,225,0.48)',
               lineHeight: 1.75,
@@ -489,7 +489,7 @@ export default function LoginPage() {
 
             <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
               <span style={{
-                fontFamily: "'DM Sans', sans-serif",
+                fontFamily: "'Poppins', sans-serif",
                 fontSize: 12,
                 color: 'rgba(197,160,90,0.6)',
                 letterSpacing: '0.08em',
@@ -499,7 +499,7 @@ export default function LoginPage() {
               <span style={{
                 fontSize: 11,
                 color: 'rgba(236,232,225,0.25)',
-                fontFamily: "'DM Sans', sans-serif",
+                fontFamily: "'Poppins', sans-serif",
                 letterSpacing: '0.06em',
               }}>
                 18+ · ID verified · GDPR

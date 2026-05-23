@@ -207,7 +207,7 @@ export default function CategoryAnimations() {
                   <line x1="130" y1="162" x2="130" y2="168" stroke="rgba(197,160,90,.45)" strokeWidth="1" />
                   <line x1="62" y1="100" x2="68" y2="100" stroke="rgba(197,160,90,.45)" strokeWidth="1" />
                   <line x1="192" y1="100" x2="198" y2="100" stroke="rgba(197,160,90,.45)" strokeWidth="1" />
-                  <text x="194" y="40" fontFamily="DM Sans" fontSize="8" fontWeight="600" letterSpacing="2" fill="rgba(232,212,168,.45)">f / 1.4</text>
+                  <text x="194" y="40" fontFamily="Poppins" fontSize="8" fontWeight="600" letterSpacing="2" fill="rgba(232,212,168,.45)">f / 1.4</text>
                 </svg>
               </div>
               <div className="cat-meta">
@@ -252,7 +252,7 @@ export default function CategoryAnimations() {
                     <circle r="6" fill="none" stroke="rgba(197,160,90,.5)" strokeWidth=".6" />
                     <line x1="0" y1="6" x2="0" y2="18" stroke="rgba(197,160,90,.5)" strokeWidth=".6" />
                     <rect x="-7" y="18" width="14" height="9" rx="1" fill="rgba(197,160,90,.12)" stroke="rgba(197,160,90,.45)" strokeWidth=".5" />
-                    <text x="-5" y="25" fontFamily="DM Sans" fontSize="6" fontWeight="600" letterSpacing="1" fill="#e0c082">407</text>
+                    <text x="-5" y="25" fontFamily="Poppins" fontSize="6" fontWeight="600" letterSpacing="1" fill="#e0c082">407</text>
                   </g>
                 </svg>
               </div>
@@ -282,13 +282,13 @@ export default function CategoryAnimations() {
                   <circle className="hotel-led" cx="170" cy="45" r="2" fill="#b84d72" />
                   <circle className="hotel-led-halo" cx="170" cy="45" r="6" fill="url(#led-on)" opacity="0" />
                   <line x1="86" y1="42" x2="92" y2="42" stroke="rgba(232,212,168,.45)" strokeWidth=".8" />
-                  <text x="86" y="65" fontFamily="DM Sans" fontSize="6" fontWeight="600" letterSpacing="2" fill="rgba(232,212,168,.5)">RFID</text>
+                  <text x="86" y="65" fontFamily="Poppins" fontSize="6" fontWeight="600" letterSpacing="2" fill="rgba(232,212,168,.5)">RFID</text>
                   <rect className="hotel-beam" x="125" y="55" width="10" height="0" fill="rgba(38,212,160,.35)" opacity="0" />
                   <g className="hotel-card" transform="translate(0 0)">
                     <rect x="92" y="160" width="76" height="44" rx="3" fill="url(#card-grad)" stroke="rgba(197,160,90,.45)" strokeWidth=".8" />
                     <rect x="92" y="167" width="76" height="6" fill="#0a050a" />
                     <text x="100" y="190" fontFamily="Playfair Display" fontStyle="italic" fontSize="11" fill="#c5a05a">Xperience</text>
-                    <text x="100" y="200" fontFamily="DM Sans" fontSize="5" fontWeight="600" letterSpacing="2" fill="rgba(232,212,168,.55)">SUITE · 1207</text>
+                    <text x="100" y="200" fontFamily="Poppins" fontSize="5" fontWeight="600" letterSpacing="2" fill="rgba(232,212,168,.55)">SUITE · 1207</text>
                   </g>
                 </svg>
               </div>

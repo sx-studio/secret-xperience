@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
       ? `✓ Your listing "${listing.title}" is now live`
       : `Update on your listing "${listing.title}"`
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
-      body{margin:0;padding:0;background:#080808;font-family:'Jost',Arial,sans-serif;color:#e8e0d0}
+      body{margin:0;padding:0;background:#080808;font-family:'Poppins',Arial,sans-serif;color:#e8e0d0}
       .wrap{max-width:560px;margin:40px auto;padding:0 24px}
       .brand{font-size:20px;font-weight:600;color:#e8e0d0;letter-spacing:0.04em;margin-bottom:28px}
       .brand span{color:#c5a05a}

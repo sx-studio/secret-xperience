@@ -119,7 +119,7 @@ export default async function NightlifePage() {
           gap: 24px;
         }
         .nl-nav-link {
-          font-family: var(--sans, 'Jost', sans-serif);
+          font-family: var(--sans, 'Poppins', sans-serif);
           font-size: 13px;
           font-weight: 400;
           color: rgba(255,255,255,0.4);
@@ -175,7 +175,7 @@ export default async function NightlifePage() {
           animation: fadeUp 0.7s ease;
         }
         .nl-hero-eyebrow {
-          font-family: var(--sans, 'Jost', sans-serif);
+          font-family: var(--sans, 'Poppins', sans-serif);
           font-size: 10px;
           font-weight: 600;
           letter-spacing: 0.22em;
@@ -202,7 +202,7 @@ export default async function NightlifePage() {
           font-style: italic;
         }
         .nl-hero-sub {
-          font-family: var(--sans, 'Jost', sans-serif);
+          font-family: var(--sans, 'Poppins', sans-serif);
           font-size: 16px;
           font-weight: 300;
           color: rgba(255,255,255,0.45);
@@ -246,7 +246,7 @@ export default async function NightlifePage() {
           border-top: none;
           border-left: none;
           border-right: none;
-          font-family: var(--sans, 'Jost', sans-serif);
+          font-family: var(--sans, 'Poppins', sans-serif);
           font-size: 13px;
           font-weight: 500;
           color: rgba(255,255,255,0.3);
@@ -275,7 +275,7 @@ export default async function NightlifePage() {
           border-radius: 20px;
           border: 0.5px solid rgba(255,255,255,0.1);
           background: transparent;
-          font-family: var(--sans, 'Jost', sans-serif);
+          font-family: var(--sans, 'Poppins', sans-serif);
           font-size: 12px;
           font-weight: 400;
           color: rgba(255,255,255,0.35);
@@ -384,7 +384,7 @@ export default async function NightlifePage() {
         .nl-badge-pill {
           padding: 4px 10px;
           border-radius: 20px;
-          font-family: var(--sans, 'Jost', sans-serif);
+          font-family: var(--sans, 'Poppins', sans-serif);
           font-size: 9px;
           font-weight: 600;
           letter-spacing: 0.12em;
@@ -414,7 +414,7 @@ export default async function NightlifePage() {
           flex-wrap: wrap;
         }
         .nl-card-city {
-          font-family: var(--sans, 'Jost', sans-serif);
+          font-family: var(--sans, 'Poppins', sans-serif);
           font-size: 11px;
           font-weight: 500;
           letter-spacing: 0.1em;
@@ -422,14 +422,14 @@ export default async function NightlifePage() {
           color: rgba(197,160,90,0.55);
         }
         .nl-card-type {
-          font-family: var(--sans, 'Jost', sans-serif);
+          font-family: var(--sans, 'Poppins', sans-serif);
           font-size: 11px;
           font-weight: 400;
           color: rgba(255,255,255,0.25);
           letter-spacing: 0.04em;
         }
         .nl-card-desc {
-          font-family: var(--sans, 'Jost', sans-serif);
+          font-family: var(--sans, 'Poppins', sans-serif);
           font-size: 13px;
           font-weight: 300;
           color: rgba(255,255,255,0.45);
@@ -450,7 +450,7 @@ export default async function NightlifePage() {
           border-radius: 20px;
           background: rgba(255,255,255,0.04);
           border: 0.5px solid rgba(255,255,255,0.1);
-          font-family: var(--sans, 'Jost', sans-serif);
+          font-family: var(--sans, 'Poppins', sans-serif);
           font-size: 10px;
           font-weight: 400;
           color: rgba(255,255,255,0.3);
@@ -465,7 +465,7 @@ export default async function NightlifePage() {
           border-top: 0.5px solid rgba(255,255,255,0.06);
         }
         .nl-cta-link {
-          font-family: var(--sans, 'Jost', sans-serif);
+          font-family: var(--sans, 'Poppins', sans-serif);
           font-size: 12px;
           font-weight: 500;
           color: var(--gold, #c5a05a);
@@ -497,7 +497,7 @@ export default async function NightlifePage() {
           color: rgba(255,255,255,0.2);
         }
         .nl-empty-sub {
-          font-family: var(--sans, 'Jost', sans-serif);
+          font-family: var(--sans, 'Poppins', sans-serif);
           font-size: 13px;
           font-weight: 300;
           color: rgba(255,255,255,0.15);
@@ -514,7 +514,7 @@ export default async function NightlifePage() {
           gap: 10px;
         }
         .nl-count-label {
-          font-family: var(--sans, 'Jost', sans-serif);
+          font-family: var(--sans, 'Poppins', sans-serif);
           font-size: 11px;
           font-weight: 600;
           letter-spacing: 0.14em;
@@ -560,7 +560,7 @@ export default async function NightlifePage() {
           letter-spacing: -0.01em;
         }
         .nl-cta-block-sub {
-          font-family: var(--sans, 'Jost', sans-serif);
+          font-family: var(--sans, 'Poppins', sans-serif);
           font-size: 14px;
           font-weight: 300;
           color: rgba(255,255,255,0.35);
@@ -574,7 +574,7 @@ export default async function NightlifePage() {
           background: linear-gradient(135deg, #c5a05a 0%, #a0803d 100%);
           border: none;
           border-radius: var(--r, 8px);
-          font-family: var(--sans, 'Jost', sans-serif);
+          font-family: var(--sans, 'Poppins', sans-serif);
           font-size: 13px;
           font-weight: 600;
           letter-spacing: 0.08em;

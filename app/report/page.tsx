@@ -2,7 +2,7 @@
 import { useState, useEffect, FormEvent } from 'react'
 import { createClient } from '../lib/supabase'
 
-const S = { bg: '#080808', t: '#e8e0d0', t2: '#888', gold: '#c5a05a', serif: "'Cormorant Garamond', serif", sans: "'Jost', sans-serif" }
+const S = { bg: '#080808', t: '#e8e0d0', t2: '#888', gold: '#c5a05a', serif: "'Cormorant Garamond', serif", sans: "'Poppins', sans-serif" }
 const inp: React.CSSProperties = { width: '100%', background: '#0d0b08', border: '0.5px solid #c5a05a33', color: S.t, fontFamily: S.sans, fontSize: 14, padding: '12px 14px', borderRadius: 3, outline: 'none' }
 
 export default function ReportPage() {

@@ -80,7 +80,7 @@ const TEXT = '#f0ece4'
 const TEXT_MUTED = 'rgba(240,236,228,0.45)'
 const TEXT_DIM = 'rgba(240,236,228,0.65)'
 const SERIF = "'Cormorant Garamond', Georgia, serif"
-const SANS = "'Jost', 'Inter', sans-serif"
+const SANS = "'Poppins', sans-serif"
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
@@ -713,7 +713,7 @@ export default function ProfilePage() {
               {profile.availability && (
                 <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ fontSize: '14px' }}>🕐</span>
-                  <span style={{ fontFamily: "'Jost', sans-serif", fontSize: '13px', color: '#8c8880' }}>{profile.availability}</span>
+                  <span style={{ fontFamily: "'Poppins', sans-serif", fontSize: '13px', color: '#8c8880' }}>{profile.availability}</span>
                 </div>
               )}
             </div>
@@ -726,7 +726,7 @@ export default function ProfilePage() {
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ fontSize: '14px' }}>🕐</span>
-                <span style={{ fontFamily: "'Jost', sans-serif", fontSize: '13px', color: '#8c8880' }}>{profile.availability}</span>
+                <span style={{ fontFamily: "'Poppins', sans-serif", fontSize: '13px', color: '#8c8880' }}>{profile.availability}</span>
               </div>
             </div>
           )}
