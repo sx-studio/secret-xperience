@@ -23,6 +23,22 @@ interface Listing {
   tags?: string[] | null
 }
 
+const CITY_FILTERS = [
+  { value: 'all', label: 'All Cities' },
+  { value: 'brussels', label: '🇧🇪 Brussels' },
+  { value: 'antwerp', label: '🇧🇪 Antwerp' },
+  { value: 'ghent', label: '🇧🇪 Ghent' },
+  { value: 'amsterdam', label: '🇳🇱 Amsterdam' },
+  { value: 'berlin', label: '🇩🇪 Berlin' },
+]
+
+const TYPE_FILTERS = [
+  { value: 'all', label: 'All types' },
+  { value: 'apartment', label: 'Apartment' },
+  { value: 'suite', label: 'Suite' },
+  { value: 'studio', label: 'Studio' },
+]
+
 const SPACE_GRADS = [
   'linear-gradient(140deg, #1a1a2e 0%, #0d0d1a 100%)',
   'linear-gradient(140deg, #1e1e2e 0%, #10101e 100%)',
@@ -214,13 +230,52 @@ export default function RentalsGrid({ listings }: { listings: Listing[] }) {
     if (typeof window === 'undefined') return false
     return localStorage.getItem('discreetMode') === '1'
   })
+  const [cityFilter, setCityFilter] = useState('all')
+  const [typeFilter, setTypeFilter] = useState('all')
+
+  const filtered = listings.filter(l => {
+    const cityOk = cityFilter === 'all' || (l.city ?? '').toLowerCase().includes(cityFilter)
+    const typeOk = typeFilter === 'all' || (l.subcategory ?? '').toLowerCase().includes(typeFilter)
+    return cityOk && typeOk
+  })
 
   return (
     <>
+      {/* CITY FILTER TABS */}
+      <div style={{ borderBottom: '0.5px solid var(--b)', background: 'rgba(17,13,28,0.96)', overflowX: 'auto', scrollbarWidth: 'none', margin: '0 -1.5rem 0', padding: '0 1.5rem' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', height: '52px', scrollbarWidth: 'none' }}>
+          {CITY_FILTERS.map((f) => (
+            <button
+              key={f.value}
+              onClick={() => setCityFilter(f.value)}
+              className={`loc-pill${cityFilter === f.value ? ' active' : ''}`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* TYPE FILTER */}
+      <div style={{ borderBottom: '0.5px solid var(--b)', background: 'var(--bg)', overflowX: 'auto', scrollbarWidth: 'none', margin: '0 -1.5rem 1.5rem', padding: '0 1.5rem' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', height: '44px', scrollbarWidth: 'none' }}>
+          <span style={{ fontSize: '11px', color: 'var(--t3)', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginRight: '4px', whiteSpace: 'nowrap' }}>Type:</span>
+          {TYPE_FILTERS.map((f) => (
+            <button
+              key={f.value}
+              onClick={() => setTypeFilter(f.value)}
+              className={`type-pill${typeFilter === f.value ? ' active' : ''}`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Results meta + discreet toggle */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '10px' }}>
         <span style={{ fontSize: '12px', color: 'var(--t3)' }}>
-          {listings.length} spaces found
+          {filtered.length} spaces found
         </span>
         <button
           onClick={() => {
@@ -260,9 +315,14 @@ export default function RentalsGrid({ listings }: { listings: Listing[] }) {
             List your space →
           </Link>
         </div>
+      ) : filtered.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '5rem 2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ fontSize: '36px', opacity: 0.3 }}>🏠</div>
+          <p style={{ fontSize: '14px', color: 'var(--t3)' }}>No spaces match this filter</p>
+        </div>
       ) : (
         <div className="rental-grid">
-          {listings.map((l, i) => <RentalCard key={l.id} l={l} idx={i} discreet={discreet} />)}
+          {filtered.map((l, i) => <RentalCard key={l.id} l={l} idx={i} discreet={discreet} />)}
         </div>
       )}
     </>

@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { rateLimit } from '../../lib/ratelimit'
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.secretxperience.eu'
 
@@ -39,7 +40,10 @@ async function sendWelcomeEmail(email: string, name: string, role: string) {
   })
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
+  const { allowed } = rateLimit(ip, 'signup', 5, 60_000)
+  if (!allowed) return NextResponse.json({ error: 'Too many attempts. Please wait a moment.' }, { status: 429 })
   try {
     const { email, password, fullName, role } = await request.json()
 

@@ -35,7 +35,7 @@ const clientSteps = [
     num: '04',
     icon: '◫',
     title: 'Book or Message',
-    body: 'Send a booking request with your preferred date, time, and duration — or open a private message thread to discuss details first. All communications are end-to-end encrypted and never stored in plain text.',
+    body: 'Send a booking request with your preferred date, time, and duration — or open a private message thread to discuss details first. All communications are private and transmitted over encrypted connections.',
   },
   {
     num: '05',

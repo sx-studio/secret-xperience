@@ -566,16 +566,27 @@ export default function ProfilePage() {
   // ── Full page ──────────────────────────────────────────────────────────────
   return (
     <div style={{ background: BG, minHeight: '100vh', fontFamily: SANS }}>
+      <style>{`
+        @media (max-width: 640px) {
+          .profile-main { padding: 20px 16px 60px !important; }
+          .profile-hero { padding: 24px 18px 24px !important; }
+          .profile-stat-item { padding: 0 12px !important; }
+          .profile-stat-item:first-child { padding-left: 0 !important; border-left: none !important; }
+        }
+        @media (max-width: 420px) {
+          .profile-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
       <NavBar />
 
-      <main style={{
+      <main className="profile-main" style={{
         maxWidth: '900px',
         margin: '0 auto',
         padding: '40px 24px 80px',
       }}>
 
         {/* ── Hero Card ───────────────────────────────────────────────────── */}
-        <section style={{
+        <section className="profile-hero" style={{
           background: CARD_BG,
           border: `0.5px solid ${BORDER}`,
           borderTop: `2px solid ${GOLD}`,
@@ -755,7 +766,7 @@ export default function ProfilePage() {
                 flexWrap: 'wrap',
               }}>
                 {stats.map((s, i) => (
-                  <div key={s.label} style={{
+                  <div key={s.label} className="profile-stat-item" style={{
                     flex: '1 1 120px',
                     padding: '0 20px',
                     borderLeft: i > 0 ? `0.5px solid ${BORDER_SUBTLE}` : 'none',
@@ -875,7 +886,7 @@ export default function ProfilePage() {
               No active listings at this time.
             </div>
           ) : (
-            <div style={{
+            <div className="profile-grid" style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
               gap: '20px',

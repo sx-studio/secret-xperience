@@ -3,7 +3,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 
 const categories = [
-  { icon: 'ti-user', title: 'Escorts & Companions', desc: 'Independent escorts, agency companions, GFE, touring — verified profiles with booking calendar and encrypted messaging.', color: 'var(--grad-boudoir)' },
+  { icon: 'ti-user', title: 'Escorts & Companions', desc: 'Independent escorts, agency companions, GFE, touring — verified profiles with booking calendar and private messaging.', color: 'var(--grad-boudoir)' },
   { icon: 'ti-camera', title: 'Content Creators', desc: 'OnlyFans, Fansly, cam models and adult creators — sell subscriptions, PPV and custom content directly on the platform.', color: 'var(--grad-plum)' },
   { icon: 'ti-building', title: 'Clubs & Nightlife', desc: 'Adult clubs, fetish bars, BDSM dungeons, swingers clubs — list your venue, events and ticket sales.', color: 'linear-gradient(140deg,#2a1a3a 0%,#110a18 100%)' },
   { icon: 'ti-heart', title: 'Wellness & Massage', desc: 'Tantra massage, erotic wellness, couples retreats, spa services — reach clients looking for discreet, premium experiences.', color: 'linear-gradient(140deg,#1a2a1a 0%,#0a180a 100%)' },

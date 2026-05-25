@@ -33,7 +33,7 @@ Every design decision, every policy, every feature on this platform flows from t
 
 • Safe — We maintain a zero-tolerance policy toward exploitation, coercion, and any content involving minors. Our moderation team operates around the clock. We cooperate fully with law enforcement.
 
-• Discreet — Your privacy is not a feature we bolt on — it is the foundation we build on. From encrypted communications to anonymous billing descriptors, discretion is engineered into every layer of the platform.`,
+• Discreet — Your privacy is not a feature we bolt on — it is the foundation we build on. From private, secure communications to anonymous billing descriptors, discretion is engineered into every layer of the platform.`,
   },
   {
     num: '03',

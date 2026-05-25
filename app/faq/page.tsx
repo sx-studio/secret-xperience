@@ -23,7 +23,7 @@ const faqGroups = [
       },
       {
         q: 'Is my booking discreet?',
-        a: `Yes. Your billing statement will display a neutral, non-identifying descriptor — not "SecretXperience" or anything related to adult services. All communications on the platform are encrypted. We do not share your personal information with providers beyond what is necessary to complete the booking, and we never share your data with third parties for commercial purposes.`,
+        a: `Yes. Your billing statement will display a neutral, non-identifying descriptor — not "SecretXperience" or anything related to adult services. All communications on the platform are private and transmitted securely over HTTPS. We do not share your personal information with providers beyond what is necessary to complete the booking, and we never share your data with third parties for commercial purposes.`,
       },
       {
         q: 'How do payments work?',

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { rateLimit } from '../lib/ratelimit'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -7,6 +8,10 @@ const supabase = createClient(
 )
 
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
+  const { allowed } = rateLimit(ip, 'newsletter', 3, 3_600_000)
+  if (!allowed) return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+
   const { email } = await req.json()
 
   if (!email || typeof email !== 'string' || !email.includes('@')) {

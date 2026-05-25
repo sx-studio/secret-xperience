@@ -35,8 +35,6 @@ export default async function HotelsPage() {
 
   const allListings = listings || []
 
-  const CITIES = ['All cities', 'Brussels', 'Amsterdam', 'Berlin', 'Paris', 'Vienna', 'Barcelona']
-
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([
@@ -118,35 +116,6 @@ export default async function HotelsPage() {
                 🇧🇪 🇳🇱 🇩🇪 🇫🇷 🇦🇹 🇪🇸
               </span>
             </div>
-          </div>
-        </div>
-
-        {/* FILTER + SORT BAR */}
-        <div style={{ borderBottom: '0.5px solid var(--b)', background: 'var(--bg1)', overflowX: 'auto', scrollbarWidth: 'none' }}>
-          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem', display: 'flex', gap: '10px', alignItems: 'center', height: '56px', scrollbarWidth: 'none' }}>
-            {/* Check-in placeholder (static UI) */}
-            <div className="checkin-fake">
-              <span>📅</span>
-              <span>Check-in date</span>
-            </div>
-            <div style={{ width: '0.5px', height: '20px', background: 'var(--b2)', flexShrink: 0 }} />
-            {/* Adults-only toggle */}
-            <div className="toggle-adults">
-              <span style={{
-                width: '28px', height: '16px', borderRadius: '8px',
-                background: 'rgba(197,160,90,0.15)', border: '0.5px solid rgba(197,160,90,0.35)',
-                display: 'inline-flex', alignItems: 'center', padding: '2px',
-              }}>
-                <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--gold)', display: 'inline-block' }} />
-              </span>
-              Adults-only
-            </div>
-            <div style={{ width: '0.5px', height: '20px', background: 'var(--b2)', flexShrink: 0 }} />
-            {/* City select */}
-            <select className="city-sel" defaultValue="">
-              <option value="">All cities</option>
-              {CITIES.slice(1).map(c => <option key={c} value={c.toLowerCase()}>{c}</option>)}
-            </select>
           </div>
         </div>
 

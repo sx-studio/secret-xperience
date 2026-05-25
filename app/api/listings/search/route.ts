@@ -28,9 +28,15 @@ export async function GET(req: NextRequest) {
     .eq('active', true)
 
   if (q) {
-    // Escape PostgREST or() special chars before embedding in filter string
-    const safe = q.replace(/[%_(),"\\]/g, '\\$&')
-    query = query.or(`title.ilike.%${safe}%,description.ilike.%${safe}%,city.ilike.%${safe}%`)
+    // Use full-text search via search_vector for ranking/relevance; fall back to ilike for short/partial terms
+    const words = q.trim().split(/\s+/).filter(Boolean)
+    if (words.length >= 1 && q.length >= 3) {
+      // websearch_to_tsquery handles phrases, AND/OR, and partial words gracefully
+      query = query.textSearch('search_vector', q, { type: 'websearch', config: 'english' })
+    } else {
+      const safe = q.replace(/[%_(),"\\]/g, '\\$&')
+      query = query.or(`title.ilike.%${safe}%,description.ilike.%${safe}%,city.ilike.%${safe}%`)
+    }
   }
   if (category && category !== 'all') query = query.ilike('category', category + '%')
   if (city) query = query.ilike('city', city + '%')

@@ -69,6 +69,7 @@ interface FormState {
   build:       string
   hair:        string
   tier:        string
+  website:     string
 }
 
 const LISTING_TIERS = [
@@ -180,6 +181,7 @@ export default function CreateListingPage() {
     ethnicity:   '',
     build:       '',
     hair:        '',
+    website:     '',
   })
 
   const [uploadingImages, setUploadingImages] = useState<UploadingImage[]>([])
@@ -365,6 +367,7 @@ export default function CreateListingPage() {
       city:            form.city,
       country:         form.country,
       meet_type:       form.meet_type,
+      website:         form.website.trim() || null,
       images:          form.images.length > 0 ? form.images : null,
       tags:            finalTags.length > 0 ? finalTags : null,
       active:          false,   // stays false until moderation approves
@@ -1202,6 +1205,43 @@ export default function CreateListingPage() {
                   ))}
                 </div>
               </div>
+
+              {/* Website URL — shown for non-personal categories */}
+              {!['escorts','companionship','massage','domination','experiences'].includes(form.category) && (
+                <div style={{ marginTop: '1.75rem' }}>
+                  <label style={{
+                    fontFamily: 'var(--sans, "Poppins", sans-serif)',
+                    fontSize: '10px',
+                    letterSpacing: '0.14em',
+                    textTransform: 'uppercase',
+                    color: 'var(--t3, rgba(255,255,255,0.2))',
+                    fontWeight: 600,
+                    display: 'block',
+                    marginBottom: '0.5rem',
+                  }}>
+                    Website URL <span style={{ opacity: 0.5, fontWeight: 300, fontSize: '9px' }}>(optional)</span>
+                  </label>
+                  <input
+                    className="cl-inp"
+                    style={{
+                      width: '100%',
+                      background: 'var(--bg2, rgba(255,255,255,0.04))',
+                      border: '0.5px solid var(--b, rgba(255,255,255,0.1))',
+                      borderRadius: 'var(--r, 8px)',
+                      padding: '12px 14px',
+                      color: 'var(--t, #ece8e1)',
+                      fontFamily: 'var(--sans, "Poppins", sans-serif)',
+                      fontSize: '14px',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                    type="url"
+                    value={form.website}
+                    onChange={e => set('website', e.target.value)}
+                    placeholder="https://www.yoursite.com"
+                  />
+                </div>
+              )}
             </div>
           )}
 

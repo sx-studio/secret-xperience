@@ -15,15 +15,6 @@ export async function generateMetadata() {
   }
 }
 
-const CREATOR_FILTERS = [
-  { value: 'all', label: 'All Creators' },
-  { value: 'photo', label: 'Photo & Video' },
-  { value: 'couple', label: 'Couple' },
-  { value: 'artistic', label: 'Artistic' },
-  { value: 'fitness', label: 'Fitness' },
-  { value: 'custom', label: 'Custom Content' },
-]
-
 
 export default async function CreatorsPage() {
   const cookieStore = cookies()
@@ -117,17 +108,6 @@ export default async function CreatorsPage() {
               <span style={{ width: '1px', height: '14px', background: 'var(--b3)', display: 'inline-block' }} />
               <span style={{ fontSize: '13px', color: 'var(--t3)' }}>Verified &amp; independent</span>
             </div>
-          </div>
-        </div>
-
-        {/* FILTER BAR */}
-        <div style={{ borderBottom: '0.5px solid var(--b)', background: 'rgba(17,13,28,0.96)', overflowX: 'auto', scrollbarWidth: 'none' }}>
-          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem', display: 'flex', gap: '8px', alignItems: 'center', height: '52px', scrollbarWidth: 'none' }}>
-            {CREATOR_FILTERS.map((f) => (
-              <span key={f.value} className={`filter-pill${f.value === 'all' ? ' active' : ''}`}>
-                {f.label}
-              </span>
-            ))}
           </div>
         </div>
 

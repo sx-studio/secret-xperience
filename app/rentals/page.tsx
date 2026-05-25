@@ -15,22 +15,6 @@ export async function generateMetadata() {
   }
 }
 
-const CITY_FILTERS = [
-  { value: 'all', label: 'All Cities' },
-  { value: 'brussels', label: '🇧🇪 Brussels' },
-  { value: 'antwerp', label: '🇧🇪 Antwerp' },
-  { value: 'ghent', label: '🇧🇪 Ghent' },
-  { value: 'amsterdam', label: '🇳🇱 Amsterdam' },
-  { value: 'berlin', label: '🇩🇪 Berlin' },
-]
-
-const TYPE_FILTERS = [
-  { value: 'all', label: 'All types' },
-  { value: 'apartment', label: 'Apartment' },
-  { value: 'suite', label: 'Suite' },
-  { value: 'studio', label: 'Studio' },
-]
-
 
 export default async function RentalsPage() {
   const cookieStore = cookies()
@@ -149,29 +133,6 @@ export default async function RentalsPage() {
             <div style={{ fontSize: '24px', opacity: 0.4 }}>🗺</div>
             <div style={{ fontSize: '13px', color: 'var(--t3)', letterSpacing: '0.04em' }}>Map view coming soon</div>
             <div style={{ fontSize: '11px', color: 'var(--t3)', opacity: 0.6 }}>Interactive map with real-time availability</div>
-          </div>
-        </div>
-
-        {/* CITY FILTER TABS */}
-        <div style={{ borderBottom: '0.5px solid var(--b)', background: 'rgba(17,13,28,0.96)', overflowX: 'auto', scrollbarWidth: 'none', marginTop: '1.5rem' }}>
-          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem', display: 'flex', gap: '8px', alignItems: 'center', height: '52px', scrollbarWidth: 'none' }}>
-            {CITY_FILTERS.map((f) => (
-              <span key={f.value} className={`loc-pill${f.value === 'all' ? ' active' : ''}`}>
-                {f.label}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* TYPE FILTER */}
-        <div style={{ borderBottom: '0.5px solid var(--b)', background: 'var(--bg)', overflowX: 'auto', scrollbarWidth: 'none' }}>
-          <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem', display: 'flex', gap: '8px', alignItems: 'center', height: '44px', scrollbarWidth: 'none' }}>
-            <span style={{ fontSize: '11px', color: 'var(--t3)', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginRight: '4px', whiteSpace: 'nowrap' }}>Type:</span>
-            {TYPE_FILTERS.map((f) => (
-              <span key={f.value} className={`type-pill${f.value === 'all' ? ' active' : ''}`}>
-                {f.label}
-              </span>
-            ))}
           </div>
         </div>
 

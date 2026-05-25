@@ -24,6 +24,15 @@ interface Listing {
   tags?: string[] | null
 }
 
+const CREATOR_FILTERS = [
+  { value: 'all', label: 'All Creators' },
+  { value: 'photo', label: 'Photo & Video' },
+  { value: 'couple', label: 'Couple' },
+  { value: 'artistic', label: 'Artistic' },
+  { value: 'fitness', label: 'Fitness' },
+  { value: 'custom', label: 'Custom Content' },
+]
+
 const GRAD_PALETTE = [
   'linear-gradient(145deg, #3d1d33 0%, #1a0d1a 100%)',
   'linear-gradient(145deg, #1a1230 0%, #0d0818 100%)',
@@ -203,16 +212,36 @@ export default function CreatorsGrid({ listings }: { listings: Listing[] }) {
     if (typeof window === 'undefined') return false
     return localStorage.getItem('discreetMode') === '1'
   })
+  const [typeFilter, setTypeFilter] = useState('all')
 
-  const featured = listings.filter(l => l.featured_until && new Date(l.featured_until) > new Date())
-  const regular  = listings.filter(l => !l.featured_until || new Date(l.featured_until) <= new Date())
+  const filteredAll = listings.filter(l =>
+    typeFilter === 'all' || (l.subcategory ?? '').toLowerCase().includes(typeFilter)
+  )
+
+  const featured = filteredAll.filter(l => l.featured_until && new Date(l.featured_until) > new Date())
+  const regular  = filteredAll.filter(l => !l.featured_until || new Date(l.featured_until) <= new Date())
 
   return (
     <>
+      {/* CONTENT TYPE FILTER BAR */}
+      <div style={{ borderBottom: '0.5px solid var(--b)', background: 'rgba(17,13,28,0.96)', overflowX: 'auto', scrollbarWidth: 'none', margin: '0 -1.5rem 1.5rem', padding: '0 1.5rem' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', height: '52px', scrollbarWidth: 'none' }}>
+          {CREATOR_FILTERS.map((f) => (
+            <button
+              key={f.value}
+              onClick={() => setTypeFilter(f.value)}
+              className={`filter-pill${typeFilter === f.value ? ' active' : ''}`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Discreet toggle row */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '10px' }}>
         <div style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--t3)' }}>
-          {listings.length} creators
+          {filteredAll.length} creators
         </div>
         <button
           onClick={() => {
@@ -267,6 +296,11 @@ export default function CreatorsGrid({ listings }: { listings: Listing[] }) {
           <Link href="/advertise" style={{ padding: '12px 28px', background: 'linear-gradient(135deg,var(--gold),var(--goldd))', borderRadius: 'var(--r)', color: '#0a0a0a', textDecoration: 'none', fontWeight: 700, fontSize: '14px' }}>
             Become a creator →
           </Link>
+        </div>
+      ) : filteredAll.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '5rem 2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ fontSize: '36px', opacity: 0.3 }}>✦</div>
+          <p style={{ fontSize: '14px', color: 'var(--t3)' }}>No creators match this filter</p>
         </div>
       ) : (
         <div>

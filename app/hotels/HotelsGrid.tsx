@@ -23,6 +23,16 @@ interface Listing {
   tags?: string[] | null
 }
 
+const CITY_FILTERS = [
+  { value: 'all', label: 'All Cities' },
+  { value: 'brussels', label: '🇧🇪 Brussels' },
+  { value: 'amsterdam', label: '🇳🇱 Amsterdam' },
+  { value: 'berlin', label: '🇩🇪 Berlin' },
+  { value: 'paris', label: '🇫🇷 Paris' },
+  { value: 'vienna', label: '🇦🇹 Vienna' },
+  { value: 'barcelona', label: '🇪🇸 Barcelona' },
+]
+
 const HOTEL_GRADS = [
   'linear-gradient(140deg, #1f2a2e 0%, #0d1416 100%)',
   'linear-gradient(140deg, #1a2018 0%, #0d1008 100%)',
@@ -260,16 +270,36 @@ export default function HotelsGrid({ listings }: { listings: Listing[] }) {
     if (typeof window === 'undefined') return false
     return localStorage.getItem('discreetMode') === '1'
   })
+  const [cityFilter, setCityFilter] = useState('all')
 
-  const featured = listings.filter(l => l.featured_until && new Date(l.featured_until) > new Date())
-  const regular  = listings.filter(l => !l.featured_until || new Date(l.featured_until) <= new Date())
+  const filteredAll = listings.filter(l =>
+    cityFilter === 'all' || (l.city ?? '').toLowerCase().includes(cityFilter)
+  )
+
+  const featured = filteredAll.filter(l => l.featured_until && new Date(l.featured_until) > new Date())
+  const regular  = filteredAll.filter(l => !l.featured_until || new Date(l.featured_until) <= new Date())
 
   return (
     <>
+      {/* CITY FILTER TABS */}
+      <div style={{ borderBottom: '0.5px solid var(--b)', background: 'var(--bg1)', overflowX: 'auto', scrollbarWidth: 'none', margin: '0 -1.5rem 1.5rem', padding: '0 1.5rem' }}>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', height: '56px', scrollbarWidth: 'none' }}>
+          {CITY_FILTERS.map((f) => (
+            <button
+              key={f.value}
+              onClick={() => setCityFilter(f.value)}
+              className={`filter-pill${cityFilter === f.value ? ' active' : ''}`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Results count + discreet toggle */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '10px' }}>
         <span style={{ fontSize: '12px', color: 'var(--t3)' }}>
-          {listings.length} hotels found
+          {filteredAll.length} hotels found
         </span>
         <button
           onClick={() => {
@@ -326,6 +356,11 @@ export default function HotelsGrid({ listings }: { listings: Listing[] }) {
           <Link href="/advertise" style={{ padding: '12px 28px', background: 'linear-gradient(135deg,var(--gold),var(--goldd))', borderRadius: 'var(--r)', color: '#0a0a0a', textDecoration: 'none', fontWeight: 700, fontSize: '14px' }}>
             List your hotel →
           </Link>
+        </div>
+      ) : filteredAll.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '5rem 2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ fontSize: '36px', opacity: 0.3 }}>🏨</div>
+          <p style={{ fontSize: '14px', color: 'var(--t3)' }}>No hotels match this filter</p>
         </div>
       ) : (
         <div className="hotel-list">
