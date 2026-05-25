@@ -162,7 +162,7 @@ export default function ListingDetailPage() {
         setListing(data as any)
         if (data.images?.length) setActiveImg(data.images[0])
         // Track view (fire-and-forget)
-        supabase.from('listing_views').insert({ listing_id: id, user_id: sess?.user?.id || null }).then(() => {})
+        supabase.from('listing_views').insert({ listing_id: id, viewer_id: sess?.user?.id || null }).then(() => {})
         // Fetch similar listings by same category
         const { data: sims } = await supabase
           .from('listings')
@@ -1329,8 +1329,8 @@ export default function ListingDetailPage() {
                 </div>
               )}
 
-              {/* Website link */}
-              {listing.website && (
+              {/* Website link — only render for safe http(s) URLs */}
+              {listing.website && /^https?:\/\//i.test(listing.website) && (
                 <a
                   href={listing.website}
                   target="_blank"

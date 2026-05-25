@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
-import { rateLimit } from '../../lib/ratelimit'
+import { rateLimit } from '../../../lib/ratelimit'
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.secretxperience.eu'
 
@@ -47,8 +47,15 @@ export async function POST(request: NextRequest) {
   try {
     const { email, password, fullName, role } = await request.json()
 
+    const VALID_ROLES = ['client', 'provider']
     if (!email || !password || !role) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    }
+    if (!VALID_ROLES.includes(role)) {
+      return NextResponse.json({ error: 'Invalid role' }, { status: 400 })
+    }
+    if (typeof password === 'string' && password.length < 8) {
+      return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 })
     }
 
     const supabase = createClient(

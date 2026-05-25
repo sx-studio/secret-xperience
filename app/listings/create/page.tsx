@@ -367,7 +367,7 @@ export default function CreateListingPage() {
       city:            form.city,
       country:         form.country,
       meet_type:       form.meet_type,
-      website:         form.website.trim() || null,
+      website:         (() => { try { const u = new URL(form.website.trim()); return ['https:', 'http:'].includes(u.protocol) ? u.href : null } catch { return null } })(),
       images:          form.images.length > 0 ? form.images : null,
       tags:            finalTags.length > 0 ? finalTags : null,
       active:          false,   // stays false until moderation approves
