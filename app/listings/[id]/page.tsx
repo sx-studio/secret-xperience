@@ -77,6 +77,7 @@ interface Listing {
   premium:     boolean
   trending:    boolean
   age:         number | null
+  website:     string | null
   profile_id:  string
   profile: {
     full_name:  string | null
@@ -1326,6 +1327,41 @@ export default function ListingDetailPage() {
                     </div>
                   )}
                 </div>
+              )}
+
+              {/* Website link */}
+              {listing.website && (
+                <a
+                  href={listing.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    padding: '14px',
+                    background: 'linear-gradient(135deg, #c5a05a 0%, #a0803d 100%)',
+                    border: 'none',
+                    borderRadius: '12px',
+                    color: '#080808',
+                    fontFamily: "'Poppins', sans-serif",
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase',
+                    textDecoration: 'none',
+                    cursor: 'pointer',
+                    boxShadow: '0 8px 32px rgba(197,160,90,0.25)',
+                    marginBottom: '4px',
+                    transition: 'opacity 0.2s, transform 0.15s',
+                  }}
+                  onMouseOver={e => { (e.currentTarget as HTMLAnchorElement).style.opacity = '0.88'; (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(-1px)' }}
+                  onMouseOut={e => { (e.currentTarget as HTMLAnchorElement).style.opacity = '1'; (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(0)' }}
+                >
+                  <i className="ti ti-external-link" style={{ fontSize: '14px' }} />
+                  Visit Website
+                </a>
               )}
 
               {/* CTA buttons */}
