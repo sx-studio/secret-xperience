@@ -818,7 +818,13 @@ export default function ListingDetailPage() {
                     fontWeight: 600,
                     marginBottom: '1rem',
                   }}>
-                    About this service
+                    {PERSONAL_CATS.has(listing.category)
+                      ? 'About this service'
+                      : listing.category === 'nightlife'
+                      ? 'About this venue'
+                      : listing.category === 'events'
+                      ? 'About this event'
+                      : 'About this listing'}
                   </p>
                   <p style={{
                     fontFamily: "'Poppins', sans-serif",
@@ -1170,7 +1176,7 @@ export default function ListingDetailPage() {
                   fontWeight: 600,
                   marginBottom: '1rem',
                 }}>
-                  Provider
+                  {listing.profile_id ? 'Provider' : 'Listing Info'}
                 </p>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1.25rem' }}>
@@ -1239,32 +1245,34 @@ export default function ListingDetailPage() {
                   </div>
                 </div>
 
-                {/* View profile link */}
-                <a
-                  href={`/profile/${listing.profile_id}`}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px',
-                    padding: '10px',
-                    background: 'rgba(255,255,255,0.03)',
-                    border: '0.5px solid rgba(255,255,255,0.1)',
-                    borderRadius: '10px',
-                    color: 'rgba(255,255,255,0.5)',
-                    fontFamily: "'Poppins', sans-serif",
-                    fontSize: '13px',
-                    fontWeight: 500,
-                    letterSpacing: '0.06em',
-                    textTransform: 'uppercase',
-                    textDecoration: 'none',
-                    transition: 'border-color 0.2s, color 0.2s',
-                    width: '100%',
-                    boxSizing: 'border-box',
-                  }}
-                >
-                  View Profile →
-                </a>
+                {/* View profile link — only when there's a real provider */}
+                {listing.profile_id && (
+                  <a
+                    href={`/profile/${listing.profile_id}`}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      padding: '10px',
+                      background: 'rgba(255,255,255,0.03)',
+                      border: '0.5px solid rgba(255,255,255,0.1)',
+                      borderRadius: '10px',
+                      color: 'rgba(255,255,255,0.5)',
+                      fontFamily: "'Poppins', sans-serif",
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      letterSpacing: '0.06em',
+                      textTransform: 'uppercase',
+                      textDecoration: 'none',
+                      transition: 'border-color 0.2s, color 0.2s',
+                      width: '100%',
+                      boxSizing: 'border-box',
+                    }}
+                  >
+                    View Profile →
+                  </a>
+                )}
               </div>
 
               {/* Pricing card */}
@@ -1322,13 +1330,33 @@ export default function ListingDetailPage() {
 
               {/* CTA buttons */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <button type="button" className="ld-book-btn" onClick={isBookable ? goToBook : goToMessage}>
-                  {isBookable ? 'Book Now' : 'Send Message'}
-                </button>
-                {isBookable && (
-                  <button type="button" className="ld-msg-btn" onClick={goToMessage}>
-                    Send Message
-                  </button>
+                {listing.profile_id ? (
+                  <>
+                    <button type="button" className="ld-book-btn" onClick={isBookable ? goToBook : goToMessage}>
+                      {isBookable ? 'Book Now' : 'Send Message'}
+                    </button>
+                    {isBookable && (
+                      <button type="button" className="ld-msg-btn" onClick={goToMessage}>
+                        Send Message
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  <div style={{
+                    padding: '13px 16px',
+                    background: 'rgba(255,255,255,0.02)',
+                    border: '0.5px solid rgba(255,255,255,0.08)',
+                    borderRadius: '12px',
+                    fontFamily: "'Poppins', sans-serif",
+                    fontSize: '12px',
+                    color: 'rgba(255,255,255,0.3)',
+                    fontWeight: 300,
+                    textAlign: 'center',
+                    letterSpacing: '0.03em',
+                    lineHeight: 1.6,
+                  }}>
+                    Contact details in venue description above
+                  </div>
                 )}
                 <button
                   type="button"

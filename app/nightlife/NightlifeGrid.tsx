@@ -47,14 +47,15 @@ function isNewListing(createdAt: string): boolean {
 }
 
 function venueTypeFromSubcategory(sub: string | null): string {
-  if (!sub) return 'Venue'
+  if (!sub) return 'Club'
   const s = sub.toLowerCase()
-  if (s.includes('club')) return 'Club'
-  if (s.includes('bar')) return 'Bar'
+  if (s.includes('sauna')) return 'Sauna'
   if (s.includes('strip')) return 'Strip Club'
-  if (s.includes('private')) return 'Private Party'
+  if (s.includes('private') || s.includes('party')) return 'Private Party'
   if (s.includes('lounge')) return 'Lounge'
-  return sub
+  if (s.includes('bar')) return 'Bar'
+  if (s.includes('club')) return 'Club'
+  return 'Club'
 }
 
 export default function NightlifeGrid({ listings }: { listings: Listing[] }) {
@@ -204,6 +205,17 @@ export default function NightlifeGrid({ listings }: { listings: Listing[] }) {
           )
         })}
       </div>
+
+      {/* Shown by filter script when all cards are filtered out */}
+      {listings.length > 0 && (
+        <div id="nl-filter-empty" style={{
+          display: 'none', textAlign: 'center', padding: '4rem 1rem',
+        }}>
+          <div style={{ fontSize: '40px', opacity: 0.2, color: '#c5a05a', marginBottom: '1rem' }}>◐</div>
+          <p className="nl-empty-text">No venues found</p>
+          <p className="nl-empty-sub">Try a different city or venue type.</p>
+        </div>
+      )}
     </>
   )
 }

@@ -55,7 +55,7 @@ export default async function NightlifePage() {
   const listings = await getListings()
 
   const CITIES = ['All', 'Brussels', 'Antwerp', 'Amsterdam', 'Berlin', 'Paris']
-  const VENUE_TYPES = ['All', 'Club', 'Bar', 'Strip Club', 'Private Party', 'Lounge']
+  const VENUE_TYPES = ['All', 'Club', 'Bar', 'Sauna', 'Strip Club', 'Private Party', 'Lounge']
 
   return (
     <>
@@ -596,9 +596,6 @@ export default async function NightlifePage() {
         }
         .nl-cta-block-btn:hover { opacity: 0.88; transform: translateY(-1px); }
 
-        /* ── Filter interactivity (client-side via data attrs) ── */
-        [data-city]:not([data-city="All"]) { display: none; }
-        [data-city="All"] { display: flex; }
       `}</style>
 
       {/* Sticky Nav */}
@@ -688,13 +685,18 @@ export default async function NightlifePage() {
 
           function applyFilters() {
             var cards = document.querySelectorAll('#nl-grid [data-city]');
+            var visibleCount = 0;
             cards.forEach(function(card) {
               var city  = card.getAttribute('data-city') || '';
               var vtype = card.getAttribute('data-vtype') || '';
               var cityOk = cityFilter === 'All' || city.toLowerCase() === cityFilter.toLowerCase();
-              var typeOk = typeFilter === 'All' || vtype.toLowerCase() === typeFilter.toLowerCase();
-              card.style.display = (cityOk && typeOk) ? 'flex' : 'none';
+              var typeOk = typeFilter === 'All' || vtype === typeFilter;
+              var show = cityOk && typeOk;
+              card.style.display = show ? 'flex' : 'none';
+              if (show) visibleCount++;
             });
+            var emptyEl = document.getElementById('nl-filter-empty');
+            if (emptyEl) emptyEl.style.display = visibleCount === 0 && cards.length > 0 ? 'block' : 'none';
           }
 
           document.querySelectorAll('[data-city-filter]').forEach(function(btn) {
