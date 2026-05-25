@@ -126,7 +126,7 @@ export default function NightlifeGrid({ listings }: { listings: Listing[] }) {
           const vType = venueTypeFromSubcategory(listing.subcategory)
           const img = listing.images?.[0] ?? null
           const tags = listing.tags ?? []
-          const availNow = isAvailableNow(listing.tags) || openNow
+          const availNow = isAvailableNow(listing.tags)
           const newListing = isNewListing(listing.created_at)
 
           return (

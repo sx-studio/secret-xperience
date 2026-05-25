@@ -16,7 +16,8 @@ export async function POST(req: NextRequest) {
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
   )
 
   const { data: booking } = await supabase
@@ -72,7 +73,7 @@ export async function POST(req: NextRequest) {
 
     if (type === 'booking_created' && provider?.email) {
       emails.push({
-        from: 'SecretXperience <noreply@secret-xperience.eu>',
+        from: 'SecretXperience <noreply@secretxperience.eu>',
         to: [provider.email],
         subject: `New booking request — ${listing?.title}`,
         html: `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${emailStyle}</style></head><body>
@@ -93,7 +94,7 @@ export async function POST(req: NextRequest) {
 
     if (type === 'booking_confirmed' && client?.email) {
       emails.push({
-        from: 'SecretXperience <noreply@secret-xperience.eu>',
+        from: 'SecretXperience <noreply@secretxperience.eu>',
         to: [client.email],
         subject: `Booking confirmed — ${listing?.title}`,
         html: `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${emailStyle}</style></head><body>
@@ -124,7 +125,7 @@ export async function POST(req: NextRequest) {
       const boostProfile = (boostListing as any)?.profile
       if (boostProfile?.email) {
         emails.push({
-          from: 'SecretXperience <noreply@secret-xperience.eu>',
+          from: 'SecretXperience <noreply@secretxperience.eu>',
           to: [boostProfile.email],
           subject: `✦ Your listing is now featured — ${boostListing?.title}`,
           html: `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${emailStyle}</style></head><body>

@@ -41,9 +41,9 @@ export async function GET(req: NextRequest) {
   if (category && category !== 'all') query = query.ilike('category', category + '%')
   if (city) query = query.ilike('city', city + '%')
   if (verified) query = query.eq('verified', true)
-  if (meetType) query = query.eq('meet_type', meetType)
+  if (meetType) query = query.or(`meet_type.eq.${meetType},meet_type.eq.both`)
   if (minPrice) query = query.gte('price_from', parseInt(minPrice))
-  if (maxPrice) query = query.lte('price_to', parseInt(maxPrice))
+  if (maxPrice) query = query.lte('price_from', parseInt(maxPrice))
 
   query = query.order('featured_until', { ascending: false, nullsFirst: false })
   if (sort === 'rating') query = query.order('rating', { ascending: false })

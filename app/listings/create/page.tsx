@@ -257,8 +257,8 @@ export default function CreateListingPage() {
   /* ── Image upload ── */
   const uploadFile = useCallback(async (file: File) => {
     if (form.images.length + uploadingImages.filter(u => u.loading).length >= 5) return
-    if (file.size > 10 * 1024 * 1024) {
-      alert(`${file.name} exceeds the 10 MB limit.`)
+    if (file.size > 4 * 1024 * 1024) {
+      alert(`${file.name} exceeds the 4 MB limit.`)
       return
     }
     const allowed = ['image/jpeg', 'image/png', 'image/webp']
@@ -1291,7 +1291,7 @@ export default function CreateListingPage() {
                   color: 'var(--t2, rgba(255,255,255,0.25))',
                   letterSpacing: '0.04em',
                 }}>
-                  Up to 5 photos · JPEG, PNG, WebP · 10 MB each
+                  Up to 5 photos · JPEG, PNG, WebP · 4 MB each
                 </span>
                 {form.images.length + uploadingImages.filter(u => u.loading).length >= 5 && (
                   <span style={{

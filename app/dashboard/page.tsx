@@ -188,13 +188,13 @@ export default function DashboardPage() {
       setUser(session.user)
 
       const [{ data: profile }, { data: listings }, { data: bookings }, { data: idVerif }, { data: favData }, { count: unreadCount }, { data: walletData }] = await Promise.all([
-        supabase.from('profiles').select('*').eq('id', session.user.id).single(),
+        supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle(),
         supabase.from('listings').select('*').eq('profile_id', session.user.id),
         supabase.from('bookings').select('*, listing:listings(title,category)').or(`client_id.eq.${session.user.id},provider_id.eq.${session.user.id}`).order('created_at', { ascending: false }).limit(20),
         supabase.from('identity_verifications').select('status').eq('user_id', session.user.id).maybeSingle(),
         supabase.from('favorites').select('listing_id, listings(id,title,category,city,country,price_from,images,active,tier)').eq('user_id', session.user.id),
         supabase.from('messages').select('*', { count: 'exact', head: true }).eq('receiver_id', session.user.id).eq('read', false),
-        supabase.from('user_wallets').select('balance').eq('user_id', session.user.id).single(),
+        supabase.from('user_wallets').select('balance').eq('user_id', session.user.id).maybeSingle(),
       ])
       if (idVerif?.status) setIdVerifStatus(idVerif.status as any)
       setUnreadMessages(unreadCount || 0)
@@ -250,7 +250,7 @@ export default function DashboardPage() {
     setSavingProfile(true)
     const supabase = createClient()
     const { data: { session } } = await supabase.auth.getSession()
-    if (!session) return
+    if (!session) { setSavingProfile(false); return }
     const updates: any = {
       full_name: profileDraft.full_name,
       bio: profileDraft.bio,

@@ -89,6 +89,17 @@ export default function DiscoverPage() {
     })
   }, [])
 
+  // Keyboard shortcuts: ← to skip, → to save
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (action || noMore || loading) return
+      if (e.key === 'ArrowLeft') flyOut('skip')
+      else if (e.key === 'ArrowRight') flyOut('like')
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [action, noMore, loading, index, cards])
+
   const loadCards = useCallback(async (cat: string) => {
     setLoading(true)
     setNoMore(false)

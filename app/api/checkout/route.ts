@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
   const { listing_id, date, time, duration, price, notes, meet_type, location } = await req.json()
 
-  if (!listing_id || !price) return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+  if (!listing_id || typeof price !== 'number' || price <= 0) return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
 
   const { data: listing } = await supabase
     .from('listings')
@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
           name: listing.title,
           description: `${duration} · ${meet_type || 'Incall'} · ${date} ${time || ''}`.trim(),
         },
-        unit_amount: price * 100,
+        unit_amount: Math.round(price * 100),
       },
       quantity: 1,
     }],

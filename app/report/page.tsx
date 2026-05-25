@@ -38,6 +38,7 @@ export default function ReportPage() {
         detail: form.detail,
         email: form.email || null,
       })
+      setSubmitting(false)
       setDone(true)
     } catch {
       setSubmitting(false)

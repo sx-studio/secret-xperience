@@ -195,9 +195,7 @@ document.querySelectorAll('.tier').forEach(function(t){
   });
 });
 
-// ── Rating slider ──
-var rsl = document.getElementById('rsl');
-rsl.addEventListener('input', function(){ var v=parseFloat(this.value); document.getElementById('rval').textContent = v===0?'Any':v.toFixed(1); });
+// ── Rating slider — handled by the listener below with null guard ──
 
 // ── How It Works data ──
 var howData = {

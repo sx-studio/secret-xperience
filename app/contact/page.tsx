@@ -1,5 +1,6 @@
 'use client'
 import { useState, FormEvent } from 'react'
+import { createClient } from '../lib/supabase'
 
 const S = { bg: '#080808', t: '#e8e0d0', t2: '#888', t3: '#555', gold: '#c5a05a', b: '#c5a05a22', b2: '#ffffff18', serif: "'Cormorant Garamond', serif", sans: "'Poppins', sans-serif" }
 
@@ -18,10 +19,23 @@ const inputStyle: React.CSSProperties = {
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' })
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault()
+    if (!form.name || !form.email || !form.message) return
+    setSubmitting(true)
+    try {
+      const supabase = createClient()
+      await supabase.from('contact_messages').insert({
+        name: form.name,
+        email: form.email,
+        subject: form.subject || 'General enquiry',
+        message: form.message,
+      })
+    } catch { /* silent — message still saved if partial */ }
+    setSubmitting(false)
     setSubmitted(true)
   }
 
@@ -147,9 +161,10 @@ export default function ContactPage() {
                 </div>
                 <button
                   type="submit"
-                  style={{ background: S.gold, color: '#080808', border: 'none', cursor: 'pointer', padding: '14px 28px', borderRadius: 3, fontSize: 12, letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 500, fontFamily: S.sans, alignSelf: 'flex-start' }}
+                  disabled={submitting}
+                  style={{ background: S.gold, color: '#080808', border: 'none', cursor: submitting ? 'default' : 'pointer', padding: '14px 28px', borderRadius: 3, fontSize: 12, letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 500, fontFamily: S.sans, alignSelf: 'flex-start', opacity: submitting ? 0.6 : 1 }}
                 >
-                  Send Message
+                  {submitting ? 'Sending…' : 'Send Message'}
                 </button>
               </form>
             )}

@@ -25,8 +25,10 @@ interface Conversation {
 
 export default function MessagesPage() {
   const [userId, setUserId] = useState<string | null>(null)
+  const [ownName, setOwnName] = useState<string | null>(null)
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [activeConv, setActiveConv] = useState<Conversation | null>(null)
+  const activeConvRef = useRef<Conversation | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
   const [body, setBody] = useState('')
   const [sending, setSending] = useState(false)
@@ -35,7 +37,18 @@ export default function MessagesPage() {
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
+  // Sync activeConv to ref so realtime handler has a non-stale reference
+  useEffect(() => { activeConvRef.current = activeConv }, [activeConv])
+
+  // Mobile panel: show/hide left vs right pane based on whether a conversation is active
   useEffect(() => {
+    if (typeof window === 'undefined' || window.innerWidth > 640) return
+    document.documentElement.style.setProperty('--conv-list-display', activeConv ? 'none' : 'flex')
+    document.documentElement.style.setProperty('--thread-panel-display', activeConv ? 'flex' : 'none')
+  }, [activeConv])
+
+  useEffect(() => {
+    let channel: any = null
     async function init() {
       const supabase = createClient()
       const { data: { session } } = await supabase.auth.getSession()
@@ -78,6 +91,10 @@ export default function MessagesPage() {
       })
 
       // Fix 1: fetch profiles with email fallback; show "Anonymous" not UUID
+      // Fetch own name for use in message notifications
+      const { data: ownProfile } = await supabase.from('profiles').select('full_name, username').eq('id', uid).maybeSingle()
+      setOwnName(ownProfile?.full_name || ownProfile?.username || null)
+
       const otherIds = [...convMap.keys()]
       if (otherIds.length > 0) {
         const { data: profiles } = await supabase
@@ -110,7 +127,7 @@ export default function MessagesPage() {
       if (providerId) {
         let conv = convList.find(c => c.other_id === providerId)
         if (!conv) {
-          const { data: profile } = await supabase.from('profiles').select('full_name, username, email').eq('id', providerId).single()
+          const { data: profile } = await supabase.from('profiles').select('full_name, username, email').eq('id', providerId).maybeSingle()
           conv = {
             other_id: providerId,
             other_name: profile?.full_name || profile?.username || profile?.email || 'Provider',
@@ -147,13 +164,16 @@ export default function MessagesPage() {
 
       setLoading(false)
 
-      supabase.channel(`messages-${uid}`)
+      channel = supabase.channel(`messages-${uid}`)
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `receiver_id=eq.${uid}` }, (payload) => {
           const newMsg = payload.new as Message
-          setMessages(prev => prev.find(m => m.id === newMsg.id) ? prev : [...prev, newMsg])
+          // Only inject into message thread if this is from the active conversation
+          if (activeConvRef.current?.other_id === newMsg.sender_id) {
+            setMessages(prev => prev.find(m => m.id === newMsg.id) ? prev : [...prev, newMsg])
+          }
           setConversations(prev => {
             const otherId = newMsg.sender_id
-            const updated = prev.map(c => c.other_id === otherId ? { ...c, last_message: newMsg.body, last_at: newMsg.created_at, unread: c.unread + 1 } : c)
+            const updated = prev.map(c => c.other_id === otherId ? { ...c, last_message: newMsg.body, last_at: newMsg.created_at, unread: activeConvRef.current?.other_id === otherId ? c.unread : c.unread + 1 } : c)
             if (!updated.find(c => c.other_id === otherId)) {
               updated.unshift({ other_id: otherId, other_name: 'Anonymous', listing_id: newMsg.listing_id, listing_title: null, last_message: newMsg.body, last_at: newMsg.created_at, unread: 1 })
             }
@@ -163,6 +183,7 @@ export default function MessagesPage() {
         .subscribe()
     }
     init()
+    return () => { channel?.unsubscribe() }
   }, [])
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
@@ -190,11 +211,10 @@ export default function MessagesPage() {
     await supabase.from('messages').insert({ sender_id: userId, receiver_id: activeConv.other_id, listing_id: activeConv.listing_id, body: optimistic.body })
     setSending(false)
     // Notify receiver by email (fire-and-forget)
-    const senderProfile = conversations.find(c => c.other_id === activeConv.other_id)
     fetch('/api/messages/notify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ receiver_id: activeConv.other_id, sender_name: (senderProfile as any)?.sender_name || null, listing_title: activeConv.listing_title || null, listing_id: activeConv.listing_id }),
+      body: JSON.stringify({ receiver_id: activeConv.other_id, sender_name: ownName || null, listing_title: activeConv.listing_title || null, listing_id: activeConv.listing_id }),
     }).catch(() => {})
     // Fix 3: update conversations list locally after send so sender sees the bump
     setConversations(prev => {
@@ -632,11 +652,6 @@ export default function MessagesPage() {
 
             {/* Composer */}
             <div className="msg-composer">
-              {/* Attach button */}
-              <button className="msg-attach-btn" type="button" aria-label="Attach file">
-                <i className="ti ti-paperclip" />
-              </button>
-
               {/* Textarea */}
               <textarea
                 ref={textareaRef}

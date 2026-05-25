@@ -302,7 +302,7 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginTop: '3rem' }}>
               {page > 0 && (
                 <Link
-                  href={`/search?${new URLSearchParams({ ...(q && { q }), ...(category !== 'all' && { category }), ...(city && city !== 'All cities' && { city }), ...(sort !== 'relevance' && { sort }), page: String(page - 1) }).toString()}`}
+                  href={`/search?${new URLSearchParams({ ...(q && { q }), ...(category !== 'all' && { category }), ...(city && city !== 'All cities' && { city }), ...(sort !== 'relevance' && { sort }), ...(verified && { verified: '1' }), ...(meet && { meet }), ...(minPrice != null && { min: String(minPrice) }), ...(maxPrice != null && { max: String(maxPrice) }), page: String(page - 1) }).toString()}`}
                   style={{ padding: '10px 20px', background: 'var(--bg1)', border: '0.5px solid var(--b)', borderRadius: 'var(--r)', color: 'var(--t2)', textDecoration: 'none', fontSize: '13px', display: 'flex', alignItems: 'center', gap: 6 }}
                 >
                   ← Previous
@@ -313,7 +313,7 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
               </span>
               {(page + 1) * PAGE_SIZE < (totalCount ?? 0) && (
                 <Link
-                  href={`/search?${new URLSearchParams({ ...(q && { q }), ...(category !== 'all' && { category }), ...(city && city !== 'All cities' && { city }), ...(sort !== 'relevance' && { sort }), page: String(page + 1) }).toString()}`}
+                  href={`/search?${new URLSearchParams({ ...(q && { q }), ...(category !== 'all' && { category }), ...(city && city !== 'All cities' && { city }), ...(sort !== 'relevance' && { sort }), ...(verified && { verified: '1' }), ...(meet && { meet }), ...(minPrice != null && { min: String(minPrice) }), ...(maxPrice != null && { max: String(maxPrice) }), page: String(page + 1) }).toString()}`}
                   style={{ padding: '10px 20px', background: 'var(--gbg)', border: '0.5px solid var(--gbrd)', borderRadius: 'var(--r)', color: 'var(--gold)', textDecoration: 'none', fontSize: '13px', display: 'flex', alignItems: 'center', gap: 6 }}
                 >
                   Next →

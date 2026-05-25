@@ -122,8 +122,6 @@ export default function AdminPage() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg, #050505)', color: 'var(--t, #ece8e1)', fontFamily: 'var(--sans)', display: 'flex' }}>
       <style>{`
-        
-        @import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css');
         @keyframes spin{to{transform:rotate(360deg)}}
         *{box-sizing:border-box}
         ::-webkit-scrollbar{width:4px}

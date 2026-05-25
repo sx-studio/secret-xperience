@@ -108,7 +108,7 @@ export default function EventsPage() {
     let res = events
     if (country !== 'All') res = res.filter(e => e.country === country)
     if (category !== 'All') res = res.filter(e => e.category === category)
-    if (search) res = res.filter(e => (e.title + e.city + e.description + e.venue_name).toLowerCase().includes(search.toLowerCase()))
+    if (search) res = res.filter(e => `${e.title ?? ''} ${e.city ?? ''} ${e.description ?? ''} ${e.venue_name ?? ''}`.toLowerCase().includes(search.toLowerCase()))
     setFiltered(res)
   }, [country, category, search, events])
 

@@ -279,7 +279,7 @@ export default function PrivateReceptionPage() {
   const [loading, setLoading]           = useState(true)
   const [showFilters, setShowFilters]   = useState(false)
   const [discreetMode, setDiscreetMode] = useState(() => {
-    if (typeof window !== 'undefined') return localStorage.getItem('sx_discreet') === '1'
+    if (typeof window !== 'undefined') return localStorage.getItem('discreetMode') === '1'
     return false
   })
 
@@ -458,7 +458,7 @@ export default function PrivateReceptionPage() {
             onClick={() => {
               const next = !discreetMode
               setDiscreetMode(next)
-              localStorage.setItem('sx_discreet', next ? '1' : '0')
+              localStorage.setItem('discreetMode', next ? '1' : '0')
             }}
             title={discreetMode ? 'Exit discreet mode' : 'Discreet mode — blur photos'}
             style={{ background: discreetMode ? 'rgba(197,160,90,0.15)' : 'transparent', border: `0.5px solid ${discreetMode ? 'var(--gbrd)' : 'var(--b2)'}`, borderRadius: 8, padding: '6px 12px', color: discreetMode ? 'var(--gold)' : 'var(--t3)', cursor: 'pointer', fontSize: 12, fontFamily: 'var(--sans)', display: 'flex', alignItems: 'center', gap: 5, whiteSpace: 'nowrap', transition: 'all .15s' }}

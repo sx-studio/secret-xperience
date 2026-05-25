@@ -125,11 +125,11 @@ export default function TokensPage() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
       if (session) {
-        supabase.from('user_wallets').select('balance,total_purchased,total_spent').eq('user_id', session.user.id).single()
+        supabase.from('user_wallets').select('balance,total_purchased,total_spent').eq('user_id', session.user.id).maybeSingle()
           .then(({ data }) => setWallet(data))
         supabase.from('token_ledger').select('id,amount,type,description,created_at,balance_after').eq('user_id', session.user.id).order('created_at', { ascending: false }).limit(15)
           .then(({ data }) => setLedger(data || []))
-        supabase.from('profiles').select('role').eq('id', session.user.id).single()
+        supabase.from('profiles').select('role').eq('id', session.user.id).maybeSingle()
           .then(({ data }) => {
             if (data?.role) {
               const map: Record<string, string> = { user: 'Member', provider: 'Provider', venue: 'Venue', creator: 'Creator' }
@@ -143,7 +143,7 @@ export default function TokensPage() {
   }, [])
 
   async function handlePurchase(pkg: Package | typeof FALLBACK_PACKAGES[0]) {
-    if (!session) { window.location.href = '/login?redirect=/tokens'; return }
+    if (!session) { window.location.href = '/login?next=/tokens'; return }
     setLoading(true)
     setSelected(pkg.id)
     try {

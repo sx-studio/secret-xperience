@@ -127,6 +127,14 @@ export default function ProviderHubPage() {
       }
       setUserId(user.id)
 
+      // Verify this user has a provider/venue/creator/admin role
+      const { data: roleCheck } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle()
+      const PROVIDER_ROLES = ['provider', 'venue', 'creator', 'admin']
+      if (!roleCheck || !PROVIDER_ROLES.includes(roleCheck.role || '')) {
+        window.location.href = '/dashboard'
+        return
+      }
+
       const [
         { data: msgs },
         { data: bkgs },

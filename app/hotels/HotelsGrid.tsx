@@ -107,6 +107,7 @@ function HotelCard({ l, idx, discreet }: { l: Listing; idx: number; discreet: bo
   const newListing = isNewListing(l.created_at)
 
   return (
+    <Link href={`/listings/${l.id}`} style={{ textDecoration: 'none', display: 'block' }}>
     <div style={{
       display: 'flex',
       background: 'var(--bg1)',
@@ -242,8 +243,7 @@ function HotelCard({ l, idx, discreet }: { l: Listing; idx: number; discreet: bo
               </div>
             )}
           </div>
-          <Link
-            href={`/listings/${l.id}`}
+          <span
             style={{
               height: '36px', padding: '0 16px',
               background: isFeatured
@@ -253,15 +253,16 @@ function HotelCard({ l, idx, discreet }: { l: Listing; idx: number; discreet: bo
               borderRadius: 'var(--r)',
               color: isFeatured ? '#0a0a0a' : 'var(--t)',
               fontSize: '13px', fontWeight: 600,
-              textDecoration: 'none', display: 'flex', alignItems: 'center',
+              display: 'flex', alignItems: 'center',
               whiteSpace: 'nowrap', transition: 'all 0.15s',
             }}
           >
             Check availability →
-          </Link>
+          </span>
         </div>
       </div>
     </div>
+    </Link>
   )
 }
 

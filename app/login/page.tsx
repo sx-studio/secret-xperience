@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { signIn, signUp } from '../lib/auth'
+import { signIn } from '../lib/auth'
 import { createClient } from '../lib/supabase'
 
 type Role = 'user' | 'provider' | 'venue' | 'creator'
