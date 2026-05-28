@@ -149,6 +149,10 @@ export default function AboutPage() {
             <a href="mailto:hello@secret-xperience.eu" style={{ color: '#c5a05a' }}>hello@secret-xperience.eu</a>
             <br />
             <a href="/press" style={{ color: '#c5a05a66', fontSize: 11, letterSpacing: '0.05em' }}>View Press Page →</a>
+            {' '}·{' '}
+            <a href="/regulations" style={{ color: '#c5a05a66', fontSize: 11, letterSpacing: '0.05em' }}>Regulation &amp; Rights →</a>
+            {' '}·{' '}
+            <a href="/medical" style={{ color: '#c5a05a66', fontSize: 11, letterSpacing: '0.05em' }}>Medical Resources →</a>
           </div>
         </div>
       </main>

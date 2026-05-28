@@ -256,6 +256,8 @@ export default function PartnersPage() {
           Secret<em style={{ fontStyle:'normal' }}>Xperience</em>
         </Link>
         <div style={{ display:'flex', alignItems:'center', gap:14 }}>
+          <Link href="/regulations" style={{ fontSize:12, color:'rgba(255,255,255,0.3)', textDecoration:'none' }}>Regulations</Link>
+          <Link href="/medical" style={{ fontSize:12, color:'rgba(255,255,255,0.3)', textDecoration:'none' }}>Medical</Link>
           <Link href="/advertise" style={{ fontSize:12, color:'rgba(255,255,255,0.3)', textDecoration:'none' }}>Advertise</Link>
           <Link href="/" style={{ fontSize:12, color:'rgba(255,255,255,0.3)', textDecoration:'none' }}>← Home</Link>
         </div>

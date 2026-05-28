@@ -290,6 +290,8 @@ export default function AdvertisePage() {
       <footer style={{ borderTop: '0.5px solid var(--b)', padding: '2rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <Link href="/" style={{ fontFamily: 'var(--serif)', fontSize: '18px', color: 'var(--gold)', textDecoration: 'none' }}>Secret<em style={{ fontStyle: 'italic', fontWeight: 300 }}>Xperience</em></Link>
         <div style={{ display: 'flex', gap: '1.5rem', fontSize: '13px', color: 'var(--t3)', flexWrap: 'wrap' }}>
+          <Link href="/regulations" style={{ color: 'var(--t3)', textDecoration: 'none' }}>Regulations</Link>
+          <Link href="/medical" style={{ color: 'var(--t3)', textDecoration: 'none' }}>Medical Info</Link>
           <Link href="/terms" style={{ color: 'var(--t3)', textDecoration: 'none' }}>Terms</Link>
           <Link href="/privacy" style={{ color: 'var(--t3)', textDecoration: 'none' }}>Privacy</Link>
           <Link href="/" style={{ color: 'var(--t3)', textDecoration: 'none' }}>Browse listings</Link>

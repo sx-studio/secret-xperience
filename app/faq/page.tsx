@@ -172,6 +172,10 @@ export default function FaqPage() {
             <a href="/contact" style={{ color: '#c5a05a' }}>Contact Support</a>
             {' '}or email{' '}
             <a href="mailto:support@secret-xperience.eu" style={{ color: '#c5a05a' }}>support@secret-xperience.eu</a>
+            <br />
+            <a href="/regulations" style={{ color: 'rgba(197,160,90,0.55)', fontSize: 11, letterSpacing: '0.05em' }}>Regulation &amp; Rights Guide →</a>
+            {' '}·{' '}
+            <a href="/medical" style={{ color: 'rgba(197,160,90,0.55)', fontSize: 11, letterSpacing: '0.05em' }}>Medical Resources →</a>
           </div>
         </div>
       </main>

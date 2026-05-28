@@ -161,6 +161,10 @@ export default async function HotelsPage() {
           </Link>
           <p style={{ fontSize: '12px', color: 'var(--t3)' }}>
             Adults only (18+) ·{' '}
+            <Link href="/regulations" style={{ color: 'var(--t3)', textDecoration: 'none' }}>Regulations</Link>
+            {' '}·{' '}
+            <Link href="/medical" style={{ color: 'var(--t3)', textDecoration: 'none' }}>Medical Info</Link>
+            {' '}·{' '}
             <Link href="/terms" style={{ color: 'var(--t3)', textDecoration: 'none' }}>Terms</Link>
             {' '}·{' '}
             <Link href="/privacy" style={{ color: 'var(--t3)', textDecoration: 'none' }}>Privacy</Link>

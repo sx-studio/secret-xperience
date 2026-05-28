@@ -222,6 +222,11 @@ export default function EventsPage() {
         <Link href="/advertise" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 28px', background: 'linear-gradient(135deg,var(--gold),var(--goldd))', borderRadius: 'var(--r)', color: '#0a0a0a', fontSize: '14px', fontWeight: 700, textDecoration: 'none' }}>
           <i className="ti ti-plus" /> Submit your event
         </Link>
+        <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <Link href="/regulations" style={{ fontSize: '12px', color: 'var(--t3)', textDecoration: 'none' }}>Regulation &amp; Rights</Link>
+          <Link href="/medical" style={{ fontSize: '12px', color: 'var(--t3)', textDecoration: 'none' }}>Medical Resources</Link>
+          <Link href="/partners" style={{ fontSize: '12px', color: 'var(--t3)', textDecoration: 'none' }}>Partners</Link>
+        </div>
       </div>
     </div>
   )

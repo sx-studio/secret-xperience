@@ -149,6 +149,8 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
               <span>✦</span> Discover
             </Link>
             <Link href="/events" style={{ fontSize: '13px', color: 'var(--t2)', textDecoration: 'none' }}>Events</Link>
+            <Link href="/regulations" style={{ fontSize: '13px', color: 'var(--t2)', textDecoration: 'none' }}>Regulations</Link>
+            <Link href="/medical" style={{ fontSize: '13px', color: 'var(--t2)', textDecoration: 'none' }}>Medical</Link>
             <Link href="/advertise" style={{ height: '34px', padding: '0 14px', background: 'linear-gradient(135deg,var(--gold),var(--goldd))', border: 'none', borderRadius: 'var(--r)', color: '#0a0a0a', fontSize: '13px', fontWeight: 700, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <i className="ti ti-plus" /> List service
             </Link>

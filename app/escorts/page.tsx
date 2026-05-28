@@ -459,6 +459,7 @@ export default function EscortsPage() {
           <Link href="/massage" style={{ fontSize: '13px', color: 'var(--t2)', textDecoration: 'none' }}>Massage</Link>
           <Link href="/nightlife" style={{ fontSize: '13px', color: 'var(--t2)', textDecoration: 'none' }}>Nightlife</Link>
           <Link href="/events" style={{ fontSize: '13px', color: 'var(--t2)', textDecoration: 'none' }}>Events</Link>
+          <Link href="/regulations" style={{ fontSize: '13px', color: 'var(--t2)', textDecoration: 'none' }}>Rights &amp; Regs</Link>
         </div>
         <button
           onClick={() => {

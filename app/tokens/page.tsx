@@ -939,6 +939,10 @@ export default function TokensPage() {
       <footer style={{ borderTop: '0.5px solid rgba(197,160,90,0.1)', padding: '2rem 24px', textAlign: 'center' }}>
         <p style={{ fontSize: 11, color: 'rgba(236,232,225,0.25)', fontWeight: 300 }}>
           © 2025 SecretXperience.eu ·{' '}
+          <a href="/regulations" style={{ color: 'rgba(197,160,90,0.5)', textDecoration: 'none' }}>Regulations</a>
+          {' '}·{' '}
+          <a href="/medical" style={{ color: 'rgba(197,160,90,0.5)', textDecoration: 'none' }}>Medical Info</a>
+          {' '}·{' '}
           <a href="/terms" style={{ color: 'rgba(197,160,90,0.5)', textDecoration: 'none' }}>Terms</a>
           {' '}·{' '}
           <a href="/privacy" style={{ color: 'rgba(197,160,90,0.5)', textDecoration: 'none' }}>Privacy</a>
