@@ -126,7 +126,18 @@ export default function BgPreviewPage() {
             position: 'sticky', top: '56px', zIndex: 10,
             transition: 'background .45s',
           }}>
-            <span style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '30px', color: '#c5a05a', letterSpacing: '.02em', filter: showBg ? 'drop-shadow(0 0 18px rgba(197,160,90,0.55))' : 'none', transition: 'filter .45s' }}>
+            <img
+              src="/sox-logo.jpg"
+              alt="SecretXperience"
+              style={{ height: '44px', width: 'auto', objectFit: 'contain', filter: showBg ? 'drop-shadow(0 0 18px rgba(197,160,90,0.55))' : 'none', transition: 'filter .45s' }}
+              onError={(e) => {
+                const el = e.currentTarget
+                el.style.display = 'none'
+                const fallback = el.nextElementSibling as HTMLElement | null
+                if (fallback) fallback.style.display = 'inline'
+              }}
+            />
+            <span style={{ display: 'none', fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '30px', color: '#c5a05a', letterSpacing: '.02em', filter: showBg ? 'drop-shadow(0 0 18px rgba(197,160,90,0.55))' : 'none', transition: 'filter .45s' }}>
               Secret<em style={{ fontStyle: 'italic', fontWeight: 300 }}>Xperience</em>
             </span>
             <div style={{ display: 'flex', gap: '1.75rem', alignItems: 'center' }}>
