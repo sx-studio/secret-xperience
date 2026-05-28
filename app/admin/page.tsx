@@ -29,23 +29,33 @@ export default function AdminPage() {
       if (profile?.role !== 'admin') { window.location.href = '/'; return }
       setIsAdmin(true)
       const [lr, ur, br, vr] = await Promise.all([
-        supabase.from('listings').select('*, profiles(full_name, username)').order('created_at', { ascending: false }),
+        supabase.from('listings').select('*').order('created_at', { ascending: false }),
         supabase.from('profiles').select('*').order('created_at', { ascending: false }),
-        supabase.from('bookings').select('*, listings(title), profiles!bookings_client_id_fkey(full_name, username)').order('created_at', { ascending: false }),
+        supabase.from('bookings').select('*, listings(title)').order('created_at', { ascending: false }),
         supabase.from('identity_verifications').select('*, profiles(full_name, username, email, role)').order('submitted_at', { ascending: false }),
       ])
       const ls = lr.data || [], us = ur.data || [], bs = br.data || []
+      // Attach profile data to listings client-side (avoids PostgREST embedded join issues)
+      const profileMap = Object.fromEntries(us.map((u: any) => [u.id, u]))
+      const lsWithProfiles = ls.map((l: any) => ({ ...l, profiles: profileMap[l.profile_id] || null }))
       setVerifications(vr.data || [])
       const revenue = bs.filter((b: any) => b.status === 'confirmed').reduce((s: number, b: any) => s + (b.total_amount || 0), 0)
-      setListings(ls); setUsers(us); setBookings(bs)
+      setListings(lsWithProfiles); setUsers(us); setBookings(bs)
       const providers = us.filter((u: any) => ['provider','venue','creator'].includes(u.role)).length
-      const pendingListings = ls.filter((l: any) => !l.active).length
-      setStats({ listings: ls.length, users: us.length, bookings: bs.length, revenue, providers, pendingListings })
+      const pendingListings = lsWithProfiles.filter((l: any) => !l.active).length
+      setStats({ listings: lsWithProfiles.length, users: us.length, bookings: bs.length, revenue, providers, pendingListings })
       setLoading(false)
 
-      // Real-time: reflect profile changes (role, verified, etc.) immediately
+      // Real-time: reflect new listings, profile changes, and new verifications
       channel = supabase
-        .channel('admin-profiles-watch')
+        .channel('admin-watch')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'listings' }, payload => {
+          setListings(prev => [payload.new, ...prev])
+          setStats(s => ({ ...s, listings: s.listings + 1, pendingListings: s.pendingListings + (!payload.new.active ? 1 : 0) }))
+        })
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'listings' }, payload => {
+          setListings(prev => prev.map(l => l.id === payload.new.id ? { ...l, ...payload.new } : l))
+        })
         .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles' }, payload => {
           setUsers(prev => prev.map(u => u.id === payload.new.id ? { ...u, ...payload.new } : u))
         })

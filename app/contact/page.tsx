@@ -1,6 +1,5 @@
 'use client'
 import { useState, FormEvent } from 'react'
-import { createClient } from '../lib/supabase'
 
 const S = { bg: '#080808', t: '#e8e0d0', t2: '#888', t3: '#555', gold: '#c5a05a', b: '#c5a05a22', b2: '#ffffff18', serif: "'Cormorant Garamond', serif", sans: "'Poppins', sans-serif" }
 
@@ -26,15 +25,11 @@ export default function ContactPage() {
     e.preventDefault()
     if (!form.name || !form.email || !form.message) return
     setSubmitting(true)
-    try {
-      const supabase = createClient()
-      await supabase.from('contact_messages').insert({
-        name: form.name,
-        email: form.email,
-        subject: form.subject || 'General enquiry',
-        message: form.message,
-      })
-    } catch { /* silent — message still saved if partial */ }
+    await fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(form),
+    })
     setSubmitting(false)
     setSubmitted(true)
   }
