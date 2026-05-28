@@ -16,6 +16,8 @@ export default function AdminPage() {
   const [stats, setStats] = useState({ listings: 0, users: 0, bookings: 0, revenue: 0, providers: 0, pendingListings: 0 })
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
+  const [verifWorking, setVerifWorking] = useState<string | null>(null)
+  const [verifMsg, setVerifMsg] = useState<{ id: string; ok: boolean; text: string } | null>(null)
 
   useEffect(() => {
     async function init() {
@@ -85,18 +87,53 @@ export default function AdminPage() {
   }
 
   async function approveVerification(verifId: string, userId: string) {
+    setVerifWorking(verifId)
+    setVerifMsg(null)
     const supabase = createClient()
-    await supabase.from('identity_verifications').update({ status: 'approved', reviewed_at: new Date().toISOString() }).eq('id', verifId)
+    const { data: { session } } = await supabase.auth.getSession()
+    const { error: e1 } = await supabase
+      .from('identity_verifications')
+      .update({ status: 'approved', reviewed_at: new Date().toISOString(), reviewer_id: session?.user.id })
+      .eq('id', verifId)
+    if (e1) {
+      setVerifMsg({ id: verifId, ok: false, text: `Failed to approve: ${e1.message}` })
+      setVerifWorking(null)
+      return
+    }
     await supabase.from('profiles').update({ verified: true }).eq('id', userId)
-    await supabase.from('notifications').insert({ user_id: userId, type: 'verification', title: '✓ You are now verified!', body: 'Your SecretXperience profile has been verified. Your listings will now show the ✓ Verified badge.', link: '/dashboard' })
+    await supabase.from('notifications').insert({
+      user_id: userId, type: 'verification',
+      title: '✓ You are now verified!',
+      body: 'Your identity has been verified. You can now publish listings on SecretXperience.',
+      link: '/listings/create',
+    })
     setVerifications(prev => prev.map(v => v.id === verifId ? { ...v, status: 'approved' } : v))
+    setVerifMsg({ id: verifId, ok: true, text: 'Approved — provider can now publish listings.' })
+    setVerifWorking(null)
   }
 
   async function rejectVerification(verifId: string, userId: string) {
+    setVerifWorking(verifId)
+    setVerifMsg(null)
     const supabase = createClient()
-    await supabase.from('identity_verifications').update({ status: 'rejected', reviewed_at: new Date().toISOString() }).eq('id', verifId)
-    await supabase.from('notifications').insert({ user_id: userId, type: 'verification', title: 'Verification update', body: 'We were unable to verify your profile at this time. Please resubmit with clearer documents or contact support.', link: '/verify' })
+    const { error: e1 } = await supabase
+      .from('identity_verifications')
+      .update({ status: 'rejected', reviewed_at: new Date().toISOString() })
+      .eq('id', verifId)
+    if (e1) {
+      setVerifMsg({ id: verifId, ok: false, text: `Failed to reject: ${e1.message}` })
+      setVerifWorking(null)
+      return
+    }
+    await supabase.from('notifications').insert({
+      user_id: userId, type: 'verification',
+      title: 'Verification update',
+      body: 'We were unable to verify your profile at this time. Please resubmit with clearer documents or contact support.',
+      link: '/verify',
+    })
     setVerifications(prev => prev.map(v => v.id === verifId ? { ...v, status: 'rejected' } : v))
+    setVerifMsg({ id: verifId, ok: true, text: 'Rejected — provider notified.' })
+    setVerifWorking(null)
   }
 
   const filteredListings = listings.filter(l => !search || l.title?.toLowerCase().includes(search.toLowerCase()) || l.city?.toLowerCase().includes(search.toLowerCase()))
@@ -389,15 +426,34 @@ export default function AdminPage() {
                           {v.reviewed_at && ` · Reviewed: ${new Date(v.reviewed_at).toLocaleString()}`}
                         </div>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ padding: '3px 10px', borderRadius: 20, fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: statusBg, color: statusColor }}>
-                          {v.status}
-                        </span>
-                        {v.status === 'pending' && (
-                          <>
-                            <button onClick={() => approveVerification(v.id, v.user_id)} style={{ padding: '6px 14px', background: 'rgba(38,212,160,0.1)', border: '0.5px solid rgba(38,212,160,0.3)', borderRadius: 6, color: '#26d4a0', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>✓ Approve</button>
-                            <button onClick={() => rejectVerification(v.id, v.user_id)} style={{ padding: '6px 14px', background: 'rgba(184,77,114,0.1)', border: '0.5px solid rgba(184,77,114,0.3)', borderRadius: 6, color: '#b84d72', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>✗ Reject</button>
-                          </>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ padding: '3px 10px', borderRadius: 20, fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', background: statusBg, color: statusColor }}>
+                            {v.status}
+                          </span>
+                          {v.status === 'pending' && (
+                            <>
+                              <button
+                                onClick={() => approveVerification(v.id, v.user_id)}
+                                disabled={verifWorking === v.id}
+                                style={{ padding: '6px 14px', background: 'rgba(38,212,160,0.1)', border: '0.5px solid rgba(38,212,160,0.3)', borderRadius: 6, color: '#26d4a0', cursor: verifWorking === v.id ? 'not-allowed' : 'pointer', fontSize: 12, fontWeight: 600, opacity: verifWorking === v.id ? 0.5 : 1 }}
+                              >
+                                {verifWorking === v.id ? '…' : '✓ Approve'}
+                              </button>
+                              <button
+                                onClick={() => rejectVerification(v.id, v.user_id)}
+                                disabled={verifWorking === v.id}
+                                style={{ padding: '6px 14px', background: 'rgba(184,77,114,0.1)', border: '0.5px solid rgba(184,77,114,0.3)', borderRadius: 6, color: '#b84d72', cursor: verifWorking === v.id ? 'not-allowed' : 'pointer', fontSize: 12, fontWeight: 600, opacity: verifWorking === v.id ? 0.5 : 1 }}
+                              >
+                                {verifWorking === v.id ? '…' : '✗ Reject'}
+                              </button>
+                            </>
+                          )}
+                        </div>
+                        {verifMsg?.id === v.id && (
+                          <div style={{ fontSize: 11, color: verifMsg.ok ? '#26d4a0' : '#b84d72', fontWeight: 500 }}>
+                            {verifMsg.text}
+                          </div>
                         )}
                       </div>
                     </div>
