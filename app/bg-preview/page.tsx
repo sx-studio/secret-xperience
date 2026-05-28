@@ -118,18 +118,18 @@ export default function BgPreviewPage() {
 
           {/* ── NAV ── */}
           <nav style={{
-            height: '64px', padding: '0 2rem',
+            height: '80px', padding: '0 2rem',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             background: showBg ? 'rgba(5,4,12,0.5)' : 'rgba(8,6,18,0.95)',
             backdropFilter: 'blur(24px)',
             borderBottom: '0.5px solid rgba(197,160,90,0.1)',
-            position: 'sticky', top: '56px', zIndex: 10,
+            position: 'sticky', top: '52px', zIndex: 10,
             transition: 'background .45s',
           }}>
             <img
               src="/sox-logo.png"
               alt="SecretXperience"
-              style={{ height: '44px', width: 'auto', objectFit: 'contain', filter: showBg ? 'drop-shadow(0 0 18px rgba(197,160,90,0.55))' : 'none', transition: 'filter .45s' }}
+              style={{ height: '64px', width: 'auto', objectFit: 'contain', filter: showBg ? 'drop-shadow(0 0 18px rgba(197,160,90,0.55))' : 'none', transition: 'filter .45s' }}
               onError={(e) => {
                 const el = e.currentTarget
                 el.style.display = 'none'
