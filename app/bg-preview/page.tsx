@@ -129,7 +129,7 @@ export default function BgPreviewPage() {
             <img
               src="/sox-logo.png"
               alt="SecretXperience"
-              style={{ height: '64px', width: 'auto', objectFit: 'contain', filter: showBg ? 'drop-shadow(0 0 18px rgba(197,160,90,0.55))' : 'none', transition: 'filter .45s' }}
+              style={{ height: '64px', width: 'auto', objectFit: 'contain', mixBlendMode: 'screen', filter: showBg ? 'drop-shadow(0 0 18px rgba(197,160,90,0.55))' : 'none', transition: 'filter .45s' }}
               onError={(e) => {
                 const el = e.currentTarget
                 el.style.display = 'none'
