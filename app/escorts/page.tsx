@@ -301,6 +301,7 @@ export default function EscortsPage() {
 
   const fetchListings = useCallback(async () => {
     setLoading(true)
+    try {
     let q = supabase
       .from('listings')
       .select('id,title,description,category,subcategory,city,country,price_from,price_to,currency,meet_type,images,verified,premium,rating,review_count,tags,created_at,featured_until,age')
@@ -370,6 +371,7 @@ export default function EscortsPage() {
 
     setListings(results)
     setLoading(false)
+    } catch { setLoading(false) }
   }, [escortType, orientation, meetType, city, priceMin, priceMax, verifiedOnly, ethnicity, hairColor, build, selectedServices, sortBy])
 
   useEffect(() => { fetchListings() }, [fetchListings])

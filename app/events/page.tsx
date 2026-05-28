@@ -102,6 +102,7 @@ export default function EventsPage() {
     const supabase = createClient()
     supabase.from('events').select('*').eq('active', true).order('featured', { ascending: false }).order('date_start', { ascending: true })
       .then(({ data }) => { setEvents(data || []); setFiltered(data || []); setLoading(false) })
+      .catch(() => setLoading(false))
   }, [])
 
   useEffect(() => {
