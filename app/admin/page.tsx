@@ -20,6 +20,7 @@ export default function AdminPage() {
   const [verifMsg, setVerifMsg] = useState<{ id: string; ok: boolean; text: string } | null>(null)
 
   useEffect(() => {
+    let channel: ReturnType<ReturnType<typeof createClient>['channel']> | null = null
     async function init() {
       const supabase = createClient()
       const { data: { session } } = await supabase.auth.getSession()
@@ -41,8 +42,23 @@ export default function AdminPage() {
       const pendingListings = ls.filter((l: any) => !l.active).length
       setStats({ listings: ls.length, users: us.length, bookings: bs.length, revenue, providers, pendingListings })
       setLoading(false)
+
+      // Real-time: reflect profile changes (role, verified, etc.) immediately
+      channel = supabase
+        .channel('admin-profiles-watch')
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles' }, payload => {
+          setUsers(prev => prev.map(u => u.id === payload.new.id ? { ...u, ...payload.new } : u))
+        })
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'profiles' }, payload => {
+          setUsers(prev => [payload.new, ...prev])
+        })
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'identity_verifications' }, payload => {
+          setVerifications(prev => [payload.new, ...prev])
+        })
+        .subscribe()
     }
     init()
+    return () => { channel?.unsubscribe() }
   }, [])
 
   async function toggleListing(id: string, field: string, current: boolean) {

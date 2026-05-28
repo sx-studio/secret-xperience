@@ -1003,6 +1003,46 @@ export default function DashboardPage() {
             )
           })()}
 
+          {/* ── Role Selector (members only) ── */}
+          {profile?.role === 'user' && (
+            <div className="db-card" style={{ marginBottom: '1.5rem', border: '0.5px solid var(--gbrd, rgba(197,160,90,0.25))' }}>
+              <div style={{ marginBottom: '1rem' }}>
+                <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--t)', marginBottom: '4px' }}>How do you want to use SecretXperience?</div>
+                <div style={{ fontSize: '12px', color: 'var(--t2)' }}>Choose your account type to unlock the right tools for you.</div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
+                {[
+                  { role: 'provider', icon: 'ti-user-heart', label: 'Provider', desc: 'Escorts, companions, massage, experiences & more' },
+                  { role: 'venue',    icon: 'ti-building',   label: 'Venue Host', desc: 'Nightlife venues, hotels, and event spaces' },
+                  { role: 'creator',  icon: 'ti-camera',     label: 'Content Creator', desc: 'Adult content, subscriptions & digital media' },
+                ].map(opt => (
+                  <button
+                    key={opt.role}
+                    onClick={async () => {
+                      const supabase = (await import('../lib/supabase')).createClient()
+                      const { error } = await supabase.from('profiles').update({ role: opt.role }).eq('id', user.id)
+                      if (!error) {
+                        setProfile((p: any) => ({ ...p, role: opt.role }))
+                        setNotification(`✓ Account type set to ${opt.label}. You can now create listings and request verification.`)
+                      }
+                    }}
+                    style={{
+                      background: 'rgba(197,160,90,0.05)', border: '0.5px solid rgba(197,160,90,0.2)',
+                      borderRadius: '10px', padding: '14px', textAlign: 'left', cursor: 'pointer',
+                      transition: 'border-color 0.2s, background 0.2s',
+                    }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(197,160,90,0.5)'; (e.currentTarget as HTMLButtonElement).style.background = 'rgba(197,160,90,0.1)' }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(197,160,90,0.2)'; (e.currentTarget as HTMLButtonElement).style.background = 'rgba(197,160,90,0.05)' }}
+                  >
+                    <i className={`ti ${opt.icon}`} style={{ color: 'var(--gold)', fontSize: '22px', display: 'block', marginBottom: '8px' }} />
+                    <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--t)', marginBottom: '4px' }}>{opt.label}</div>
+                    <div style={{ fontSize: '11px', color: 'var(--t2)', lineHeight: 1.4 }}>{opt.desc}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* ── Verification Card ── */}
           {(profile?.role === 'provider' || profile?.role === 'venue' || profile?.role === 'creator') && !profile?.verified && (
             <div className="db-card" style={{ marginBottom: '1.5rem', border: profile?.verification_status === 'pending' ? '0.5px solid rgba(245,168,38,0.3)' : '0.5px solid var(--gbrd, rgba(197,160,90,0.25))' }}>
