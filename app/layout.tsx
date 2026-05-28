@@ -83,19 +83,32 @@ const langPickerScript = `
     var btn = document.getElementById('langPickerBtn');
     var langObj = LANGS.find(function(l){ return l.code === code; }) || LANGS[0];
     if (btn) btn.innerHTML = langObj.flag + ' <span style="font-size:11px;font-weight:600;letter-spacing:.04em">' + langObj.code.toUpperCase() + '</span> <i class="ti ti-chevron-down" style="font-size:10px;opacity:0.6"></i>';
-    // Trigger Google Translate
-    var attempt = 0;
-    function tryTranslate() {
-      var combo = document.querySelector('.goog-te-combo');
-      if (combo) {
-        combo.value = code === 'en' ? '' : code;
-        combo.dispatchEvent(new Event('change'));
-      } else if (attempt < 15) {
-        attempt++;
-        setTimeout(tryTranslate, 300);
+    if (code === 'en') {
+      // Clear the googtrans cookie on all domain variants and reload — the only
+      // reliable way to fully revert Google Translate back to the source language.
+      var host = location.hostname;
+      var bare = host.replace(/^www\./, '');
+      ['/', '/'].forEach(function(path) {
+        document.cookie = 'googtrans=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=' + path + ';';
+        document.cookie = 'googtrans=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=' + path + ';domain=' + host + ';';
+        document.cookie = 'googtrans=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=' + path + ';domain=.' + bare + ';';
+      });
+      location.reload();
+    } else {
+      // Trigger Google Translate combo — retry until the GT widget has loaded
+      var attempt = 0;
+      function tryTranslate() {
+        var combo = document.querySelector('.goog-te-combo');
+        if (combo) {
+          combo.value = code;
+          combo.dispatchEvent(new Event('change'));
+        } else if (attempt < 15) {
+          attempt++;
+          setTimeout(tryTranslate, 300);
+        }
       }
+      tryTranslate();
     }
-    tryTranslate();
   }
 
   function buildPicker() {
