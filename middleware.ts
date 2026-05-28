@@ -6,6 +6,9 @@ export async function middleware(request: NextRequest) {
     request: { headers: request.headers }
   })
 
+  // Use getSession() — reads the JWT from cookies locally, no Supabase network call.
+  // getUser() makes a network request using the publishable key, which is origin-restricted
+  // and crashes the middleware from Vercel's edge runtime (no Origin header → "Host not in allowlist").
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)!,
@@ -23,15 +26,14 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { session } } = await supabase.auth.getSession()
 
-  // Protect these routes — redirect to login if not authenticated
   const protectedRoutes = ['/dashboard', '/bookings', '/messages', '/profile']
-  const isProtected = protectedRoutes.some(route => 
+  const isProtected = protectedRoutes.some(route =>
     request.nextUrl.pathname.startsWith(route)
   )
 
-  if (isProtected && !user) {
+  if (isProtected && !session) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
