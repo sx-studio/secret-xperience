@@ -45,7 +45,7 @@ const SERVICE_TAGS: Record<string, string[]> = {
 }
 
 const ETHNICITY_OPTIONS = ['Asian', 'Black', 'Caucasian', 'Hispanic', 'Indian', 'Middle Eastern', 'Mixed', 'Other']
-const BUILD_OPTIONS     = ['Slim', 'Athletic', 'Curvy', 'Full-figured', 'Petite', 'Tall', 'Average']
+const BUILD_OPTIONS     = ['Slim', 'Athletic', 'Curvy', 'Full-figured', 'Petite', 'Tall', 'Average', 'Other']
 const HAIR_OPTIONS      = ['Black', 'Blonde', 'Brown', 'Red', 'Auburn', 'White/Grey', 'Other']
 
 const STATS_CATEGORIES  = ['escorts', 'companionship', 'massage', 'domination']

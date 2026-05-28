@@ -60,9 +60,9 @@ const MEET_TYPES = [
   { value: 'both',    label: 'Both' },
 ]
 
-const ETHNICITIES = ['Any', 'European', 'Latina', 'Asian', 'Ebony', 'Arabic', 'Mixed', 'Eastern European']
-const HAIR_COLORS = ['Any', 'Blonde', 'Brunette', 'Black', 'Redhead', 'Auburn', 'Other']
-const BUILDS      = ['Any', 'Slim', 'Athletic', 'Curvy', 'Petite', 'BBW', 'Muscular']
+const ETHNICITIES = ['Any', 'Asian', 'Black', 'Caucasian', 'Hispanic', 'Indian', 'Middle Eastern', 'Mixed', 'Other']
+const HAIR_COLORS = ['Any', 'Black', 'Blonde', 'Brown', 'Red', 'Auburn', 'White/Grey', 'Other']
+const BUILDS      = ['Any', 'Slim', 'Athletic', 'Curvy', 'Full-figured', 'Petite', 'Tall', 'Average', 'Other']
 const CITIES      = ['All Cities', 'Brussels', 'Antwerp', 'Ghent', 'Amsterdam', 'Berlin', 'Paris', 'Cologne', 'Rotterdam']
 
 const SERVICES_LIST = [
@@ -346,13 +346,13 @@ export default function EscortsPage() {
       })
     }
     if (ethnicity !== 'Any') {
-      results = results.filter(l => (l.tags ?? []).some((t: string) => t.toLowerCase() === ethnicity.toLowerCase()))
+      results = results.filter(l => (l.tags ?? []).some((t: string) => t.toLowerCase() === `ethnicity: ${ethnicity.toLowerCase()}`))
     }
     if (hairColor !== 'Any') {
-      results = results.filter(l => (l.tags ?? []).some((t: string) => t.toLowerCase() === hairColor.toLowerCase()))
+      results = results.filter(l => (l.tags ?? []).some((t: string) => t.toLowerCase() === `hair: ${hairColor.toLowerCase()}`))
     }
     if (build !== 'Any') {
-      results = results.filter(l => (l.tags ?? []).some((t: string) => t.toLowerCase() === build.toLowerCase()))
+      results = results.filter(l => (l.tags ?? []).some((t: string) => t.toLowerCase() === `build: ${build.toLowerCase()}`))
     }
     if (selectedServices.length > 0) {
       results = results.filter(l => {
