@@ -127,7 +127,7 @@ export default function BgPreviewPage() {
             transition: 'background .45s',
           }}>
             <img
-              src="/sox-logo.jpg"
+              src="/sox-logo.png"
               alt="SecretXperience"
               style={{ height: '44px', width: 'auto', objectFit: 'contain', filter: showBg ? 'drop-shadow(0 0 18px rgba(197,160,90,0.55))' : 'none', transition: 'filter .45s' }}
               onError={(e) => {
