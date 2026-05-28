@@ -2042,6 +2042,9 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
       <a href="/creators" class="nd-sub-link"><i class="ti ti-camera"></i> Creators</a>
       <a href="/events" class="nd-sub-link"><i class="ti ti-calendar-event"></i> Events</a>
       <a href="/shop" class="nd-sub-link"><i class="ti ti-shopping-bag"></i> Adult Shop</a>
+      <div class="nd-group-hd">Information</div>
+      <a href="/regulations" class="nd-sub-link"><i class="ti ti-scale"></i> Regulation &amp; Rights</a>
+      <a href="/medical" class="nd-sub-link"><i class="ti ti-heart-rate-monitor"></i> Medical Resources</a>
     </nav>
     <div class="nav-drawer-footer" id="navDrawerLogout" style="display:none">
       <button data-action="logout" class="nav-drawer-link" style="color:var(--wine);padding:0"><i class="ti ti-logout" style="color:var(--wine)"></i> Log Out</button>
@@ -2469,12 +2472,12 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
           <a href="/rentals">Rentals</a>
         </div>
         <div class="footer-col">
-          <div class="footer-col-title">Help</div>
-          <a href="/faq">FAQ</a>
-          <a href="/contact">Contact support</a>
-          <a href="/report">Report a listing</a>
-          <a href="/advertise">List a service</a>
+          <div class="footer-col-title">Resources</div>
+          <a href="/regulations">Regulation &amp; Rights</a>
+          <a href="/medical">Medical Information</a>
           <a href="/partners">Partners &amp; Links</a>
+          <a href="/advertise">List a service</a>
+          <a href="/contact">Contact support</a>
         </div>
         <div class="footer-col">
           <div class="footer-col-title">Legal</div>
