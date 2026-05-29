@@ -1258,7 +1258,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         if (unreadCount && unreadCount > 0) {
           const label = unreadCount > 9 ? '9+' : String(unreadCount)
           if (badge) { badge.textContent = label; badge.style.display = 'inline' }
-          if (ddBadge) { ddBadge.textContent = label; ddBadge.style.display = 'inline' }
+          if (ddBadge) { ddBadge.style.display = 'inline-block' }
         }
 
         // Populate nav drawer — logged-in state
@@ -1880,7 +1880,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
           <div style="padding:6px 0;">
             <a id="ddMyProfileLink" href="/dashboard" style="display:flex;align-items:center;gap:10px;padding:10px 16px;color:var(--t);font-size:13px;text-decoration:none;" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''"><i class="ti ti-user-circle" style="font-size:16px;color:var(--t3);width:18px;text-align:center;"></i> My Profile</a>
             <a href="/dashboard" style="display:flex;align-items:center;gap:10px;padding:10px 16px;color:var(--t);font-size:13px;text-decoration:none;" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''"><i class="ti ti-layout-dashboard" style="font-size:16px;color:var(--t3);width:18px;text-align:center;"></i> Dashboard</a>
-            <a href="/messages" style="display:flex;align-items:center;gap:10px;padding:10px 16px;color:var(--t);font-size:13px;text-decoration:none;" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''"><i class="ti ti-message" style="font-size:16px;color:var(--t3);width:18px;text-align:center;"></i> Messages <span id="ddMsgBadge" style="display:none;margin-left:auto;background:var(--gold);color:#0a0a0a;border-radius:10px;padding:1px 7px;font-size:11px;font-weight:700;"></span></a>
+            <a href="/messages" style="display:flex;align-items:center;gap:10px;padding:10px 16px;color:var(--t);font-size:13px;text-decoration:none;" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''"><i class="ti ti-message" style="font-size:16px;color:var(--t3);width:18px;text-align:center;"></i> Messages <span id="ddMsgBadge" style="display:none;margin-left:auto;width:8px;height:8px;border-radius:50%;background:#c5a05a;box-shadow:0 0 6px rgba(197,160,90,0.7);animation:ddDotPulse 1.8s ease-in-out infinite;flex-shrink:0;"></span></a>
             <a href="/listings/create" style="display:flex;align-items:center;gap:10px;padding:10px 16px;color:var(--t);font-size:13px;text-decoration:none;" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''"><i class="ti ti-plus" style="font-size:16px;color:var(--t3);width:18px;text-align:center;"></i> List a service</a>
           </div>
           <div style="border-top:0.5px solid var(--b);padding:6px 0;">
