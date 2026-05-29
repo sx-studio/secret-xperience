@@ -54,9 +54,6 @@ async function getListings() {
 export default async function NightlifePage() {
   const listings = await getListings()
 
-  const CITIES = ['All', 'Brussels', 'Antwerp', 'Amsterdam', 'Berlin', 'Paris']
-  const VENUE_TYPES = ['All', 'Club', 'Bar', 'Sauna', 'Strip Club', 'Private Party', 'Lounge']
-
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify([
@@ -631,98 +628,7 @@ export default async function NightlifePage() {
         </div>
       </section>
 
-      {/* Filters — city tabs + type pills (client-side interaction via script) */}
-      <div className="nl-filters-wrap" id="nl-filters">
-        <div className="nl-city-tabs" role="tablist" id="nl-city-tabs">
-          {CITIES.map((city, i) => (
-            <button
-              key={city}
-              className={`nl-city-tab${i === 0 ? ' active' : ''}`}
-              data-city-filter={city}
-              role="tab"
-              aria-selected={i === 0}
-            >
-              {city}
-            </button>
-          ))}
-        </div>
-        <div className="nl-type-pills" id="nl-type-pills">
-          {VENUE_TYPES.map((type, i) => (
-            <button
-              key={type}
-              className={`nl-type-pill${i === 0 ? ' active' : ''}`}
-              data-type-filter={type}
-            >
-              {type}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <main className="nl-main">
-
-        <NightlifeGrid listings={listings} />
-
-        {/* List your venue CTA */}
-        <div className="nl-cta-block">
-          <h2 className="nl-cta-block-title">List your venue</h2>
-          <p className="nl-cta-block-sub">
-            Reach Europe&apos;s most exclusive clientele.<br />
-            List your club, bar, lounge or private event space on SecretXperience.
-          </p>
-          <a href="/listings/create" className="nl-cta-block-btn">
-            Get listed →
-          </a>
-        </div>
-
-      </main>
-
-      {/* Client-side filter script */}
-      <script dangerouslySetInnerHTML={{ __html: `
-        (function() {
-          var cityFilter = 'All';
-          var typeFilter = 'All';
-
-          function applyFilters() {
-            var cards = document.querySelectorAll('#nl-grid [data-city]');
-            var visibleCount = 0;
-            cards.forEach(function(card) {
-              var city  = card.getAttribute('data-city') || '';
-              var vtype = card.getAttribute('data-vtype') || '';
-              var cityOk = cityFilter === 'All' || city.toLowerCase() === cityFilter.toLowerCase();
-              var typeOk = typeFilter === 'All' || vtype === typeFilter;
-              var show = cityOk && typeOk;
-              card.style.display = show ? 'flex' : 'none';
-              if (show) visibleCount++;
-            });
-            var emptyEl = document.getElementById('nl-filter-empty');
-            if (emptyEl) emptyEl.style.display = visibleCount === 0 && cards.length > 0 ? 'block' : 'none';
-          }
-
-          document.querySelectorAll('[data-city-filter]').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-              cityFilter = btn.getAttribute('data-city-filter');
-              document.querySelectorAll('[data-city-filter]').forEach(function(b) {
-                b.classList.toggle('active', b === btn);
-              });
-              applyFilters();
-            });
-          });
-
-          document.querySelectorAll('[data-type-filter]').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-              typeFilter = btn.getAttribute('data-type-filter');
-              document.querySelectorAll('[data-type-filter]').forEach(function(b) {
-                b.classList.toggle('active', b === btn);
-              });
-              applyFilters();
-            });
-          });
-
-          applyFilters();
-        })();
-      ` }} />
+      <NightlifeGrid listings={listings} />
     </>
   )
 }

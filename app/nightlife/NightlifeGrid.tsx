@@ -16,6 +16,9 @@ interface Listing {
   verified?: boolean
 }
 
+const CITIES = ['All', 'Brussels', 'Antwerp', 'Amsterdam', 'Berlin', 'Paris']
+const VENUE_TYPES = ['All', 'Club', 'Bar', 'Sauna', 'Strip Club', 'Private Party', 'Lounge']
+
 function isAvailableNow(tags: string[] | null | undefined): boolean {
   if (!tags) return false
   const days = ['sun','mon','tue','wed','thu','fri','sat']
@@ -38,8 +41,7 @@ function isOpenNow(): boolean {
 }
 
 function isTonightOpen(): boolean {
-  const h = new Date().getHours()
-  return h >= 16
+  return new Date().getHours() >= 16
 }
 
 function isNewListing(createdAt: string): boolean {
@@ -54,11 +56,12 @@ function venueTypeFromSubcategory(sub: string | null): string {
   if (s.includes('private') || s.includes('party')) return 'Private Party'
   if (s.includes('lounge')) return 'Lounge'
   if (s.includes('bar')) return 'Bar'
-  if (s.includes('club')) return 'Club'
   return 'Club'
 }
 
 export default function NightlifeGrid({ listings }: { listings: Listing[] }) {
+  const [cityFilter, setCityFilter] = useState('All')
+  const [typeFilter, setTypeFilter] = useState('All')
   const [discreet, setDiscreet] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false
     return localStorage.getItem('discreetMode') === '1'
@@ -67,155 +70,182 @@ export default function NightlifeGrid({ listings }: { listings: Listing[] }) {
   const openNow = isOpenNow()
   const tonightOk = isTonightOpen()
 
+  const visible = listings.filter(l => {
+    const cityOk = cityFilter === 'All' || (l.city ?? '').toLowerCase() === cityFilter.toLowerCase()
+    const typeOk = typeFilter === 'All' || venueTypeFromSubcategory(l.subcategory) === typeFilter
+    return cityOk && typeOk
+  })
+
   return (
     <>
-      {/* Count bar with discreet toggle */}
-      <div className="nl-count-bar">
-        <div>
-          <span className="nl-count-label">Venues</span>
-          <span className="nl-count-num">{listings.length}</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span style={{
-            fontFamily: 'var(--sans, "Poppins", sans-serif)',
-            fontSize: '11px',
-            color: 'rgba(255,255,255,0.2)',
-            fontWeight: 300,
-            letterSpacing: '0.04em',
-          }}>
-            Updated nightly
-          </span>
-          <button
-            onClick={() => {
-              const next = !discreet
-              setDiscreet(next)
-              localStorage.setItem('discreetMode', next ? '1' : '0')
-            }}
-            title={discreet ? 'Exit discreet mode' : 'Discreet mode — blur photos'}
-            style={{
-              background: discreet ? 'rgba(197,160,90,0.15)' : 'transparent',
-              border: '0.5px solid rgba(255,255,255,0.12)',
-              borderRadius: '999px',
-              padding: '7px 16px',
-              fontSize: '12px',
-              fontWeight: 600,
-              color: discreet ? 'var(--gold, #c5a05a)' : 'rgba(255,255,255,0.35)',
-              cursor: 'pointer',
-              letterSpacing: '0.04em',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              fontFamily: 'var(--sans, "Poppins", sans-serif)',
-            }}
-          >
-            <i className={`ti ${discreet ? 'ti-eye-off' : 'ti-eye'}`} />
-            {discreet ? 'Discreet ON' : 'Discreet'}
-          </button>
-        </div>
-      </div>
-
-      {/* Venue Grid */}
-      <div className="nl-grid" id="nl-grid">
-        {listings.length === 0 ? (
-          <div className="nl-empty">
-            <div className="nl-empty-icon">◐</div>
-            <p className="nl-empty-text">The night is still young</p>
-            <p className="nl-empty-sub">No venues listed yet — be the first to list yours.</p>
-          </div>
-        ) : listings.map((listing, idx) => {
-          const vType = venueTypeFromSubcategory(listing.subcategory)
-          const img = listing.images?.[0] ?? null
-          const tags = listing.tags ?? []
-          const availNow = isAvailableNow(listing.tags)
-          const newListing = isNewListing(listing.created_at)
-
-          return (
-            <a
-              key={listing.id}
-              href={`/listings/${listing.id}`}
-              className="nl-card"
-              data-city={listing.city ?? 'All'}
-              data-vtype={vType}
-              style={{ animationDelay: `${idx * 0.06}s`, textDecoration: 'none' }}
+      {/* Sticky filters */}
+      <div className="nl-filters-wrap" id="nl-filters">
+        <div className="nl-city-tabs" role="tablist">
+          {CITIES.map(city => (
+            <button
+              key={city}
+              className={`nl-city-tab${cityFilter === city ? ' active' : ''}`}
+              role="tab"
+              aria-selected={cityFilter === city}
+              onClick={() => setCityFilter(city)}
             >
-              {/* Image area */}
-              <div className="nl-card-img">
-                {img ? (
-                  <img
-                    src={img}
-                    alt={listing.title}
-                    style={{ filter: discreet ? 'blur(24px) brightness(0.5)' : 'none', transition: 'filter 0.3s ease' }}
-                  />
-                ) : (
-                  <div className="nl-card-img-placeholder">
-                    <span style={{ fontSize: '48px', opacity: 0.2, color: '#c5a05a' }}>◐</span>
-                  </div>
-                )}
-                <div className="nl-card-img-overlay" />
-
-                {/* Availability badges (top-right, existing style) */}
-                <div className="nl-badge">
-                  {availNow && (
-                    <span className="nl-badge-pill nl-badge-open">Open Now</span>
-                  )}
-                  {!availNow && tonightOk && (
-                    <span className="nl-badge-pill nl-badge-tonight">Tonight</span>
-                  )}
-                </div>
-
-                {/* Verified / New badges (top-left) */}
-                <div style={{ position: 'absolute', top: '10px', left: '10px', display: 'flex', flexDirection: 'column', gap: '5px', zIndex: 2 }}>
-                  {listing.verified && (
-                    <span style={{ background: 'rgba(38,212,160,0.15)', border: '0.5px solid rgba(38,212,160,0.4)', color: '#26d4a0', fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', letterSpacing: '0.06em', backdropFilter: 'blur(6px)' }}>VERIFIED</span>
-                  )}
-                  {newListing && !availNow && (
-                    <span style={{ background: 'rgba(130,100,220,0.18)', border: '0.5px solid rgba(130,100,220,0.4)', color: '#a78bfa', fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', letterSpacing: '0.06em', backdropFilter: 'blur(6px)' }}>NEW</span>
-                  )}
-                </div>
-
-                <div className="nl-card-name">{listing.title}</div>
-              </div>
-
-              {/* Body */}
-              <div className="nl-card-body">
-                <div className="nl-card-meta">
-                  {listing.city && (
-                    <span className="nl-card-city">{listing.city}</span>
-                  )}
-                  <span className="nl-card-type">{vType}</span>
-                </div>
-
-                {listing.description && (
-                  <p className="nl-card-desc">{listing.description}</p>
-                )}
-
-                {tags.length > 0 && (
-                  <div className="nl-card-tags">
-                    {tags.filter(t => !t.startsWith('wh:')).slice(0, 4).map(tag => (
-                      <span key={tag} className="nl-tag">{tag}</span>
-                    ))}
-                  </div>
-                )}
-
-                <div className="nl-card-cta">
-                  <span className="nl-cta-link">View venue →</span>
-                </div>
-              </div>
-            </a>
-          )
-        })}
+              {city}
+            </button>
+          ))}
+        </div>
+        <div className="nl-type-pills">
+          {VENUE_TYPES.map(type => (
+            <button
+              key={type}
+              className={`nl-type-pill${typeFilter === type ? ' active' : ''}`}
+              onClick={() => setTypeFilter(type)}
+            >
+              {type}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Shown by filter script when all cards are filtered out */}
-      {listings.length > 0 && (
-        <div id="nl-filter-empty" style={{
-          display: 'none', textAlign: 'center', padding: '4rem 1rem',
-        }}>
-          <div style={{ fontSize: '40px', opacity: 0.2, color: '#c5a05a', marginBottom: '1rem' }}>◐</div>
-          <p className="nl-empty-text">No venues found</p>
-          <p className="nl-empty-sub">Try a different city or venue type.</p>
+      {/* Main content */}
+      <main className="nl-main">
+        {/* Count + discreet toggle */}
+        <div className="nl-count-bar">
+          <div>
+            <span className="nl-count-label">Venues</span>
+            <span className="nl-count-num">{visible.length}</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{
+              fontFamily: 'var(--sans, "Poppins", sans-serif)',
+              fontSize: '11px',
+              color: 'rgba(255,255,255,0.2)',
+              fontWeight: 300,
+              letterSpacing: '0.04em',
+            }}>
+              Updated nightly
+            </span>
+            <button
+              onClick={() => {
+                const next = !discreet
+                setDiscreet(next)
+                localStorage.setItem('discreetMode', next ? '1' : '0')
+              }}
+              title={discreet ? 'Exit discreet mode' : 'Discreet mode — blur photos'}
+              style={{
+                background: discreet ? 'rgba(197,160,90,0.15)' : 'transparent',
+                border: '0.5px solid rgba(255,255,255,0.12)',
+                borderRadius: '999px',
+                padding: '7px 16px',
+                fontSize: '12px',
+                fontWeight: 600,
+                color: discreet ? 'var(--gold, #c5a05a)' : 'rgba(255,255,255,0.35)',
+                cursor: 'pointer',
+                letterSpacing: '0.04em',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                fontFamily: 'var(--sans, "Poppins", sans-serif)',
+              }}
+            >
+              <i className={`ti ${discreet ? 'ti-eye-off' : 'ti-eye'}`} />
+              {discreet ? 'Discreet ON' : 'Discreet'}
+            </button>
+          </div>
         </div>
-      )}
+
+        {/* Grid */}
+        <div className="nl-grid">
+          {visible.length === 0 ? (
+            <div className="nl-empty">
+              <div className="nl-empty-icon">◐</div>
+              <p className="nl-empty-text">
+                {listings.length === 0 ? 'The night is still young' : 'No venues found'}
+              </p>
+              <p className="nl-empty-sub">
+                {listings.length === 0
+                  ? 'No venues listed yet — be the first to list yours.'
+                  : 'Try a different city or venue type.'}
+              </p>
+            </div>
+          ) : visible.map((listing, idx) => {
+            const vType = venueTypeFromSubcategory(listing.subcategory)
+            const img = listing.images?.[0] ?? null
+            const tags = (listing.tags ?? []).filter(t => !t.startsWith('wh:'))
+            const availNow = isAvailableNow(listing.tags)
+            const newListing = isNewListing(listing.created_at)
+
+            return (
+              <a
+                key={listing.id}
+                href={`/listings/${listing.id}`}
+                className="nl-card"
+                style={{ animationDelay: `${idx * 0.06}s`, textDecoration: 'none' }}
+              >
+                <div className="nl-card-img">
+                  {img ? (
+                    <img
+                      src={img}
+                      alt={listing.title}
+                      style={{ filter: discreet ? 'blur(24px) brightness(0.5)' : 'none', transition: 'filter 0.3s ease' }}
+                    />
+                  ) : (
+                    <div className="nl-card-img-placeholder">
+                      <span style={{ fontSize: '48px', opacity: 0.2, color: '#c5a05a' }}>◐</span>
+                    </div>
+                  )}
+                  <div className="nl-card-img-overlay" />
+
+                  <div className="nl-badge">
+                    {availNow && <span className="nl-badge-pill nl-badge-open">Open Now</span>}
+                    {!availNow && tonightOk && <span className="nl-badge-pill nl-badge-tonight">Tonight</span>}
+                  </div>
+
+                  <div style={{ position: 'absolute', top: '10px', left: '10px', display: 'flex', flexDirection: 'column', gap: '5px', zIndex: 2 }}>
+                    {listing.verified && (
+                      <span style={{ background: 'rgba(38,212,160,0.15)', border: '0.5px solid rgba(38,212,160,0.4)', color: '#26d4a0', fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', letterSpacing: '0.06em', backdropFilter: 'blur(6px)' }}>VERIFIED</span>
+                    )}
+                    {newListing && !availNow && (
+                      <span style={{ background: 'rgba(130,100,220,0.18)', border: '0.5px solid rgba(130,100,220,0.4)', color: '#a78bfa', fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', letterSpacing: '0.06em', backdropFilter: 'blur(6px)' }}>NEW</span>
+                    )}
+                  </div>
+
+                  <div className="nl-card-name">{listing.title}</div>
+                </div>
+
+                <div className="nl-card-body">
+                  <div className="nl-card-meta">
+                    {listing.city && <span className="nl-card-city">{listing.city}</span>}
+                    <span className="nl-card-type">{vType}</span>
+                  </div>
+                  {listing.description && <p className="nl-card-desc">{listing.description}</p>}
+                  {tags.length > 0 && (
+                    <div className="nl-card-tags">
+                      {tags.slice(0, 4).map(tag => (
+                        <span key={tag} className="nl-tag">{tag}</span>
+                      ))}
+                    </div>
+                  )}
+                  <div className="nl-card-cta">
+                    <span className="nl-cta-link">View venue →</span>
+                  </div>
+                </div>
+              </a>
+            )
+          })}
+        </div>
+
+        {/* List your venue CTA */}
+        <div className="nl-cta-block">
+          <h2 className="nl-cta-block-title">List your venue</h2>
+          <p className="nl-cta-block-sub">
+            Reach Europe&apos;s most exclusive clientele.<br />
+            List your club, bar, lounge or private event space on SecretXperience.
+          </p>
+          <a href="/listings/create" className="nl-cta-block-btn">
+            Get listed →
+          </a>
+        </div>
+      </main>
     </>
   )
 }
