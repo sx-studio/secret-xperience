@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useCallback, useState } from 'react'
 import { signOut } from '../lib/auth'
 import { createClient } from '../lib/supabase'
 
@@ -175,6 +175,19 @@ export default function DashboardPage() {
   const [connectLoginLoading, setConnectLoginLoading] = useState(false)
   const [unreadMessages, setUnreadMessages]   = useState(0)
 
+  // Photo editor state
+  const [photoEditing, setPhotoEditing] = useState<{ imgIdx: number; url: string } | null>(null)
+  const [photoZoom, setPhotoZoom]       = useState(1)
+  const [photoRotate, setPhotoRotate]   = useState(0)
+  const [photoPanX, setPhotoPanX]       = useState(0)
+  const [photoPanY, setPhotoPanY]       = useState(0)
+  const [photoSaving, setPhotoSaving]   = useState(false)
+  const [photoUploading, setPhotoUploading] = useState(false)
+  const previewCanvasRef  = useRef<HTMLCanvasElement | null>(null)
+  const photoImgRef       = useRef<HTMLImageElement | null>(null)
+  const photoDragRef      = useRef<{ startX: number; startY: number; startPanX: number; startPanY: number } | null>(null)
+  const photoFileInputRef = useRef<HTMLInputElement | null>(null)
+
   useEffect(() => {
     async function load() {
       const supabase = createClient()
@@ -319,6 +332,133 @@ export default function DashboardPage() {
     if (json.url) { window.location.href = json.url }
     else { setBoostLoading(false) }
   }
+
+  // ── Photo editor helpers ──────────────────────────────────────────────
+
+  const drawPhotoPreview = useCallback((
+    canvas: HTMLCanvasElement | null,
+    img: HTMLImageElement | null,
+    zoom: number, rotate: number, panX: number, panY: number,
+  ) => {
+    if (!canvas || !img || !img.naturalWidth) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    const outW = canvas.width
+    const outH = canvas.height
+    const panScale = outW / 300
+    ctx.clearRect(0, 0, outW, outH)
+    ctx.save()
+    ctx.translate(outW / 2 + panX * panScale, outH / 2 + panY * panScale)
+    ctx.rotate(rotate * Math.PI / 180)
+    const isRotated90 = Math.round(Math.abs(rotate) / 90) % 2 !== 0
+    const baseW = isRotated90 ? img.naturalHeight : img.naturalWidth
+    const baseH = isRotated90 ? img.naturalWidth : img.naturalHeight
+    const baseScale = Math.max(300 / baseW, 400 / baseH) * panScale
+    ctx.scale(zoom * baseScale, zoom * baseScale)
+    ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2)
+    ctx.restore()
+  }, [])
+
+  // Load image when editor opens and reset transform
+  useEffect(() => {
+    if (!photoEditing) { photoImgRef.current = null; return }
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+    img.onload = () => {
+      photoImgRef.current = img
+      drawPhotoPreview(previewCanvasRef.current, img, photoZoom, photoRotate, photoPanX, photoPanY)
+    }
+    img.src = photoEditing.url
+  }, [photoEditing?.url]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Redraw on transform change
+  useEffect(() => {
+    if (!photoEditing) return
+    drawPhotoPreview(previewCanvasRef.current, photoImgRef.current, photoZoom, photoRotate, photoPanX, photoPanY)
+  }, [photoZoom, photoRotate, photoPanX, photoPanY, drawPhotoPreview]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function applyPhotoEdit() {
+    if (!photoEditing || !photoImgRef.current) return
+    setPhotoSaving(true)
+    try {
+      const exportCanvas = document.createElement('canvas')
+      exportCanvas.width = 800
+      exportCanvas.height = 1067
+      drawPhotoPreview(exportCanvas, photoImgRef.current, photoZoom, photoRotate, photoPanX, photoPanY)
+      await new Promise<void>((resolve, reject) => {
+        exportCanvas.toBlob(async (blob) => {
+          if (!blob) { reject(new Error('toBlob returned null')); return }
+          const file = new File([blob], 'photo.jpg', { type: 'image/jpeg' })
+          const fd = new FormData()
+          fd.append('file', file)
+          const res = await fetch('/api/upload', { method: 'POST', body: fd })
+          const json = await res.json()
+          if (json.publicUrl) {
+            setListingDraft((d: any) => {
+              const imgs = [...(d.images || [])]
+              imgs[photoEditing.imgIdx] = json.publicUrl
+              return { ...d, images: imgs }
+            })
+          }
+          resolve()
+        }, 'image/jpeg', 0.87)
+      })
+    } catch {
+      setNotification('Could not export photo. Try re-uploading instead.')
+    }
+    setPhotoSaving(false)
+    setPhotoEditing(null)
+  }
+
+  async function resizeImageForDashboard(file: File): Promise<File> {
+    const TARGET_W = 800; const TARGET_H = 1067; const QUALITY = 0.87
+    return new Promise((resolve) => {
+      const url = URL.createObjectURL(file)
+      const img = new Image()
+      img.onload = () => {
+        URL.revokeObjectURL(url)
+        if (img.naturalWidth <= TARGET_W && img.naturalHeight <= TARGET_H) { resolve(file); return }
+        const scaleW = TARGET_W / img.naturalWidth
+        const scaleH = TARGET_H / img.naturalHeight
+        const scale = Math.min(scaleW, scaleH)
+        const w = Math.round(img.naturalWidth * scale)
+        const h = Math.round(img.naturalHeight * scale)
+        const canvas = document.createElement('canvas')
+        canvas.width = w; canvas.height = h
+        const ctx = canvas.getContext('2d')!
+        ctx.drawImage(img, 0, 0, w, h)
+        canvas.toBlob(
+          (blob) => resolve(blob ? new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' }) : file),
+          'image/jpeg', QUALITY
+        )
+      }
+      img.onerror = () => { URL.revokeObjectURL(url); resolve(file) }
+      img.src = url
+    })
+  }
+
+  async function handlePhotoFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setPhotoUploading(true)
+    const resized = await resizeImageForDashboard(file)
+    const fd = new FormData()
+    fd.append('file', resized)
+    const res = await fetch('/api/upload', { method: 'POST', body: fd })
+    const json = await res.json()
+    if (json.publicUrl) {
+      setListingDraft((d: any) => {
+        const imgs = (d.images || []).filter(Boolean)
+        return { ...d, images: [...imgs, json.publicUrl].slice(0, 5) }
+      })
+    } else {
+      setNotification(json.error || 'Upload failed — please try again.')
+    }
+    setPhotoUploading(false)
+    if (photoFileInputRef.current) photoFileInputRef.current.value = ''
+  }
+
+  // ── End photo editor helpers ──────────────────────────────────────────
 
   const displayName: string = profile?.full_name || user?.email?.split('@')[0] || 'there'
   const initials = getInitials(profile?.full_name || user?.email || '')
@@ -721,6 +861,65 @@ export default function DashboardPage() {
         .db-photo-url { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
         .db-photo-url input { flex: 1; }
         .db-photo-num { font: 600 10px/1 var(--sans); color: var(--t3); min-width: 14px; text-align: right; }
+
+        .db-photo-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 10px; }
+        @media (max-width: 480px) { .db-photo-grid { grid-template-columns: repeat(3, 1fr); } }
+
+        .db-photo-thumb {
+          position: relative; aspect-ratio: 3/4; border-radius: 8px; overflow: hidden;
+          background: #111; border: 0.5px solid rgba(255,255,255,0.08);
+        }
+        .db-photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .db-photo-thumb-add {
+          aspect-ratio: 3/4; border-radius: 8px; border: 0.5px dashed rgba(197,160,90,0.3);
+          display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+          cursor: pointer; background: rgba(197,160,90,0.03); transition: all 0.15s;
+        }
+        .db-photo-thumb-add:hover { border-color: rgba(197,160,90,0.6); background: rgba(197,160,90,0.07); }
+
+        .db-photo-actions {
+          position: absolute; bottom: 0; left: 0; right: 0;
+          background: linear-gradient(transparent, rgba(0,0,0,0.82));
+          display: flex; justify-content: center; gap: 3px; padding: 14px 4px 5px;
+        }
+        .db-photo-act-btn {
+          width: 24px; height: 24px; border-radius: 5px; border: 0.5px solid rgba(255,255,255,0.2);
+          background: rgba(0,0,0,0.55); color: rgba(255,255,255,0.75); cursor: pointer;
+          font-size: 12px; display: flex; align-items: center; justify-content: center;
+          transition: border-color 0.12s, color 0.12s, background 0.12s; flex-shrink: 0;
+        }
+        .db-photo-act-btn:hover { border-color: var(--gold); color: var(--gold); background: rgba(0,0,0,0.75); }
+        .db-photo-act-btn.danger:hover { border-color: #e2536b; color: #e2536b; }
+        .db-photo-order-badge {
+          position: absolute; top: 4px; left: 4px; background: rgba(0,0,0,0.65); border-radius: 4px;
+          padding: 2px 5px; font: 600 9px/1 var(--sans); color: rgba(255,255,255,0.5); letter-spacing: 0.06em;
+        }
+
+        .db-pe-modal {
+          position: fixed; inset: 0; z-index: 1100;
+          background: rgba(0,0,0,0.88); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+          display: flex; align-items: center; justify-content: center; padding: 1rem;
+        }
+        .db-pe-panel {
+          background: #0d0d0d; border: 0.5px solid rgba(197,160,90,0.3); border-radius: 18px;
+          padding: 1.5rem; width: 100%; max-width: 380px; box-shadow: 0 32px 96px rgba(0,0,0,0.8);
+        }
+        .db-pe-canvas {
+          display: block; border-radius: 10px; overflow: hidden;
+          cursor: grab; touch-action: none; user-select: none;
+          border: 0.5px solid rgba(255,255,255,0.07);
+          background: #000; width: 100%; aspect-ratio: 3/4;
+          max-height: 55vh; object-fit: contain;
+        }
+        .db-pe-canvas:active { cursor: grabbing; }
+        .db-pe-slider { width: 100%; accent-color: var(--gold, #c5a05a); height: 4px; cursor: pointer; }
+        .db-pe-rotate-btn {
+          flex: 1; padding: 8px 0; background: rgba(255,255,255,0.04);
+          border: 0.5px solid rgba(255,255,255,0.1); border-radius: 8px;
+          color: rgba(255,255,255,0.55); cursor: pointer; font-size: 16px;
+          transition: border-color 0.15s, color 0.15s, background 0.15s;
+        }
+        .db-pe-rotate-btn:hover { border-color: var(--gold); color: var(--gold); background: rgba(197,160,90,0.07); }
 
         @media (max-width: 640px) {
           .db-stats-grid { grid-template-columns: 1fr !important; }
@@ -1550,24 +1749,64 @@ export default function DashboardPage() {
 
             {/* ── Photos ── */}
             <div className="db-form-section">
-              <div className="db-form-section-title">Photos (up to 5 URLs)</div>
-              {[0,1,2,3,4].map(i => (
-                <div key={i} className="db-photo-url">
-                  <span className="db-photo-num">{i+1}</span>
-                  <input
-                    type="url" className="db-input"
-                    value={(listingDraft.images||[])[i]||''}
-                    onChange={e => setListingDraft((d:any)=>{
-                      const imgs = [...(d.images||['','','','',''])]
-                      imgs[i] = e.target.value
-                      return { ...d, images: imgs }
-                    })}
-                    placeholder="https://images.unsplash.com/…"
-                    style={{ height:'36px',fontSize:'12px' }}
-                  />
-                </div>
-              ))}
-              <div style={{ fontSize:'11px',color:'rgba(255,255,255,0.2)',marginTop:'4px',fontFamily:'var(--sans)' }}>Paste direct image URLs. Leave blank to skip.</div>
+              <div className="db-form-section-title">Photos</div>
+              <div className="db-photo-grid">
+                {(listingDraft.images || []).filter(Boolean).map((url: string, i: number, arr: string[]) => (
+                  <div key={i} className="db-photo-thumb">
+                    <img src={url} alt="" />
+                    <div className="db-photo-order-badge">{i + 1}</div>
+                    <div className="db-photo-actions">
+                      <button className="db-photo-act-btn" title="Move left" disabled={i === 0}
+                        style={{ opacity: i === 0 ? 0.3 : 1 }}
+                        onClick={() => setListingDraft((d: any) => {
+                          const imgs = [...d.images.filter(Boolean)]
+                          ;[imgs[i - 1], imgs[i]] = [imgs[i], imgs[i - 1]]
+                          return { ...d, images: imgs }
+                        })}>‹</button>
+                      <button className="db-photo-act-btn" title="Edit / crop"
+                        onClick={() => {
+                          setPhotoZoom(1); setPhotoRotate(0); setPhotoPanX(0); setPhotoPanY(0)
+                          setPhotoEditing({ imgIdx: i, url })
+                        }}>
+                        <i className="ti ti-crop" style={{ fontSize: 12 }} />
+                      </button>
+                      <button className="db-photo-act-btn" title="Move right" disabled={i === arr.length - 1}
+                        style={{ opacity: i === arr.length - 1 ? 0.3 : 1 }}
+                        onClick={() => setListingDraft((d: any) => {
+                          const imgs = [...d.images.filter(Boolean)]
+                          ;[imgs[i], imgs[i + 1]] = [imgs[i + 1], imgs[i]]
+                          return { ...d, images: imgs }
+                        })}>›</button>
+                      <button className="db-photo-act-btn danger" title="Remove photo"
+                        onClick={() => setListingDraft((d: any) => ({
+                          ...d, images: d.images.filter((_: any, j: number) => j !== i),
+                        }))}>×</button>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Add photo slot */}
+                {(listingDraft.images || []).filter(Boolean).length < 5 && (
+                  <div className="db-photo-thumb-add" onClick={() => !photoUploading && photoFileInputRef.current?.click()}>
+                    {photoUploading ? (
+                      <div style={{ width: 18, height: 18, border: '1.5px solid rgba(197,160,90,0.3)', borderTopColor: 'var(--gold)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                    ) : (
+                      <>
+                        <span style={{ fontSize: 20, color: 'rgba(197,160,90,0.45)', lineHeight: 1 }}>+</span>
+                        <span style={{ fontSize: 10, color: 'rgba(197,160,90,0.4)', fontFamily: 'var(--sans)', letterSpacing: '0.05em', textAlign: 'center', lineHeight: 1.3 }}>Add photo</span>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <input
+                ref={photoFileInputRef} type="file" accept="image/jpeg,image/png,image/webp"
+                style={{ display: 'none' }} onChange={handlePhotoFileChange}
+              />
+              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.2)', fontFamily: 'var(--sans)' }}>
+                ‹ › to reorder · crop icon to edit · × to remove · up to 5 photos
+              </div>
             </div>
 
             {/* ── Profile Details (escort categories only) ── */}
@@ -1725,6 +1964,78 @@ export default function DashboardPage() {
             <div style={{ display:'flex',gap:'10px',justifyContent:'flex-end',paddingTop:'0.5rem',borderTop:'0.5px solid rgba(255,255,255,0.06)' }}>
               <button onClick={() => setEditingListing(null)} className="db-quick-btn-dark">Cancel</button>
               <button onClick={saveListing} disabled={savingListing} className="db-quick-btn-gold">{savingListing ? 'Saving…' : 'Save changes'}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Photo editor modal ── */}
+      {photoEditing && (
+        <div className="db-pe-modal" onClick={() => !photoSaving && setPhotoEditing(null)}>
+          <div className="db-pe-panel" onClick={e => e.stopPropagation()}>
+
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+              <div style={{ fontFamily: 'var(--serif)', fontSize: '20px', fontWeight: 500, color: 'var(--t, #ece8e1)' }}>
+                Edit Photo <span style={{ fontFamily: 'var(--sans)', fontSize: '11px', color: 'var(--t3)', fontWeight: 400, marginLeft: 6 }}>drag · zoom · rotate</span>
+              </div>
+              <button
+                onClick={() => setPhotoEditing(null)} disabled={photoSaving}
+                style={{ background: 'none', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: '50%', width: 30, height: 30, color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >×</button>
+            </div>
+
+            {/* Canvas preview */}
+            <canvas
+              ref={previewCanvasRef}
+              className="db-pe-canvas"
+              width={300}
+              height={400}
+              onPointerDown={e => {
+                e.currentTarget.setPointerCapture(e.pointerId)
+                photoDragRef.current = { startX: e.clientX, startY: e.clientY, startPanX: photoPanX, startPanY: photoPanY }
+              }}
+              onPointerMove={e => {
+                if (!photoDragRef.current) return
+                setPhotoPanX(photoDragRef.current.startPanX + (e.clientX - photoDragRef.current.startX))
+                setPhotoPanY(photoDragRef.current.startPanY + (e.clientY - photoDragRef.current.startY))
+              }}
+              onPointerUp={() => { photoDragRef.current = null }}
+              onPointerCancel={() => { photoDragRef.current = null }}
+            />
+
+            {/* Zoom slider */}
+            <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ fontSize: 11, color: 'var(--t3)', fontFamily: 'var(--sans)', minWidth: 28 }}>1×</span>
+              <input
+                type="range" min="0.5" max="4" step="0.05"
+                value={photoZoom}
+                onChange={e => setPhotoZoom(Number(e.target.value))}
+                className="db-pe-slider"
+              />
+              <span style={{ fontSize: 11, color: 'var(--t3)', fontFamily: 'var(--sans)', minWidth: 28, textAlign: 'right' }}>{photoZoom.toFixed(1)}×</span>
+            </div>
+
+            {/* Rotate buttons */}
+            <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+              <button className="db-pe-rotate-btn"
+                onClick={() => setPhotoRotate(r => (r - 90 + 360) % 360)}
+                title="Rotate 90° left">↺ Left</button>
+              <button
+                onClick={() => { setPhotoZoom(1); setPhotoRotate(0); setPhotoPanX(0); setPhotoPanY(0) }}
+                style={{ background: 'transparent', border: '0.5px solid rgba(255,255,255,0.08)', borderRadius: 8, color: 'rgba(255,255,255,0.3)', cursor: 'pointer', padding: '8px 14px', fontSize: 11, fontFamily: 'var(--sans)', letterSpacing: '0.06em', transition: 'all 0.15s' }}
+                title="Reset">Reset</button>
+              <button className="db-pe-rotate-btn"
+                onClick={() => setPhotoRotate(r => (r + 90) % 360)}
+                title="Rotate 90° right">Right ↻</button>
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: 'flex', gap: '8px', marginTop: '1rem', paddingTop: '1rem', borderTop: '0.5px solid rgba(255,255,255,0.06)' }}>
+              <button onClick={() => setPhotoEditing(null)} disabled={photoSaving} className="db-quick-btn-dark" style={{ flex: 1, padding: '10px' }}>Cancel</button>
+              <button onClick={applyPhotoEdit} disabled={photoSaving} className="db-quick-btn-gold" style={{ flex: 2, padding: '10px' }}>
+                {photoSaving ? 'Uploading…' : 'Apply & Save →'}
+              </button>
             </div>
           </div>
         </div>
