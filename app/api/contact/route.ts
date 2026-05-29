@@ -24,8 +24,8 @@ export async function POST(req: NextRequest) {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        from: 'SecretXperience <no-reply@secret-xperience.eu>',
-        to: ['support@secret-xperience.eu'],
+        from: 'SecretXperience <no-reply@secretxperience.eu>',
+        to: ['support@secretxperience.eu'],
         reply_to: email,
         subject: `[Contact] ${subject || 'General enquiry'} — ${name}`,
         html: `
