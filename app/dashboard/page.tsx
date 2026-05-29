@@ -168,7 +168,7 @@ export default function DashboardPage() {
   const [listingDraft, setListingDraft]     = useState<any>({})
   const [savingListing, setSavingListing]   = useState(false)
   const [boostingListing, setBoostingListing] = useState<any | null>(null)
-  const [boostPlan, setBoostPlan]             = useState<'week' | 'month'>('month')
+  const [boostPlan, setBoostPlan]             = useState<'6h' | 'week' | 'month'>('6h')
   const [boostLoading, setBoostLoading]       = useState(false)
   const [notification, setNotification]       = useState<string | null>(null)
   const [connectLoading, setConnectLoading]   = useState(false)
@@ -323,14 +323,32 @@ export default function DashboardPage() {
   async function startBoost() {
     if (!boostingListing) return
     setBoostLoading(true)
-    const res = await fetch('/api/featured-boost', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ listing_id: boostingListing.id, plan: boostPlan }),
-    })
-    const json = await res.json()
-    if (json.url) { window.location.href = json.url }
-    else { setBoostLoading(false) }
+    if (boostPlan === '6h') {
+      // Token-based flash boost — no Stripe redirect
+      const res = await fetch('/api/listings/flash-boost', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ listing_id: boostingListing.id }),
+      })
+      const json = await res.json()
+      setBoostLoading(false)
+      setBoostingListing(null)
+      if (json.ok) {
+        setTokenBalance(b => (b ?? 0) - 20)
+        setNotification('✦ Flash boost active! Your listing is at the top for 6 hours.')
+      } else {
+        setNotification(json.error || 'Boost failed — check your token balance.')
+      }
+    } else {
+      const res = await fetch('/api/featured-boost', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ listing_id: boostingListing.id, plan: boostPlan }),
+      })
+      const json = await res.json()
+      if (json.url) { window.location.href = json.url }
+      else { setBoostLoading(false) }
+    }
   }
 
   // ── Photo editor helpers ──────────────────────────────────────────────
@@ -1450,11 +1468,33 @@ export default function DashboardPage() {
                         {listing.active ? 'Live' : 'Inactive'}
                       </span>
                       <button
-                        onClick={() => { setBoostPlan('month'); setBoostingListing(listing) }}
+                        onClick={() => { setBoostPlan('6h'); setBoostingListing(listing) }}
                         style={{ padding: '5px 12px', borderRadius: 'var(--r, 8px)', border: '0.5px solid var(--gbrd, rgba(197,160,90,0.4))', background: 'transparent', color: 'var(--gold, #c5a05a)', cursor: 'pointer', fontSize: '12px', fontWeight: 500, fontFamily: 'var(--sans)', letterSpacing: '0.04em', transition: 'all .15s' }}
                         onMouseOver={e => { (e.target as HTMLElement).style.background = 'var(--gbg, rgba(197,160,90,0.1))' }}
                         onMouseOut={e => { (e.target as HTMLElement).style.background = 'transparent' }}
                       >✦ Boost</button>
+                      <button
+                        className="db-icon-btn"
+                        title="Edit photos"
+                        onClick={() => {
+                          const parsed = parseListingTags(listing.tags)
+                          setListingDraft({
+                            title: listing.title || '', description: listing.description || '',
+                            category: listing.category || '', city: listing.city || '',
+                            country: listing.country || '', price_from: listing.price_from ?? '',
+                            price_to: listing.price_to ?? '', meet_type: listing.meet_type || 'incall',
+                            active: listing.active ?? true,
+                            images: Array.isArray(listing.images) ? [...listing.images] : [],
+                            ...parsed,
+                          })
+                          setEditingListing(listing)
+                          setTimeout(() => {
+                            document.getElementById('listing-photos-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                          }, 120)
+                        }}
+                      >
+                        <i className="ti ti-photo" aria-hidden="true" />
+                      </button>
                       <button
                         className="db-icon-btn"
                         title="Edit listing"
@@ -1748,7 +1788,7 @@ export default function DashboardPage() {
             </div>
 
             {/* ── Photos ── */}
-            <div className="db-form-section">
+            <div className="db-form-section" id="listing-photos-section">
               <div className="db-form-section-title">Photos</div>
               <div className="db-photo-grid">
                 {(listingDraft.images || []).filter(Boolean).map((url: string, i: number, arr: string[]) => (
@@ -2086,24 +2126,29 @@ export default function DashboardPage() {
               <div style={{ fontFamily:'var(--serif)',fontSize:'22px',color:'var(--gold, #c5a05a)',fontWeight:500,marginBottom:'6px' }}>✦ Boost Listing</div>
               <div style={{ fontSize:'13px',color:'var(--t2, #8c8880)',lineHeight:1.5 }}>Feature <strong style={{ color:'var(--t, #ece8e1)' }}>{boostingListing.title}</strong> at the top of search results.</div>
             </div>
-            <div style={{ display:'flex',gap:'10px',marginBottom:'1.5rem' }}>
+            <div style={{ display:'flex',gap:'8px',marginBottom:'1.5rem' }}>
               {([
-                { key:'week',  label:'7 Days',  price:'€29', note:'Quick boost' },
-                { key:'month', label:'30 Days', price:'€79', note:'Best value' },
-              ] as const).map(p => (
-                <div key={p.key} onClick={() => setBoostPlan(p.key)} style={{ flex:1,padding:'1rem',borderRadius:'var(--rl, 13px)',border:`0.5px solid ${boostPlan===p.key?'var(--gbrd, rgba(197,160,90,0.6))':'var(--b2, rgba(255,255,255,0.08))'}`,background:boostPlan===p.key?'var(--gbg, rgba(197,160,90,0.07))':'var(--bg2, transparent)',cursor:'pointer',textAlign:'center',transition:'all var(--t-fast, .15s) var(--ease-out)' }}>
-                  <div style={{ fontSize:'13px',color:'var(--t2, #8c8880)',marginBottom:'4px' }}>{p.label}</div>
-                  <div style={{ fontSize:'22px',fontFamily:'var(--serif)',color:'var(--gold, #c5a05a)',fontWeight:400 }}>{p.price}</div>
-                  <div style={{ fontSize:'11px',color:'var(--t3, #4c4a47)',marginTop:'3px' }}>{p.note}</div>
+                { key:'6h',   label:'6 Hours', price:'20 tokens', note:'Flash boost' },
+                { key:'week', label:'7 Days',  price:'€29',       note:'Quick boost' },
+                { key:'month',label:'30 Days', price:'€79',       note:'Best value'  },
+              ] as { key: '6h'|'week'|'month'; label: string; price: string; note: string }[]).map(p => (
+                <div key={p.key} onClick={() => setBoostPlan(p.key)} style={{ flex:1,padding:'0.875rem 0.5rem',borderRadius:'var(--rl, 13px)',border:`0.5px solid ${boostPlan===p.key?'var(--gbrd, rgba(197,160,90,0.6))':'var(--b2, rgba(255,255,255,0.08))'}`,background:boostPlan===p.key?'var(--gbg, rgba(197,160,90,0.07))':'var(--bg2, transparent)',cursor:'pointer',textAlign:'center',transition:'all var(--t-fast, .15s) var(--ease-out)' }}>
+                  <div style={{ fontSize:'12px',color:'var(--t2, #8c8880)',marginBottom:'4px' }}>{p.label}</div>
+                  <div style={{ fontSize:'20px',fontFamily:'var(--serif)',color:'var(--gold, #c5a05a)',fontWeight:400 }}>{p.price}</div>
+                  <div style={{ fontSize:'10px',color:'var(--t3, #4c4a47)',marginTop:'3px' }}>{p.note}</div>
                 </div>
               ))}
             </div>
             <div style={{ background:'var(--gbg, rgba(197,160,90,0.06))',border:'0.5px solid var(--gbrd, rgba(197,160,90,0.15))',borderRadius:'var(--r, 8px)',padding:'0.875rem 1rem',marginBottom:'1.5rem',fontSize:'12px',color:'var(--t2, #8c8880)',lineHeight:1.6 }}>
-              Your listing will appear at the top of all search results and category pages with a ✦ Featured badge for the selected duration.
+              {boostPlan === '6h'
+                ? 'Your listing will appear at the top of results for 6 hours, then return to its normal position.'
+                : 'Your listing will appear at the top of all search results and category pages with a ✦ Featured badge for the selected duration.'}
             </div>
             <div style={{ display:'flex',gap:'10px',justifyContent:'flex-end' }}>
               <button onClick={() => setBoostingListing(null)} className="db-quick-btn-dark">Cancel</button>
-              <button onClick={startBoost} disabled={boostLoading} className="db-quick-btn-gold">{boostLoading ? 'Redirecting…' : `Boost for ${boostPlan==='week'?'€29':'€79'}`}</button>
+              <button onClick={startBoost} disabled={boostLoading} className="db-quick-btn-gold">
+                {boostLoading ? (boostPlan === '6h' ? 'Boosting…' : 'Redirecting…') : `Boost for ${boostPlan==='6h'?'20 tokens':boostPlan==='week'?'€29':'€79'}`}
+              </button>
             </div>
           </div>
         </div>
