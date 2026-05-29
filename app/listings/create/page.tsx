@@ -254,6 +254,50 @@ export default function CreateListingPage() {
     }))
   }
 
+  /* ── Image resize helper (canvas, runs in browser) ── */
+  const resizeImage = useCallback((file: File): Promise<File> => {
+    const TARGET_W = 800
+    const TARGET_H = 1067  // 3:4 portrait — fits all card types
+    const QUALITY  = 0.87
+
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      const blobUrl = URL.createObjectURL(file)
+      img.onload = () => {
+        URL.revokeObjectURL(blobUrl)
+        // Skip upscaling — only downscale if image is larger
+        const scale = Math.min(1, Math.max(TARGET_W / img.naturalWidth, TARGET_H / img.naturalHeight))
+        const drawW = img.naturalWidth  * scale
+        const drawH = img.naturalHeight * scale
+
+        const canvas = document.createElement('canvas')
+        canvas.width  = Math.min(TARGET_W, img.naturalWidth)
+        canvas.height = Math.min(TARGET_H, img.naturalHeight)
+        const ctx = canvas.getContext('2d')!
+
+        // Centre-crop to fill canvas (cover behaviour)
+        const scaleX  = canvas.width  / img.naturalWidth
+        const scaleY  = canvas.height / img.naturalHeight
+        const coverScale = Math.max(scaleX, scaleY)
+        const sw = canvas.width  / coverScale
+        const sh = canvas.height / coverScale
+        const sx = (img.naturalWidth  - sw) / 2
+        const sy = (img.naturalHeight - sh) / 2
+        ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height)
+
+        canvas.toBlob(
+          blob => {
+            if (!blob) { reject(new Error('Resize failed')); return }
+            resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' }))
+          },
+          'image/jpeg', QUALITY
+        )
+      }
+      img.onerror = () => { URL.revokeObjectURL(blobUrl); resolve(file) } // fallback: upload original
+      img.src = blobUrl
+    })
+  }, [])
+
   /* ── Image upload ── */
   const uploadFile = useCallback(async (file: File) => {
     if (form.images.length + uploadingImages.filter(u => u.loading).length >= 5) return
@@ -272,8 +316,9 @@ export default function CreateListingPage() {
     setUploadingImages(prev => [...prev, { id: uid, name: file.name, preview, loading: true }])
 
     try {
+      const resized = await resizeImage(file)
       const fd = new FormData()
-      fd.append('file', file)
+      fd.append('file', resized)
       const res = await fetch('/api/upload', { method: 'POST', body: fd })
       if (!res.ok) throw new Error('Failed to upload image')
       const { publicUrl } = await res.json()
@@ -286,7 +331,7 @@ export default function CreateListingPage() {
         prev.map(u => u.id === uid ? { ...u, loading: false, error: err.message } : u)
       )
     }
-  }, [form.images, uploadingImages])
+  }, [form.images, uploadingImages, resizeImage])
 
   const handleFiles = useCallback((files: FileList | null) => {
     if (!files) return
