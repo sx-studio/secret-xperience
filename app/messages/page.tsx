@@ -32,10 +32,21 @@ export default function MessagesPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [body, setBody] = useState('')
   const [sending, setSending] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [toasts, setToasts] = useState<{ id: string; name: string; body: string; otherId: string }[]>([])
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  function pushToast(name: string, body: string, otherId: string) {
+    const id = crypto.randomUUID()
+    setToasts(prev => [...prev, { id, name, body, otherId }])
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 5000)
+    // Browser notification (if permission already granted)
+    if (typeof window !== 'undefined' && Notification.permission === 'granted') {
+      new Notification(`New message from ${name}`, { body, icon: '/favicon.ico', tag: otherId })
+    }
+  }
 
   // Sync activeConv to ref so realtime handler has a non-stale reference
   useEffect(() => { activeConvRef.current = activeConv }, [activeConv])
@@ -164,12 +175,26 @@ export default function MessagesPage() {
 
       setLoading(false)
 
+      // Request browser notification permission
+      if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission()
+      }
+
       channel = supabase.channel(`messages-${uid}`)
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `receiver_id=eq.${uid}` }, (payload) => {
           const newMsg = payload.new as Message
+          const isActive = activeConvRef.current?.other_id === newMsg.sender_id
           // Only inject into message thread if this is from the active conversation
-          if (activeConvRef.current?.other_id === newMsg.sender_id) {
+          if (isActive) {
             setMessages(prev => prev.find(m => m.id === newMsg.id) ? prev : [...prev, newMsg])
+          }
+          // Show toast + browser notification for messages not in the active thread
+          if (!isActive) {
+            setConversations(prev => {
+              const sender = prev.find(c => c.other_id === newMsg.sender_id)
+              pushToast(sender?.other_name || 'Someone', newMsg.body, newMsg.sender_id)
+              return prev
+            })
           }
           setConversations(prev => {
             const otherId = newMsg.sender_id
@@ -260,6 +285,101 @@ export default function MessagesPage() {
           display: flex;
           flex-direction: column;
         }
+
+        .msg-pane-header {
+          height: 56px;
+          padding: 0 1rem;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          border-bottom: 0.5px solid var(--b, rgba(255,255,255,0.06));
+          flex-shrink: 0;
+        }
+        .msg-pane-title {
+          font-family: var(--serif, 'Cormorant Garamond', serif);
+          font-size: 20px;
+          font-weight: 400;
+          color: var(--t, #ece8e1);
+          letter-spacing: 0.01em;
+        }
+        .msg-back-btn {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          background: none;
+          border: 0.5px solid rgba(255,255,255,0.08);
+          border-radius: 20px;
+          padding: 5px 12px 5px 8px;
+          color: var(--t2, rgba(255,255,255,0.45));
+          font: 400 12px var(--sans, 'Poppins', sans-serif);
+          cursor: pointer;
+          letter-spacing: 0.03em;
+          transition: border-color 0.15s, color 0.15s;
+        }
+        .msg-back-btn:hover { border-color: rgba(197,160,90,0.35); color: var(--gold, #c5a05a); }
+
+        /* Toast notifications */
+        .msg-toast-container {
+          position: fixed;
+          bottom: 24px;
+          right: 24px;
+          z-index: 9999;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          pointer-events: none;
+        }
+        .msg-toast {
+          background: var(--bg1, #1a1117);
+          border: 0.5px solid rgba(197,160,90,0.3);
+          border-radius: var(--rl, 13px);
+          padding: 13px 15px;
+          width: 300px;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 0 0.5px rgba(197,160,90,0.08);
+          pointer-events: all;
+          cursor: pointer;
+          animation: toastIn 0.25s ease;
+          display: flex;
+          gap: 11px;
+          align-items: flex-start;
+        }
+        @keyframes toastIn {
+          from { opacity: 0; transform: translateY(12px) scale(0.97); }
+          to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .msg-toast-avatar {
+          width: 36px; height: 36px;
+          border-radius: 50%;
+          background: rgba(197,160,90,0.12);
+          border: 0.5px solid rgba(197,160,90,0.25);
+          display: flex; align-items: center; justify-content: center;
+          font-family: var(--serif, 'Cormorant Garamond', serif);
+          font-size: 15px;
+          color: var(--gold, #c5a05a);
+          flex-shrink: 0;
+        }
+        .msg-toast-name {
+          font: 600 13px var(--sans, 'Poppins', sans-serif);
+          color: var(--t, #ece8e1);
+          margin-bottom: 3px;
+        }
+        .msg-toast-body {
+          font: 400 12px var(--sans, 'Poppins', sans-serif);
+          color: var(--t2, rgba(255,255,255,0.45));
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          max-width: 210px;
+        }
+        .msg-toast-close {
+          margin-left: auto;
+          background: none; border: none;
+          color: var(--t3, rgba(255,255,255,0.25));
+          cursor: pointer; font-size: 14px;
+          padding: 0; line-height: 1;
+          flex-shrink: 0;
+        }
+        .msg-toast-close:hover { color: var(--t2, rgba(255,255,255,0.5)); }
 
         .msg-search-wrap {
           position: relative;
@@ -459,8 +579,44 @@ export default function MessagesPage() {
         }
       `}</style>
 
+      {/* ── Toast notifications ── */}
+      <div className="msg-toast-container">
+        {toasts.map(t => (
+          <div
+            key={t.id}
+            className="msg-toast"
+            onClick={() => {
+              const conv = conversations.find(c => c.other_id === t.otherId)
+              if (conv) openConversation(conv, messages, userId!)
+              setToasts(prev => prev.filter(x => x.id !== t.id))
+            }}
+          >
+            <div className="msg-toast-avatar">{t.name.charAt(0).toUpperCase()}</div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div className="msg-toast-name">{t.name}</div>
+              <div className="msg-toast-body">{t.body}</div>
+            </div>
+            <button
+              className="msg-toast-close"
+              onClick={e => { e.stopPropagation(); setToasts(prev => prev.filter(x => x.id !== t.id)) }}
+            >
+              <i className="ti ti-x" />
+            </button>
+          </div>
+        ))}
+      </div>
+
       {/* ── Left pane (thread list) ── */}
       <div className="msg-left-pane">
+        {/* Header with back button */}
+        <div className="msg-pane-header">
+          <span className="msg-pane-title">Messages</span>
+          <button className="msg-back-btn" onClick={() => window.history.length > 1 ? window.history.back() : window.location.href = '/dashboard'}>
+            <i className="ti ti-arrow-left" style={{ fontSize: '14px' }} />
+            Back
+          </button>
+        </div>
+
         {/* Search */}
         <div className="msg-search-wrap">
           <i className="ti ti-search msg-search-icon" />
