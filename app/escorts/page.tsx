@@ -297,7 +297,7 @@ export default function EscortsPage() {
   const [hairColor, setHairColor]       = useState('Any')
   const [build, setBuild]               = useState('Any')
   const [selectedServices, setSelectedServices] = useState<string[]>([])
-  const [sortBy, setSortBy]             = useState<'rating' | 'price_asc' | 'price_desc' | 'newest' | 'available'>('rating')
+  const [sortBy, setSortBy]             = useState<'rating' | 'price_asc' | 'price_desc' | 'newest' | 'available'>('newest')
 
   const fetchListings = useCallback(async () => {
     setLoading(true)

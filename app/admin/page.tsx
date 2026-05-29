@@ -73,9 +73,11 @@ export default function AdminPage() {
 
   async function toggleListing(id: string, field: string, current: boolean) {
     const supabase = createClient()
-    await supabase.from('listings').update({ [field]: !current }).eq('id', id)
-    setListings(prev => prev.map(l => l.id === id ? { ...l, [field]: !current } : l))
-    // Send approval/rejection email when toggling active status
+    const update: Record<string, unknown> = { [field]: !current }
+    // Keep status in sync with active state
+    if (field === 'active') update.status = !current ? 'approved' : 'pending'
+    await supabase.from('listings').update(update).eq('id', id)
+    setListings(prev => prev.map(l => l.id === id ? { ...l, ...update } : l))
     if (field === 'active') {
       fetch('/api/admin/listing-moderation', {
         method: 'POST',

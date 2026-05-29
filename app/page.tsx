@@ -1225,14 +1225,9 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         if (ddName) ddName.textContent = name
         if (ddEmail) ddEmail.textContent = profile?.email || session.user.email || ''
 
-        // Set "My Profile" link to user's public listing or profile page
-        ;(async () => {
-          const { data: myListings } = await (supabase as any).from('listings').select('id').eq('profile_id', session.user.id).eq('active', true).order('created_at', { ascending: false }).limit(1)
-          const myProfileLink = document.getElementById('ddMyProfileLink') as HTMLAnchorElement | null
-          if (myProfileLink) {
-            myProfileLink.href = myListings && myListings.length > 0 ? `/listings/${myListings[0].id}` : `/profile/${session.user.id}`
-          }
-        })()
+        // Set "My Profile" link to dashboard
+        const myProfileLink = document.getElementById('ddMyProfileLink') as HTMLAnchorElement | null
+        if (myProfileLink) myProfileLink.href = '/dashboard'
 
         // Admin: show Admin bar + swap nav button
         if (profile?.role === 'admin') {
