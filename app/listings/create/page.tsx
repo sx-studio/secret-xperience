@@ -37,11 +37,13 @@ const MEET_TYPES = [
   { value: 'both',    label: 'Both',     desc: 'Either works' },
 ]
 
+const ALL_SERVICES = ['69','Anal','BDSM','Body Massage','Couples','Cum on Body','Cum on Face','Deep Throat','Doggy Style','Domina','Duo','Erotic Massage','Facesitting','Fetish','Foot Worship','French Kissing','GFE','Golden Shower','Handjob','Kissing','Lap Dance','Massage','Mistress','Oral','Prostate Massage','Rimming','Roleplay','Spanking','Squirting','Strap-on','Striptease','Tantra','Thai Massage','Threesome','Toys']
+
 const SERVICE_TAGS: Record<string, string[]> = {
-  escorts:      ['GFE', 'BDSM', 'Massage', 'Tantric', 'Roleplay', 'Dinner Date', 'Travel Companion', 'Duo', 'Couples', 'Overnight', 'Striptease', 'Domination'],
-  companionship:['GFE', 'BDSM', 'Massage', 'Tantric', 'Roleplay', 'Dinner Date', 'Travel Companion', 'Duo', 'Couples', 'Overnight', 'Striptease', 'Domination'],
-  massage:      ['Swedish', 'Deep Tissue', 'Tantric', 'Hot Stone', 'Thai', 'Sports', 'Reflexology', 'Aromatherapy'],
-  domination:   ['GFE', 'BDSM', 'Roleplay', 'Dinner Date', 'Overnight', 'Domination'],
+  escorts:      ALL_SERVICES,
+  companionship:ALL_SERVICES,
+  massage:      ALL_SERVICES,
+  domination:   ALL_SERVICES,
 }
 
 const ETHNICITY_OPTIONS = ['Asian', 'Black', 'Caucasian', 'Hispanic', 'Indian', 'Middle Eastern', 'Mixed', 'Other']

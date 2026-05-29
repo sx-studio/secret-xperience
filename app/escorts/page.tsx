@@ -65,11 +65,7 @@ const HAIR_COLORS = ['Any', 'Black', 'Blonde', 'Brown', 'Red', 'Auburn', 'White/
 const BUILDS      = ['Any', 'Slim', 'Athletic', 'Curvy', 'Full-figured', 'Petite', 'Tall', 'Average', 'Other']
 const CITIES      = ['All Cities', 'Brussels', 'Antwerp', 'Ghent', 'Amsterdam', 'Berlin', 'Paris', 'Cologne', 'Rotterdam']
 
-const SERVICES_LIST = [
-  'GFE', 'BDSM', 'Massage', 'Tantric', 'Roleplay', 'Dinner Date',
-  'Travel Companion', 'Duo', 'Couples', 'Overnight', 'Striptease',
-  'Domination', 'Fetish', 'Oral', 'Anal', 'Bondage', 'Pegging',
-]
+const SERVICES_LIST = ['69','Anal','BDSM','Body Massage','Couples','Cum on Body','Cum on Face','Deep Throat','Doggy Style','Domina','Duo','Erotic Massage','Facesitting','Fetish','Foot Worship','French Kissing','GFE','Golden Shower','Handjob','Kissing','Lap Dance','Massage','Mistress','Oral','Prostate Massage','Rimming','Roleplay','Spanking','Squirting','Strap-on','Striptease','Tantra','Thai Massage','Threesome','Toys']
 
 /* ── Helpers ────────────────────────────────────────────── */
 function timeAgo(iso: string) {
