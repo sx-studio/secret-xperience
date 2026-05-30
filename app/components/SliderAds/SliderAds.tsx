@@ -38,6 +38,7 @@ export default function SliderAds() {
   const [current, setCurrent] = useState(0)
   const [paused, setPaused]   = useState(false)
   const [mountEl, setMountEl] = useState<Element | null>(null)
+  const [ctaHref, setCtaHref] = useState('/advertise')
 
   const stageRef    = useRef<HTMLDivElement>(null)
   const ambientRef  = useRef<HTMLDivElement>(null)
@@ -46,6 +47,14 @@ export default function SliderAds() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const animRef     = useRef(false)
   const stageW      = useRef(0)
+
+  // Resolve CTA destination based on auth state
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setCtaHref(session ? '/dashboard' : '/advertise')
+    })
+  }, [])
 
   // Load featured listings
   useEffect(() => {
@@ -343,7 +352,7 @@ export default function SliderAds() {
 
       {/* Advertise CTA */}
       <div style={{ marginTop:'0.35rem', textAlign:'right' }}>
-        <a href="/advertise" style={{ fontSize:10, color:'rgba(236,232,225,0.2)', textDecoration:'none', letterSpacing:'.04em', transition:'color .15s' }}
+        <a href={ctaHref} style={{ fontSize:10, color:'rgba(236,232,225,0.2)', textDecoration:'none', letterSpacing:'.04em', transition:'color .15s' }}
           onMouseOver={e => (e.currentTarget.style.color = accent)}
           onMouseOut={e => (e.currentTarget.style.color = 'rgba(236,232,225,0.2)')}>
           Advertise in this space · <span style={{ color:accent, fontWeight:700 }}>Get featured →</span>
