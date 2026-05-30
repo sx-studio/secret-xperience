@@ -651,10 +651,24 @@ export default function TokensPage() {
                       fontSize: 10,
                       color: 'rgba(197,160,90,0.6)',
                       fontWeight: 400,
-                      marginBottom: perks.length ? '1rem' : '1.25rem',
+                      marginBottom: '0.4rem',
                       letterSpacing: '0.02em',
                     }}>
                       {rate}
+                    </p>
+
+                    {/* Days of visibility at basic rate (3 tok/day) */}
+                    <p style={{
+                      fontSize: 10,
+                      color: 'rgba(236,232,225,0.3)',
+                      fontWeight: 300,
+                      marginBottom: perks.length ? '1rem' : '1.25rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 4,
+                    }}>
+                      <i className="ti ti-calendar" style={{ fontSize: 10 }} />
+                      ≈ {Math.floor(total / 3)} days visibility at basic tier
                     </p>
 
                     {/* Perks */}
