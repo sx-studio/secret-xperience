@@ -24,7 +24,8 @@ export default function LoginPage() {
   const [showPass, setShowPass] = useState(false)
   const [shake, setShake]       = useState(false)
   const [success, setSuccess]   = useState(false)
-  const [termsChecked, setTermsChecked] = useState(false)
+  const [termsChecked, setTermsChecked]         = useState(false)
+  const [newsletterChecked, setNewsletterChecked] = useState(true)
 
   useEffect(() => {
     if (error) {
@@ -66,7 +67,7 @@ export default function LoginPage() {
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, fullName, role }),
+        body: JSON.stringify({ email, password, fullName, role, newsletter: newsletterChecked }),
       })
       const json = await res.json()
       if (!res.ok) {
@@ -711,40 +712,36 @@ export default function LoginPage() {
                     </div>
                   </div>
 
-                  {/* Terms (signup only) */}
+                  {/* Terms + Newsletter (signup only) */}
                   {mode === 'signup' && (
-                    <label style={{
-                      display: 'flex',
-                      alignItems: 'flex-start',
-                      gap: 10,
-                      cursor: 'pointer',
-                      marginBottom: 4,
-                    }}>
-                      <input
-                        type="checkbox"
-                        checked={termsChecked}
-                        onChange={e => setTermsChecked(e.target.checked)}
-                        required
-                        style={{
-                          width: 16,
-                          height: 16,
-                          marginTop: 2,
-                          accentColor: '#c5a05a',
-                          flexShrink: 0,
-                        }}
-                      />
-                      <span style={{
-                        fontSize: 12,
-                        color: 'rgba(236,232,225,0.45)',
-                        lineHeight: 1.55,
-                        fontWeight: 300,
-                      }}>
-                        I&apos;m 18 or older and accept the{' '}
-                        <a href="/terms" style={{ color: '#c5a05a', textDecoration: 'none' }}>Members&apos; Code</a>
-                        {' '}and{' '}
-                        <a href="/privacy" style={{ color: '#c5a05a', textDecoration: 'none' }}>Privacy Policy</a>
-                      </span>
-                    </label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 4 }}>
+                      <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={termsChecked}
+                          onChange={e => setTermsChecked(e.target.checked)}
+                          required
+                          style={{ width: 16, height: 16, marginTop: 2, accentColor: '#c5a05a', flexShrink: 0 }}
+                        />
+                        <span style={{ fontSize: 12, color: 'rgba(236,232,225,0.45)', lineHeight: 1.55, fontWeight: 300 }}>
+                          I&apos;m 18 or older and accept the{' '}
+                          <a href="/terms" style={{ color: '#c5a05a', textDecoration: 'none' }}>Members&apos; Code</a>
+                          {' '}and{' '}
+                          <a href="/privacy" style={{ color: '#c5a05a', textDecoration: 'none' }}>Privacy Policy</a>
+                        </span>
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={newsletterChecked}
+                          onChange={e => setNewsletterChecked(e.target.checked)}
+                          style={{ width: 16, height: 16, marginTop: 2, accentColor: '#c5a05a', flexShrink: 0 }}
+                        />
+                        <span style={{ fontSize: 12, color: 'rgba(236,232,225,0.45)', lineHeight: 1.55, fontWeight: 300 }}>
+                          Send me curated updates — new listings, private events &amp; exclusive offers
+                        </span>
+                      </label>
+                    </div>
                   )}
 
                   {/* Error */}

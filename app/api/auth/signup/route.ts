@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
   const { allowed } = rateLimit(ip, 'signup', 5, 60_000)
   if (!allowed) return NextResponse.json({ error: 'Too many attempts. Please wait a moment.' }, { status: 429 })
   try {
-    const { email, password, fullName, role } = await request.json()
+    const { email, password, fullName, role, newsletter } = await request.json()
 
     const VALID_ROLES = ['client', 'provider']
     if (!email || !password || !role) {
@@ -73,6 +73,15 @@ export async function POST(request: NextRequest) {
 
     if (authError) {
       return NextResponse.json({ error: authError.message }, { status: 400 })
+    }
+
+    // Newsletter opt-in
+    if (newsletter) {
+      supabase
+        .from('newsletter_subscribers')
+        .upsert({ email: email.toLowerCase().trim(), subscribed_at: new Date().toISOString() }, { onConflict: 'email', ignoreDuplicates: true })
+        .then(() => {})
+        .catch(() => {})
     }
 
     // Fire-and-forget — don't block signup on email delivery
