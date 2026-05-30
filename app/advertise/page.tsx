@@ -24,69 +24,70 @@ const benefits = [
 
 const plans = [
   {
-    name: 'Free',
+    name: 'Basic',
     price: '€0',
-    period: 'forever',
-    desc: 'Get started and test the platform.',
+    period: 'to get started',
+    desc: 'Create your profile and go live for free. Use tokens to boost visibility.',
     cta: 'Create free profile',
+    ctaHref: '/login',
     ctaStyle: 'ghost',
     features: [
-      'Basic profile page',
-      'Up to 3 photos',
-      'Contact form',
+      'Full profile with photos',
       'Listed in search results',
-      'Standard placement',
+      'Booking requests',
+      'Encrypted messaging',
+      'Identity verification',
+      '7-day free trial included',
     ],
-    missing: ['Verified badge', 'Priority placement', 'Analytics', 'Booking calendar', 'Featured on homepage'],
+    missing: ['Priority placement', 'Homepage slider', 'Featured badge'],
   },
   {
-    name: 'Premium',
+    name: 'Featured',
     price: '€29',
-    period: 'per month',
-    desc: 'For serious providers ready to grow.',
-    cta: 'Start Premium',
+    period: 'for 7 days',
+    desc: 'Gold-bordered card, priority placement in every category and search page.',
+    cta: 'Get featured',
+    ctaHref: '/boost',
     ctaStyle: 'gold',
     highlight: true,
     features: [
-      'Everything in Free',
-      'Verified badge',
-      'Up to 20 photos + video',
-      'Priority placement in search',
+      'Everything in Basic',
+      'Gold ✦ Featured badge',
+      'Priority in search & category pages',
       'Booking calendar',
       'Analytics dashboard',
-      'Encrypted messaging',
       'Client reviews',
     ],
-    missing: ['Featured on homepage', 'Dedicated account manager'],
+    missing: ['Homepage slider placement'],
   },
   {
-    name: 'VIP',
+    name: 'Slider',
     price: '€79',
-    period: 'per month',
-    desc: 'Maximum visibility across Europe.',
-    cta: 'Go VIP',
+    period: 'for 30 days',
+    desc: 'Appear in the homepage featured slider — maximum visibility to every visitor.',
+    cta: 'Get in the slider',
+    ctaHref: '/boost',
     ctaStyle: 'gold',
     features: [
-      'Everything in Premium',
-      'Featured on homepage',
-      'Top of category search',
+      'Everything in Featured',
+      'Homepage featured slider',
+      'Top of every category page',
       'Featured city pages',
-      'Dedicated account manager',
-      'Social media promotion',
-      'Early access to new features',
-      'Custom profile URL',
+      'Maximum exposure for 30 days',
     ],
     missing: [],
   },
 ]
 
 const faqs = [
-  { q: 'How quickly can I get my profile live?', a: 'Free profiles go live within minutes. Premium and VIP profiles are reviewed and verified within 24 hours.' },
-  { q: 'What payment methods do you accept?', a: 'We accept all major credit cards through our adult-friendly payment processor. Bank transfer available for VIP plans.' },
+  { q: 'How quickly can I get my profile live?', a: 'Profiles go live within minutes after identity verification is approved — usually within a few hours.' },
+  { q: 'What does the 7-day free trial include?', a: 'Every new listing gets a 7-day free trial period where your listing stays active at no cost. After 7 days, tokens are deducted daily from your balance to keep it live.' },
+  { q: 'What payment methods do you accept?', a: 'Token packages can be purchased by card. Featured placement boosts are processed via Stripe.' },
+  { q: 'How do tokens work?', a: 'Tokens are the platform currency — 1 token = €0.10. They are deducted daily to keep your listing active (3–15 tokens/day depending on tier) and used for flash boosts. Packages start from €2.50.' },
   { q: 'Is my personal information protected?', a: 'Yes. We never display your real name, address or personal contact details publicly. All client communication goes through our encrypted messaging system.' },
-  { q: 'Can I list in multiple cities?', a: 'Yes. Premium and VIP profiles can be listed in multiple cities across Europe simultaneously.' },
-  { q: 'What happens if I want to cancel?', a: 'You can cancel anytime. Your profile stays live until the end of your billing period with no cancellation fees.' },
-  { q: 'Do you accept creators from all European countries?', a: 'Yes. We currently serve Belgium, Netherlands, Germany, France, Spain, Czech Republic, Hungary, Austria and more.' },
+  { q: 'Can I list in multiple cities?', a: 'Yes. You can create listings in any city across Europe and manage them from one dashboard.' },
+  { q: 'What is the difference between featured and slider?', a: 'Featured (€29/7 days) gives you a gold badge and priority in category/search pages. Slider (€79/30 days) adds placement in the homepage featured slider seen by every visitor.' },
+  { q: 'Do you accept providers from all European countries?', a: 'Yes. We currently serve Belgium, Netherlands, Germany, France, Spain, Czech Republic, Hungary, Austria and more.' },
 ]
 
 export default function AdvertisePage() {
@@ -229,7 +230,7 @@ export default function AdvertisePage() {
                   </div>
                   <p style={{ fontSize: '13px', color: 'var(--t3)', margin: '.75rem 0 0' }}>{p.desc}</p>
                 </div>
-                <Link href="/login?next=/listings/create" style={{ display: 'block', textAlign: 'center', padding: '12px', borderRadius: 'var(--r)', fontSize: '14px', fontWeight: 600, textDecoration: 'none', marginBottom: '1.75rem', background: p.ctaStyle === 'gold' ? 'linear-gradient(135deg,var(--gold),var(--goldd))' : 'transparent', border: p.ctaStyle === 'ghost' ? '0.5px solid var(--b2)' : 'none', color: p.ctaStyle === 'gold' ? '#0a0a0a' : 'var(--t2)' }}>
+                <Link href={(p as any).ctaHref || '/login?next=/listings/create'} style={{ display: 'block', textAlign: 'center', padding: '12px', borderRadius: 'var(--r)', fontSize: '14px', fontWeight: 600, textDecoration: 'none', marginBottom: '1.75rem', background: p.ctaStyle === 'gold' ? 'linear-gradient(135deg,var(--gold),var(--goldd))' : 'transparent', border: p.ctaStyle === 'ghost' ? '0.5px solid var(--b2)' : 'none', color: p.ctaStyle === 'gold' ? '#0a0a0a' : 'var(--t2)' }}>
                   {p.cta}
                 </Link>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>

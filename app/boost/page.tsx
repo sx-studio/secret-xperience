@@ -135,22 +135,9 @@ export default function BoostPage() {
             </div>
           ) : (
             <>
-              {/* Plan selection */}
-              <div className="boost-grid">
-                {PLANS.map(p => (
-                  <div key={p.key} className={`plan-card${selectedPlan === p.key ? ' selected' : ''}`} onClick={() => setPlan(p.key as 'week' | 'month')}>
-                    {p.badge && <div className="plan-badge">{p.badge}</div>}
-                    <div className="plan-label">{p.label}</div>
-                    <div className="plan-price">{p.price}</div>
-                    <div className="plan-per">{p.per}</div>
-                    <div className="plan-desc">{p.description}</div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Listing picker */}
-              <div style={{ marginBottom: '0.5rem' }}>
-                <div className="section-label">Select listing to feature</div>
+              {/* Step 1: Listing picker */}
+              <div style={{ marginBottom: '2rem' }}>
+                <div className="section-label">Step 1 — Choose your listing</div>
                 <select
                   className="listing-select"
                   value={selectedListing}
@@ -169,9 +156,23 @@ export default function BoostPage() {
                 )}
               </div>
 
+              {/* Step 2: Plan selection */}
+              <div className="section-label">Step 2 — Choose a duration</div>
+              <div className="boost-grid">
+                {PLANS.map(p => (
+                  <div key={p.key} className={`plan-card${selectedPlan === p.key ? ' selected' : ''}`} onClick={() => setPlan(p.key as 'week' | 'month')}>
+                    {p.badge && <div className="plan-badge">{p.badge}</div>}
+                    <div className="plan-label">{p.label}</div>
+                    <div className="plan-price">{p.price}</div>
+                    <div className="plan-per">{p.per}</div>
+                    <div className="plan-desc">{p.description}</div>
+                  </div>
+                ))}
+              </div>
+
               {/* CTA */}
               <button className="checkout-btn" disabled={submitting || !selectedListing} onClick={checkout}>
-                {submitting ? 'Redirecting to payment…' : `Feature for ${selectedPlan === 'week' ? '€29 · 7 days' : '€79 · 30 days'} →`}
+                {submitting ? 'Redirecting to payment…' : `Feature "${selectedListingData?.title || ''}" for ${selectedPlan === 'week' ? '€29 · 7 days' : '€79 · 30 days'} →`}
               </button>
 
               {error && <div className="boost-error">{error}</div>}
