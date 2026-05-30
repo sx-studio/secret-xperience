@@ -56,8 +56,16 @@ export async function POST(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Notify provider (fire-and-forget)
+  // In-app notification for provider + email (fire-and-forget)
   const origin = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.secretxperience.eu'
+  admin.from('notifications').insert({
+    user_id:    listing.profile_id,
+    type:       'booking_new',
+    title:      'New booking request',
+    body:       `Someone wants to book "${listing.title}"${date ? ` on ${date}` : ''}.`,
+    link:       '/dashboard',
+  }).then(() => {})
+
   fetch(`${origin}/api/notify`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.INTERNAL_SECRET || 'sx-internal'}` },
