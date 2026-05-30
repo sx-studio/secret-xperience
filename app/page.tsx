@@ -2315,6 +2315,20 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         <div class="tab" role="tab" style="font-family:var(--serif);font-size:15px;">My saves</div>
       </div>
 
+      <!-- Health, Safety & Legal notice bar -->
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;">
+        <a href="/medical" style="display:flex;align-items:center;gap:10px;background:rgba(38,212,160,0.07);border:0.5px solid rgba(38,212,160,0.2);border-radius:10px;padding:10px 16px;text-decoration:none;transition:background .2s;" onmouseover="this.style.background='rgba(38,212,160,0.12)'" onmouseout="this.style.background='rgba(38,212,160,0.07)'">
+          <i class="ti ti-heart-rate-monitor" style="color:#26d4a0;font-size:18px;flex-shrink:0;" aria-hidden="true"></i>
+          <span style="font-size:13px;color:rgba(236,232,225,0.8);font-family:var(--sans);">Health &amp; safety matter. Read our <span style="color:#26d4a0;font-weight:500;">Medical Information &amp; Resources</span> — sexual health, safe sex &amp; support contacts.</span>
+          <i class="ti ti-arrow-right" style="color:#26d4a0;font-size:14px;margin-left:auto;flex-shrink:0;" aria-hidden="true"></i>
+        </a>
+        <a href="/regulations" style="display:flex;align-items:center;gap:10px;background:rgba(197,160,90,0.06);border:0.5px solid rgba(197,160,90,0.18);border-radius:10px;padding:10px 16px;text-decoration:none;transition:background .2s;" onmouseover="this.style.background='rgba(197,160,90,0.11)'" onmouseout="this.style.background='rgba(197,160,90,0.06)'">
+          <i class="ti ti-scale" style="color:#c5a05a;font-size:18px;flex-shrink:0;" aria-hidden="true"></i>
+          <span style="font-size:13px;color:rgba(236,232,225,0.8);font-family:var(--sans);">Know your rights. Our <span style="color:#c5a05a;font-weight:500;">Regulation &amp; Legal Rights</span> page covers EU/BE/NL/DE sex work law and provider protections.</span>
+          <i class="ti ti-arrow-right" style="color:#c5a05a;font-size:14px;margin-left:auto;flex-shrink:0;" aria-hidden="true"></i>
+        </a>
+      </div>
+
       <!-- Filter toggle (mobile) -->
       <button class="filter-toggle" id="filterToggle" aria-label="Open filters">
         <i class="ti ti-adjustments-horizontal" aria-hidden="true"></i> Filters &amp; sort
@@ -2461,61 +2475,6 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         <button id="loadMoreBtn" style="display:none;padding:10px 28px;background:transparent;border:0.5px solid rgba(197,160,90,0.4);border-radius:10px;color:#c5a05a;font-size:13px;cursor:pointer;font-family:inherit;letter-spacing:0.06em" onclick="(window as any).__loadMore()">Load more listings</button>
       </div>
 
-      <!-- User Profiles -->
-      <div class="sec-title" style="font-family:var(--serif);font-size:26px;font-weight:500;letter-spacing:0.01em;color:var(--t);">User profiles</div>
-      <div class="profiles">
-
-        <div class="pcard" tabindex="0">
-          <div class="av" style="background:rgba(100,80,200,.18);color:#b0a0f8">SA</div>
-          <div class="pinfo">
-            <div class="pn">Sophia A.</div>
-            <div class="pr">Independent Escort · Private</div>
-            <div class="pstats">
-              <span class="pst"><i class="ti ti-star-filled" style="color:var(--gold)" aria-hidden="true"></i> 4.9</span>
-              <span class="pst"><i class="ti ti-eye" aria-hidden="true"></i> 2.1k views</span>
-              <span class="pst"><i class="ti ti-circle-check" style="color:#26d4a0" aria-hidden="true"></i> Verified</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="pcard" tabindex="0">
-          <div class="av" style="background:var(--tbg);color:#1dc9a0">LC</div>
-          <div class="pinfo">
-            <div class="pn">Luna Creative</div>
-            <div class="pr">Creator · Subscription</div>
-            <div class="pstats">
-              <span class="pst"><i class="ti ti-star-filled" style="color:var(--gold)" aria-hidden="true"></i> 4.8</span>
-              <span class="pst"><i class="ti ti-users" aria-hidden="true"></i> 840 subscribers</span>
-              <span class="pst"><i class="ti ti-circle-check" style="color:#26d4a0" aria-hidden="true"></i> Verified</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="pcard" tabindex="0">
-          <div class="av" style="background:var(--pbg);color:#e07aa0">MR</div>
-          <div class="pinfo">
-            <div class="pn">Marc R.</div>
-            <div class="pr">Registered User · Gold Member</div>
-            <div class="pstats">
-              <span class="pst"><i class="ti ti-heart" aria-hidden="true"></i> 32 saves</span>
-              <span class="pst"><i class="ti ti-calendar" aria-hidden="true"></i> 12 bookings</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="pcard admin-p" tabindex="0">
-          <div class="av" style="background:var(--gbg);color:var(--gold)">SX</div>
-          <div class="pinfo">
-            <div class="pn">Admin · SecretXperience</div>
-            <div class="pr" style="color:var(--gold)">Super Admin</div>
-            <div class="pstats">
-              <span class="pst"><i class="ti ti-settings" aria-hidden="true"></i> Full access</span>
-              <span class="pst"><i class="ti ti-shield-check" style="color:var(--gold)" aria-hidden="true"></i> Moderator</span>
-            </div>
-          </div>
-        </div>
-
-      </div>
     </main>
   </div>
 
