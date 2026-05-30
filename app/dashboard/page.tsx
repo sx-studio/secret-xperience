@@ -99,13 +99,6 @@ function getInitials(name: string): string {
     .join('')
 }
 
-function getDailyRate(tier: string): number {
-  if (tier === 'premium')  return 15
-  if (tier === 'slider')   return 10
-  if (tier === 'featured') return 6
-  return 3
-}
-
 function StatusDot({ active }: { active: boolean }) {
   return (
     <span style={{
@@ -369,13 +362,10 @@ export default function DashboardPage() {
       })
       const json = await res.json()
       if (json.ok) {
-        setListings(prev => prev.map(l => l.id === listingId ? { ...l, active: true } : l))
-        if (json.newBalance != null) setTokenBalance(json.newBalance)
-        setNotification('✦ Listing reactivated!')
-      } else if (res.status === 402) {
-        setNotification(`Insufficient tokens — need ${json.required}, have ${json.balance}. Top up at /tokens.`)
+        setListings(prev => prev.map(l => l.id === listingId ? { ...l, active: true, status: 'approved' } : l))
+        setNotification('✓ Your listing is live again.')
       } else {
-        setNotification(json.error || 'Reactivation failed.')
+        setNotification(json.error || 'Could not set listing live.')
       }
     } catch {
       setNotification('Network error — please try again.')
@@ -1477,13 +1467,6 @@ export default function DashboardPage() {
                               : `up to €${listing.price_to}`}
                           </span>
                         )}
-                        {/* Daily token burn rate — visible for active listings past trial, as a reminder */}
-                        {listing.active && (!listing.trial_ends_at || new Date(listing.trial_ends_at) < new Date()) && (
-                          <span style={{ fontSize: '11px', color: 'rgba(197,160,90,0.5)', fontFamily: 'var(--sans)', display: 'flex', alignItems: 'center', gap: 3 }}>
-                            <i className="ti ti-coin" style={{ fontSize: 10 }} />
-                            {getDailyRate(listing.tier)}/day
-                          </span>
-                        )}
                       </div>
                     </div>
 
@@ -1507,15 +1490,15 @@ export default function DashboardPage() {
                       <span className={listing.active ? 'db-status-pill-active' : 'db-status-pill-inactive'}>
                         {listing.active ? 'Live' : 'Inactive'}
                       </span>
-                      {/* Reactivate button — only when inactive AND free trial has expired */}
-                      {!listing.active && listing.trial_ends_at && new Date(listing.trial_ends_at) < new Date() && (
+                      {/* Reactivate button — free; basic listings are always free to keep live */}
+                      {!listing.active && (
                         <button
                           onClick={() => reactivateListing(listing.id)}
                           disabled={activatingListing === listing.id}
-                          title={`Costs ${getDailyRate(listing.tier)} tokens/day`}
-                          style={{ padding: '5px 12px', borderRadius: 'var(--r, 8px)', border: '0.5px solid rgba(197,160,90,0.6)', background: activatingListing === listing.id ? 'rgba(197,160,90,0.1)' : 'rgba(197,160,90,0.12)', color: 'var(--gold, #c5a05a)', cursor: activatingListing === listing.id ? 'default' : 'pointer', fontSize: '12px', fontWeight: 600, fontFamily: 'var(--sans)', letterSpacing: '0.04em', transition: 'all .15s', opacity: activatingListing === listing.id ? 0.6 : 1 }}
+                          title="Set your listing live again — free"
+                          style={{ padding: '5px 12px', borderRadius: 'var(--r, 8px)', border: '0.5px solid rgba(38,212,160,0.5)', background: activatingListing === listing.id ? 'rgba(38,212,160,0.08)' : 'rgba(38,212,160,0.12)', color: 'var(--verified, #1dc9a0)', cursor: activatingListing === listing.id ? 'default' : 'pointer', fontSize: '12px', fontWeight: 600, fontFamily: 'var(--sans)', letterSpacing: '0.04em', transition: 'all .15s', opacity: activatingListing === listing.id ? 0.6 : 1 }}
                         >
-                          {activatingListing === listing.id ? '…' : `Reactivate · ${getDailyRate(listing.tier)} tok/day`}
+                          {activatingListing === listing.id ? '…' : 'Set live'}
                         </button>
                       )}
                       <a

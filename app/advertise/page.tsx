@@ -37,7 +37,7 @@ const plans = [
       'Booking requests',
       'Encrypted messaging',
       'Identity verification',
-      '7-day free trial included',
+      'Stays live for free — no expiry',
     ],
     missing: ['Priority placement', 'Homepage slider', 'Featured badge'],
   },
@@ -81,9 +81,9 @@ const plans = [
 
 const faqs = [
   { q: 'How quickly can I get my profile live?', a: 'Profiles go live within minutes after identity verification is approved — usually within a few hours.' },
-  { q: 'What does the 7-day free trial include?', a: 'Every new listing gets a 7-day free trial period where your listing stays active at no cost. After 7 days, tokens are deducted daily from your balance to keep it live.' },
-  { q: 'What payment methods do you accept?', a: 'Token packages can be purchased by card. Featured placement boosts are processed via Stripe.' },
-  { q: 'How do tokens work?', a: 'Tokens are the platform currency — 1 token = €0.10. They are deducted daily to keep your listing active (3–15 tokens/day depending on tier) and used for flash boosts. Packages start from €2.50.' },
+  { q: 'Does my basic listing ever expire?', a: 'No. A basic listing is completely free and stays live permanently — set it up once and you never need to re-list or pay to keep it visible.' },
+  { q: 'What payment methods do you accept?', a: 'Featured placement boosts are processed via Stripe (card). Token packages for flash boosts and upgrades can also be purchased by card.' },
+  { q: 'How do tokens work?', a: 'Tokens are an optional platform currency — 1 token = €0.10. They are used for flash boosts (a short visibility bump) and to upgrade a listing tier. Your basic listing never costs tokens. Packages start from €2.50.' },
   { q: 'Is my personal information protected?', a: 'Yes. We never display your real name, address or personal contact details publicly. All client communication goes through our encrypted messaging system.' },
   { q: 'Can I list in multiple cities?', a: 'Yes. You can create listings in any city across Europe and manage them from one dashboard.' },
   { q: 'What is the difference between featured and slider?', a: 'Featured (€29/7 days) gives you a gold badge and priority in category/search pages. Slider (€79/30 days) adds placement in the homepage featured slider seen by every visitor.' },

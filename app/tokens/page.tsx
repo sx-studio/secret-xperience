@@ -50,7 +50,7 @@ const FALLBACK_PACKAGES = [
     price_eur: 2.50,
     popular: false,
     rate: '€0.10/token',
-    perks: ['Tip a creator', 'Top up your balance'],
+    perks: ['Tip a creator', 'One 6-hour flash boost'],
   },
   {
     id: 'basic',
@@ -61,7 +61,7 @@ const FALLBACK_PACKAGES = [
     price_eur: 5,
     popular: false,
     rate: '€0.10/token',
-    perks: ['17 days basic listing', 'Flash boost a listing'],
+    perks: ['One Featured listing (7 days)', 'Two flash boosts'],
   },
   {
     id: 'standard',
@@ -72,7 +72,7 @@ const FALLBACK_PACKAGES = [
     price_eur: 15,
     popular: false,
     rate: '€0.10/token',
-    perks: ['50 days basic listing', 'Featured listing for 7 days'],
+    perks: ['One Premium listing (30 days)', 'or Featured + Slider for a week'],
   },
   {
     id: 'popular',
