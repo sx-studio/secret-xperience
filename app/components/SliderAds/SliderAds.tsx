@@ -351,11 +351,26 @@ export default function SliderAds() {
       </div>
 
       {/* Advertise CTA */}
-      <div style={{ marginTop:'0.35rem', textAlign:'right' }}>
-        <a href={ctaHref} style={{ fontSize:10, color:'rgba(236,232,225,0.2)', textDecoration:'none', letterSpacing:'.04em', transition:'color .15s' }}
-          onMouseOver={e => (e.currentTarget.style.color = accent)}
-          onMouseOut={e => (e.currentTarget.style.color = 'rgba(236,232,225,0.2)')}>
-          Advertise in this space · <span style={{ color:accent, fontWeight:700 }}>Get featured →</span>
+      <div style={{ marginTop:'0.85rem', display:'flex', alignItems:'center', justifyContent:'center', gap:12, flexWrap:'wrap' }}>
+        <span style={{ fontSize:11, color:'rgba(236,232,225,0.4)', letterSpacing:'.04em', fontFamily:'var(--sans)' }}>
+          This could be your listing
+        </span>
+        <a href={ctaHref}
+          style={{
+            display:'inline-flex', alignItems:'center', gap:7,
+            fontSize:12.5, fontWeight:700, letterSpacing:'.05em', textDecoration:'none',
+            color:'#0a0712',
+            background:`linear-gradient(135deg, ${accent}, ${accent}cc)`,
+            border:`1px solid ${accent}`,
+            borderRadius:24, padding:'9px 20px',
+            boxShadow:`0 4px 18px ${accent}55, inset 0 1px 0 rgba(255,255,255,0.25)`,
+            transition:'transform .18s ease, box-shadow .18s ease',
+            whiteSpace:'nowrap', cursor:'pointer',
+          }}
+          onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 7px 26px ${accent}88, inset 0 1px 0 rgba(255,255,255,0.3)` }}
+          onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 4px 18px ${accent}55, inset 0 1px 0 rgba(255,255,255,0.25)` }}>
+          <i className="ti ti-sparkles" style={{ fontSize:14 }} aria-hidden="true" />
+          Feature your listing
         </a>
       </div>
     </div>
