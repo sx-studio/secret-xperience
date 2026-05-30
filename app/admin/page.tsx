@@ -313,16 +313,18 @@ export default function AdminPage() {
                     <tr key={l.id} className="adm-tr" style={{ borderTop: '0.5px solid var(--b, rgba(255,255,255,0.04))', color: 'var(--t, #ece8e1)', transition: 'background var(--t-fast, .1s)' }}>
                       <td style={{ padding: '14px 16px' }}>
                         <a href={`/listings/${l.id}`} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 500, color: l.active ? 'var(--t, #ece8e1)' : 'var(--t3, #4c4a47)', textDecoration: 'none', transition: 'color 0.15s' }} onMouseEnter={e => (e.currentTarget.style.color = 'var(--gold, #c5a05a)')} onMouseLeave={e => (e.currentTarget.style.color = l.active ? 'var(--t, #ece8e1)' : 'var(--t3, #4c4a47)')}>{l.title} ↗</a>
-                        {!l.active && <div style={{ font: '500 10px/1 var(--sans)', color: 'var(--wine, #b84d72)', marginTop: '3px', letterSpacing: '0.06em' }}>● Hidden</div>}
+                        {l.city && <div style={{ font: '11px/1 var(--sans)', color: 'var(--t3, #4c4a47)', marginTop: '3px' }}><i className="ti ti-map-pin" style={{ fontSize: 10 }} /> {l.city}{l.country ? `, ${l.country}` : ''}</div>}
                       </td>
                       <td style={{ padding: '14px 16px' }}><span style={{ background: 'rgba(255,255,255,0.05)', padding: '3px 8px', borderRadius: '20px', font: '500 11px/1 var(--sans)', color: 'var(--t2, #8c8880)', letterSpacing: '0.06em' }}>{l.category}</span></td>
                       <td style={{ padding: '14px 16px', color: 'var(--t2, #8c8880)', fontSize: '12px' }}>{l.profiles?.full_name || l.profiles?.username || '—'}</td>
                       <td style={{ padding: '14px 16px', color: 'var(--gold, #c5a05a)', fontSize: '12px', fontWeight: 500 }}>{l.price_from ? `€${l.price_from}` : '—'}</td>
                       <td style={{ padding: '14px 16px' }}>
-                        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', alignItems: 'center' }}>
+                          <span style={{ background: l.active ? 'rgba(38,212,160,0.12)' : 'rgba(184,77,114,0.12)', color: l.active ? 'var(--verified, #1dc9a0)' : 'var(--wine, #b84d72)', padding: '2px 8px', borderRadius: '20px', font: '700 10px/1 var(--sans)', letterSpacing: '0.1em' }}>{l.active ? '● Live' : '● Hidden'}</span>
                           {l.verified && <span style={{ background: 'rgba(38,212,160,0.12)', color: 'var(--verified, #1dc9a0)', padding: '2px 7px', borderRadius: '20px', font: '600 10px/1 var(--sans)', letterSpacing: '0.08em' }}>Verified</span>}
                           {l.premium && <span style={{ background: 'var(--gbg)', color: 'var(--gold)', padding: '2px 7px', borderRadius: '20px', font: '600 10px/1 var(--sans)', letterSpacing: '0.08em' }}>Premium</span>}
                           {l.trending && <span style={{ background: 'rgba(176,160,248,0.12)', color: '#b0a0f8', padding: '2px 7px', borderRadius: '20px', font: '600 10px/1 var(--sans)', letterSpacing: '0.08em' }}>Trending</span>}
+                          {l.active && l.status && l.status !== 'approved' && <span style={{ background: 'rgba(245,168,38,0.12)', color: '#f5a826', padding: '2px 7px', borderRadius: '20px', font: '600 10px/1 var(--sans)', letterSpacing: '0.08em' }}>{l.status}</span>}
                         </div>
                       </td>
                       <td style={{ padding: '14px 16px' }}>
