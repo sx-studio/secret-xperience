@@ -48,8 +48,33 @@ if (_ageOk > Date.now()) {
     if (_hasSession) dismissGate();
   } catch(e) {}
 }
+function showRoleStep(){
+  var box = gate ? gate.querySelector('.gate-box') : null;
+  if (!box) { dismissGate(); return; }
+  box.innerHTML = '<div style="position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:200px;height:200px;background:radial-gradient(circle,rgba(197,160,90,0.15) 0%,transparent 70%);pointer-events:none;"></div>'
+    + '<div style="font:600 11px/1 var(--sans);letter-spacing:0.32em;color:var(--gold);text-align:center;margin-bottom:1.25rem;text-transform:uppercase;position:relative;z-index:2;">Welcome</div>'
+    + '<h2 style="font-family:var(--serif);font-size:24px;font-weight:400;text-align:center;margin:0 0 0.4rem;position:relative;z-index:2;">How would you like to explore?</h2>'
+    + '<p style="text-align:center;margin:0 auto 1.5rem;color:var(--t2);font-size:13px;line-height:1.6;position:relative;z-index:2;max-width:300px;">You can switch anytime — this just tailors your experience.</p>'
+    + '<div style="display:flex;flex-direction:column;gap:12px;position:relative;z-index:2;">'
+    + '<button id="roleVisitor" style="display:flex;align-items:center;gap:14px;width:100%;padding:16px 18px;background:var(--bg2);border:0.5px solid var(--b2);border-radius:var(--rl);cursor:pointer;text-align:left;transition:border-color .15s,background .15s;font-family:var(--sans);">'
+    +   '<i class="ti ti-eye" style="font-size:26px;color:var(--gold);flex-shrink:0;"></i>'
+    +   '<span><span style="display:block;font-size:15px;font-weight:600;color:var(--t);margin-bottom:2px;">I am here to browse</span><span style="display:block;font-size:12px;color:var(--t3);">Discover companions, venues & experiences</span></span>'
+    + '</button>'
+    + '<button id="roleProvider" style="display:flex;align-items:center;gap:14px;width:100%;padding:16px 18px;background:var(--bg2);border:0.5px solid var(--b2);border-radius:var(--rl);cursor:pointer;text-align:left;transition:border-color .15s,background .15s;font-family:var(--sans);">'
+    +   '<i class="ti ti-briefcase" style="font-size:26px;color:var(--gold);flex-shrink:0;"></i>'
+    +   '<span><span style="display:block;font-size:15px;font-weight:600;color:var(--t);margin-bottom:2px;">I offer a service</span><span style="display:block;font-size:12px;color:var(--t3);">List as a provider, venue or creator — free</span></span>'
+    + '</button>'
+    + '</div>';
+  var hov = function(b){ b.addEventListener('mouseover',function(){b.style.borderColor='var(--gold)';b.style.background='var(--gbg)';}); b.addEventListener('mouseout',function(){b.style.borderColor='var(--b2)';b.style.background='var(--bg2)';}); };
+  var bv = document.getElementById('roleVisitor');
+  var bp = document.getElementById('roleProvider');
+  if (bv) { hov(bv); bv.addEventListener('click', function(){ try{localStorage.setItem('sx_role','visitor');}catch(e){} dismissGate(); }); }
+  if (bp) { hov(bp); bp.addEventListener('click', function(){ try{localStorage.setItem('sx_role','provider');}catch(e){} dismissGate(); window.location.href='/advertise'; }); }
+}
 document.getElementById('gyes').addEventListener('click', function(){
-  dismissGate();
+  // Lock in age verification immediately, then offer role choice
+  try { localStorage.setItem('sx_age_ok', String(Date.now() + 30 * 24 * 60 * 60 * 1000)); } catch(e){}
+  showRoleStep();
 });
 document.getElementById('gno').addEventListener('click', function(){
   gate.innerHTML = '<div style="position:relative;z-index:2;background:var(--bg1);border:0.5px solid var(--b3);border-radius:var(--rxl);padding:2.5rem 2rem;max-width:360px;width:90%;text-align:center"><div style="font-family:var(--serif);font-size:22px;color:var(--t);margin-bottom:.75rem">Access Denied</div><div style="font-size:13px;color:var(--t2)">You must be 18 or older to access SecretXperience.eu.</div></div>';
@@ -1337,6 +1362,19 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         if (loginBtn) loginBtn.onclick = () => { window.location.href = '/login' }
         if (signupBtn) signupBtn.onclick = () => { window.location.href = '/advertise' }
 
+        // Mobile-only auth button — show when logged out (CSS reveals it on phones)
+        const mobileLoginBtn = document.getElementById('mobileLoginBtn')
+        if (mobileLoginBtn) {
+          mobileLoginBtn.classList.add('show')
+          // Route providers straight to /advertise based on their earlier role choice
+          try {
+            if (localStorage.getItem('sx_role') === 'provider') {
+              ;(mobileLoginBtn as HTMLAnchorElement).href = '/advertise'
+              mobileLoginBtn.innerHTML = '<i class="ti ti-briefcase" style="font-size:14px;"></i> List service'
+            }
+          } catch (e) {}
+        }
+
         // Populate nav drawer — logged-out state
         const ndShowLoggedOut = ['ndLogin','ndSignup']
         ndShowLoggedOut.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = '' })
@@ -1358,7 +1396,13 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
           // Messages
           btn.addEventListener('click', function() { window.location.href = '/messages' })
         } else if (i === 4) {
-          // Account
+          // Account / Sign in
+          if (!session) {
+            const icon = btn.querySelector('i')
+            const label = btn.querySelector('span')
+            if (icon) icon.className = 'ti ti-login'
+            if (label) label.textContent = 'Sign in'
+          }
           btn.addEventListener('click', function() { window.location.href = session ? '/dashboard' : '/login' })
         }
       })
@@ -1975,6 +2019,8 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
           </div>
         </div>
       </div>
+      <!-- Mobile-only auth button (logged-out): always visible on phones -->
+      <a href="/login" id="mobileLoginBtn" class="mobile-auth-btn" style="display:none;align-items:center;gap:5px;text-decoration:none;background:linear-gradient(135deg,var(--gold),var(--goldd));color:#0a0a0a;font-weight:600;font-size:13px;padding:7px 14px;border-radius:20px;white-space:nowrap;"><i class="ti ti-user" style="font-size:14px;"></i> Sign in</a>
       <button class="nb nav-menu-btn" id="menuBtn" aria-label="Open menu"><i class="ti ti-menu-2"></i></button>
     </div>
   </nav>

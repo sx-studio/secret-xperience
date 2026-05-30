@@ -786,6 +786,8 @@ select.input { appearance: none; padding-right: 32px; background-image: linear-g
   transition:all .2s;
 }
 .nav-menu-btn:hover{border-color:var(--b3);color:var(--t)}
+/* Mobile auth button — hidden on desktop always; shown on phones only when JS marks it (.show) */
+.mobile-auth-btn{display:none!important}
 
 /* ── CATEGORY BAR ── */
 .catbar{
@@ -1190,6 +1192,8 @@ footer{background:var(--bg1);border-top:0.5px solid var(--b);padding:2.5rem 1.5r
   /* !important overrides inline style="display:flex" on the Events link */
   .nav-right .nb:not(.nav-menu-btn){display:none!important}
   .nav-menu-btn{display:flex}
+  /* Mobile auth button visible only when logged out (JS adds .show) */
+  .mobile-auth-btn.show{display:inline-flex!important;order:-1}
   .catbar{top:var(--nav-h);padding:.6rem .9rem;gap:.35rem}
   .cat{padding:5px 11px;font-size:12px}
   .layout{grid-template-columns:1fr}
