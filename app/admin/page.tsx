@@ -81,8 +81,11 @@ export default function AdminPage() {
   async function toggleListing(id: string, field: string, current: boolean) {
     const supabase = createClient()
     const update: Record<string, unknown> = { [field]: !current }
-    // Keep status in sync with active state
-    if (field === 'active') update.status = !current ? 'approved' : 'pending'
+    if (field === 'active') {
+      update.status = !current ? 'approved' : 'pending'
+      // When making active, clear stale tier_expires_at so cron can't re-hide it
+      if (!current) update.tier_expires_at = null
+    }
     await supabase.from('listings').update(update).eq('id', id)
     setListings(prev => prev.map(l => l.id === id ? { ...l, ...update } : l))
     if (field === 'active') {
@@ -94,12 +97,38 @@ export default function AdminPage() {
     }
   }
 
+  async function setListingTier(id: string, tier: 'basic' | 'featured' | 'slider' | 'premium') {
+    const supabase = createClient()
+    const now = new Date()
+    const days = tier === 'premium' ? 30 : tier === 'basic' ? 0 : 7
+    const until = days > 0 ? new Date(now.getTime() + days * 86400000) : null
+    const update: Record<string, unknown> = {
+      tier,
+      tier_expires_at: until?.toISOString() ?? null,
+      active: true,
+      status: 'approved',
+    }
+    if (tier === 'featured' || tier === 'slider') {
+      update.featured_until = until!.toISOString()
+      update.premium = false
+    } else if (tier === 'premium') {
+      update.featured_until = until!.toISOString()
+      update.premium = true
+    } else {
+      // basic — clear featured state
+      update.premium = false
+      update.featured_until = null
+    }
+    await supabase.from('listings').update(update).eq('id', id)
+    setListings(prev => prev.map(l => l.id === id ? { ...l, ...update } : l))
+  }
+
   async function featureListing(id: string, days: number) {
     const supabase = createClient()
     const until = new Date()
     until.setDate(until.getDate() + days)
-    await supabase.from('listings').update({ featured_until: until.toISOString(), premium: true }).eq('id', id)
-    setListings(prev => prev.map(l => l.id === id ? { ...l, featured_until: until.toISOString(), premium: true } : l))
+    await supabase.from('listings').update({ featured_until: until.toISOString(), premium: true, active: true, status: 'approved', tier_expires_at: until.toISOString() }).eq('id', id)
+    setListings(prev => prev.map(l => l.id === id ? { ...l, featured_until: until.toISOString(), premium: true, active: true, status: 'approved' } : l))
   }
 
   async function deleteListing(id: string) {
@@ -302,7 +331,7 @@ export default function AdminPage() {
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                 <thead>
                   <tr style={{ background: 'var(--bg2, rgba(255,255,255,0.02))' }}>
-                    {['Title', 'Category', 'Provider', 'Price', 'Status', 'Actions'].map(h => (
+                    {['Title / Location', 'Category', 'Provider', 'Price', 'Status / Tier', 'Actions'].map(h => (
                       <th key={h} style={{ textAlign: 'left', padding: '12px 16px', font: '600 9px/1 var(--sans)', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--t3, #4c4a47)' }}>{h}</th>
                     ))}
                   </tr>
@@ -319,60 +348,74 @@ export default function AdminPage() {
                       <td style={{ padding: '14px 16px', color: 'var(--t2, #8c8880)', fontSize: '12px' }}>{l.profiles?.full_name || l.profiles?.username || '—'}</td>
                       <td style={{ padding: '14px 16px', color: 'var(--gold, #c5a05a)', fontSize: '12px', fontWeight: 500 }}>{l.price_from ? `€${l.price_from}` : '—'}</td>
                       <td style={{ padding: '14px 16px' }}>
-                        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', alignItems: 'center' }}>
-                          <span style={{ background: l.active ? 'rgba(38,212,160,0.12)' : 'rgba(184,77,114,0.12)', color: l.active ? 'var(--verified, #1dc9a0)' : 'var(--wine, #b84d72)', padding: '2px 8px', borderRadius: '20px', font: '700 10px/1 var(--sans)', letterSpacing: '0.1em' }}>{l.active ? '● Live' : '● Hidden'}</span>
-                          {l.verified && <span style={{ background: 'rgba(38,212,160,0.12)', color: 'var(--verified, #1dc9a0)', padding: '2px 7px', borderRadius: '20px', font: '600 10px/1 var(--sans)', letterSpacing: '0.08em' }}>Verified</span>}
-                          {l.premium && <span style={{ background: 'var(--gbg)', color: 'var(--gold)', padding: '2px 7px', borderRadius: '20px', font: '600 10px/1 var(--sans)', letterSpacing: '0.08em' }}>Premium</span>}
-                          {l.trending && <span style={{ background: 'rgba(176,160,248,0.12)', color: '#b0a0f8', padding: '2px 7px', borderRadius: '20px', font: '600 10px/1 var(--sans)', letterSpacing: '0.08em' }}>Trending</span>}
-                          {l.active && l.status && l.status !== 'approved' && <span style={{ background: 'rgba(245,168,38,0.12)', color: '#f5a826', padding: '2px 7px', borderRadius: '20px', font: '600 10px/1 var(--sans)', letterSpacing: '0.08em' }}>{l.status}</span>}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                          <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                            <span style={{ background: l.active ? 'rgba(38,212,160,0.12)' : 'rgba(184,77,114,0.12)', color: l.active ? 'var(--verified, #1dc9a0)' : 'var(--wine, #b84d72)', padding: '2px 8px', borderRadius: '20px', font: '700 10px/1 var(--sans)', letterSpacing: '0.1em' }}>{l.active ? '● Live' : '● Hidden'}</span>
+                            {l.verified && <span style={{ background: 'rgba(38,212,160,0.12)', color: 'var(--verified, #1dc9a0)', padding: '2px 7px', borderRadius: '20px', font: '600 10px/1 var(--sans)', letterSpacing: '0.08em' }}>Verified</span>}
+                            {!l.active && l.status && <span style={{ background: 'rgba(245,168,38,0.12)', color: '#f5a826', padding: '2px 7px', borderRadius: '20px', font: '600 10px/1 var(--sans)', letterSpacing: '0.08em' }}>{l.status}</span>}
+                          </div>
+                          {/* Tier badge */}
+                          {(() => {
+                            const tierColors: Record<string, string> = { basic: 'rgba(236,232,225,0.4)', featured: '#c5a05a', slider: '#b0a0f8', premium: '#f5a826' }
+                            const tierBg: Record<string, string> = { basic: 'rgba(255,255,255,0.04)', featured: 'rgba(197,160,90,0.1)', slider: 'rgba(176,160,248,0.1)', premium: 'rgba(245,168,38,0.1)' }
+                            const tier = l.tier || 'basic'
+                            const exp = l.tier_expires_at ? new Date(l.tier_expires_at) : null
+                            const expStr = exp && exp > new Date() ? ` · until ${exp.toLocaleDateString('en-GB', { day:'numeric', month:'short' })}` : ''
+                            return <span style={{ background: tierBg[tier], color: tierColors[tier], padding: '2px 7px', borderRadius: '20px', font: '600 10px/1 var(--sans)', letterSpacing: '0.06em', width: 'fit-content' }}>{tier.charAt(0).toUpperCase() + tier.slice(1)}{expStr}</span>
+                          })()}
                         </div>
                       </td>
-                      <td style={{ padding: '14px 16px' }}>
-                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
-                          <button
-                            className="adm-action-icon-btn adm-action-btn"
-                            onClick={() => toggleListing(l.id, 'verified', l.verified)}
-                            style={{ color: l.verified ? 'var(--t2, #8c8880)' : 'var(--verified, #1dc9a0)', borderColor: l.verified ? 'var(--b2)' : 'rgba(38,212,160,0.3)' }}
-                            title={l.verified ? 'Unverify' : 'Verify'}
-                          >
-                            <i className={`ti ${l.verified ? 'ti-x' : 'ti-circle-check'}`} aria-hidden="true" />
-                            <span style={{ font: '600 10px/1 var(--sans)', letterSpacing: '0.06em' }}>{l.verified ? 'Unverify' : 'Verify'}</span>
-                          </button>
-                          <button
-                            className="adm-action-icon-btn adm-action-btn"
-                            onClick={() => toggleListing(l.id, 'premium', l.premium)}
-                            style={{ color: l.premium ? 'var(--t2, #8c8880)' : 'var(--gold, #c5a05a)', borderColor: l.premium ? 'var(--b2)' : 'var(--gbrd)' }}
-                            title={l.premium ? 'Unpremium' : 'Premium'}
-                          >
-                            <i className={`ti ${l.premium ? 'ti-star-off' : 'ti-star'}`} aria-hidden="true" />
-                            <span style={{ font: '600 10px/1 var(--sans)', letterSpacing: '0.06em' }}>{l.premium ? 'Unpremium' : 'Premium'}</span>
-                          </button>
-                          <button
-                            className="adm-action-icon-btn adm-action-btn"
-                            onClick={() => featureListing(l.id, 30)}
-                            style={{ color: 'var(--gold, #c5a05a)', borderColor: 'var(--gbrd)' }}
-                            title="Feature for 30 days"
-                          >
-                            <i className="ti ti-sparkles" aria-hidden="true" />
-                            <span style={{ font: '600 10px/1 var(--sans)', letterSpacing: '0.06em' }}>Feature 30d</span>
-                          </button>
-                          <button
-                            className="adm-action-icon-btn adm-action-btn"
-                            onClick={() => toggleListing(l.id, 'active', l.active)}
-                            style={{ color: l.active ? 'var(--wine, #b84d72)' : 'var(--verified, #1dc9a0)', borderColor: l.active ? 'rgba(184,77,114,0.3)' : 'rgba(38,212,160,0.3)' }}
-                            title={l.active ? 'Hide listing' : 'Show listing'}
-                          >
-                            <i className={`ti ${l.active ? 'ti-eye-off' : 'ti-eye'}`} aria-hidden="true" />
-                            <span style={{ font: '600 10px/1 var(--sans)', letterSpacing: '0.06em' }}>{l.active ? 'Hide' : 'Show'}</span>
-                          </button>
-                          <button
-                            className="adm-action-icon-btn adm-action-btn"
-                            onClick={() => deleteListing(l.id)}
-                            style={{ color: 'var(--danger, #e2536b)', borderColor: 'rgba(226,83,107,0.3)' }}
-                            title="Delete listing"
-                          >
-                            <i className="ti ti-trash" aria-hidden="true" />
-                          </button>
+                      <td style={{ padding: '10px 16px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          {/* Row 1: Verify + Show/Hide + Delete */}
+                          <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', alignItems: 'center' }}>
+                            <button
+                              className="adm-action-icon-btn adm-action-btn"
+                              onClick={() => toggleListing(l.id, 'verified', l.verified)}
+                              style={{ color: l.verified ? 'var(--t2, #8c8880)' : 'var(--verified, #1dc9a0)', borderColor: l.verified ? 'var(--b2)' : 'rgba(38,212,160,0.3)' }}
+                              title={l.verified ? 'Remove verification' : 'Verify listing'}
+                            >
+                              <i className={`ti ${l.verified ? 'ti-circle-x' : 'ti-circle-check'}`} aria-hidden="true" />
+                              <span style={{ font: '600 10px/1 var(--sans)', letterSpacing: '0.06em' }}>{l.verified ? 'Unverify' : 'Verify'}</span>
+                            </button>
+                            <button
+                              className="adm-action-icon-btn adm-action-btn"
+                              onClick={() => toggleListing(l.id, 'active', l.active)}
+                              style={{ color: l.active ? 'var(--wine, #b84d72)' : 'var(--verified, #1dc9a0)', borderColor: l.active ? 'rgba(184,77,114,0.3)' : 'rgba(38,212,160,0.3)' }}
+                              title={l.active ? 'Hide listing' : 'Show listing'}
+                            >
+                              <i className={`ti ${l.active ? 'ti-eye-off' : 'ti-eye'}`} aria-hidden="true" />
+                              <span style={{ font: '600 10px/1 var(--sans)', letterSpacing: '0.06em' }}>{l.active ? 'Hide' : 'Show'}</span>
+                            </button>
+                            <button
+                              className="adm-action-icon-btn adm-action-btn"
+                              onClick={() => deleteListing(l.id)}
+                              style={{ color: 'var(--danger, #e2536b)', borderColor: 'rgba(226,83,107,0.3)' }}
+                              title="Delete listing permanently"
+                            >
+                              <i className="ti ti-trash" aria-hidden="true" />
+                            </button>
+                          </div>
+                          {/* Row 2: Tier buttons — Basic · Featured 7d · Slider 7d · Premium 30d */}
+                          <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', alignItems: 'center' }}>
+                            <span style={{ font: '500 9px/1 var(--sans)', color: 'var(--t3)', letterSpacing: '0.1em', marginRight: 2 }}>TIER:</span>
+                            {(['basic', 'featured', 'slider', 'premium'] as const).map(tier => {
+                              const active = l.tier === tier
+                              const colors: Record<string, string> = { basic: 'rgba(236,232,225,0.5)', featured: '#c5a05a', slider: '#b0a0f8', premium: '#f5a826' }
+                              const labels: Record<string, string> = { basic: 'Basic', featured: 'Featured 7d', slider: 'Slider 7d', premium: 'Premium 30d' }
+                              return (
+                                <button
+                                  key={tier}
+                                  className="adm-action-icon-btn adm-action-btn"
+                                  onClick={() => setListingTier(l.id, tier)}
+                                  style={{ color: active ? colors[tier] : 'var(--t3)', borderColor: active ? colors[tier] : 'var(--b2)', background: active ? `${colors[tier]}18` : 'transparent', opacity: active ? 1 : 0.7 }}
+                                  title={`Set tier: ${labels[tier]}`}
+                                >
+                                  <span style={{ font: `${active ? '700' : '500'} 10px/1 var(--sans)`, letterSpacing: '0.05em' }}>{labels[tier]}</span>
+                                </button>
+                              )
+                            })}
+                          </div>
                         </div>
                       </td>
                     </tr>
