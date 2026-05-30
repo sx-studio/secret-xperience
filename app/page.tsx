@@ -1531,6 +1531,16 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         if (hPrice) hPrice.textContent = heroSource.price_from ? '€' + heroSource.price_from + '/hr' : 'POA'
         if (hRating) hRating.textContent = heroSource.rating ? '★ ' + Number(heroSource.rating).toFixed(1) : '★ —'
         if (hMonogram) hMonogram.textContent = (heroSource.title || 'Sx').slice(0, 2)
+        const hImg = document.getElementById('heroCardImg') as HTMLImageElement | null
+        const hGrad = document.getElementById('heroCardGradient') as HTMLElement | null
+        if (hImg && heroSource.images && heroSource.images.length > 0) {
+          hImg.src = heroSource.images[0]
+          hImg.style.display = 'block'
+          if (hMonogram) hMonogram.style.display = 'none'
+          if (hGrad) hGrad.style.display = 'block'
+        }
+        const hCard = document.getElementById('heroFeaturedCard')
+        if (hCard && heroSource.id) hCard.onclick = () => { window.location.href = '/listings/' + heroSource.id }
       }
     }
 
@@ -2036,16 +2046,18 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
           <div><div style="font-family:var(--serif);font-size:28px;color:var(--gold);">4.8 ★</div><div class="t-meta" style="color:var(--t3);">AVG RATING</div></div>
         </div>
       </div>
-      <!-- MIDDLE: neon-X mascot -->
+      <!-- MIDDLE: SX brand logo -->
       <div class="hero-promo-col" style="display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;">
-        <div style="position:relative;background:var(--grad-silk);border-radius:var(--rl);padding:1rem;">
-          <img src="/brand/logo-neon-x.jpg" alt="XperienceNights" style="width:260px;border-radius:var(--rl);mix-blend-mode:screen;filter:drop-shadow(0 0 60px rgba(123,78,179,0.40));" />
+        <div style="position:relative;background:#000;border-radius:var(--rl);padding:1rem;">
+          <img src="/sox-logo.png" alt="SecretXperience" style="width:260px;border-radius:var(--rl);filter:drop-shadow(0 0 40px rgba(197,160,90,0.35));" />
         </div>
-        <p class="t-meta" style="color:var(--t3);margin-top:0.75rem;text-align:center;letter-spacing:0.16em;">XPERIENCE · NIGHTS</p>
+        <p class="t-meta" style="color:var(--t3);margin-top:0.75rem;text-align:center;letter-spacing:0.16em;">SECRET · XPERIENCE</p>
       </div>
       <!-- RIGHT: featured listing card -->
       <div class="hero-hero-col" id="heroFeaturedCard" style="width:100%;max-width:320px;border-radius:var(--rl);border:0.5px solid var(--b2);box-shadow:var(--shadow-card-h);overflow:hidden;cursor:pointer;" onclick="document.getElementById('heroFeaturedCard').style.transform='translateY(-3px)'">
         <div class="cat-escort" style="height:240px;position:relative;display:flex;align-items:flex-end;padding:1.25rem;">
+          <img id="heroCardImg" src="" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;" />
+          <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(8,6,14,0.75) 0%, transparent 55%);pointer-events:none;" id="heroCardGradient" style="display:none;"></div>
           <div style="position:absolute;top:0.75rem;right:0.75rem;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.30);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;"><i class="ti ti-heart-filled" style="color:var(--pink);font-size:15px;"></i></div>
           <span style="font-family:var(--serif);font-size:96px;font-style:italic;font-weight:400;color:rgba(197,160,90,0.30);line-height:1;position:absolute;bottom:0.5rem;left:1.25rem;" id="heroMonogram">Sa</span>
         </div>
