@@ -1217,7 +1217,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         if (loginBtn) loginBtn.style.display = 'none'
         if (signupBtn) signupBtn.style.display = 'none'
         if (listServiceBtn) listServiceBtn.style.display = 'flex'
-        if (profileMenuWrap) profileMenuWrap.style.display = 'block'
+        if (profileMenuWrap) { profileMenuWrap.style.display = 'flex'; profileMenuWrap.style.alignItems = 'center'; profileMenuWrap.style.gap = '8px' }
 
         // Populate avatar + dropdown header
         if (profileAvatar) profileAvatar.textContent = initials
@@ -1260,6 +1260,67 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
           if (badge) { badge.textContent = label; badge.style.display = 'inline' }
           if (ddBadge) { ddBadge.style.display = 'inline-block' }
         }
+
+        // ── Notification bell ──
+        ;(async () => {
+          const notifBtn      = document.getElementById('notifBtn')
+          const notifDropdown = document.getElementById('notifDropdown') as HTMLElement | null
+          const notifBadge    = document.getElementById('notifBadge') as HTMLElement | null
+          const notifList     = document.getElementById('notifList') as HTMLElement | null
+          const notifMarkAll  = document.getElementById('notifMarkAll')
+          if (!notifBtn || !notifDropdown) return
+
+          async function loadNotifications() {
+            const res  = await fetch('/api/notifications')
+            const json = await res.json()
+            const items: any[] = json.notifications || []
+            const unread = items.filter((n: any) => !n.read).length
+            if (notifBadge) notifBadge.style.display = unread > 0 ? 'block' : 'none'
+            if (!notifList) return
+            if (items.length === 0) {
+              notifList.innerHTML = '<div style="padding:20px 16px;text-align:center;font-size:13px;color:var(--t3);font-family:var(--sans);">No notifications yet</div>'
+              return
+            }
+            notifList.innerHTML = items.map((n: any) => `
+              <div data-nid="${n.id}" style="padding:12px 16px;border-bottom:0.5px solid var(--b);cursor:pointer;opacity:${n.read ? '0.55' : '1'};transition:background .15s;" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''">
+                <div style="display:flex;align-items:flex-start;gap:10px;">
+                  <div style="width:8px;height:8px;border-radius:50%;background:${n.read ? 'transparent' : '#c5a05a'};margin-top:5px;flex-shrink:0;"></div>
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-size:13px;font-weight:${n.read ? '400' : '500'};color:var(--t);font-family:var(--sans);margin-bottom:3px;">${n.title}</div>
+                    ${n.body ? `<div style="font-size:12px;color:var(--t3);font-family:var(--sans);font-weight:300;line-height:1.5;">${n.body}</div>` : ''}
+                    <div style="font-size:11px;color:var(--t3);margin-top:4px;font-family:var(--sans);">${new Date(n.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</div>
+                  </div>
+                </div>
+              </div>
+            `).join('')
+            notifList.querySelectorAll('[data-nid]').forEach(el => {
+              el.addEventListener('click', async () => {
+                const nid = (el as HTMLElement).dataset.nid
+                const n   = items.find((x: any) => x.id === nid)
+                await fetch('/api/notifications', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: nid }) })
+                if (n?.link) window.location.href = n.link
+                else loadNotifications()
+              })
+            })
+          }
+
+          notifBtn.addEventListener('click', async (e) => {
+            e.stopPropagation()
+            const open = notifDropdown.style.display !== 'none'
+            notifDropdown.style.display = open ? 'none' : 'block'
+            if (!open) await loadNotifications()
+          })
+          document.addEventListener('click', () => { if (notifDropdown) notifDropdown.style.display = 'none' })
+          notifDropdown.addEventListener('click', e => e.stopPropagation())
+          notifMarkAll?.addEventListener('click', async (e) => {
+            e.stopPropagation()
+            await fetch('/api/notifications', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) })
+            await loadNotifications()
+          })
+
+          // Initial badge check
+          await loadNotifications()
+        })()
 
         // Populate nav drawer — logged-in state
         const ndUser = document.getElementById('navDrawerUser')
@@ -1866,7 +1927,23 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
       <button class="nb pri" id="signupBtn" onclick="window.location.href='/advertise'">List your service</button>
       <!-- logged-in: List service + profile avatar -->
       <button class="nb pri" id="listServiceBtn" style="display:none" onclick="window.location.href='/listings/create'"><i class="ti ti-plus" aria-hidden="true"></i> List service</button>
-      <div id="profileMenuWrap" style="display:none;position:relative;">
+      <div id="profileMenuWrap" style="display:none;position:relative;align-items:center;gap:8px;">
+        <!-- Notification bell -->
+        <div style="position:relative;">
+          <button id="notifBtn" aria-label="Notifications" style="width:34px;height:34px;background:var(--bg2);border:0.5px solid var(--b2);border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--t2);font-size:16px;position:relative;flex-shrink:0;transition:border-color .2s;">
+            <i class="ti ti-bell"></i>
+            <span id="notifBadge" style="display:none;position:absolute;top:3px;right:3px;width:8px;height:8px;border-radius:50%;background:#c5a05a;box-shadow:0 0 6px rgba(197,160,90,0.7);"></span>
+          </button>
+          <div id="notifDropdown" style="display:none;position:absolute;top:calc(100% + 8px);right:0;min-width:300px;max-width:340px;background:var(--bg1);border:0.5px solid var(--b2);border-radius:var(--rl);box-shadow:var(--shadow-modal);z-index:9999;overflow:hidden;">
+            <div style="padding:12px 16px;border-bottom:0.5px solid var(--b);display:flex;align-items:center;justify-content:space-between;">
+              <span style="font-family:var(--serif);font-size:15px;color:var(--t);">Notifications</span>
+              <button id="notifMarkAll" style="font-size:11px;color:var(--gold);background:none;border:none;cursor:pointer;font-family:var(--sans);letter-spacing:0.04em;">Mark all read</button>
+            </div>
+            <div id="notifList" style="max-height:340px;overflow-y:auto;padding:6px 0;">
+              <div style="padding:20px 16px;text-align:center;font-size:13px;color:var(--t3);font-family:var(--sans);">Loading…</div>
+            </div>
+          </div>
+        </div>
         <button id="profileBtn" aria-label="Account menu" aria-haspopup="true" aria-expanded="false" style="display:flex;align-items:center;gap:6px;background:var(--bg2);border:0.5px solid var(--b2);border-radius:20px;padding:4px 10px 4px 4px;cursor:pointer;color:var(--t);">
           <div id="profileAvatar" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--goldd));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#0a0a0a;flex-shrink:0;">A</div>
           <span id="profileDisplayName" style="font-size:13px;font-weight:500;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Account</span>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '../lib/supabase'
 
-const TABS = ['Listings', 'Users', 'Verification', 'Bookings'] as const
+const TABS = ['Listings', 'Users', 'Verification', 'Bookings', 'Newsletter'] as const
 type Tab = typeof TABS[number]
 
 export default function AdminPage() {
@@ -18,6 +18,11 @@ export default function AdminPage() {
   const [search, setSearch] = useState('')
   const [verifWorking, setVerifWorking] = useState<string | null>(null)
   const [verifMsg, setVerifMsg] = useState<{ id: string; ok: boolean; text: string } | null>(null)
+  const [nlSubject, setNlSubject]     = useState('')
+  const [nlBody, setNlBody]           = useState('')
+  const [nlSending, setNlSending]     = useState(false)
+  const [nlResult, setNlResult]       = useState<string | null>(null)
+  const [nlSubCount, setNlSubCount]   = useState<number | null>(null)
 
   useEffect(() => {
     let channel: ReturnType<ReturnType<typeof createClient>['channel']> | null = null
@@ -28,12 +33,14 @@ export default function AdminPage() {
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single()
       if (profile?.role !== 'admin') { window.location.href = '/'; return }
       setIsAdmin(true)
-      const [lr, ur, br, vr] = await Promise.all([
+      const [lr, ur, br, vr, nlr] = await Promise.all([
         supabase.from('listings').select('*').order('created_at', { ascending: false }),
         supabase.from('profiles').select('*').order('created_at', { ascending: false }),
         supabase.from('bookings').select('*, listings(title)').order('created_at', { ascending: false }),
         supabase.from('identity_verifications').select('*, profiles(full_name, username, email, role)').order('submitted_at', { ascending: false }),
+        supabase.from('newsletter_subscribers').select('id', { count: 'exact', head: true }),
       ])
+      setNlSubCount(nlr.count ?? 0)
       const ls = lr.data || [], us = ur.data || [], bs = br.data || []
       // Attach profile data to listings client-side (avoids PostgREST embedded join issues)
       const profileMap = Object.fromEntries(us.map((u: any) => [u.id, u]))
@@ -254,7 +261,7 @@ export default function AdminPage() {
           <div>
             <h1 style={{ fontFamily: 'var(--serif)', fontWeight: 500, fontSize: '36px', color: 'var(--t, #ece8e1)', margin: 0, lineHeight: 1.1 }}>{tab}</h1>
             <div style={{ font: '300 11px/1 var(--sans)', color: 'var(--t3, #4c4a47)', marginTop: '4px', letterSpacing: '0.04em' }}>
-              {tab === 'Listings' ? `${filteredListings.length} listings` : tab === 'Users' ? `${filteredUsers.length} users` : `${filteredBookings.length} bookings`}
+              {tab === 'Listings' ? `${filteredListings.length} listings` : tab === 'Users' ? `${filteredUsers.length} users` : tab === 'Newsletter' ? `${nlSubCount ?? '…'} subscribers` : `${filteredBookings.length} bookings`}
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -509,6 +516,62 @@ export default function AdminPage() {
                   </div>
                 )
               })}
+            </div>
+          )}
+
+          {/* ── Newsletter broadcast ── */}
+          {tab === 'Newsletter' && (
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: '1.5rem' }}>
+                <div style={{ fontFamily: 'var(--serif)', fontSize: 15, color: 'var(--t2)' }}>
+                  {nlSubCount !== null ? <><strong style={{ color: 'var(--gold)' }}>{nlSubCount}</strong> subscribers</> : 'Loading…'}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14, maxWidth: 600 }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--t3)', marginBottom: 6, fontFamily: 'var(--sans)' }}>Subject line</label>
+                  <input
+                    value={nlSubject}
+                    onChange={e => setNlSubject(e.target.value)}
+                    placeholder="e.g. New listings this week — exclusive access"
+                    style={{ width: '100%', padding: '10px 14px', background: 'var(--bg2)', border: '0.5px solid var(--b2)', borderRadius: 10, color: 'var(--t)', fontSize: 14, fontFamily: 'var(--sans)', outline: 'none' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--t3)', marginBottom: 6, fontFamily: 'var(--sans)' }}>Email body (HTML or plain text)</label>
+                  <textarea
+                    value={nlBody}
+                    onChange={e => setNlBody(e.target.value)}
+                    rows={10}
+                    placeholder={`<h2>Hello from SecretXperience</h2>\n<p>This week we have...</p>`}
+                    style={{ width: '100%', padding: '10px 14px', background: 'var(--bg2)', border: '0.5px solid var(--b2)', borderRadius: 10, color: 'var(--t)', fontSize: 13, fontFamily: 'var(--sans)', outline: 'none', resize: 'vertical', lineHeight: 1.6 }}
+                  />
+                </div>
+                <button
+                  disabled={nlSending || !nlSubject.trim() || !nlBody.trim()}
+                  onClick={async () => {
+                    if (!confirm(`Send to ${nlSubCount} subscribers?`)) return
+                    setNlSending(true); setNlResult(null)
+                    const res = await fetch('/api/newsletter/broadcast', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ subject: nlSubject, html: nlBody }),
+                    })
+                    const json = await res.json()
+                    setNlResult(res.ok ? `✓ Sent to ${json.sent ?? nlSubCount} subscribers` : `✗ ${json.error || 'Failed'}`)
+                    setNlSending(false)
+                  }}
+                  style={{ alignSelf: 'flex-start', padding: '10px 28px', background: nlSending ? 'var(--bg3)' : 'linear-gradient(135deg,#c5a05a,#a07840)', color: nlSending ? 'var(--t3)' : '#0a0808', border: 'none', borderRadius: 10, fontFamily: 'var(--sans)', fontSize: 13, fontWeight: 700, letterSpacing: '0.06em', cursor: nlSending ? 'default' : 'pointer' }}
+                >
+                  {nlSending ? 'Sending…' : 'Send broadcast'}
+                </button>
+                {nlResult && (
+                  <div style={{ padding: '10px 14px', borderRadius: 10, background: nlResult.startsWith('✓') ? 'rgba(62,207,142,0.08)' : 'rgba(212,95,114,0.08)', border: `0.5px solid ${nlResult.startsWith('✓') ? 'rgba(62,207,142,0.3)' : 'rgba(212,95,114,0.3)'}`, color: nlResult.startsWith('✓') ? '#3ecf8e' : '#d45f72', fontSize: 13, fontFamily: 'var(--sans)' }}>
+                    {nlResult}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

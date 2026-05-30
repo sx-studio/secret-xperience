@@ -174,9 +174,45 @@ export default function ListingDetailPage() {
           .limit(3)
         setSimilarListings(sims || [])
         document.title = `${data.title} | SecretXperience`
-        let meta = document.querySelector('meta[name="description"]')
-        if (!meta) { meta = document.createElement('meta'); meta.setAttribute('name', 'description'); document.head.appendChild(meta) }
-        meta.setAttribute('content', data.description?.slice(0, 160) || `Book ${data.title} in ${data.city}`)
+        const ogTitle = `${data.title} | SecretXperience`
+        const ogDesc  = data.description?.slice(0, 160) || `Book ${data.title} in ${data.city}`
+        const ogImg   = data.images?.[0] || '/og-image.jpg'
+        const ogUrl   = `https://www.secretxperience.eu/listings/${id}`
+
+        const setMeta = (attr: 'name' | 'property', key: string, val: string) => {
+          let el = document.querySelector(`meta[${attr}="${key}"]`) as HTMLMetaElement | null
+          if (!el) { el = document.createElement('meta') as HTMLMetaElement; el.setAttribute(attr, key); document.head.appendChild(el) }
+          el.content = val
+        }
+        setMeta('name', 'description', ogDesc)
+        setMeta('property', 'og:title', ogTitle)
+        setMeta('property', 'og:description', ogDesc)
+        setMeta('property', 'og:image', ogImg)
+        setMeta('property', 'og:url', ogUrl)
+        setMeta('property', 'og:type', 'website')
+        setMeta('property', 'twitter:card', 'summary_large_image')
+        setMeta('property', 'twitter:title', ogTitle)
+        setMeta('property', 'twitter:description', ogDesc)
+        setMeta('property', 'twitter:image', ogImg)
+
+        // JSON-LD
+        const prev = document.getElementById('listing-jsonld')
+        if (prev) prev.remove()
+        const ld = document.createElement('script')
+        ld.id = 'listing-jsonld'
+        ld.type = 'application/ld+json'
+        ld.textContent = JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'Service',
+          name: data.title,
+          description: data.description || '',
+          image: data.images || [],
+          url: ogUrl,
+          areaServed: { '@type': 'City', name: data.city },
+          serviceType: CATEGORY_LABELS[data.category] || data.category,
+          ...(data.price_from ? { offers: { '@type': 'Offer', price: data.price_from, priceCurrency: data.currency || 'EUR' } } : {}),
+        })
+        document.head.appendChild(ld)
       }
       setPageLoading(false)
     }

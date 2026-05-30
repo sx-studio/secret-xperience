@@ -1612,6 +1612,18 @@ export default function DashboardPage() {
                           Message
                         </a>
                       )}
+                      {['pending', 'confirmed'].includes(booking.status) && (
+                        <button
+                          onClick={async () => {
+                            if (!confirm('Cancel this booking?')) return
+                            const res = await fetch('/api/bookings/cancel', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ bookingId: booking.id }) })
+                            if (res.ok) setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, status: 'cancelled' } : b))
+                          }}
+                          style={{ padding: '5px 12px', borderRadius: 8, border: '0.5px solid rgba(212,95,114,0.3)', background: 'transparent', color: '#d45f72', fontSize: 12, fontWeight: 600, fontFamily: 'var(--sans)', letterSpacing: '0.04em', cursor: 'pointer' }}
+                        >
+                          Cancel
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
