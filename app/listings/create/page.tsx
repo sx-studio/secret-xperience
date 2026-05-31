@@ -33,8 +33,8 @@ const COUNTRIES = [
 ]
 
 const MEET_TYPES = [
-  { value: 'incall',  label: 'Incall',   desc: 'At your location' },
-  { value: 'outcall', label: 'Outcall',  desc: "At client's location" },
+  { value: 'incall',  label: 'Incall / Private',  desc: 'At your location' },
+  { value: 'outcall', label: 'Outcall / Escort',  desc: "At client's location" },
   { value: 'both',    label: 'Both',     desc: 'Either works' },
 ]
 
