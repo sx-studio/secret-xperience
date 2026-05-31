@@ -113,18 +113,25 @@ function memberWelcomeHtml(name: string) {
 
 async function sendWelcomeEmail(email: string, name: string, role: string) {
   const key = process.env.RESEND_API_KEY
-  if (!key) return
+  if (!key) {
+    console.warn('[welcome-email] RESEND_API_KEY not set — skipping welcome email for', email)
+    return
+  }
   const isProvider = role === 'provider'
   const subject = isProvider
     ? 'Welcome to SecretXperience — let\'s get your first listing live'
     : 'Welcome in — your invitation to SecretXperience'
   const html = isProvider ? providerWelcomeHtml(name) : memberWelcomeHtml(name)
 
-  await fetch('https://api.resend.com/emails', {
+  const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ from: 'SecretXperience <hello@secretxperience.eu>', to: [email], subject, html }),
   })
+  if (!res.ok) {
+    const body = await res.text().catch(() => '')
+    console.error(`[welcome-email] Resend returned ${res.status} for ${email}:`, body)
+  }
 }
 
 export async function POST(request: NextRequest) {

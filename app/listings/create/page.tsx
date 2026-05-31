@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '../../lib/supabase'
 import { POSSIBILITY_GROUPS, POSSIBILITY_CATEGORIES } from '../../lib/possibilities'
+import { ETHNICITIES, HAIR_COLOURS, BUILDS } from '../../lib/attributes'
 
 /* ─── Data ─────────────────────────────────────────────── */
 
@@ -47,11 +48,14 @@ const SERVICE_TAGS: Record<string, string[]> = {
   domination:   ALL_SERVICES,
 }
 
-const ETHNICITY_OPTIONS = ['Asian', 'Black', 'Caucasian', 'Hispanic', 'Indian', 'Middle Eastern', 'Mixed', 'Other']
-const BUILD_OPTIONS     = ['Slim', 'Athletic', 'Curvy', 'Full-figured', 'Petite', 'Tall', 'Average', 'Other']
-const HAIR_OPTIONS      = ['Black', 'Blonde', 'Brown', 'Red', 'Auburn', 'White/Grey', 'Other']
+const ETHNICITY_OPTIONS = ETHNICITIES
+const BUILD_OPTIONS     = BUILDS
+const HAIR_OPTIONS      = HAIR_COLOURS
 
 const STATS_CATEGORIES  = ['escorts', 'companionship', 'massage', 'domination']
+const WH_CATEGORIES     = ['escorts', 'companionship', 'massage', 'domination', 'nightlife', 'adult']
+const WH_DAYS           = ['mon','tue','wed','thu','fri','sat','sun']
+const WH_DAY_LABELS     = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
 
 /* ─── Types ─────────────────────────────────────────────── */
 
@@ -74,6 +78,8 @@ interface FormState {
   hair:        string
   tier:        string
   website:     string
+  wh_mon: string; wh_tue: string; wh_wed: string; wh_thu: string
+  wh_fri: string; wh_sat: string; wh_sun: string
 }
 
 const LISTING_TIERS = [
@@ -187,6 +193,8 @@ export default function CreateListingPage() {
     build:       '',
     hair:        '',
     website:     '',
+    wh_mon: '10-22', wh_tue: '10-22', wh_wed: '10-22', wh_thu: '10-22',
+    wh_fri: '10-22', wh_sat: 'off',   wh_sun: 'off',
   })
 
   const [uploadingImages, setUploadingImages] = useState<UploadingImage[]>([])
@@ -401,14 +409,21 @@ export default function CreateListingPage() {
       }
     }
 
-    // Build final tags array: service tags + physical stat tags
+    // Build final tags array: service tags + physical stat tags + working hours
     const statTags: string[] = []
     if (STATS_CATEGORIES.includes(form.category)) {
       if (form.ethnicity) statTags.push(`Ethnicity: ${form.ethnicity}`)
       if (form.build)     statTags.push(`Build: ${form.build}`)
       if (form.hair)      statTags.push(`Hair: ${form.hair}`)
     }
-    const finalTags = [...form.tags, ...statTags]
+    const whTags: string[] = []
+    if (WH_CATEGORIES.includes(form.category)) {
+      for (const day of WH_DAYS) {
+        const val = (form as any)[`wh_${day}`] as string
+        if (val && val !== 'off') whTags.push(`wh:${day}:${val}`)
+      }
+    }
+    const finalTags = [...form.tags, ...statTags, ...whTags]
 
     const tierDays: Record<string, number> = { basic: 1, featured: 7, slider: 7, premium: 30 }
     const tierExpiry = new Date()
@@ -1362,6 +1377,51 @@ export default function CreateListingPage() {
                   ))}
                 </div>
               </div>
+
+              {/* Working Hours — shown for service/nightlife categories */}
+              {WH_CATEGORIES.includes(form.category) && (
+                <div style={{ marginTop: '1.75rem' }}>
+                  <p style={{ fontFamily: 'var(--sans)', fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--t3, rgba(255,255,255,0.2))', fontWeight: 600, marginBottom: '1rem' }}>
+                    Working Hours <span style={{ textTransform: 'none', letterSpacing: 0, fontWeight: 300, opacity: 0.6 }}>(optional)</span>
+                  </p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {WH_DAYS.map((day, i) => {
+                      const key = `wh_${day}` as keyof FormState
+                      const val = (form[key] as string) ?? (i < 5 ? '10-22' : 'off')
+                      const isOn = val !== 'off'
+                      const parts = isOn ? val.split('-') : ['10', '22']
+                      const startH = parts[0] ?? '10'
+                      const endH   = parts[1] ?? '22'
+                      const hourOpts = Array.from({length:24},(_,h)=>String(h).padStart(2,'0'))
+                      return (
+                        <div key={day} style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+                          <div style={{ width:'32px', fontSize:'11px', color:'rgba(255,255,255,0.4)', fontFamily:'var(--sans)', fontWeight:600, letterSpacing:'0.06em', flexShrink:0 }}>{WH_DAY_LABELS[i]}</div>
+                          <button type="button"
+                            style={{ width:'28px', height:'28px', borderRadius:'6px', border:'0.5px solid rgba(255,255,255,0.12)', background: isOn ? 'rgba(197,160,90,0.12)' : 'transparent', color: isOn ? 'var(--gold,#c5a05a)' : 'rgba(255,255,255,0.2)', cursor:'pointer', fontSize:'13px', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}
+                            onClick={() => set(key, isOn ? 'off' : '10-22')}>
+                            {isOn ? '✓' : '–'}
+                          </button>
+                          {isOn ? (
+                            <>
+                              <select value={startH} className="cl-inp" style={{ flex:1, padding:'7px 8px', fontSize:'12px', background:'var(--bg2,rgba(255,255,255,0.04))', border:'0.5px solid var(--b,rgba(255,255,255,0.1))', borderRadius:'6px', color:'var(--t,#ece8e1)', outline:'none' }}
+                                onChange={e => set(key, `${e.target.value}-${endH}`)}>
+                                {hourOpts.map(h => <option key={h} value={h}>{h}:00</option>)}
+                              </select>
+                              <span style={{ fontSize:'11px', color:'rgba(255,255,255,0.25)', flexShrink:0 }}>to</span>
+                              <select value={endH} className="cl-inp" style={{ flex:1, padding:'7px 8px', fontSize:'12px', background:'var(--bg2,rgba(255,255,255,0.04))', border:'0.5px solid var(--b,rgba(255,255,255,0.1))', borderRadius:'6px', color:'var(--t,#ece8e1)', outline:'none' }}
+                                onChange={e => set(key, `${startH}-${e.target.value}`)}>
+                                {hourOpts.map(h => <option key={h} value={h}>{h}:00</option>)}
+                              </select>
+                            </>
+                          ) : (
+                            <span style={{ fontSize:'11px', color:'rgba(255,255,255,0.15)', fontFamily:'var(--sans)' }}>Closed</span>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* Website URL — shown for non-personal categories */}
               {!['escorts','companionship','massage','domination','experiences'].includes(form.category) && (

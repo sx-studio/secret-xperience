@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
+import { ETHNICITIES, tagMatchesEthnicity, HAIR_COLOURS, tagMatchesHair, BUILDS, tagMatchesBuild, ORIENTATIONS, tagMatchesOrientation } from '../lib/attributes'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -50,17 +51,14 @@ const CATEGORIES = [
 ]
 
 const SEXUAL_ORIENTATION = [
-  { value: 'all',          label: 'Any' },
-  { value: 'heterosexual', label: 'Straight' },
-  { value: 'gay',          label: 'Gay / Lesbian' },
-  { value: 'bisexual',     label: 'Bisexual' },
-  { value: 'for-all',      label: 'For all' },
+  { value: 'all', label: 'Any' },
+  ...ORIENTATIONS,
 ]
 
-const ETHNICITIES  = ['Any', 'European', 'Latina', 'Asian', 'Ebony', 'Arabic', 'Mixed', 'Eastern European']
-const HAIR_COLORS  = ['Any', 'Blonde', 'Brunette', 'Black', 'Redhead', 'Auburn', 'Other']
-const BUILDS       = ['Any', 'Slim', 'Athletic', 'Curvy', 'Petite', 'BBW', 'Muscular']
-const CITIES       = ['All Cities', 'Brussels', 'Antwerp', 'Ghent', 'Amsterdam', 'Berlin', 'Paris', 'Cologne', 'Rotterdam']
+const ETHNICITY_FILTER = ['Any', ...ETHNICITIES]
+const HAIR_COLORS  = ['Any', ...HAIR_COLOURS]
+const BUILDS_FILTER = ['Any', ...BUILDS]
+const CITIES       = ['All Cities', 'Brussels', 'Antwerp', 'Ghent', 'Grimbergen', 'Amsterdam', 'Berlin', 'Paris', 'Cologne', 'Rotterdam']
 
 const SERVICES_LIST = [
   'GFE', 'BDSM', 'Massage', 'Tantric', 'Roleplay', 'Dinner Date',
@@ -342,19 +340,16 @@ export default function PrivateReceptionPage() {
       })
     }
     if (orientation !== 'all') {
-      results = results.filter(l => {
-        const tags = (l.tags ?? []).map((t: string) => t.toLowerCase())
-        return tags.includes(orientation) || tags.includes('for all') || tags.includes('for-all')
-      })
+      results = results.filter(l => (l.tags ?? []).some((t: string) => tagMatchesOrientation(t, orientation)))
     }
     if (ethnicity !== 'Any') {
-      results = results.filter(l => (l.tags ?? []).some((t: string) => t.toLowerCase() === ethnicity.toLowerCase()))
+      results = results.filter(l => (l.tags ?? []).some((t: string) => tagMatchesEthnicity(t, ethnicity)))
     }
     if (hairColor !== 'Any') {
-      results = results.filter(l => (l.tags ?? []).some((t: string) => t.toLowerCase() === hairColor.toLowerCase()))
+      results = results.filter(l => (l.tags ?? []).some((t: string) => tagMatchesHair(t, hairColor)))
     }
     if (build !== 'Any') {
-      results = results.filter(l => (l.tags ?? []).some((t: string) => t.toLowerCase() === build.toLowerCase()))
+      results = results.filter(l => (l.tags ?? []).some((t: string) => tagMatchesBuild(t, build)))
     }
     if (selectedServices.length > 0) {
       results = results.filter(l => {
@@ -561,14 +556,14 @@ export default function PrivateReceptionPage() {
                 <div>
                   <div style={{ fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--t3)', marginBottom: '8px', fontWeight: 600 }}>Ethnicity</div>
                   <select className="filter-select" value={ethnicity} onChange={e => setEthnicity(e.target.value)}>
-                    {ETHNICITIES.map(e => <option key={e}>{e}</option>)}
+                    {ETHNICITY_FILTER.map(e => <option key={e}>{e}</option>)}
                   </select>
                 </div>
 
                 <div>
                   <div style={{ fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--t3)', marginBottom: '8px', fontWeight: 600 }}>Build</div>
                   <select className="filter-select" value={build} onChange={e => setBuild(e.target.value)}>
-                    {BUILDS.map(b => <option key={b}>{b}</option>)}
+                    {BUILDS_FILTER.map(b => <option key={b}>{b}</option>)}
                   </select>
                 </div>
 

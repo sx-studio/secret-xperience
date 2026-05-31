@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
+import { ETHNICITIES, tagMatchesEthnicity, HAIR_COLOURS, tagMatchesHair, BUILDS, tagMatchesBuild, ORIENTATIONS, tagMatchesOrientation } from '../lib/attributes'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -46,11 +47,8 @@ const ESCORT_TYPES = [
 ]
 
 const SEXUAL_ORIENTATION = [
-  { value: 'all',          label: 'Any' },
-  { value: 'heterosexual', label: 'Straight' },
-  { value: 'gay',          label: 'Gay / Lesbian' },
-  { value: 'bisexual',     label: 'Bisexual' },
-  { value: 'for-all',      label: 'For all' },
+  { value: 'all', label: 'Any' },
+  ...ORIENTATIONS,
 ]
 
 const MEET_TYPES = [
@@ -60,10 +58,10 @@ const MEET_TYPES = [
   { value: 'both',    label: 'Both' },
 ]
 
-const ETHNICITIES = ['Any', 'Asian', 'Black', 'Caucasian', 'Hispanic', 'Indian', 'Middle Eastern', 'Mixed', 'Other']
-const HAIR_COLORS = ['Any', 'Black', 'Blonde', 'Brown', 'Red', 'Auburn', 'White/Grey', 'Other']
-const BUILDS      = ['Any', 'Slim', 'Athletic', 'Curvy', 'Full-figured', 'Petite', 'Tall', 'Average', 'Other']
-const CITIES      = ['All Cities', 'Brussels', 'Antwerp', 'Ghent', 'Amsterdam', 'Berlin', 'Paris', 'Cologne', 'Rotterdam']
+const ETHNICITY_FILTER = ['Any', ...ETHNICITIES]
+const HAIR_COLORS = ['Any', ...HAIR_COLOURS]
+const BUILDS_FILTER = ['Any', ...BUILDS]
+const CITIES      = ['All Cities', 'Brussels', 'Antwerp', 'Ghent', 'Grimbergen', 'Amsterdam', 'Berlin', 'Paris', 'Cologne', 'Rotterdam']
 
 const SERVICES_LIST = ['69','Anal','BDSM','Body Massage','Couples','Cum on Body','Cum on Face','Deep Throat','Doggy Style','Domina','Duo','Erotic Massage','Facesitting','Fetish','Foot Worship','French Kissing','GFE','Golden Shower','Handjob','Kissing','Lap Dance','Massage','Mistress','Oral','Prostate Massage','Rimming','Roleplay','Spanking','Squirting','Strap-on','Striptease','Tantra','Thai Massage','Threesome','Toys']
 
@@ -336,19 +334,16 @@ export default function EscortsPage() {
       })
     }
     if (orientation !== 'all') {
-      results = results.filter(l => {
-        const tags = (l.tags ?? []).map((t: string) => t.toLowerCase())
-        return tags.includes(orientation) || tags.includes('for all') || tags.includes('for-all')
-      })
+      results = results.filter(l => (l.tags ?? []).some((t: string) => tagMatchesOrientation(t, orientation)))
     }
     if (ethnicity !== 'Any') {
-      results = results.filter(l => (l.tags ?? []).some((t: string) => t.toLowerCase() === `ethnicity: ${ethnicity.toLowerCase()}`))
+      results = results.filter(l => (l.tags ?? []).some((t: string) => tagMatchesEthnicity(t, ethnicity)))
     }
     if (hairColor !== 'Any') {
-      results = results.filter(l => (l.tags ?? []).some((t: string) => t.toLowerCase() === `hair: ${hairColor.toLowerCase()}`))
+      results = results.filter(l => (l.tags ?? []).some((t: string) => tagMatchesHair(t, hairColor)))
     }
     if (build !== 'Any') {
-      results = results.filter(l => (l.tags ?? []).some((t: string) => t.toLowerCase() === `build: ${build.toLowerCase()}`))
+      results = results.filter(l => (l.tags ?? []).some((t: string) => tagMatchesBuild(t, build)))
     }
     if (selectedServices.length > 0) {
       results = results.filter(l => {
@@ -577,7 +572,7 @@ export default function EscortsPage() {
               <div>
                 <div style={{ fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--t3)', marginBottom: '8px', fontWeight: 600 }}>Ethnicity</div>
                 <select className="filter-select" value={ethnicity} onChange={e => setEthnicity(e.target.value)}>
-                  {ETHNICITIES.map(e => <option key={e}>{e}</option>)}
+                  {ETHNICITY_FILTER.map(e => <option key={e}>{e}</option>)}
                 </select>
               </div>
 
@@ -585,7 +580,7 @@ export default function EscortsPage() {
               <div>
                 <div style={{ fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--t3)', marginBottom: '8px', fontWeight: 600 }}>Build</div>
                 <select className="filter-select" value={build} onChange={e => setBuild(e.target.value)}>
-                  {BUILDS.map(b => <option key={b}>{b}</option>)}
+                  {BUILDS_FILTER.map(b => <option key={b}>{b}</option>)}
                 </select>
               </div>
 

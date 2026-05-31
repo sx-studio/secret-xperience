@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { groupSelected } from '../../lib/possibilities'
+import { ETHNIC_VALUES, HAIR_VALUES, BUILD_VALUES } from '../../lib/attributes'
 
 /* ─────────────────────────────────────────────────────────
    Advertising profile — modelled on redlights.be format:
@@ -65,9 +66,9 @@ interface EscortProfileProps {
 }
 
 /* ── Tag classification ────────────────────────────────── */
-const HAIR_SET   = new Set(['blonde','brunette','redhead','black hair','auburn','dark hair','black','brown hair','dark'])
-const BUILD_SET  = new Set(['slim','athletic','curvy','petite','bbw','muscular','fit','average'])
-const ETHNIC_SET = new Set(['european','latina','asian','ebony','arabic','mixed','eastern european','caucasian'])
+const HAIR_SET   = HAIR_VALUES
+const BUILD_SET  = BUILD_VALUES
+const ETHNIC_SET = ETHNIC_VALUES
 const LANG_SET   = new Set(['english','french','dutch','german','spanish','italian','portuguese','arabic','russian','polish','czech'])
 const HEIGHT_RE  = /^(\d{3})\s*cm$/i
 const WEIGHT_RE  = /^(\d{2,3})\s*kg$/i
@@ -508,7 +509,7 @@ export default function EscortProfile({
                 const key = d.toLowerCase()
                 const hours = workingHours[key]
                 const isOn = hours !== null && hours !== undefined
-                const displayTime = isOn ? hours.replace('-', '–') : ''
+                const displayTime = isOn ? hours.split('-').map(h => `${h.padStart(2,'0')}:00`).join('–') : ''
                 return (
                   <div key={d} className="rl-day-col">
                     <div className="rl-day-label">{d}</div>

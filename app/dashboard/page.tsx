@@ -4,13 +4,14 @@ import { useEffect, useRef, useCallback, useState } from 'react'
 import { signOut } from '../lib/auth'
 import { createClient } from '../lib/supabase'
 import PhoneVerify from '../components/PhoneVerify/PhoneVerify'
+import { ETHNICITIES, ETHNIC_VALUES, HAIR_COLOURS, HAIR_VALUES, BUILDS as CANONICAL_BUILDS, BUILD_VALUES } from '../lib/attributes'
 
 /* ── Listing edit constants ── */
 const ESCORT_TYPES_OPT = ['Women','Men','Trans Woman','Trans Man','Non-Binary','Couples','Fetish']
 const ORIENTATION_OPT  = ['Straight','Gay','Bisexual','For All']
-const ETHNICITY_OPT    = ['Caucasian','Latina','Asian','Ebony','Arabic','Mixed','Eastern European']
-const HAIR_OPT         = ['Blonde','Brunette','Redhead','Black','Auburn','Dark']
-const BUILD_OPT        = ['Slim','Athletic','Curvy','Petite','BBW','Muscular','Average']
+const ETHNICITY_OPT    = ETHNICITIES
+const HAIR_OPT         = HAIR_COLOURS
+const BUILD_OPT        = CANONICAL_BUILDS
 const NATIONALITY_OPT  = ['Belgian','Dutch','German','French','Spanish','Italian','British','American','Brazilian','Colombian','Czech','Polish','Romanian','Ukrainian','Russian','Other']
 const LANGUAGE_OPT     = ['English','French','Dutch','German','Spanish','Italian','Portuguese','Arabic','Russian','Polish','Czech']
 const ESCORT_SVCS      = ['69','Anal','BDSM','Body Massage','Couples','Cum on Body','Cum on Face','Deep Throat','Doggy Style','Domina','Duo','Erotic Massage','Facesitting','Fetish','Foot Worship','French Kissing','GFE','Golden Shower','Handjob','Kissing','Lap Dance','Massage','Mistress','Oral','Prostate Massage','Rimming','Roleplay','Spanking','Squirting','Strap-on','Striptease','Tantra','Thai Massage','Threesome','Toys']
@@ -34,9 +35,9 @@ function parseListingTags(tags: string[] | null | undefined) {
     wh_thu: '10-22', wh_fri: '10-22', wh_sat: 'off', wh_sun: 'off',
   }
   if (!tags) return res
-  const HAIR_V = ['blonde','brunette','redhead','black hair','auburn','dark hair','black','brown hair','dark']
-  const BUILD_V = ['slim','athletic','curvy','petite','bbw','muscular','fit','average']
-  const ETHNIC_V = ['european','latina','asian','ebony','arabic','mixed','eastern european','caucasian']
+  const HAIR_V = HAIR_VALUES
+  const BUILD_V = BUILD_VALUES
+  const ETHNIC_V = ETHNIC_VALUES
   const NAT_V = ['belgian','dutch','german','french','spanish','italian','british','american','brazilian','colombian','czech','polish','romanian','ukrainian','russian']
   const LANG_V = ['english','french','dutch','german','spanish','italian','portuguese','arabic','russian','polish','czech']
   for (const tag of tags) {
@@ -53,9 +54,9 @@ function parseListingTags(tags: string[] | null | undefined) {
     const hm = l.match(/^(\d{3})\s*cm$/i); if (hm) { res.height = hm[1]; continue }
     const wm = l.match(/^(\d{2,3})\s*kg$/i); if (wm) { res.weight = wm[1]; continue }
     const am = l.match(/^(\d{2})$/); if (am) { res.age = am[1]; continue }
-    if (HAIR_V.includes(l))  { res.hair = l; continue }
-    if (BUILD_V.includes(l)) { res.build = l; continue }
-    if (ETHNIC_V.includes(l)) { res.ethnicity = l; continue }
+    if (HAIR_V.has(l))  { res.hair = l; continue }
+    if (BUILD_V.has(l)) { res.build = l; continue }
+    if (ETHNIC_V.has(l)) { res.ethnicity = l; continue }
     if (NAT_V.includes(l))   { res.nationality = l; continue }
     if (LANG_V.includes(l))  { res.languages.push(l); continue }
     res.services.push(tag)
@@ -1827,9 +1828,9 @@ export default function DashboardPage() {
                 <div>
                   <label style={{ display:'block',font:'600 10px/1 var(--sans)',color:'rgba(255,255,255,0.35)',letterSpacing:'0.1em',marginBottom:'7px',textTransform:'uppercase' }}>Meet Type</label>
                   <select value={listingDraft.meet_type||'incall'} onChange={e => setListingDraft((d:any)=>({...d,meet_type:e.target.value}))} className="db-select">
-                    <option value="incall">Incall</option>
-                    <option value="outcall">Outcall</option>
-                    <option value="both">Both (Incall & Outcall)</option>
+                    <option value="incall">Incall / Private</option>
+                    <option value="outcall">Outcall / Escort</option>
+                    <option value="both">Both</option>
                   </select>
                 </div>
               </div>
@@ -2051,30 +2052,43 @@ export default function DashboardPage() {
               {/* ── Working Hours ── */}
               <div className="db-form-section">
                 <div className="db-form-section-title">Working Hours</div>
-                <div className="db-wh-grid">
+                <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
                   {WH_DAYS.map((day, i) => {
                     const key = `wh_${day}`
                     const val = listingDraft[key] ?? (i < 5 ? '10-22' : 'off')
                     const isOn = val !== 'off'
+                    const parts = isOn ? val.split('-') : ['10', '22']
+                    const startH = parts[0] ?? '10'
+                    const endH   = parts[1] ?? '22'
+                    const hourOpts = Array.from({length:24},(_,h)=>String(h).padStart(2,'0'))
                     return (
-                      <div key={day} className="db-wh-day">
-                        <div className="db-wh-label">{WH_DAY_LABELS[i]}</div>
+                      <div key={day} style={{ display:'flex', alignItems:'center', gap:'10px' }}>
+                        <div style={{ width:'32px', fontSize:'11px', color:'rgba(255,255,255,0.4)', fontFamily:'var(--sans)', fontWeight:600, letterSpacing:'0.06em' }}>{WH_DAY_LABELS[i]}</div>
                         <button type="button"
-                          className={`db-wh-toggle ${isOn ? 'on' : 'off'}`}
+                          style={{ width:'28px', height:'28px', borderRadius:'6px', border:'0.5px solid rgba(255,255,255,0.12)', background: isOn ? 'rgba(197,160,90,0.15)' : 'transparent', color: isOn ? 'var(--gold,#c5a05a)' : 'rgba(255,255,255,0.2)', cursor:'pointer', fontSize:'13px', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}
                           onClick={() => setListingDraft((d:any)=>({...d, [key]: isOn ? 'off' : '10-22'}))}>
                           {isOn ? '✓' : '–'}
                         </button>
-                        {isOn && (
-                          <input type="text" className="db-wh-time"
-                            value={val} placeholder="10-22"
-                            onChange={e => setListingDraft((d:any)=>({...d, [key]: e.target.value}))}
-                          />
+                        {isOn ? (
+                          <>
+                            <select value={startH} className="db-select" style={{ flex:1, padding:'5px 8px', fontSize:'12px' }}
+                              onChange={e => setListingDraft((d:any)=>({...d, [key]: `${e.target.value}-${endH}`}))}>
+                              {hourOpts.map(h => <option key={h} value={h}>{h}:00</option>)}
+                            </select>
+                            <span style={{ fontSize:'11px', color:'rgba(255,255,255,0.25)', flexShrink:0 }}>to</span>
+                            <select value={endH} className="db-select" style={{ flex:1, padding:'5px 8px', fontSize:'12px' }}
+                              onChange={e => setListingDraft((d:any)=>({...d, [key]: `${startH}-${e.target.value}`}))}>
+                              {hourOpts.map(h => <option key={h} value={h}>{h}:00</option>)}
+                            </select>
+                          </>
+                        ) : (
+                          <span style={{ fontSize:'11px', color:'rgba(255,255,255,0.15)', fontFamily:'var(--sans)' }}>Closed</span>
                         )}
                       </div>
                     )
                   })}
                 </div>
-                <div style={{ fontSize:'11px',color:'rgba(255,255,255,0.2)',marginTop:'10px',fontFamily:'var(--sans)' }}>Format: HH-HH (e.g. 10-22 = 10:00 to 22:00). Click dot to toggle day on/off.</div>
+                <div style={{ fontSize:'11px',color:'rgba(255,255,255,0.2)',marginTop:'12px',fontFamily:'var(--sans)' }}>Click the checkmark to toggle a day on or off.</div>
               </div>
             </>)}
 
