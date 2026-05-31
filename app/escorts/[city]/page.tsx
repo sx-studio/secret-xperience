@@ -29,12 +29,12 @@ const CITIES: Record<string, string> = {
 }
 
 /** Country slugs — queries by `country` column instead of `city`. */
-const COUNTRIES: Record<string, { name: string; code: string; desc: string }> = {
-  belgium:     { name: 'Belgium', code: 'BE', desc: 'Browse verified escort and companion profiles across Belgium — Brussels, Antwerp, Ghent, Grimbergen and more. Incall and outcall available.' },
-  netherlands: { name: 'Netherlands', code: 'NL', desc: 'Verified escort listings across the Netherlands — Amsterdam, Rotterdam and beyond. Discreet, professional, always independent.' },
-  germany:     { name: 'Germany', code: 'DE', desc: 'Independent escort and companion profiles in Germany — Berlin, Cologne, Hamburg and more. Browse verified listings.' },
-  france:      { name: 'France', code: 'FR', desc: 'Discover verified escort and companion profiles in France — Paris, Lyon and beyond. Curated, discreet, professional.' },
-  luxembourg:  { name: 'Luxembourg', code: 'LU', desc: 'Verified escort and companion profiles in Luxembourg. Incall and outcall arrangements, independently submitted.' },
+const COUNTRIES: Record<string, { name: string; code: string; cities: string; desc: string }> = {
+  belgium:     { name: 'Belgium', code: 'BE', cities: 'Brussels, Antwerp & Ghent', desc: 'Browse verified escort ads in Belgium — women, couples, men & trans. Independent escorts and agencies for dinner dates, business trips and private meetings. Real photos, reviews & prices.' },
+  netherlands: { name: 'Netherlands', code: 'NL', cities: 'Amsterdam, Rotterdam & Den Haag', desc: 'View escort ads in the Netherlands — women, couples, men, trans & private houses for home reception, escort service or erotic massage. Verified profiles, real photos & prices.' },
+  germany:     { name: 'Germany', code: 'DE', cities: 'Berlin, Cologne & Hamburg', desc: 'Escort directory for Germany — independent escorts, escort agencies and private houses. Find female, male & trans escorts in Berlin, Cologne and beyond. Real photos & reviews.' },
+  france:      { name: 'France', code: 'FR', cities: 'Paris, Lyon & Marseille', desc: 'Browse verified escort ads in France — women, men, couples & trans. Independent escorts and agencies for dinner dates, travel and private meetings. Real photos, reviews & prices.' },
+  luxembourg:  { name: 'Luxembourg', code: 'LU', cities: 'Luxembourg City', desc: 'Verified escort ads in Luxembourg — women, men, couples & trans. Independent escorts for dinner dates, business trips and private meetings. Real photos, reviews & prices.' },
 }
 
 const ALL_SLUGS = [...Object.keys(CITIES), ...Object.keys(COUNTRIES)]
@@ -47,22 +47,18 @@ export async function generateMetadata({ params }: { params: { city: string } })
   const slug = params.city.toLowerCase()
   if (COUNTRIES[slug]) {
     const c = COUNTRIES[slug]
+    const title = `Escort ${c.name} — Escorts in ${c.cities} | SecretXperience`
     return {
-      title: `Escorts in ${c.name} | SecretXperience`,
+      title,
       description: c.desc,
-      openGraph: { title: `Escorts in ${c.name} | SecretXperience`, description: c.desc, type: 'website' },
+      openGraph: { title, description: c.desc, type: 'website' },
       alternates: { canonical: `https://www.secretxperience.eu/escorts/${slug}` },
     }
   }
   const cityName = CITIES[slug]
   if (!cityName) return { title: 'SecretXperience' }
-  const isBE = ['brussels','antwerp','ghent','grimbergen','leuven','mechelen','hasselt','namur','charleroi','kortrijk','ostend','bruges','liege'].includes(slug)
-  const title = isBE
-    ? `Escort Girls ${cityName} — Verified, Real Photos | SecretXperience`
-    : `Escorts in ${cityName} | SecretXperience`
-  const desc = isBE
-    ? `Verified escort girls in ${cityName}. ✓ Real photos ✓ Reviews ✓ Prices. Book independent escorts & VIP companions in ${cityName} discreetly.`
-    : `Browse verified escort profiles in ${cityName}. Discreet, professional providers — incall and outcall available.`
+  const title = `Escort Girls ${cityName} — Verified Escorts, Real Photos & Prices | SecretXperience`
+  const desc = `View escort ads in ${cityName} — women, men, couples & trans for escort service, private reception or erotic massage. Independent escorts & VIP companions. Real photos, reviews & prices.`
   return {
     title,
     description: desc,

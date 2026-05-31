@@ -29,12 +29,12 @@ const CITIES: Record<string, string> = {
 }
 
 /** Country slugs — queries by `country` column instead of `city`. */
-const COUNTRIES: Record<string, { name: string; code: string; desc: string }> = {
-  belgium:     { name: 'Belgium', code: 'BE', desc: 'Private reception hosts across Belgium — Brussels, Antwerp, Ghent, Grimbergen and more. You visit them at their own discreet location.' },
-  netherlands: { name: 'Netherlands', code: 'NL', desc: 'Verified private reception hosts across the Netherlands — Amsterdam, Rotterdam and beyond. Companionship, massage and curated experiences.' },
-  germany:     { name: 'Germany', code: 'DE', desc: 'Private reception hosts in Germany — Berlin, Cologne, Hamburg and more. Visit verified hosts at their private location.' },
-  france:      { name: 'France', code: 'FR', desc: 'Private reception hosts in France — Paris, Lyon and beyond. Companionship, massage and discreet experiences at their location.' },
-  luxembourg:  { name: 'Luxembourg', code: 'LU', desc: 'Verified private reception hosts in Luxembourg. Companionship, massage and curated experiences, independently submitted.' },
+const COUNTRIES: Record<string, { name: string; code: string; cities: string; desc: string }> = {
+  belgium:     { name: 'Belgium', code: 'BE', cities: 'Brussels, Antwerp & Ghent', desc: 'View private reception ads in Belgium — women, couples, men & trans offering home reception and private houses. Companionship, massage and erotic experiences at their location. Real photos & prices.' },
+  netherlands: { name: 'Netherlands', code: 'NL', cities: 'Amsterdam, Rotterdam & Den Haag', desc: 'View private house ads in the Netherlands — women, couples, men & trans for home reception. Companionship, massage and erotic experiences at their private location. Verified profiles, real photos & prices.' },
+  germany:     { name: 'Germany', code: 'DE', cities: 'Berlin, Cologne & Hamburg', desc: 'Private reception directory for Germany — women, couples, men & trans offering home reception and private houses in Berlin, Cologne and beyond. Real photos, reviews & prices.' },
+  france:      { name: 'France', code: 'FR', cities: 'Paris, Lyon & Marseille', desc: 'View private reception ads in France — women, couples, men & trans for home reception and private houses. Companionship, massage and erotic experiences. Real photos, reviews & prices.' },
+  luxembourg:  { name: 'Luxembourg', code: 'LU', cities: 'Luxembourg City', desc: 'Private reception ads in Luxembourg — women, couples, men & trans offering home reception. Companionship, massage and erotic experiences at their location. Real photos & prices.' },
 }
 
 const ALL_SLUGS = [...Object.keys(CITIES), ...Object.keys(COUNTRIES)]
@@ -47,7 +47,7 @@ export async function generateMetadata({ params }: { params: { city: string } })
   const slug = params.city.toLowerCase()
   if (COUNTRIES[slug]) {
     const c = COUNTRIES[slug]
-    const title = `Private Reception ${c.name} — Verified Hosts | SecretXperience`
+    const title = `Private Reception ${c.name} — Home Reception in ${c.cities} | SecretXperience`
     return {
       title,
       description: c.desc,
@@ -57,8 +57,8 @@ export async function generateMetadata({ params }: { params: { city: string } })
   }
   const cityName = CITIES[slug]
   if (!cityName) return { title: 'SecretXperience' }
-  const title = `Private Reception ${cityName} — Verified Hosts | SecretXperience`
-  const desc = `Visit verified private reception hosts in ${cityName}. Companionship, massage & curated experiences at their own discreet location. Real photos, reviews & prices.`
+  const title = `Private Reception ${cityName} — Home Reception & Private Houses | SecretXperience`
+  const desc = `View private reception ads in ${cityName} — women, couples, men & trans offering home reception and private houses. Companionship, massage and erotic experiences at their location. Real photos & prices.`
   return {
     title,
     description: desc,
