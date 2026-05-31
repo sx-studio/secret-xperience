@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '../../lib/supabase'
+import { POSSIBILITY_GROUPS, POSSIBILITY_CATEGORIES } from '../../lib/possibilities'
 
 /* ─── Data ─────────────────────────────────────────────── */
 
@@ -67,6 +68,7 @@ interface FormState {
   meet_type:   string
   images:      string[]
   tags:        string[]
+  services:    string[]
   ethnicity:   string
   build:       string
   hair:        string
@@ -180,6 +182,7 @@ export default function CreateListingPage() {
     meet_type:   'both',
     images:      [],
     tags:        [],
+    services:    [],
     ethnicity:   '',
     build:       '',
     hair:        '',
@@ -231,6 +234,7 @@ export default function CreateListingPage() {
         ...prev,
         ...savedForm,
         tags: Array.isArray(savedForm?.tags) ? savedForm.tags : [],
+        services: Array.isArray(savedForm?.services) ? savedForm.services : [],
       }))
       setStep(savedStep || 1)
       setDraftBanner(false)
@@ -253,6 +257,15 @@ export default function CreateListingPage() {
       tags: f.tags.includes(tag)
         ? f.tags.filter(t => t !== tag)
         : [...f.tags, tag],
+    }))
+  }
+
+  function toggleService(svc: string) {
+    setForm(f => ({
+      ...f,
+      services: f.services.includes(svc)
+        ? f.services.filter(s => s !== svc)
+        : [...f.services, svc],
     }))
   }
 
@@ -417,6 +430,7 @@ export default function CreateListingPage() {
       website:         (() => { try { const u = new URL(form.website.trim()); return ['https:', 'http:'].includes(u.protocol) ? u.href : null } catch { return null } })(),
       images:          form.images.length > 0 ? form.images : null,
       tags:            finalTags.length > 0 ? finalTags : null,
+      services:        POSSIBILITY_CATEGORIES.has(form.category) && form.services.length > 0 ? form.services : null,
       active:          false,   // stays false until moderation approves
       status:          'pending',
       tier:            form.tier,
@@ -1031,6 +1045,102 @@ export default function CreateListingPage() {
                       letterSpacing: '0.04em',
                     }}>
                       {form.tags.length} selected
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* ── Possibilities (grouped service menu) ── */}
+              {POSSIBILITY_CATEGORIES.has(form.category) && (
+                <div style={fieldWrap}>
+                  <label style={label}>Possibilities</label>
+                  <p style={{
+                    fontFamily: 'var(--sans, "Poppins", sans-serif)',
+                    fontSize: '12px',
+                    color: 'var(--t3, rgba(255,255,255,0.22))',
+                    fontWeight: 300,
+                    letterSpacing: '0.02em',
+                    marginBottom: '14px',
+                  }}>
+                    Tick everything you offer. These appear as a clear checklist on your listing.
+                  </p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                    {POSSIBILITY_GROUPS.map(group => (
+                      <div key={group.key}>
+                        <div style={{
+                          fontFamily: 'var(--sans, "Poppins", sans-serif)',
+                          fontSize: '11px',
+                          letterSpacing: '0.16em',
+                          textTransform: 'uppercase',
+                          color: 'var(--gold, #c5a05a)',
+                          fontWeight: 600,
+                          marginBottom: '10px',
+                        }}>
+                          {group.label}
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '7px' }}>
+                          {group.items.map(item => {
+                            const checked = form.services.includes(item)
+                            return (
+                              <button
+                                key={item}
+                                type="button"
+                                onClick={() => toggleService(item)}
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '9px',
+                                  padding: '9px 12px',
+                                  textAlign: 'left',
+                                  background: checked ? 'rgba(197,160,90,0.08)' : 'transparent',
+                                  border: `0.5px solid ${checked ? 'var(--gold, #c5a05a)' : 'var(--b2, rgba(255,255,255,0.12))'}`,
+                                  borderRadius: 'var(--r, 8px)',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.15s',
+                                }}
+                              >
+                                <span style={{
+                                  width: '18px',
+                                  height: '18px',
+                                  borderRadius: '5px',
+                                  flexShrink: 0,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  background: checked ? 'var(--gold, #c5a05a)' : 'transparent',
+                                  border: `1px solid ${checked ? 'var(--gold, #c5a05a)' : 'rgba(255,255,255,0.2)'}`,
+                                  color: '#0a0a0a',
+                                  fontSize: '11px',
+                                  fontWeight: 700,
+                                }}>
+                                  {checked ? '✓' : ''}
+                                </span>
+                                <span style={{
+                                  fontFamily: 'var(--sans, "Poppins", sans-serif)',
+                                  fontSize: '13px',
+                                  fontWeight: 300,
+                                  color: checked ? 'var(--t, #ece8e1)' : 'var(--t2, rgba(236,232,225,0.6))',
+                                  lineHeight: 1.3,
+                                }}>
+                                  {item}
+                                </span>
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {form.services.length > 0 && (
+                    <p style={{
+                      fontFamily: 'var(--sans, "Poppins", sans-serif)',
+                      fontSize: '11px',
+                      color: 'var(--gold, rgba(197,160,90,0.5))',
+                      marginTop: '14px',
+                      fontWeight: 300,
+                      letterSpacing: '0.04em',
+                    }}>
+                      {form.services.length} possibilit{form.services.length === 1 ? 'y' : 'ies'} selected
                     </p>
                   )}
                 </div>

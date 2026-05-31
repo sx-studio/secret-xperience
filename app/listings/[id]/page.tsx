@@ -402,7 +402,7 @@ export default function ListingDetailPage() {
           </nav>
           <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '2.5rem 1.5rem 6rem', animation: 'fadeUp 0.35s ease' }}>
             <EscortProfile
-              listing={{ ...listing, tags: (listing as any).tags ?? [] }}
+              listing={{ ...listing, tags: (listing as any).tags ?? [], services: (listing as any).services ?? [] }}
               reviews={reviews}
               session={session}
               isBookable={isBookable}

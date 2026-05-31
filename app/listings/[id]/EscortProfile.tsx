@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { groupSelected } from '../../lib/possibilities'
 
 /* ─────────────────────────────────────────────────────────
    Advertising profile — modelled on redlights.be format:
@@ -45,6 +46,7 @@ interface EscortProfileProps {
       verified: boolean
     }
     tags?: string[] | null
+    services?: string[] | null
     rating?: number
     review_count?: number
   }
@@ -194,6 +196,9 @@ export default function EscortProfile({
   const images  = (listing.images ?? []).filter(Boolean)
   const tags    = listing.tags ?? []
   const { height, weight, age, hair, build, ethnicity, nationality, languages, services, escortType, orientation, workingHours } = classifyTags(tags)
+  // Structured Possibilities (new): grouped checklist from listing.services.
+  // Falls back to the legacy flat tag-derived services for older listings.
+  const possibilityGroups = groupSelected(listing.services ?? [])
   const sym     = listing.currency === 'GBP' ? '£' : '€'
   const rates   = listing.price_from ? derivedRates(listing.price_from, sym) : []
   const catLabel = CATEGORY_LABEL[listing.category] ?? cap(listing.category)
@@ -253,6 +258,7 @@ export default function EscortProfile({
         .rl-section-title::after { content:'';flex:1;height:0.5px;background:rgba(255,255,255,0.07); }
 
         /* Possibilities checklist */
+        .rl-poss-group { font-size:12px;font-weight:600;color:rgba(236,232,225,0.85);margin-bottom:6px;letter-spacing:0.02em; }
         .rl-possibilities { display:grid;grid-template-columns:1fr 1fr;gap:4px 16px; }
         .rl-poss-item { display:flex;align-items:center;gap:7px;padding:5px 0;font-size:13px;color:rgba(236,232,225,0.65);border-bottom:0.5px solid rgba(255,255,255,0.04); }
         .rl-poss-check { width:16px;height:16px;border-radius:4px;background:rgba(26,143,106,0.15);border:0.5px solid rgba(26,143,106,0.35);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;color:#26d4a0; }
@@ -457,7 +463,24 @@ export default function EscortProfile({
           )}
 
           {/* Possibilities / Services */}
-          {services.length > 0 && (
+          {possibilityGroups.length > 0 ? (
+            <div className="rl-section">
+              <div className="rl-section-title">Possibilities</div>
+              {possibilityGroups.map(group => (
+                <div key={group.label} style={{ marginBottom: '1.1rem' }}>
+                  <div className="rl-poss-group">{group.label}</div>
+                  <div className="rl-possibilities">
+                    {group.items.map(s => (
+                      <div key={s} className="rl-poss-item">
+                        <div className="rl-poss-check">✓</div>
+                        <span>{s}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : services.length > 0 && (
             <div className="rl-section">
               <div className="rl-section-title">Possibilities</div>
               <div className="rl-possibilities">
