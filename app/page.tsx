@@ -2140,7 +2140,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         <div id="navDrawerAvatar" style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--goldd));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#0a0a0a;flex-shrink:0;">A</div>
         <div>
           <div id="navDrawerName" style="font-size:14px;font-weight:500;color:var(--t)">Account</div>
-          <div id="navDrawerEmail" style="font-size:12px;color:var(--t3);margin-top:1px"></div>
+          <div id="navDrawerEmail" style="font-size:12px;color:var(--t2);margin-top:1px"></div>
         </div>
       </div>
     </div>
