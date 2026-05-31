@@ -45,6 +45,72 @@ const clientSteps = [
   },
 ]
 
+const creatorSteps = [
+  {
+    num: '01',
+    icon: '◎',
+    title: 'Create a Creator Account',
+    body: 'Sign up free and select the Creator role. Set up your display name, a short bio, and a profile photo. Your personal details remain private — only what you choose to share is visible.',
+  },
+  {
+    num: '02',
+    icon: '◈',
+    title: 'Publish Your Content',
+    body: 'Open Creator Studio to post photos and videos with captions. Upload directly from your device — content is securely stored and displayed on your creator profile and in the discovery feed.',
+  },
+  {
+    num: '03',
+    icon: '◉',
+    title: 'Link Your Other Platforms',
+    body: 'Add links to your OnlyFans, Fansly, Instagram, or any external platform. Fans can discover you here and follow you across all your channels from one place.',
+  },
+  {
+    num: '04',
+    icon: '◫',
+    title: 'Build Your Fanbase',
+    body: 'Fans follow you with one tap and receive your latest posts in their feed. Use the live chat feature to engage directly, and grow a loyal audience that knows where to find you.',
+  },
+  {
+    num: '05',
+    icon: '◆',
+    title: 'Receive Gifts & Tips',
+    body: 'Fans can send token gifts (25 – 200 tokens) directly from any post as a show of appreciation. Received tokens land instantly in your wallet — redeem them for boosts or withdraw as platform credit.',
+  },
+]
+
+const venueSteps = [
+  {
+    num: '01',
+    icon: '◎',
+    title: 'Create a Host Account',
+    body: 'Sign up free and select the Provider role. Whether you manage a private apartment, a BDSM studio, an adult hotel, or a vacation rental — choose the category that fits your property.',
+  },
+  {
+    num: '02',
+    icon: '◈',
+    title: 'List Your Property',
+    body: 'Create a listing with photos, a description, pricing (hourly or nightly), and location details. Highlight amenities, house rules, and discretion measures. You control exactly what is displayed.',
+  },
+  {
+    num: '03',
+    icon: '◉',
+    title: 'Get Verified',
+    body: 'Complete identity and property verification to earn the verified badge. Verified listings rank higher in search and receive significantly more booking requests from trusted clients.',
+  },
+  {
+    num: '04',
+    icon: '◫',
+    title: 'Accept Bookings',
+    body: 'Clients send booking requests with their preferred dates and duration. You review and approve on your own schedule — no obligations, no minimums. Manage everything from your dashboard.',
+  },
+  {
+    num: '05',
+    icon: '◆',
+    title: 'Get Paid',
+    body: 'Payments for rentals, hotel stays, and experiences are processed securely via Stripe. Funds are released after the booking is confirmed. SecretXperience retains a 15% platform fee.',
+  },
+]
+
 const providerSteps = [
   {
     num: '01',
@@ -186,6 +252,54 @@ export default function HowItWorksPage() {
             List your services professionally, reach verified clients, and manage your schedule on your terms.
           </p>
           {providerSteps.map((step, i) => (
+            <StepCard key={step.num} step={step} index={i} />
+          ))}
+        </section>
+
+        {/* Divider */}
+        <div style={{ textAlign: 'center', marginBottom: 80 }}>
+          <span style={{ fontSize: 22, color: '#c5a05a22', letterSpacing: '0.4em' }}>✦ ✦ ✦</span>
+        </div>
+
+        {/* For Creators */}
+        <section style={{ marginBottom: 80 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 8 }}>
+            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 400, color: '#e8e0d0', letterSpacing: '0.02em' }}>
+              For Creators
+            </h2>
+            <span style={{ fontSize: 11, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#c5a05a', border: '0.5px solid #c5a05a44', padding: '3px 10px', borderRadius: 2 }}>
+              Publish &amp; Earn
+            </span>
+          </div>
+          <div style={{ height: '0.5px', background: 'linear-gradient(90deg, #c5a05a44 0%, transparent 70%)', marginBottom: 8 }} />
+          <p style={{ fontSize: 14, color: '#555', lineHeight: 1.7, marginBottom: 8 }}>
+            Share content, build a following, and earn tokens from fans — all in one place.
+          </p>
+          {creatorSteps.map((step, i) => (
+            <StepCard key={step.num} step={step} index={i} />
+          ))}
+        </section>
+
+        {/* Divider */}
+        <div style={{ textAlign: 'center', marginBottom: 80 }}>
+          <span style={{ fontSize: 22, color: '#c5a05a22', letterSpacing: '0.4em' }}>✦ ✦ ✦</span>
+        </div>
+
+        {/* For Venues & Hosts */}
+        <section style={{ marginBottom: 80 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 8 }}>
+            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 400, color: '#e8e0d0', letterSpacing: '0.02em' }}>
+              For Venues &amp; Hosts
+            </h2>
+            <span style={{ fontSize: 11, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#c5a05a', border: '0.5px solid #c5a05a44', padding: '3px 10px', borderRadius: 2 }}>
+              List &amp; Host
+            </span>
+          </div>
+          <div style={{ height: '0.5px', background: 'linear-gradient(90deg, #c5a05a44 0%, transparent 70%)', marginBottom: 8 }} />
+          <p style={{ fontSize: 14, color: '#555', lineHeight: 1.7, marginBottom: 8 }}>
+            Rentals, hotels, BDSM studios, private apartments — list your space and receive bookings from verified clients.
+          </p>
+          {venueSteps.map((step, i) => (
             <StepCard key={step.num} step={step} index={i} />
           ))}
         </section>

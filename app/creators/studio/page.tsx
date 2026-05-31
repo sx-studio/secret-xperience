@@ -20,6 +20,7 @@ export default function CreatorStudio() {
   const [linkMsg, setLinkMsg] = useState('')
 
   const [myPosts, setMyPosts] = useState<any[]>([])
+  const [gifts, setGifts] = useState<any[]>([])
 
   useEffect(() => {
     (async () => {
@@ -28,10 +29,14 @@ export default function CreatorStudio() {
       if (!session) { window.location.href = '/login?next=/creators/studio'; return }
       setMe(session.user.id)
       setAuthChecked(true)
-      const { data: prof } = await supabase.from('profiles').select('external_links').eq('id', session.user.id).maybeSingle()
+      const [{ data: prof }, { data: posts }, { data: giftData }] = await Promise.all([
+        supabase.from('profiles').select('external_links').eq('id', session.user.id).maybeSingle(),
+        supabase.from('creator_posts').select('id, caption, media_url, media_type, created_at').eq('creator_id', session.user.id).order('created_at', { ascending: false }),
+        supabase.from('creator_gifts').select('id, amount_tokens, message, created_at, sender:sender_id(full_name, username)').eq('creator_id', session.user.id).order('created_at', { ascending: false }).limit(20),
+      ])
       if (prof?.external_links && Array.isArray(prof.external_links)) setLinks(prof.external_links)
-      const { data: posts } = await supabase.from('creator_posts').select('id, caption, media_url, media_type, created_at').eq('creator_id', session.user.id).order('created_at', { ascending: false })
       setMyPosts(posts || [])
+      setGifts(giftData || [])
     })()
   }, [])
 
@@ -161,6 +166,31 @@ export default function CreatorStudio() {
             </div>
           </div>
         )}
+
+        {/* Gifts received */}
+        <div style={card}>
+          <div style={{ fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--t3)', marginBottom: '12px' }}>Gifts received {gifts.length > 0 && `(${gifts.length})`}</div>
+          {gifts.length === 0 ? (
+            <p style={{ fontSize: '13px', color: 'var(--t3)', margin: 0 }}>No gifts yet — fans can send tokens from your posts.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {gifts.map((g: any) => {
+                const senderName = g.sender?.full_name || g.sender?.username || 'Anonymous'
+                const d = new Date(g.created_at)
+                return (
+                  <div key={g.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '10px 12px', background: 'var(--bg2)', borderRadius: 'var(--r)' }}>
+                    <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--gbg)', border: '0.5px solid var(--gbrd)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '16px' }}>✦</div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--t)' }}>{senderName} <span style={{ color: 'var(--gold)' }}>+{g.amount_tokens} tokens</span></div>
+                      {g.message && <div style={{ fontSize: '12px', color: 'var(--t2)', marginTop: '3px', fontStyle: 'italic' }}>&ldquo;{g.message}&rdquo;</div>}
+                      <div style={{ fontSize: '11px', color: 'var(--t3)', marginTop: '4px' }}>{d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

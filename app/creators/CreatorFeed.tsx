@@ -27,13 +27,116 @@ function timeAgo(iso: string) {
   return `${Math.floor(s / 86400)}d ago`
 }
 
-function PostCard({ post, me, follows, onFollow }: { post: Post; me: string | null; follows: Set<string>; onFollow: (id: string) => void }) {
+const GIFT_AMOUNTS = [25, 50, 100, 200]
+
+function GiftModal({ creator, senderBalance, onClose, onSent }: {
+  creator: { id: string; full_name: string | null; username: string | null }
+  senderBalance: number | null
+  onClose: () => void
+  onSent: (newBalance: number) => void
+}) {
+  const [amount, setAmount] = useState(50)
+  const [message, setMessage] = useState('')
+  const [sending, setSending] = useState(false)
+  const [err, setErr] = useState('')
+  const name = creator.full_name || creator.username || 'Creator'
+
+  async function send() {
+    setSending(true); setErr('')
+    try {
+      const res = await fetch('/api/creators/gift', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ creatorId: creator.id, amountTokens: amount, message: message.trim() }),
+      })
+      const json = await res.json()
+      if (!res.ok) { setErr(json.error || 'Failed to send gift'); setSending(false); return }
+      onSent(json.newBalance)
+    } catch { setErr('Failed to send gift'); setSending(false) }
+  }
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
+      onClick={e => { if (e.target === e.currentTarget) onClose() }}>
+      <div style={{ position: 'absolute', inset: 0, background: 'rgba(4,3,10,0.85)', backdropFilter: 'blur(8px)' }} onClick={onClose} />
+      <div style={{ position: 'relative', background: 'var(--bg1)', border: '0.5px solid var(--gbrd)', borderRadius: '18px', padding: '2rem', width: '100%', maxWidth: '380px', boxShadow: '0 0 60px rgba(197,160,90,0.15)' }}>
+        <button onClick={onClose} style={{ position: 'absolute', top: '14px', right: '14px', background: 'none', border: 'none', color: 'var(--t3)', cursor: 'pointer', fontSize: '20px' }}>×</button>
+        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+          <div style={{ fontSize: '28px', marginBottom: '8px' }}>✦</div>
+          <h2 style={{ fontFamily: 'var(--serif)', fontSize: '22px', fontWeight: 400, margin: '0 0 6px' }}>Send a gift</h2>
+          <p style={{ fontSize: '13px', color: 'var(--t3)', margin: 0 }}>Show {name} some appreciation</p>
+        </div>
+
+        <div style={{ marginBottom: '1.25rem' }}>
+          <div style={{ fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--t3)', marginBottom: '10px' }}>Choose amount</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '8px' }}>
+            {GIFT_AMOUNTS.map(a => (
+              <button key={a} onClick={() => setAmount(a)} style={{ padding: '10px 4px', borderRadius: '10px', border: amount === a ? '1.5px solid var(--gold)' : '0.5px solid var(--b2)', background: amount === a ? 'var(--gbg)' : 'var(--bg2)', cursor: 'pointer', color: amount === a ? 'var(--gold)' : 'var(--t2)', fontWeight: 700, fontSize: '14px', transition: 'all .15s' }}>
+                {a}
+                <div style={{ fontSize: '10px', fontWeight: 400, color: 'var(--t3)', marginTop: '2px' }}>tokens</div>
+              </button>
+            ))}
+          </div>
+          {senderBalance !== null && (
+            <div style={{ fontSize: '11px', color: 'var(--t3)', marginTop: '8px', textAlign: 'right' }}>
+              Your balance: <strong style={{ color: amount > senderBalance ? '#e0607a' : 'var(--gold)' }}>{senderBalance} tokens</strong>
+            </div>
+          )}
+        </div>
+
+        <div style={{ marginBottom: '1.25rem' }}>
+          <div style={{ fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--t3)', marginBottom: '10px' }}>Message (optional)</div>
+          <textarea
+            value={message}
+            onChange={e => setMessage(e.target.value.slice(0, 200))}
+            placeholder="Leave a kind word…"
+            rows={2}
+            style={{ width: '100%', padding: '10px 12px', background: 'var(--bg2)', border: '0.5px solid var(--b2)', borderRadius: 'var(--r)', color: 'var(--t)', fontSize: '13px', fontFamily: 'var(--sans)', resize: 'none', boxSizing: 'border-box' }}
+          />
+          <div style={{ fontSize: '11px', color: 'var(--t3)', textAlign: 'right' }}>{message.length}/200</div>
+        </div>
+
+        {err && <div style={{ fontSize: '13px', color: '#e0607a', marginBottom: '12px', textAlign: 'center' }}>{err}</div>}
+
+        <button onClick={send} disabled={sending || (senderBalance !== null && amount > senderBalance)} style={{ width: '100%', padding: '13px', background: 'linear-gradient(135deg,var(--gold),var(--goldd))', border: 'none', borderRadius: 'var(--r)', color: '#0a0a0a', fontWeight: 700, fontSize: '15px', cursor: sending ? 'default' : 'pointer', opacity: (senderBalance !== null && amount > senderBalance) ? 0.5 : 1 }}>
+          {sending ? 'Sending…' : `Send ${amount} tokens ✦`}
+        </button>
+        {senderBalance !== null && amount > senderBalance && (
+          <p style={{ fontSize: '12px', color: 'var(--t3)', textAlign: 'center', marginTop: '10px' }}>
+            <Link href="/tokens" style={{ color: 'var(--gold)' }}>Get more tokens →</Link>
+          </p>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function GiftSuccess({ amount, onClose }: { amount: number; onClose: () => void }) {
+  useEffect(() => { const t = setTimeout(onClose, 3000); return () => clearTimeout(t) }, [onClose])
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', pointerEvents: 'none' }}>
+      <div style={{ background: 'var(--bg1)', border: '1px solid var(--gbrd)', borderRadius: '16px', padding: '2rem 2.5rem', textAlign: 'center', boxShadow: '0 0 60px rgba(197,160,90,0.25)', pointerEvents: 'auto' }}>
+        <div style={{ fontSize: '36px', marginBottom: '8px' }}>✦</div>
+        <div style={{ fontFamily: 'var(--serif)', fontSize: '20px', fontWeight: 400, marginBottom: '6px' }}>Gift sent!</div>
+        <div style={{ fontSize: '13px', color: 'var(--t3)' }}>{amount} tokens delivered with love</div>
+      </div>
+    </div>
+  )
+}
+
+function PostCard({ post, me, follows, balance, onFollow, onBalanceChange }: {
+  post: Post; me: string | null; follows: Set<string>; balance: number | null
+  onFollow: (id: string) => void
+  onBalanceChange: (b: number) => void
+}) {
   const c = post.creator
   if (!c) return null
   const name = c.full_name || c.username || 'Creator'
   const following = follows.has(c.id)
   const isSelf = me === c.id
   const links = Array.isArray(c.external_links) ? c.external_links : []
+  const [giftOpen, setGiftOpen] = useState(false)
+  const [gifted, setGifted] = useState<number | null>(null)
 
   return (
     <article style={{ background: 'var(--bg1)', border: '0.5px solid var(--b)', borderRadius: '14px', overflow: 'hidden' }}>
@@ -75,6 +178,13 @@ function PostCard({ post, me, follows, onFollow }: { post: Post; me: string | nu
               <i className="ti ti-message-circle" /> Live chat
             </Link>
           )}
+          {!isSelf && (
+            <button
+              onClick={() => { if (!me) { window.location.href = '/login?next=/creators'; return } setGiftOpen(true) }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '7px 14px', borderRadius: '20px', border: '0.5px solid rgba(197,160,90,0.35)', background: 'var(--gbg)', color: 'var(--gold)', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}>
+              ✦ Send a gift
+            </button>
+          )}
           {links.slice(0, 3).map((l, i) => (
             <a key={i} href={l.url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '7px 12px', borderRadius: '20px', border: '0.5px solid rgba(197,160,90,0.3)', color: 'var(--gold)', fontSize: '12px', fontWeight: 600, textDecoration: 'none' }}>
               <i className="ti ti-external-link" /> {l.label}
@@ -82,6 +192,16 @@ function PostCard({ post, me, follows, onFollow }: { post: Post; me: string | nu
           ))}
         </div>
       </div>
+
+      {giftOpen && (
+        <GiftModal
+          creator={c}
+          senderBalance={balance}
+          onClose={() => setGiftOpen(false)}
+          onSent={(newBal) => { onBalanceChange(newBal); setGifted(amount => { setGiftOpen(false); return null }); setGifted(50) }}
+        />
+      )}
+      {gifted !== null && <GiftSuccess amount={gifted} onClose={() => setGifted(null)} />}
     </article>
   )
 }
@@ -89,6 +209,7 @@ function PostCard({ post, me, follows, onFollow }: { post: Post; me: string | nu
 export default function CreatorFeed({ posts }: { posts: Post[] }) {
   const [me, setMe] = useState<string | null>(null)
   const [follows, setFollows] = useState<Set<string>>(new Set())
+  const [balance, setBalance] = useState<number | null>(null)
 
   useEffect(() => {
     (async () => {
@@ -97,21 +218,23 @@ export default function CreatorFeed({ posts }: { posts: Post[] }) {
         const { data: { session } } = await supabase.auth.getSession()
         if (!session) return
         setMe(session.user.id)
-        const { data } = await supabase.from('creator_follows').select('creator_id').eq('follower_id', session.user.id)
-        setFollows(new Set((data || []).map((r: any) => r.creator_id)))
+        const [{ data: followData }, { data: wallet }] = await Promise.all([
+          supabase.from('creator_follows').select('creator_id').eq('follower_id', session.user.id),
+          supabase.from('user_wallets').select('balance').eq('user_id', session.user.id).maybeSingle(),
+        ])
+        setFollows(new Set((followData || []).map((r: any) => r.creator_id)))
+        if (wallet) setBalance(wallet.balance)
       } catch { /* ignore */ }
     })()
   }, [])
 
   async function onFollow(creatorId: string) {
     if (!me) { window.location.href = '/login?next=/creators'; return }
-    // optimistic
     setFollows(prev => { const n = new Set(prev); n.has(creatorId) ? n.delete(creatorId) : n.add(creatorId); return n })
     try {
       const res = await fetch('/api/creators/follow', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ creatorId }) })
       if (!res.ok) throw new Error()
     } catch {
-      // revert on failure
       setFollows(prev => { const n = new Set(prev); n.has(creatorId) ? n.delete(creatorId) : n.add(creatorId); return n })
     }
   }
@@ -133,7 +256,17 @@ export default function CreatorFeed({ posts }: { posts: Post[] }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '18px', maxWidth: '620px', margin: '0 auto' }}>
-      {posts.map(p => <PostCard key={p.id} post={p} me={me} follows={follows} onFollow={onFollow} />)}
+      {posts.map(p => (
+        <PostCard
+          key={p.id}
+          post={p}
+          me={me}
+          follows={follows}
+          balance={balance}
+          onFollow={onFollow}
+          onBalanceChange={setBalance}
+        />
+      ))}
     </div>
   )
 }
