@@ -27,7 +27,9 @@
       "mcp__resend__send-email",
       "mcp__resend__list-broadcasts",
       "mcp__resend__list-contacts",
-      "mcp__resend__list-segments"
+      "mcp__resend__list-segments",
+      "mcp__resend__list-emails",
+      "mcp__resend__list-logs"
     ]
   }
 }
