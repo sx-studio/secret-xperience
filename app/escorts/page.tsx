@@ -55,8 +55,8 @@ const SEXUAL_ORIENTATION = [
 
 const MEET_TYPES = [
   { value: 'all',     label: 'Any' },
-  { value: 'incall',  label: 'Incall' },
-  { value: 'outcall', label: 'Outcall' },
+  { value: 'incall',  label: 'Incall / Private' },
+  { value: 'outcall', label: 'Outcall / Escort' },
   { value: 'both',    label: 'Both' },
 ]
 
