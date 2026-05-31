@@ -4,34 +4,121 @@ import { rateLimit } from '../../../lib/ratelimit'
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.secretxperience.eu'
 
+function providerWelcomeHtml(name: string) {
+  const hi = name ? `Welcome, ${name} —` : 'Welcome —'
+  return `
+<div style="background:#080612;padding:40px 20px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <div style="max-width:560px;margin:0 auto;background:#110d1c;border:1px solid rgba(255,255,255,0.08);border-radius:18px;overflow:hidden;">
+    <div style="height:3px;background:linear-gradient(90deg,transparent,#c5a05a,#e7c87f,#c5a05a,transparent);"></div>
+    <div style="padding:34px 36px 8px;">
+      <div style="font-size:24px;font-weight:600;letter-spacing:0.02em;color:#c5a05a;font-family:Georgia,'Cormorant Garamond',serif;">SecretXperience</div>
+    </div>
+    <div style="padding:14px 36px 8px;">
+      <h1 style="font-size:23px;font-weight:400;color:#ece8e1;margin:0 0 14px;font-family:Georgia,serif;">${hi} let's get you seen.</h1>
+      <p style="font-size:14px;line-height:1.7;color:rgba(236,232,225,0.65);margin:0 0 26px;">
+        You're now part of a premium marketplace built for discretion, safety and reach across Belgium, the Netherlands, Germany, France &amp; Luxembourg. Three quick steps and you're live.
+      </p>
+    </div>
+    <div style="padding:0 36px;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:14px;">
+        <tr>
+          <td width="34" valign="top"><div style="width:26px;height:26px;border-radius:50%;background:#c5a05a;color:#080612;font-weight:700;font-size:13px;text-align:center;line-height:26px;">1</div></td>
+          <td valign="top" style="padding-bottom:18px;">
+            <div style="font-size:15px;color:#ece8e1;font-weight:600;margin-bottom:3px;">Create your listing — free, forever</div>
+            <div style="font-size:13px;line-height:1.6;color:rgba(236,232,225,0.55);">A basic listing stays live permanently. No daily re-listing, no expiry.</div>
+          </td>
+        </tr>
+        <tr>
+          <td width="34" valign="top"><div style="width:26px;height:26px;border-radius:50%;background:#c5a05a;color:#080612;font-weight:700;font-size:13px;text-align:center;line-height:26px;">2</div></td>
+          <td valign="top" style="padding-bottom:18px;">
+            <div style="font-size:15px;color:#ece8e1;font-weight:600;margin-bottom:3px;">Verify your identity</div>
+            <div style="font-size:13px;line-height:1.6;color:rgba(236,232,225,0.55);">Verified providers get a trust badge and noticeably more enquiries.</div>
+          </td>
+        </tr>
+        <tr>
+          <td width="34" valign="top"><div style="width:26px;height:26px;border-radius:50%;background:#c5a05a;color:#080612;font-weight:700;font-size:13px;text-align:center;line-height:26px;">3</div></td>
+          <td valign="top" style="padding-bottom:6px;">
+            <div style="font-size:15px;color:#ece8e1;font-weight:600;margin-bottom:3px;">Get to the top</div>
+            <div style="font-size:13px;line-height:1.6;color:rgba(236,232,225,0.55);">Feature your listing for 7 or 30 days to lead the grid and homepage slider.</div>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div style="padding:18px 36px 8px;text-align:center;">
+      <a href="${SITE}/listings/create" style="display:inline-block;background:linear-gradient(135deg,#e7c87f,#c5a05a 55%,#a0803d);color:#1a1206;text-decoration:none;font-weight:700;font-size:15px;padding:14px 34px;border-radius:10px;">Create my listing →</a>
+    </div>
+    <div style="margin:24px 36px;padding:18px 20px;background:rgba(197,160,90,0.07);border:1px solid rgba(197,160,90,0.2);border-radius:12px;">
+      <div style="font-size:14px;color:#c5a05a;font-weight:600;margin-bottom:4px;">Invite providers, earn featured credit</div>
+      <div style="font-size:13px;line-height:1.6;color:rgba(236,232,225,0.6);">Share your referral link — when someone you invite publishes their first listing, you're rewarded automatically. <a href="${SITE}/refer" style="color:#c5a05a;">Get your link →</a></div>
+    </div>
+    <div style="padding:8px 36px 34px;border-top:1px solid rgba(255,255,255,0.06);margin-top:8px;">
+      <p style="font-size:12px;line-height:1.6;color:rgba(236,232,225,0.35);margin:18px 0 0;">
+        Questions? Just reply to this email — we read every message.<br/>
+        SecretXperience.eu · Adults only (18+) · You can unsubscribe anytime.
+      </p>
+    </div>
+  </div>
+</div>`
+}
+
+function memberWelcomeHtml(name: string) {
+  const hi = name ? `Welcome in, ${name}.` : 'Welcome in.'
+  return `
+<div style="background:#050309;padding:36px 18px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,sans-serif;">
+  <div style="max-width:540px;margin:0 auto;background:#0e0a17;border:1px solid rgba(197,160,90,0.18);border-radius:20px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,0.5);">
+    <div style="height:3px;background:linear-gradient(90deg,transparent,#c5a05a,#e7c87f,#c5a05a,transparent);"></div>
+    <div style="padding:40px 40px 0;text-align:center;">
+      <div style="font-family:Georgia,'Cormorant Garamond',serif;font-size:27px;font-weight:600;letter-spacing:0.04em;color:#c5a05a;">SecretXperience</div>
+      <div style="font-family:Georgia,serif;font-style:italic;font-size:13px;color:rgba(236,232,225,0.45);margin-top:8px;letter-spacing:0.02em;">An evening that ends behind a closed door.</div>
+    </div>
+    <div style="padding:30px 40px 6px;text-align:center;">
+      <h1 style="font-family:Georgia,serif;font-size:30px;font-weight:400;color:#f2ede4;margin:0 0 16px;line-height:1.2;">${hi}</h1>
+      <p style="font-size:14.5px;line-height:1.75;color:rgba(236,232,225,0.7);margin:0 auto;max-width:400px;">
+        You've stepped into a private world — a curated marketplace of remarkable companions and unforgettable evenings across Belgium, the Netherlands, Germany, France &amp; Luxembourg. We're genuinely glad you're here.
+      </p>
+    </div>
+    <div style="padding:26px 40px 4px;">
+      <div style="font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:#c5a05a;text-align:center;margin-bottom:18px;">What awaits you</div>
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr><td valign="top" style="padding:0 0 16px;">
+          <span style="color:#c5a05a;font-size:15px;">✦</span>
+          <span style="font-size:14px;color:#ece8e1;font-weight:600;margin-left:8px;">First looks at new arrivals</span>
+          <div style="font-size:13px;line-height:1.6;color:rgba(236,232,225,0.55);margin:3px 0 0 23px;">Be the first to discover newly listed companions in your city.</div>
+        </td></tr>
+        <tr><td valign="top" style="padding:0 0 16px;">
+          <span style="color:#c5a05a;font-size:15px;">✦</span>
+          <span style="font-size:14px;color:#ece8e1;font-weight:600;margin-left:8px;">Invitations to private events</span>
+          <div style="font-size:13px;line-height:1.6;color:rgba(236,232,225,0.55);margin:3px 0 0 23px;">Exclusive evenings and experiences, shared only with members.</div>
+        </td></tr>
+        <tr><td valign="top" style="padding:0 0 4px;">
+          <span style="color:#c5a05a;font-size:15px;">✦</span>
+          <span style="font-size:14px;color:#ece8e1;font-weight:600;margin-left:8px;">Quiet, discreet, always yours</span>
+          <div style="font-size:13px;line-height:1.6;color:rgba(236,232,225,0.55);margin:3px 0 0 23px;">Delivered with discretion. Your privacy is the point.</div>
+        </td></tr>
+      </table>
+    </div>
+    <div style="padding:26px 40px 10px;text-align:center;">
+      <a href="${SITE}/discover" style="display:inline-block;background:linear-gradient(135deg,#e7c87f,#c5a05a 55%,#a0803d);color:#1a1206;text-decoration:none;font-weight:700;font-size:15px;padding:15px 40px;border-radius:11px;letter-spacing:0.02em;">Begin exploring →</a>
+      <div style="font-size:12px;color:rgba(236,232,225,0.4);margin-top:14px;">Browse verified providers, save your favourites, and book with confidence.</div>
+    </div>
+    <div style="padding:22px 40px 34px;margin-top:14px;border-top:1px solid rgba(255,255,255,0.06);text-align:center;">
+      <p style="font-size:11.5px;line-height:1.7;color:rgba(236,232,225,0.32);margin:0;">
+        Sent with discretion by SecretXperience · Adults only (18+)<br/>
+        You're receiving this because you created an account. Reply STOP to unsubscribe anytime.
+      </p>
+    </div>
+  </div>
+</div>`
+}
+
 async function sendWelcomeEmail(email: string, name: string, role: string) {
   const key = process.env.RESEND_API_KEY
   if (!key) return
   const isProvider = role === 'provider'
   const subject = isProvider
-    ? 'Welcome to SecretXperience — set up your first listing'
-    : 'Welcome to SecretXperience'
-  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
-    body{margin:0;padding:0;background:#080808;font-family:'Poppins',Arial,sans-serif;color:#e8e0d0}
-    .wrap{max-width:560px;margin:40px auto;padding:0 24px}
-    .brand{font-size:22px;font-weight:600;color:#e8e0d0;letter-spacing:0.04em;margin-bottom:32px}
-    .brand span{color:#c5a05a}
-    h1{font-size:28px;font-weight:400;color:#e8e0d0;margin:0 0 16px;font-family:Georgia,serif;font-style:italic}
-    p{font-size:14px;line-height:1.7;color:#888;margin:0 0 20px}
-    .btn{display:inline-block;background:linear-gradient(135deg,#c5a05a,#a07840);color:#000;font-weight:700;font-size:13px;padding:12px 28px;border-radius:8px;text-decoration:none;letter-spacing:0.06em;margin-top:8px}
-    .footer{margin-top:48px;font-size:11px;color:#444;border-top:0.5px solid #1a1a1a;padding-top:20px}
-  </style></head><body><div class="wrap">
-    <div class="brand">Secret<span>Xperience</span></div>
-    <h1>Welcome${name ? `, ${name}` : ''}</h1>
-    <p>You've joined the EU's most modern adult services marketplace. ${isProvider
-      ? 'To start receiving enquiries, create your first listing — it takes about 5 minutes.'
-      : 'Browse verified providers, save your favourites, and book with confidence.'
-    }</p>
-    <a href="${isProvider ? `${SITE}/listings/create` : `${SITE}/escorts`}" class="btn">
-      ${isProvider ? 'Create your first listing →' : 'Browse listings →'}
-    </a>
-    <div class="footer">SecretXperience · <a href="${SITE}/privacy" style="color:#555;text-decoration:none">Privacy</a> · <a href="${SITE}/terms" style="color:#555;text-decoration:none">Terms</a></div>
-  </div></body></html>`
+    ? 'Welcome to SecretXperience — let\'s get your first listing live'
+    : 'Welcome in — your invitation to SecretXperience'
+  const html = isProvider ? providerWelcomeHtml(name) : memberWelcomeHtml(name)
 
   await fetch('https://api.resend.com/emails', {
     method: 'POST',

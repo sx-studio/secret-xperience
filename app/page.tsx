@@ -1625,10 +1625,12 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
           { count: listingCount },
           { count: userCount },
           { count: providerCount },
+          { data: activeRows },
         ] = await Promise.all([
           (supabase as any).from('listings').select('id', { count: 'exact', head: true }).eq('active', true),
           (supabase as any).from('profiles').select('id', { count: 'exact', head: true }),
           (supabase as any).from('profiles').select('id', { count: 'exact', head: true }).in('role', ['provider','venue','creator']),
+          (supabase as any).from('listings').select('profile_id, city').eq('active', true),
         ])
         const el = (id: string) => document.getElementById(id)
         const countStr = (listingCount || 0).toLocaleString()
@@ -1637,6 +1639,17 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         if (el('statProviders')) el('statProviders')!.textContent = (providerCount || 0).toLocaleString()
         if (el('statUsers')) el('statUsers')!.textContent = (userCount || 0).toLocaleString()
         if (el('statRevenue')) el('statRevenue')!.textContent = '—'
+
+        // Live social proof — distinct active providers + cities from live listings
+        const rows = (activeRows || []) as Array<{ profile_id: string | null; city: string | null }>
+        const liveListings = listingCount || rows.length
+        const liveCities = new Set(rows.map(r => (r.city || '').trim().toLowerCase()).filter(Boolean)).size
+        if (el('statCitiesHero')) el('statCitiesHero')!.textContent = String(liveCities || 0)
+        if (el('statListingsPill')) el('statListingsPill')!.textContent = (liveListings || 0).toLocaleString()
+        if (el('statCitiesPill')) el('statCitiesPill')!.textContent = String(liveCities || 0)
+        // Hide the live pill entirely if there's nothing live yet (avoid "0 listings")
+        const pill = el('liveNowPill')
+        if (pill) pill.style.display = liveListings > 0 ? 'inline-flex' : 'none'
       } catch(e) {}
     }
     loadStats()
@@ -2085,9 +2098,13 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
           <input type="text" id="heroSearch" placeholder="Search listings, companions, venues…" style="width:100%;height:52px;padding:0 90px 0 42px;background:var(--bg2);border:0.5px solid var(--gbrd);border-radius:20px;color:var(--t);font:400 14px var(--sans);outline:none;" onkeydown="if(event.key==='Enter'){var q=this.value.trim();if(q){window.location.href='/search?q='+encodeURIComponent(q)}else{window.location.href='/search'}}" />
           <button id="heroSearchBtn" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);height:40px;padding:0 16px;background:var(--grad-gold);border:none;border-radius:16px;color:#000;font:600 13px var(--sans);cursor:pointer;letter-spacing:0.04em;">Search</button>
         </div>
+        <div id="liveNowPill" style="display:inline-flex;align-items:center;gap:8px;margin-bottom:1.25rem;padding:7px 14px;background:rgba(38,212,160,0.08);border:0.5px solid rgba(38,212,160,0.3);border-radius:999px;font:500 12.5px var(--sans);color:var(--t);">
+          <span style="position:relative;display:inline-flex;width:8px;height:8px;"><span style="position:absolute;inset:0;border-radius:50%;background:#26d4a0;animation:sxPulse 1.8s ease-out infinite;"></span><span style="position:relative;width:8px;height:8px;border-radius:50%;background:#26d4a0;"></span></span>
+          <span><strong id="statListingsPill" style="color:#26d4a0;">—</strong> listings live now across <strong id="statCitiesPill" style="color:#26d4a0;">—</strong> cities in Belgium, Netherlands &amp; Germany</span>
+        </div>
         <div class="hero-stats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;">
           <div><div id="statListings" style="font-family:var(--serif);font-size:28px;color:var(--gold);">40+</div><div class="t-meta" style="color:var(--t3);">LISTINGS</div></div>
-          <div><div style="font-family:var(--serif);font-size:28px;color:var(--gold);">8</div><div class="t-meta" style="color:var(--t3);">CITIES</div></div>
+          <div><div id="statCitiesHero" style="font-family:var(--serif);font-size:28px;color:var(--gold);">—</div><div class="t-meta" style="color:var(--t3);">CITIES</div></div>
           <div><div style="font-family:var(--serif);font-size:28px;color:var(--gold);">8</div><div class="t-meta" style="color:var(--t3);">CATEGORIES</div></div>
           <div><div style="font-family:var(--serif);font-size:28px;color:var(--gold);">4.8 ★</div><div class="t-meta" style="color:var(--t3);">AVG RATING</div></div>
         </div>
