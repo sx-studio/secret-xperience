@@ -1,14 +1,33 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createClient } from '../lib/supabase'
 
 const TABS = ['Listings', 'Users', 'Verification', 'Bookings', 'Newsletter'] as const
 type Tab = typeof TABS[number]
 
+const TAB_ICONS: Record<Tab, string> = {
+  Listings: 'layout-list',
+  Users: 'users',
+  Verification: 'shield-check',
+  Bookings: 'calendar-event',
+  Newsletter: 'mail',
+}
+
+const LS_KEY = (t: Tab) => `sx_admin_seen_${t.toLowerCase()}`
+
+function loadLastSeen(t: Tab): number {
+  try { return parseInt(localStorage.getItem(LS_KEY(t)) || '0', 10) } catch { return 0 }
+}
+function saveLastSeen(t: Tab) {
+  try { localStorage.setItem(LS_KEY(t), String(Date.now())) } catch { }
+}
+
 export default function AdminPage() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [tab, setTab] = useState<Tab>('Listings')
+  const [badges, setBadges] = useState<Record<Tab, number>>({ Listings: 0, Users: 0, Verification: 0, Bookings: 0, Newsletter: 0 })
+  const currentTab = useRef<Tab>('Listings')
   const [listings, setListings] = useState<any[]>([])
   const [users, setUsers] = useState<any[]>([])
   const [bookings, setBookings] = useState<any[]>([])
@@ -51,6 +70,21 @@ export default function AdminPage() {
       const providers = us.filter((u: any) => ['provider','venue','creator'].includes(u.role)).length
       const pendingListings = lsWithProfiles.filter((l: any) => !l.active).length
       setStats({ listings: lsWithProfiles.length, users: us.length, bookings: bs.length, revenue, providers, pendingListings })
+
+      // Calculate initial badges — count items newer than last time each tab was visited
+      const seenListings = loadLastSeen('Listings')
+      const seenUsers = loadLastSeen('Users')
+      const seenVerification = loadLastSeen('Verification')
+      const seenBookings = loadLastSeen('Bookings')
+      setBadges({
+        Listings:     lsWithProfiles.filter((l: any) => new Date(l.created_at).getTime() > seenListings).length,
+        Users:        us.filter((u: any) => new Date(u.created_at).getTime() > seenUsers).length,
+        Verification: (vr.data || []).filter((v: any) => new Date(v.submitted_at || v.created_at).getTime() > seenVerification).length,
+        Bookings:     bs.filter((b: any) => new Date(b.created_at).getTime() > seenBookings).length,
+        Newsletter:   0,
+      })
+      // Mark the initial active tab as seen immediately
+      saveLastSeen('Listings')
       setLoading(false)
 
       // Real-time: reflect new listings, profile changes, and new verifications
@@ -59,6 +93,7 @@ export default function AdminPage() {
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'listings' }, payload => {
           setListings(prev => [payload.new, ...prev])
           setStats(s => ({ ...s, listings: s.listings + 1, pendingListings: s.pendingListings + (!payload.new.active ? 1 : 0) }))
+          if (currentTab.current !== 'Listings') setBadges(b => ({ ...b, Listings: b.Listings + 1 }))
         })
         .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'listings' }, payload => {
           setListings(prev => prev.map(l => l.id === payload.new.id ? { ...l, ...payload.new } : l))
@@ -68,9 +103,15 @@ export default function AdminPage() {
         })
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'profiles' }, payload => {
           setUsers(prev => [payload.new, ...prev])
+          if (currentTab.current !== 'Users') setBadges(b => ({ ...b, Users: b.Users + 1 }))
         })
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'identity_verifications' }, payload => {
           setVerifications(prev => [payload.new, ...prev])
+          if (currentTab.current !== 'Verification') setBadges(b => ({ ...b, Verification: b.Verification + 1 }))
+        })
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bookings' }, payload => {
+          setBookings(prev => [payload.new, ...prev])
+          if (currentTab.current !== 'Bookings') setBadges(b => ({ ...b, Bookings: b.Bookings + 1 }))
         })
         .subscribe()
     }
@@ -271,9 +312,19 @@ export default function AdminPage() {
         </div>
         <nav style={{ flex: 1, padding: '1rem 0' }}>
           {TABS.map(t => (
-            <button key={t} className="adm-tab-btn" onClick={() => setTab(t)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '0.75rem 1.5rem', background: tab === t ? 'var(--gbg, rgba(197,160,90,0.08))' : 'transparent', border: 'none', borderLeft: tab === t ? '2px solid var(--gold, #c5a05a)' : '2px solid transparent', color: tab === t ? 'var(--gold, #c5a05a)' : 'var(--t2, #8c8880)', cursor: 'pointer', font: `${tab === t ? 600 : 400} 13px/1 var(--sans)`, textAlign: 'left', transition: 'all var(--t-fast, .15s) var(--ease-out)' }}>
-              <i className={`ti ti-${t === 'Listings' ? 'layout-list' : t === 'Users' ? 'users' : 'calendar-event'}`} style={{ fontSize: '16px' }} aria-hidden="true" />
-              {t}
+            <button key={t} className="adm-tab-btn" onClick={() => {
+              currentTab.current = t
+              setTab(t)
+              setBadges(b => ({ ...b, [t]: 0 }))
+              saveLastSeen(t)
+            }} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '10px', padding: '0.75rem 1.5rem', background: tab === t ? 'var(--gbg, rgba(197,160,90,0.08))' : 'transparent', border: 'none', borderLeft: tab === t ? '2px solid var(--gold, #c5a05a)' : '2px solid transparent', color: tab === t ? 'var(--gold, #c5a05a)' : 'var(--t2, #8c8880)', cursor: 'pointer', font: `${tab === t ? 600 : 400} 13px/1 var(--sans)`, textAlign: 'left', transition: 'all var(--t-fast, .15s) var(--ease-out)', position: 'relative' }}>
+              <i className={`ti ti-${TAB_ICONS[t]}`} style={{ fontSize: '16px' }} aria-hidden="true" />
+              <span style={{ flex: 1 }}>{t}</span>
+              {badges[t] > 0 && (
+                <span style={{ minWidth: '18px', height: '18px', borderRadius: '9px', background: '#e0607a', color: '#fff', fontSize: '10px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '0 5px', lineHeight: 1 }}>
+                  {badges[t] > 99 ? '99+' : badges[t]}
+                </span>
+              )}
             </button>
           ))}
         </nav>
