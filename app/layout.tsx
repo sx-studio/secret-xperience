@@ -12,23 +12,24 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.secretxperience.eu'),
-  title: 'SecretXperience.eu — Premium Adult Services Platform',
-  description: 'Discreet, verified, premium adult experiences across Europe. Browse escorts, companions, nightlife, creators, rentals, and more.',
+  title: 'Escort Girls Belgium — Brussels, Antwerp, Ghent | SecretXperience',
+  description: 'Verified escort girls in Belgium — Brussels, Antwerp, Ghent & more. Real photos, reviews & prices. Book independent escorts, VIP companions & private reception discreetly.',
   manifest: '/manifest.json',
+  keywords: ['escort Belgium', 'escort girls Belgium', 'escort Brussels', 'escort Antwerp', 'escort Ghent', 'escorts belgique', 'escort meisjes belgie', 'VIP companions Belgium', 'private reception Belgium', 'adult services Belgium'],
   appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'SecretXperience' },
   openGraph: {
     type: 'website',
     locale: 'en_EU',
     url: 'https://www.secretxperience.eu',
     siteName: 'SecretXperience.eu',
-    title: 'SecretXperience.eu — Premium Adult Services Platform',
-    description: 'Discreet, verified, premium adult experiences across Europe.',
+    title: 'Escort Girls Belgium — Brussels, Antwerp, Ghent | SecretXperience',
+    description: 'Verified escort girls in Belgium — Brussels, Antwerp, Ghent & more. Real photos, reviews & prices. Book independent escorts, VIP companions & private reception discreetly.',
     images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'SecretXperience.eu' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'SecretXperience.eu — Premium Adult Services Platform',
-    description: 'Discreet, verified, premium adult experiences across Europe.',
+    title: 'Escort Girls Belgium — Brussels, Antwerp, Ghent | SecretXperience',
+    description: 'Verified escort girls in Belgium — Brussels, Antwerp, Ghent & more. Real photos, reviews & prices.',
     images: ['/og-image.jpg'],
   },
   icons: {

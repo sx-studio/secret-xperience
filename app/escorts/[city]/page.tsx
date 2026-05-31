@@ -9,6 +9,13 @@ const CITIES: Record<string, string> = {
   antwerp:     'Antwerp',
   ghent:       'Ghent',
   grimbergen:  'Grimbergen',
+  leuven:      'Leuven',
+  mechelen:    'Mechelen',
+  hasselt:     'Hasselt',
+  namur:       'Namur',
+  charleroi:   'Charleroi',
+  kortrijk:    'Kortrijk',
+  ostend:      'Ostend',
   amsterdam:   'Amsterdam',
   rotterdam:   'Rotterdam',
   berlin:      'Berlin',
@@ -49,14 +56,17 @@ export async function generateMetadata({ params }: { params: { city: string } })
   }
   const cityName = CITIES[slug]
   if (!cityName) return { title: 'SecretXperience' }
+  const isBE = ['brussels','antwerp','ghent','grimbergen','leuven','mechelen','hasselt','namur','charleroi','kortrijk','ostend','bruges','liege'].includes(slug)
+  const title = isBE
+    ? `Escort Girls ${cityName} — Verified, Real Photos | SecretXperience`
+    : `Escorts in ${cityName} | SecretXperience`
+  const desc = isBE
+    ? `Verified escort girls in ${cityName}. ✓ Real photos ✓ Reviews ✓ Prices. Book independent escorts & VIP companions in ${cityName} discreetly.`
+    : `Browse verified escort profiles in ${cityName}. Discreet, professional providers — incall and outcall available.`
   return {
-    title: `Escorts in ${cityName} | SecretXperience`,
-    description: `Browse verified escort profiles in ${cityName}. Discreet, professional providers — incall and outcall available.`,
-    openGraph: {
-      title: `Escorts in ${cityName} | SecretXperience`,
-      description: `Verified escort listings in ${cityName}. Browse profiles, view photos, and book securely.`,
-      type: 'website',
-    },
+    title,
+    description: desc,
+    openGraph: { title, description: desc, type: 'website' },
     alternates: { canonical: `https://www.secretxperience.eu/escorts/${slug}` },
   }
 }
