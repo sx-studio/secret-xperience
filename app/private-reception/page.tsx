@@ -475,6 +475,19 @@ export default function PrivateReceptionPage() {
             <p style={{ color: 'var(--t2)', fontSize: '15px', maxWidth: '560px', lineHeight: 1.7 }}>
               You come to them. Browse verified private hosts — companionship, massage, domination and curated experiences at their own discreet location.
             </p>
+
+            {/* Browse by country/city — jumps to dedicated location pages */}
+            <div style={{ marginTop: '1.5rem' }}>
+              <div style={{ fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--t3)', marginBottom: '0.6rem' }}>Browse by location</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '7px' }}>
+                {[['belgium','🇧🇪 Belgium'],['netherlands','🇳🇱 Netherlands'],['germany','🇩🇪 Germany'],['france','🇫🇷 France'],['luxembourg','🇱🇺 Luxembourg']].map(([slug, label]) => (
+                  <Link key={slug} href={`/private-reception/${slug}`} style={{ fontSize: '13px', padding: '6px 14px', border: '0.5px solid var(--gbrd)', borderRadius: '20px', color: 'var(--gold)', background: 'var(--gbg)', textDecoration: 'none', whiteSpace: 'nowrap', fontWeight: 500 }}>{label}</Link>
+                ))}
+                {[['brussels','Brussels'],['antwerp','Antwerp'],['amsterdam','Amsterdam'],['berlin','Berlin'],['paris','Paris']].map(([slug, label]) => (
+                  <Link key={slug} href={`/private-reception/${slug}`} style={{ fontSize: '13px', padding: '6px 14px', border: '0.5px solid var(--b)', borderRadius: '20px', color: 'var(--t2)', textDecoration: 'none', whiteSpace: 'nowrap' }}>{label}</Link>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
