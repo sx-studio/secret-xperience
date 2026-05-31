@@ -5,28 +5,49 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 
 const CITIES: Record<string, string> = {
-  brussels:   'Brussels',
-  antwerp:    'Antwerp',
-  ghent:      'Ghent',
-  amsterdam:  'Amsterdam',
-  rotterdam:  'Rotterdam',
-  berlin:     'Berlin',
-  hamburg:    'Hamburg',
-  paris:      'Paris',
-  lyon:       'Lyon',
-  luxembourg: 'Luxembourg',
-  liege:      'Liège',
-  bruges:     'Bruges',
-  cologne:    'Cologne',
+  brussels:    'Brussels',
+  antwerp:     'Antwerp',
+  ghent:       'Ghent',
+  grimbergen:  'Grimbergen',
+  amsterdam:   'Amsterdam',
+  rotterdam:   'Rotterdam',
+  berlin:      'Berlin',
+  hamburg:     'Hamburg',
+  paris:       'Paris',
+  lyon:        'Lyon',
+  luxembourg:  'Luxembourg',
+  liege:       'Liège',
+  bruges:      'Bruges',
+  cologne:     'Cologne',
 }
 
+/** Country slugs — queries by `country` column instead of `city`. */
+const COUNTRIES: Record<string, { name: string; code: string; desc: string }> = {
+  belgium:     { name: 'Belgium', code: 'BE', desc: 'Browse verified escort and companion profiles across Belgium — Brussels, Antwerp, Ghent, Grimbergen and more. Incall and outcall available.' },
+  netherlands: { name: 'Netherlands', code: 'NL', desc: 'Verified escort listings across the Netherlands — Amsterdam, Rotterdam and beyond. Discreet, professional, always independent.' },
+  germany:     { name: 'Germany', code: 'DE', desc: 'Independent escort and companion profiles in Germany — Berlin, Cologne, Hamburg and more. Browse verified listings.' },
+  france:      { name: 'France', code: 'FR', desc: 'Discover verified escort and companion profiles in France — Paris, Lyon and beyond. Curated, discreet, professional.' },
+  luxembourg:  { name: 'Luxembourg', code: 'LU', desc: 'Verified escort and companion profiles in Luxembourg. Incall and outcall arrangements, independently submitted.' },
+}
+
+const ALL_SLUGS = [...Object.keys(CITIES), ...Object.keys(COUNTRIES)]
+
 export async function generateStaticParams() {
-  return Object.keys(CITIES).map(city => ({ city }))
+  return ALL_SLUGS.map(slug => ({ city: slug }))
 }
 
 export async function generateMetadata({ params }: { params: { city: string } }): Promise<Metadata> {
-  const cityKey = params.city.toLowerCase()
-  const cityName = CITIES[cityKey]
+  const slug = params.city.toLowerCase()
+  if (COUNTRIES[slug]) {
+    const c = COUNTRIES[slug]
+    return {
+      title: `Escorts in ${c.name} | SecretXperience`,
+      description: c.desc,
+      openGraph: { title: `Escorts in ${c.name} | SecretXperience`, description: c.desc, type: 'website' },
+      alternates: { canonical: `https://www.secretxperience.eu/escorts/${slug}` },
+    }
+  }
+  const cityName = CITIES[slug]
   if (!cityName) return { title: 'SecretXperience' }
   return {
     title: `Escorts in ${cityName} | SecretXperience`,
@@ -36,14 +57,19 @@ export async function generateMetadata({ params }: { params: { city: string } })
       description: `Verified escort listings in ${cityName}. Browse profiles, view photos, and book securely.`,
       type: 'website',
     },
-    alternates: { canonical: `https://www.secretxperience.eu/escorts/${cityKey}` },
+    alternates: { canonical: `https://www.secretxperience.eu/escorts/${slug}` },
   }
 }
 
 export default async function EscortsCityPage({ params }: { params: { city: string } }) {
-  const cityKey = params.city.toLowerCase()
-  const cityName = CITIES[cityKey]
-  if (!cityName) notFound()
+  const slug = params.city.toLowerCase()
+  const isCountry = !!COUNTRIES[slug]
+  const countryInfo = COUNTRIES[slug]
+  const cityName = CITIES[slug]
+
+  if (!isCountry && !cityName) notFound()
+
+  const displayName = isCountry ? countryInfo.name : cityName!
 
   const cookieStore = cookies()
   const supabase = createServerClient(
@@ -52,20 +78,34 @@ export default async function EscortsCityPage({ params }: { params: { city: stri
     { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
   )
 
-  const { data: listings } = await supabase
+  let query = supabase
     .from('listings')
-    .select('id, title, category, city, price_from, images, verified, premium, age, tags')
+    .select('id, title, category, city, country, price_from, images, verified, premium, age, tags')
     .eq('active', true)
+    .eq('status', 'approved')
     .in('category', ['escorts', 'companionship', 'massage', 'domination'])
-    .ilike('city', `%${cityName}%`)
     .order('premium', { ascending: false })
-    .limit(48)
+    .limit(60)
+
+  if (isCountry) {
+    // Match both full name ("Belgium") and 2-letter code ("BE")
+    query = query.or(`country.ilike.%${countryInfo.name}%,country.ilike.${countryInfo.code}`)
+  } else {
+    query = query.ilike('city', `%${cityName}%`)
+  }
+
+  const { data: listings } = await query
+
+  // For country pages: collect unique cities for sub-navigation
+  const citiesInCountry = isCountry
+    ? [...new Set((listings ?? []).map(l => l.city).filter(Boolean))].sort()
+    : []
 
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    name: `Escorts in ${cityName}`,
-    url: `https://www.secretxperience.eu/escorts/${cityKey}`,
+    name: `Escorts in ${displayName}`,
+    url: `https://www.secretxperience.eu/escorts/${slug}`,
     numberOfItems: listings?.length ?? 0,
     itemListElement: (listings || []).map((l, i) => ({
       '@type': 'ListItem',
@@ -97,6 +137,8 @@ export default async function EscortsCityPage({ params }: { params: { city: stri
           .city-card-body{padding:10px 12px 12px}
           .city-card-name{font-family:${S.serif};font-size:15px;font-weight:400;color:${S.t};margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
           .city-card-meta{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:${S.t2}}
+          .pill-link{font-size:13px;padding:5px 14px;border:0.5px solid ${S.b};border-radius:20px;color:${S.t2};transition:border-color .2s,color .2s;display:inline-block}
+          .pill-link:hover{border-color:${S.gold};color:${S.gold}}
         `}</style>
 
         {/* Header */}
@@ -114,19 +156,34 @@ export default async function EscortsCityPage({ params }: { params: { city: stri
             <span>›</span>
             <a href="/escorts" style={{ color: S.t2 }}>Escorts</a>
             <span>›</span>
-            <span style={{ color: S.gold }}>{cityName}</span>
+            <span style={{ color: S.gold }}>{displayName}</span>
           </nav>
 
           <h1 style={{ fontFamily: S.serif, fontSize: 'clamp(32px,5vw,52px)', fontWeight: 400, marginBottom: '0.5rem', lineHeight: 1.15 }}>
-            Escorts in <em style={{ fontStyle: 'italic', color: S.gold }}>{cityName}</em>
+            Escorts in <em style={{ fontStyle: 'italic', color: S.gold }}>{displayName}</em>
           </h1>
-          <p style={{ fontSize: 14, color: S.t2, marginBottom: '2.5rem', maxWidth: 560, lineHeight: 1.7 }}>
-            {listings?.length ?? 0} verified provider{listings?.length !== 1 ? 's' : ''} available in {cityName}. All listings independently submitted and identity-reviewed.
+          <p style={{ fontSize: 14, color: S.t2, marginBottom: isCountry && citiesInCountry.length > 0 ? '1.5rem' : '2.5rem', maxWidth: 560, lineHeight: 1.7 }}>
+            {isCountry
+              ? countryInfo.desc
+              : `${listings?.length ?? 0} verified provider${listings?.length !== 1 ? 's' : ''} available in ${displayName}. All listings independently submitted and identity-reviewed.`
+            }
           </p>
+
+          {/* Country: city sub-navigation */}
+          {isCountry && citiesInCountry.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '2.5rem' }}>
+              {citiesInCountry.map(city => {
+                const citySlug = Object.entries(CITIES).find(([,v]) => v.toLowerCase() === city.toLowerCase())?.[0]
+                return citySlug
+                  ? <a key={city} href={`/escorts/${citySlug}`} className="pill-link">{city}</a>
+                  : <span key={city} className="pill-link" style={{ cursor: 'default' }}>{city}</span>
+              })}
+            </div>
+          )}
 
           {(!listings || listings.length === 0) ? (
             <div style={{ textAlign: 'center', padding: '4rem 0', color: S.t2 }}>
-              <p style={{ fontSize: 16, marginBottom: 16 }}>No listings yet in {cityName}.</p>
+              <p style={{ fontSize: 16, marginBottom: 16 }}>No listings yet in {displayName}.</p>
               <a href="/escorts" style={{ color: S.gold, fontSize: 14 }}>Browse all escorts →</a>
             </div>
           ) : (
@@ -157,15 +214,21 @@ export default async function EscortsCityPage({ params }: { params: { city: stri
             </div>
           )}
 
-          {/* Internal links to other cities */}
+          {/* Internal links */}
           <div style={{ marginTop: '4rem', borderTop: `0.5px solid ${S.b}`, paddingTop: '2rem' }}>
-            <p style={{ fontSize: 12, letterSpacing: '0.1em', textTransform: 'uppercase', color: S.t2, marginBottom: '1rem' }}>Other cities</p>
+            {/* Browse by country */}
+            <p style={{ fontSize: 12, letterSpacing: '0.1em', textTransform: 'uppercase', color: S.t2, marginBottom: '1rem' }}>Browse by country</p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '2rem' }}>
+              {Object.entries(COUNTRIES).filter(([k]) => k !== slug).map(([k, c]) => (
+                <a key={k} href={`/escorts/${k}`} className="pill-link">{c.name}</a>
+              ))}
+            </div>
+
+            {/* Browse by city */}
+            <p style={{ fontSize: 12, letterSpacing: '0.1em', textTransform: 'uppercase', color: S.t2, marginBottom: '1rem' }}>Browse by city</p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-              {Object.entries(CITIES).filter(([k]) => k !== cityKey).map(([k, name]) => (
-                <a key={k} href={`/escorts/${k}`} style={{ fontSize: 13, padding: '5px 14px', border: `0.5px solid ${S.b}`, borderRadius: '20px', color: S.t2, transition: 'border-color .2s,color .2s' }}
-                  onMouseOver={e => { (e.target as HTMLElement).style.borderColor = S.gold; (e.target as HTMLElement).style.color = S.gold }}
-                  onMouseOut={e => { (e.target as HTMLElement).style.borderColor = S.b; (e.target as HTMLElement).style.color = S.t2 }}
-                >{name}</a>
+              {Object.entries(CITIES).filter(([k]) => k !== slug).map(([k, name]) => (
+                <a key={k} href={`/escorts/${k}`} className="pill-link">{name}</a>
               ))}
             </div>
           </div>

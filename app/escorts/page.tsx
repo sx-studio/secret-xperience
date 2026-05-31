@@ -709,8 +709,18 @@ export default function EscortsPage() {
               )
             })()}
 
+          {/* Browse by country */}
+          <div style={{ marginTop: '3rem', borderTop: '0.5px solid var(--b)', paddingTop: '2rem' }}>
+            <p style={{ fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--t3)', marginBottom: '0.9rem' }}>Browse by country</p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              {[['belgium','Belgium'],['netherlands','Netherlands'],['germany','Germany'],['france','France'],['luxembourg','Luxembourg']].map(([slug, label]) => (
+                <Link key={slug} href={`/escorts/${slug}`} style={{ fontSize: '13px', padding: '5px 14px', border: '0.5px solid var(--b)', borderRadius: '20px', color: 'var(--t2)', transition: 'all .2s' }}>{label}</Link>
+              ))}
+            </div>
+          </div>
+
           {/* List CTA */}
-          <div style={{ marginTop: '4rem', background: 'var(--bg1)', border: '0.5px solid var(--b2)', borderRadius: 'var(--rl)', padding: '2.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '2rem', flexWrap: 'wrap' }}>
+          <div style={{ marginTop: '3rem', background: 'var(--bg1)', border: '0.5px solid var(--b2)', borderRadius: 'var(--rl)', padding: '2.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '2rem', flexWrap: 'wrap' }}>
             <div>
               <div style={{ fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--gold)', marginBottom: '0.6rem' }}>Independent Escorts & Agencies</div>
               <h3 style={{ fontFamily: 'var(--serif)', fontSize: '26px', fontStyle: 'italic', fontWeight: 400, marginBottom: '0.5rem' }}>Advertise your profile</h3>
