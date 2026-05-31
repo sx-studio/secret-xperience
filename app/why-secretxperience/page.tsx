@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-const TITLE = 'Escort Girls Belgium | Verified Escorts Brussels, Antwerp & Ghent — SecretXperience'
-const DESC  = 'Verified escort listings across Belgium — Brussels, Antwerp, Ghent, Liège, Bruges and beyond. Browse hundreds of independent escorts, companions and private reception — discreet, safe and live now.'
+const TITLE = 'Escort Girls Belgium — Brussels, Antwerp, Ghent | SecretXperience'
+const DESC  = 'Verified escort girls in Belgium — Brussels, Antwerp, Ghent, Liège & Bruges. ✓ Real photos ✓ Reviews ✓ Prices. Book independent escorts, VIP companions & private reception, discreetly.'
 const URL   = 'https://www.secretxperience.eu/why-secretxperience'
 
 export const metadata: Metadata = {
@@ -196,9 +196,17 @@ export default function WhySecretXperience() {
             <h1 style={{ fontFamily: S.serif, fontSize: 'clamp(2.6rem,6.5vw,4.8rem)', fontWeight: 400, lineHeight: 1.1, margin: '0 0 1.5rem', color: S.t }}>
               Escort Girls Belgium<br /><em style={{ fontStyle: 'italic', color: G }}>Verified, discreet<br />&amp; live now</em>
             </h1>
-            <p style={{ fontSize: '17px', color: S.t2, lineHeight: 1.8, maxWidth: '640px', margin: '0 auto 2.5rem' }}>
-              Browse hundreds of verified independent escorts, companions, and private reception across Brussels, Antwerp, Ghent, Liège, Bruges and all of Belgium — on Europe&apos;s most trusted adult services platform.
+            <p style={{ fontSize: '17px', color: S.t2, lineHeight: 1.8, maxWidth: '640px', margin: '0 auto 1.5rem' }}>
+              Browse and book hundreds of verified escort girls, VIP companions, erotic massage and private reception across Brussels, Antwerp, Ghent, Liège, Bruges and all of Belgium — independent, discreet, and live now.
             </p>
+            {/* Star trust line — mirrors how top-ranking listings present themselves */}
+            <div style={{ display: 'flex', gap: '18px', justifyContent: 'center', flexWrap: 'wrap', fontSize: '13px', color: S.t2, marginBottom: '2.25rem' }}>
+              {['Real photos', 'Verified profiles', 'Reviews & prices', 'Discreet booking'].map(item => (
+                <span key={item} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+                  <span style={{ color: G }}>★</span>{item}
+                </span>
+              ))}
+            </div>
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '2.5rem' }}>
               <Link href="/search" style={{ padding: '14px 32px', background: `linear-gradient(135deg,${G},#b8914a)`, borderRadius: '10px', color: '#0a0a0a', fontWeight: 700, fontSize: '15px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
                 <i className="ti ti-search" /> Browse listings
