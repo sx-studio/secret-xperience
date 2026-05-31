@@ -35,6 +35,9 @@ export const metadata: Metadata = {
     apple: '/icon-192.png',
     icon: '/favicon.ico',
   },
+  verification: {
+    google: 'm10S1aWlGhdFAXgWqmAvoEUYF_2GIOYNMU_4_pGseE0',
+  },
 }
 
 // Theme bootstrap — runs before paint to avoid a flash of the wrong theme.
