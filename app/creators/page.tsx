@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
 import CreatorsGrid from './CreatorsGrid'
+import CreatorFeed from './CreatorFeed'
 
 export async function generateMetadata() {
   return {
@@ -34,6 +35,15 @@ export default async function CreatorsPage() {
     .limit(48)
 
   const allListings = listings || []
+
+  const { data: postRows } = await supabase
+    .from('creator_posts')
+    .select('id, caption, media_url, media_type, created_at, creator:profiles!creator_id(id, full_name, username, avatar_url, verified, external_links)')
+    .eq('active', true)
+    .order('created_at', { ascending: false })
+    .limit(40)
+
+  const posts = (postRows || []) as any[]
 
   return (
     <>
@@ -113,6 +123,20 @@ export default async function CreatorsPage() {
 
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2.5rem 1.5rem 6rem' }}>
 
+          {/* LATEST CONTENT FEED */}
+          <div style={{ marginBottom: '3rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '10px' }}>
+              <h2 style={{ fontFamily: 'var(--serif)', fontSize: '24px', fontWeight: 400, margin: 0 }}>Latest from creators</h2>
+              <Link href="/creators/studio" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '20px', border: '0.5px solid rgba(197,160,90,0.3)', color: 'var(--gold)', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}>
+                <i className="ti ti-plus" /> Post content
+              </Link>
+            </div>
+            <CreatorFeed posts={posts} />
+          </div>
+
+          {allListings.length > 0 && (
+            <h2 style={{ fontFamily: 'var(--serif)', fontSize: '24px', fontWeight: 400, margin: '0 0 1.25rem' }}>Book a creator</h2>
+          )}
           <CreatorsGrid listings={allListings} />
 
           {/* CTA BANNER */}

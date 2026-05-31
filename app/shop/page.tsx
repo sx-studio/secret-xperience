@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
-import ShopGrid from './ShopGrid'
+import ProductGrid from './ProductGrid'
 
 export async function generateMetadata() {
   return {
@@ -24,16 +24,15 @@ export default async function ShopPage() {
     { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
   )
 
-  const { data: listings } = await supabase
-    .from('listings')
-    .select('id, title, description, category, subcategory, city, country, price_from, price_to, images, verified, premium, rating, review_count, featured_until')
+  const { data: products } = await supabase
+    .from('products')
+    .select('id, name, description, price_cents, currency, images, category, brand, fulfillment, external_url, featured, in_stock')
     .eq('active', true)
-    .eq('category', 'shop')
-    .order('featured_until', { ascending: false, nullsFirst: false })
-    .order('rating', { ascending: false })
-    .limit(48)
+    .order('featured', { ascending: false })
+    .order('created_at', { ascending: false })
+    .limit(60)
 
-  const allListings = listings || []
+  const allProducts = products || []
 
   return (
     <>
@@ -124,7 +123,7 @@ export default async function ShopPage() {
             </p>
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
               <span style={{ fontSize: '13px', color: 'var(--t3)' }}>
-                <span style={{ color: 'var(--gold)', fontWeight: 600 }}>{allListings.length}</span> products
+                <span style={{ color: 'var(--gold)', fontWeight: 600 }}>{allProducts.length}</span> products
               </span>
               <span style={{ width: '1px', height: '14px', background: 'var(--b3)', display: 'inline-block' }} />
               <span style={{ fontSize: '13px', color: 'var(--t3)' }}>🚚 Plain packaging · Free returns</span>
@@ -134,10 +133,10 @@ export default async function ShopPage() {
 
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem 6rem' }}>
 
-          <ShopGrid listings={allListings} />
+          <ProductGrid products={allProducts} />
 
           {/* VENDOR CTA */}
-          {allListings.length > 0 && (
+          {allProducts.length > 0 && (
             <div style={{
               marginTop: '4rem',
               padding: '2.5rem',
