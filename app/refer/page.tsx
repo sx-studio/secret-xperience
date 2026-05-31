@@ -5,12 +5,20 @@ import { createClient } from '../lib/supabase'
 
 const SITE = 'https://secretxperience.eu'
 
+const MSG_PROVIDER = (link: string) =>
+  `Hey! I list on SecretXperience — the new premium adult platform across the EU. Free to join, real bookings, discreet. Create your listing here: ${link}`
+
+const MSG_CLIENT = (link: string) =>
+  `Check out SecretXperience — the most discreet way to find escorts, venues, events and more across Europe. Sign up here: ${link}`
+
 export default function ReferPage() {
   const [loading, setLoading] = useState(true)
   const [authed, setAuthed] = useState<boolean | null>(null)
   const [code, setCode] = useState<string | null>(null)
   const [stats, setStats] = useState({ pending: 0, qualified: 0, rewardTokens: 0 })
   const [copied, setCopied] = useState(false)
+  const [copiedMsg, setCopiedMsg] = useState<'provider' | 'client' | null>(null)
+  const [msgType, setMsgType] = useState<'provider' | 'client'>('provider')
 
   useEffect(() => {
     (async () => {
@@ -30,17 +38,18 @@ export default function ReferPage() {
   }, [])
 
   const link = code ? `${SITE}/login?ref=${code}` : ''
-
-  async function share() {
-    const text = 'List with me on SecretXperience — free, permanent listings across the EU.'
-    try {
-      if ((navigator as any).share) { await (navigator as any).share({ title: 'SecretXperience', text, url: link }); return }
-    } catch { /* fall through */ }
-    try { await navigator.clipboard.writeText(link); setCopied(true); setTimeout(() => setCopied(false), 2000) } catch { /* ignore */ }
-  }
+  const msgText = msgType === 'provider' ? MSG_PROVIDER(link) : MSG_CLIENT(link)
+  const waLink = `https://wa.me/?text=${encodeURIComponent(msgText)}`
+  const smsLink = `sms:?body=${encodeURIComponent(msgText)}`
+  const tgLink = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(msgType === 'provider' ? MSG_PROVIDER('') : MSG_CLIENT(''))}`
 
   async function copy() {
     try { await navigator.clipboard.writeText(link); setCopied(true); setTimeout(() => setCopied(false), 2000) } catch { /* ignore */ }
+  }
+
+  async function copyMsg(type: 'provider' | 'client') {
+    const text = type === 'provider' ? MSG_PROVIDER(link) : MSG_CLIENT(link)
+    try { await navigator.clipboard.writeText(text); setCopiedMsg(type); setTimeout(() => setCopiedMsg(null), 2000) } catch { /* ignore */ }
   }
 
   const card: React.CSSProperties = { background: 'var(--bg1)', border: '0.5px solid var(--b)', borderRadius: 'var(--rl)', padding: '1.5rem' }
@@ -84,8 +93,42 @@ export default function ReferPage() {
               <div style={{ fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--t3)', marginBottom: '12px' }}>Your referral link</div>
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                 <input readOnly value={link} onFocus={e => e.currentTarget.select()} style={{ flex: '1 1 240px', minWidth: 0, padding: '12px 14px', background: 'var(--bg2)', border: '0.5px solid var(--b2)', borderRadius: 'var(--r)', color: 'var(--t)', fontSize: '13px', fontFamily: 'monospace' }} />
-                <button onClick={copy} style={{ padding: '12px 18px', background: 'var(--bg2)', border: '0.5px solid var(--b2)', borderRadius: 'var(--r)', color: 'var(--t)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>{copied ? '✓ Copied' : 'Copy'}</button>
-                <button onClick={share} style={{ padding: '12px 18px', background: 'linear-gradient(135deg,var(--gold),var(--goldd))', border: 'none', borderRadius: 'var(--r)', color: '#0a0a0a', fontSize: '13px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>↗ Share</button>
+                <button onClick={copy} style={{ padding: '12px 18px', background: 'var(--bg2)', border: '0.5px solid var(--b2)', borderRadius: 'var(--r)', color: 'var(--t)', fontSize: '13px', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>{copied ? '✓ Copied' : 'Copy link'}</button>
+              </div>
+            </div>
+
+            {/* Share via messaging */}
+            <div style={card}>
+              <div style={{ fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--t3)', marginBottom: '14px' }}>Send it directly</div>
+
+              {/* Message type toggle */}
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+                {(['provider', 'client'] as const).map(t => (
+                  <button key={t} onClick={() => setMsgType(t)} style={{ padding: '7px 16px', borderRadius: 'var(--r)', border: `0.5px solid ${msgType === t ? 'var(--gold)' : 'var(--b2)'}`, background: msgType === t ? 'rgba(197,160,90,0.1)' : 'transparent', color: msgType === t ? 'var(--gold)' : 'var(--t2)', fontSize: '12px', fontWeight: 600, cursor: 'pointer', textTransform: 'capitalize' }}>
+                    {t === 'provider' ? '🎭 For providers' : '👤 For clients'}
+                  </button>
+                ))}
+              </div>
+
+              {/* Pre-written message preview */}
+              <div style={{ background: 'var(--bg2)', border: '0.5px solid var(--b2)', borderRadius: 'var(--r)', padding: '14px', fontSize: '13px', color: 'var(--t2)', lineHeight: 1.7, marginBottom: '14px', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+                {msgText}
+              </div>
+
+              {/* Channel buttons */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(140px,1fr))', gap: '8px' }}>
+                <a href={smsLink} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', padding: '11px 14px', background: '#1a9e3f', border: 'none', borderRadius: 'var(--r)', color: '#fff', fontSize: '13px', fontWeight: 600, textDecoration: 'none', cursor: 'pointer' }}>
+                  <i className="ti ti-message" /> SMS
+                </a>
+                <a href={waLink} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', padding: '11px 14px', background: '#25d366', border: 'none', borderRadius: 'var(--r)', color: '#fff', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}>
+                  <i className="ti ti-brand-whatsapp" /> WhatsApp
+                </a>
+                <a href={tgLink} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', padding: '11px 14px', background: '#229ed9', border: 'none', borderRadius: 'var(--r)', color: '#fff', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}>
+                  <i className="ti ti-brand-telegram" /> Telegram
+                </a>
+                <button onClick={() => copyMsg(msgType)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', padding: '11px 14px', background: 'var(--bg2)', border: '0.5px solid var(--b2)', borderRadius: 'var(--r)', color: 'var(--t)', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>
+                  <i className={`ti ti-${copiedMsg === msgType ? 'check' : 'copy'}`} /> {copiedMsg === msgType ? 'Copied!' : 'Copy text'}
+                </button>
               </div>
             </div>
 
