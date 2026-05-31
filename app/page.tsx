@@ -2547,7 +2547,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
       </div>
 
       <div style="text-align:center;padding:1.5rem 0">
-        <button id="loadMoreBtn" style="display:none;padding:10px 28px;background:transparent;border:0.5px solid rgba(197,160,90,0.4);border-radius:10px;color:#c5a05a;font-size:13px;cursor:pointer;font-family:inherit;letter-spacing:0.06em" onclick="(window as any).__loadMore()">Load more listings</button>
+        <button id="loadMoreBtn" style="display:none;padding:10px 28px;background:transparent;border:0.5px solid rgba(197,160,90,0.4);border-radius:10px;color:#c5a05a;font-size:13px;cursor:pointer;font-family:inherit;letter-spacing:0.06em" onclick="window.__loadMore()">Load more listings</button>
       </div>
 
     </main>
