@@ -169,6 +169,27 @@ export default function EscortProfile({
   const [rvText,   setRvText]   = useState('')
   const [rvBusy,   setRvBusy]   = useState(false)
   const [showRvForm, setShowRvForm] = useState(false)
+  const [shared, setShared] = useState(false)
+
+  async function handleShare() {
+    const url = typeof window !== 'undefined' ? window.location.href : ''
+    const shareData = {
+      title: listing.title,
+      text: `${listing.title} · ${listing.city} — on SecretXperience`,
+      url,
+    }
+    try {
+      if (typeof navigator !== 'undefined' && (navigator as any).share) {
+        await (navigator as any).share(shareData)
+        return
+      }
+    } catch { /* user cancelled native sheet — fall through to copy */ }
+    try {
+      await navigator.clipboard.writeText(url)
+      setShared(true)
+      setTimeout(() => setShared(false), 2000)
+    } catch { /* clipboard blocked — no-op */ }
+  }
 
   const images  = (listing.images ?? []).filter(Boolean)
   const tags    = listing.tags ?? []
@@ -420,6 +441,9 @@ export default function EscortProfile({
             <button className="rl-btn-outline" onClick={onMessage} style={{ border: `0.5px solid ${catText}66`, color: catText }}>
               💬 Send Message
             </button>
+            <button className="rl-btn-outline" onClick={handleShare} style={{ border: `0.5px solid ${C.b2}`, color: C.t2 }}>
+              {shared ? '✓ Link copied' : '↗ Share'}
+            </button>
           </div>
 
           {/* About */}
@@ -536,6 +560,9 @@ export default function EscortProfile({
             </button>
             <button className="rl-btn-outline" onClick={onMessage} style={{ border: `0.5px solid ${catText}55`, color: catText }}>
               💬 Send Message
+            </button>
+            <button className="rl-btn-outline" onClick={handleShare} style={{ border: `0.5px solid ${C.b2}`, color: C.t2, marginTop: '8px' }}>
+              {shared ? '✓ Link copied' : '↗ Share this profile'}
             </button>
             <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: C.t3 }}>
               <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: C.green, flexShrink: 0 }} />
