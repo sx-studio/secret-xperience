@@ -113,3 +113,29 @@ export function tagMatchesOrientation(tag: string, canonical: string): boolean {
   }
   return t === v || t === `orientation:${v}` || t === `orientation: ${v}`
 }
+
+// ── Profile / escort type ───────────────────────────────────────────────────────
+
+/**
+ * Filter-key → all lowercase tag values that denote that type. Listings store the
+ * type as a prefixed tag (`type:men`, `type:trans woman`) from the create form and
+ * dashboard editor, but older/free-text listings may carry bare synonyms — so each
+ * key lists every acceptable bare value. Matching also strips a leading `type:`.
+ */
+const TYPE_SYNONYMS: Record<string, string[]> = {
+  'women':       ['women', 'woman', 'female'],
+  'men':         ['men', 'man', 'male', 'gigolo'],
+  'trans-woman': ['trans woman', 'transwoman', 'transsexual', 'trans-woman', 'ts', 'shemale'],
+  'trans-man':   ['trans man', 'transman', 'trans-man'],
+  'non-binary':  ['non-binary', 'nonbinary', 'enby', 'non binary'],
+  'couples':     ['couples', 'couple', 'duo'],
+  'fetish':      ['fetish', 'bdsm', 'domination', 'mistress'],
+}
+
+/** Does a listing tag denote this profile type? Handles prefixed `type:x` and bare `x`. */
+export function tagMatchesType(tag: string, filterKey: string): boolean {
+  const raw = tag.toLowerCase().trim()
+  const bare = raw.startsWith('type:') ? raw.slice(5).trim() : raw
+  const syn = TYPE_SYNONYMS[filterKey] ?? [filterKey]
+  return syn.includes(bare)
+}

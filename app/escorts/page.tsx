@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
-import { ETHNICITIES, tagMatchesEthnicity, HAIR_COLOURS, tagMatchesHair, BUILDS, tagMatchesBuild, ORIENTATIONS, tagMatchesOrientation } from '../lib/attributes'
+import { ETHNICITIES, tagMatchesEthnicity, HAIR_COLOURS, tagMatchesHair, BUILDS, tagMatchesBuild, ORIENTATIONS, tagMatchesOrientation, tagMatchesType } from '../lib/attributes'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -321,16 +321,16 @@ export default function EscortsPage() {
     // Client-side filters for tag-based fields
     if (escortType !== 'all') {
       results = results.filter(l => {
-        const tags = (l.tags ?? []).map((t: string) => t.toLowerCase())
+        const rawTags = l.tags ?? []
+        const tags = rawTags.map((t: string) => t.toLowerCase())
         const sub = (l.subcategory ?? '').toLowerCase()
-        if (escortType === 'women') return tags.some((t: string) => ['woman','female','women'].includes(t)) || (!tags.some((t: string) => ['man','male','men','trans','couple','non-binary'].includes(t)))
-        if (escortType === 'men') return tags.some((t: string) => ['man','male','men','gigolo'].includes(t)) || sub.includes('gigolo') || sub.includes('male')
-        if (escortType === 'trans-woman') return tags.some((t: string) => t.includes('trans woman') || t.includes('transwoman') || t.includes('transsexual'))
-        if (escortType === 'trans-man') return tags.some((t: string) => t.includes('trans man') || t.includes('transman'))
-        if (escortType === 'non-binary') return tags.some((t: string) => t.includes('non-binary') || t.includes('nonbinary') || t.includes('enby'))
-        if (escortType === 'couples') return tags.some((t: string) => t === 'couples' || t === 'duo') || sub.includes('couple')
-        if (escortType === 'fetish') return tags.some((t: string) => ['fetish','bdsm','domination'].includes(t)) || l.category === 'domination'
-        return true
+        if (rawTags.some((t: string) => tagMatchesType(t, escortType))) return true
+        // Category / subcategory fallbacks for listings without an explicit type tag
+        if (escortType === 'women') return !tags.some((t: string) => tagMatchesType(t, 'men') || t.includes('trans') || tagMatchesType(t, 'couples') || tagMatchesType(t, 'non-binary'))
+        if (escortType === 'men') return sub.includes('gigolo') || sub.includes('male')
+        if (escortType === 'couples') return sub.includes('couple')
+        if (escortType === 'fetish') return l.category === 'domination'
+        return false
       })
     }
     if (orientation !== 'all') {
@@ -530,7 +530,7 @@ export default function EscortsPage() {
                 <div style={{ fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--t3)', marginBottom: '8px', fontWeight: 600 }}>Sexual Orientation</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   {SEXUAL_ORIENTATION.map(o => (
-                    <button key={o.value} onClick={() => setOrientation(o.value)} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', cursor: 'pointer', padding: '5px 8px', borderRadius: '8px', fontSize: '13px', color: orientation === o.value ? 'var(--gold)' : 'var(--t2)', background: orientation === o.value ? 'var(--gbg)' : 'transparent', fontFamily: 'var(--sans)', textAlign: 'left' } as any}>
+                    <button key={o.value} onClick={() => setOrientation(o.value)} style={{ display: 'flex', alignItems: 'center', gap: '8px', border: 'none', cursor: 'pointer', padding: '5px 8px', borderRadius: '8px', fontSize: '13px', color: orientation === o.value ? 'var(--gold)' : 'var(--t2)', background: orientation === o.value ? 'var(--gbg)' : 'transparent', fontFamily: 'var(--sans)', textAlign: 'left' } as any}>
                       <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '1.5px solid ' + (orientation === o.value ? 'var(--gold)' : 'var(--b2)'), display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         {orientation === o.value && <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: 'var(--gold)' }} />}
                       </span>

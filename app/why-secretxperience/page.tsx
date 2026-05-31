@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-const TITLE = 'Best Adult Services Platform in Europe 2025 | SecretXperience'
-const DESC  = 'SecretXperience is Europe\'s #1 verified adult lifestyle marketplace — covering escorts, nightlife, creators, rentals, and events across Belgium, Netherlands, Germany and beyond. Discover why thousands of providers and clients choose us.'
+const TITLE = 'Escort Girls Belgium | Verified Escorts Brussels, Antwerp & Ghent — SecretXperience'
+const DESC  = 'Verified escort listings across Belgium — Brussels, Antwerp, Ghent, Liège, Bruges and beyond. Browse hundreds of independent escorts, companions and private reception — discreet, safe and live now.'
 const URL   = 'https://www.secretxperience.eu/why-secretxperience'
 
 export const metadata: Metadata = {
@@ -14,18 +14,18 @@ export const metadata: Metadata = {
     description: DESC,
     url: URL,
     type: 'article',
-    images: [{ url: 'https://www.secretxperience.eu/og-image.jpg', width: 1200, height: 630, alt: 'SecretXperience — Europe\'s Premium Adult Lifestyle Platform' }],
+    images: [{ url: 'https://www.secretxperience.eu/og-image.jpg', width: 1200, height: 630, alt: 'Escort Girls Belgium — SecretXperience' }],
   },
   twitter: { card: 'summary_large_image', title: TITLE, description: DESC, images: ['https://www.secretxperience.eu/og-image.jpg'] },
   keywords: [
-    'best adult platform Europe', 'escort directory Belgium', 'escort directory Netherlands',
-    'escort directory Germany', 'verified escort platform', 'adult lifestyle marketplace',
-    'discreet escort booking', 'premium escort directory EU', 'escort platform Brussels',
-    'escort platform Amsterdam', 'escort platform Berlin', 'adult services platform',
-    'nightlife directory Europe', 'swingers clubs Belgium', 'adult creators platform',
-    'private rental adult', 'escort agency alternative', 'independent escort directory',
-    'safe escort platform', 'adult entertainment Europe', 'SecretXperience review',
-    'best escort site Belgium', 'adult marketplace 2025', 'erotic platform Europe',
+    'escorts Belgium', 'escort girls Belgium', 'escort Brussels', 'escort Antwerp',
+    'escort Ghent', 'escort Liège', 'escort Bruges', 'private reception Belgium',
+    'independent escorts Belgium', 'verified escorts Belgium', 'escort directory Belgium',
+    'adult services Belgium', 'escort girls Brussels', 'companions Belgium',
+    'escort directory Netherlands', 'escort directory Germany', 'verified escort platform',
+    'adult lifestyle marketplace', 'discreet escort booking', 'premium escort directory EU',
+    'escort platform Amsterdam', 'escort platform Berlin', 'nightlife directory Europe',
+    'adult creators platform', 'safe escort platform', 'best escort site Belgium',
   ].join(', '),
 }
 
@@ -36,11 +36,20 @@ const jsonLd = {
       '@type': 'Organization',
       '@id': 'https://www.secretxperience.eu/#organization',
       name: 'SecretXperience',
+      legalName: '3S.lifestyle bv',
       url: 'https://www.secretxperience.eu',
       logo: { '@type': 'ImageObject', url: 'https://www.secretxperience.eu/icon-192.png' },
       description: 'Europe\'s premium adult lifestyle marketplace — verified escorts, nightlife, creators, rentals and events across Belgium, Netherlands and Germany.',
       areaServed: ['BE', 'NL', 'DE', 'FR', 'LU'],
       foundingLocation: { '@type': 'Place', name: 'Belgium' },
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: 'Tangendallaan 23',
+        addressLocality: 'Grimbergen',
+        postalCode: '1850',
+        addressCountry: 'BE',
+      },
+      vatID: 'BE 0749.661.728',
       sameAs: ['https://www.secretxperience.eu'],
     },
     {
@@ -182,21 +191,39 @@ export default function WhySecretXperience() {
               <span style={{ color: S.t2 }}>Why SecretXperience</span>
             </nav>
             <div style={{ display: 'inline-block', background: 'rgba(197,160,90,0.1)', border: `0.5px solid rgba(197,160,90,0.3)`, borderRadius: '20px', padding: '4px 16px', fontSize: '11px', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: G, marginBottom: '1.75rem' }}>
-              Europe&apos;s Adult Lifestyle Platform
+              Verified Escort Girls — Belgium &amp; Europe
             </div>
             <h1 style={{ fontFamily: S.serif, fontSize: 'clamp(2.6rem,6.5vw,4.8rem)', fontWeight: 400, lineHeight: 1.1, margin: '0 0 1.5rem', color: S.t }}>
-              Why SecretXperience is<br /><em style={{ fontStyle: 'italic', color: G }}>Europe&apos;s best adult<br />services platform</em>
+              Escort Girls Belgium<br /><em style={{ fontStyle: 'italic', color: G }}>Verified, discreet<br />&amp; live now</em>
             </h1>
-            <p style={{ fontSize: '17px', color: S.t2, lineHeight: 1.8, maxWidth: '620px', margin: '0 auto 2.5rem' }}>
-              From Brussels to Berlin, Amsterdam to Paris — SecretXperience connects thousands of verified providers, creators, venues, and discerning clients across the EU on one trusted, discreet platform.
+            <p style={{ fontSize: '17px', color: S.t2, lineHeight: 1.8, maxWidth: '640px', margin: '0 auto 2.5rem' }}>
+              Browse hundreds of verified independent escorts, companions, and private reception across Brussels, Antwerp, Ghent, Liège, Bruges and all of Belgium — on Europe&apos;s most trusted adult services platform.
             </p>
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '2rem' }}>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '2.5rem' }}>
               <Link href="/search" style={{ padding: '14px 32px', background: `linear-gradient(135deg,${G},#b8914a)`, borderRadius: '10px', color: '#0a0a0a', fontWeight: 700, fontSize: '15px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
                 <i className="ti ti-search" /> Browse listings
               </Link>
               <Link href="#why-great" style={{ padding: '14px 28px', border: `0.5px solid ${S.b2}`, borderRadius: '10px', color: S.t2, fontSize: '15px', textDecoration: 'none' }}>
                 Read on ↓
               </Link>
+            </div>
+            {/* Browse escorts by city */}
+            <div style={{ marginBottom: '2rem' }}>
+              <p style={{ fontSize: '11px', color: S.t3, marginBottom: '0.75rem', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Browse escorts by city</p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center', maxWidth: '700px', margin: '0 auto' }}>
+                {[['brussels','Brussels'],['antwerp','Antwerp'],['ghent','Ghent'],['grimbergen','Grimbergen'],['liege','Liège'],['bruges','Bruges'],['amsterdam','Amsterdam'],['berlin','Berlin'],['paris','Paris'],['cologne','Cologne']].map(([slug,label]) => (
+                  <Link key={slug} href={`/escorts/${slug}`} style={{ background: 'rgba(197,160,90,0.1)', border: `0.5px solid ${S.b}`, borderRadius: '20px', padding: '5px 14px', fontSize: '13px', color: S.t2, textDecoration: 'none' }}>{label}</Link>
+                ))}
+              </div>
+            </div>
+            {/* Browse escorts by country */}
+            <div style={{ marginBottom: '2rem' }}>
+              <p style={{ fontSize: '11px', color: S.t3, marginBottom: '0.75rem', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Browse by country</p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
+                {[['belgium','Belgium'],['netherlands','Netherlands'],['germany','Germany'],['france','France'],['luxembourg','Luxembourg']].map(([slug,label]) => (
+                  <Link key={slug} href={`/escorts/${slug}`} style={{ background: 'rgba(197,160,90,0.1)', border: `0.5px solid ${S.b}`, borderRadius: '20px', padding: '5px 14px', fontSize: '13px', color: S.t2, textDecoration: 'none' }}>{label}</Link>
+                ))}
+              </div>
             </div>
             {/* Quick nav pills */}
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -506,13 +533,18 @@ export default function WhySecretXperience() {
         </section>
 
         {/* ── FOOTER ── */}
-        <footer style={{ borderTop: `0.5px solid ${S.b}`, padding: '2rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', background: S.bg1 }}>
-          <Link href="/" style={{ fontFamily: S.serif, fontSize: '18px', color: G, textDecoration: 'none' }}>Secret<em style={{ fontStyle: 'italic', fontWeight: 300 }}>Xperience</em></Link>
-          <div style={{ display: 'flex', gap: '1.5rem', fontSize: '13px', flexWrap: 'wrap' }}>
-            {[['/escorts','Escorts'],['/nightlife','Nightlife'],['/creators','Creators'],['/rentals','Rentals'],['/events','Events'],['/advertise','Advertise'],['/how-it-works','How it works'],['/terms','Terms'],['/privacy','Privacy']].map(([h,l]) => (
-              <Link key={h} href={h} style={{ color: S.t3, textDecoration: 'none' }}>{l}</Link>
-            ))}
+        <footer style={{ borderTop: `0.5px solid ${S.b}`, padding: '2rem 1.5rem', background: S.bg1 }}>
+          <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+            <Link href="/" style={{ fontFamily: S.serif, fontSize: '18px', color: G, textDecoration: 'none' }}>Secret<em style={{ fontStyle: 'italic', fontWeight: 300 }}>Xperience</em></Link>
+            <div style={{ display: 'flex', gap: '1.5rem', fontSize: '13px', flexWrap: 'wrap' }}>
+              {[['/escorts','Escorts'],['/nightlife','Nightlife'],['/creators','Creators'],['/rentals','Rentals'],['/events','Events'],['/advertise','Advertise'],['/how-it-works','How it works'],['/terms','Terms'],['/privacy','Privacy']].map(([h,l]) => (
+                <Link key={h} href={h} style={{ color: S.t3, textDecoration: 'none' }}>{l}</Link>
+              ))}
+            </div>
           </div>
+          <p style={{ maxWidth: '1100px', margin: '1.5rem auto 0', fontSize: '12px', color: S.t3, textAlign: 'center' }}>
+            © {new Date().getFullYear()} 3S.lifestyle bv · Tangendallaan 23, 1850 Grimbergen · BE 0749.661.728
+          </p>
         </footer>
 
       </div>

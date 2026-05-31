@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
-import { ETHNICITIES, tagMatchesEthnicity, HAIR_COLOURS, tagMatchesHair, BUILDS, tagMatchesBuild, ORIENTATIONS, tagMatchesOrientation } from '../lib/attributes'
+import { ETHNICITIES, tagMatchesEthnicity, HAIR_COLOURS, tagMatchesHair, BUILDS, tagMatchesBuild, ORIENTATIONS, tagMatchesOrientation, tagMatchesType } from '../lib/attributes'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -329,14 +329,14 @@ export default function PrivateReceptionPage() {
 
     if (hostType !== 'all') {
       results = results.filter(l => {
-        const tags = (l.tags ?? []).map((t: string) => t.toLowerCase())
+        const rawTags = l.tags ?? []
+        const tags = rawTags.map((t: string) => t.toLowerCase())
         const sub = (l.subcategory ?? '').toLowerCase()
-        if (hostType === 'women') return tags.some((t: string) => ['woman','female','women'].includes(t)) || (!tags.some((t: string) => ['man','male','men','trans','couple','non-binary'].includes(t)))
-        if (hostType === 'men') return tags.some((t: string) => ['man','male','men'].includes(t)) || sub.includes('male')
-        if (hostType === 'trans-woman') return tags.some((t: string) => t.includes('trans woman') || t.includes('transwoman'))
-        if (hostType === 'non-binary') return tags.some((t: string) => t.includes('non-binary') || t.includes('nonbinary'))
-        if (hostType === 'couples') return tags.some((t: string) => t === 'couples' || t === 'duo') || sub.includes('couple')
-        return true
+        if (rawTags.some((t: string) => tagMatchesType(t, hostType))) return true
+        if (hostType === 'women') return !tags.some((t: string) => tagMatchesType(t, 'men') || t.includes('trans') || tagMatchesType(t, 'couples') || tagMatchesType(t, 'non-binary'))
+        if (hostType === 'men') return sub.includes('male')
+        if (hostType === 'couples') return sub.includes('couple')
+        return false
       })
     }
     if (orientation !== 'all') {
