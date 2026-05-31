@@ -24,7 +24,10 @@
       "mcp__1e794605-26ef-4b6f-b176-ae888a1f2024__list_migrations",
       "mcp__1e794605-26ef-4b6f-b176-ae888a1f2024__get_logs",
       "mcp__resend__list-domains",
-      "mcp__resend__send-email"
+      "mcp__resend__send-email",
+      "mcp__resend__list-broadcasts",
+      "mcp__resend__list-contacts",
+      "mcp__resend__list-segments"
     ]
   }
 }
