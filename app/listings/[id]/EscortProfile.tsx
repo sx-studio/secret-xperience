@@ -44,6 +44,12 @@ interface EscortProfileProps {
       username: string | null
       avatar_url: string | null
       verified: boolean
+      phone?: string | null
+      phone_verified?: boolean | null
+      show_phone?: boolean | null
+      whatsapp?: string | null
+      whatsapp_verified?: boolean | null
+      show_whatsapp?: boolean | null
     }
     tags?: string[] | null
     services?: string[] | null
@@ -575,6 +581,34 @@ export default function EscortProfile({
 
         {/* ══ RIGHT SIDEBAR ══ */}
         <div style={{ position: 'sticky', top: '80px', display: 'flex', flexDirection: 'column' }}>
+
+          {/* Verified contact numbers */}
+          {(() => {
+            const p = listing.profile || ({} as any)
+            const showPhone = p.phone && p.phone_verified && p.show_phone !== false
+            const showWa    = p.whatsapp && p.whatsapp_verified && p.show_whatsapp !== false
+            if (!showPhone && !showWa) return null
+            const waDigits = showWa ? String(p.whatsapp).replace(/[^0-9]/g, '') : ''
+            return (
+              <div className="rl-scard">
+                <div className="rl-section-title" style={{ fontSize: '10px' }}>Contact</div>
+                {showPhone && (
+                  <a href={`tel:${p.phone}`} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 0', textDecoration: 'none', color: C.t }}>
+                    <span style={{ fontSize: '17px' }}>📞</span>
+                    <span style={{ fontSize: '15px', fontFamily: "'Poppins',sans-serif", letterSpacing: '0.02em' }}>{p.phone}</span>
+                    <span title="Verified number" style={{ marginLeft: 'auto', fontSize: '10px', fontWeight: 700, color: C.green, background: 'rgba(38,212,160,0.12)', border: `0.5px solid ${C.green}55`, borderRadius: '20px', padding: '2px 8px' }}>✓</span>
+                  </a>
+                )}
+                {showWa && (
+                  <a href={`https://wa.me/${waDigits}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 0', borderTop: showPhone ? `0.5px solid ${C.b}` : 'none', textDecoration: 'none', color: C.t }}>
+                    <span style={{ fontSize: '17px' }}>🟢</span>
+                    <span style={{ fontSize: '15px', fontFamily: "'Poppins',sans-serif", letterSpacing: '0.02em' }}>WhatsApp</span>
+                    <span title="Verified WhatsApp" style={{ marginLeft: 'auto', fontSize: '10px', fontWeight: 700, color: C.green, background: 'rgba(38,212,160,0.12)', border: `0.5px solid ${C.green}55`, borderRadius: '20px', padding: '2px 8px' }}>✓</span>
+                  </a>
+                )}
+              </div>
+            )
+          })()}
 
           {/* Contact CTAs */}
           <div className="rl-scard">

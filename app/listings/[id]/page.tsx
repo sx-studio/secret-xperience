@@ -143,7 +143,13 @@ export default function ListingDetailPage() {
               full_name,
               username,
               avatar_url,
-              verified
+              verified,
+              phone,
+              phone_verified,
+              show_phone,
+              whatsapp,
+              whatsapp_verified,
+              show_whatsapp
             )
           `)
           .eq('id', id)

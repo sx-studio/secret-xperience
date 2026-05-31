@@ -3,6 +3,7 @@
 import { useEffect, useRef, useCallback, useState } from 'react'
 import { signOut } from '../lib/auth'
 import { createClient } from '../lib/supabase'
+import PhoneVerify from '../components/PhoneVerify/PhoneVerify'
 
 /* ── Listing edit constants ── */
 const ESCORT_TYPES_OPT = ['Women','Men','Trans Woman','Trans Man','Non-Binary','Couples','Fetish']
@@ -1242,6 +1243,24 @@ export default function DashboardPage() {
               </div>
             )
           })()}
+
+          {/* ── Phone & WhatsApp verification (providers) ── */}
+          {isProvider && (
+            <PhoneVerify
+              profile={profile}
+              onUpdate={async (patch) => {
+                setProfile((p: any) => ({ ...p, ...patch }))
+                // Display toggles aren't persisted by the verify API — save them here.
+                const toggles: Record<string, any> = {}
+                if ('show_phone' in patch) toggles.show_phone = patch.show_phone
+                if ('show_whatsapp' in patch) toggles.show_whatsapp = patch.show_whatsapp
+                if (Object.keys(toggles).length && user?.id) {
+                  const supabase = createClient()
+                  await supabase.from('profiles').update(toggles).eq('id', user.id)
+                }
+              }}
+            />
+          )}
 
           {/* ── Role Selector (members only) ── */}
           {profile?.role === 'user' && (
