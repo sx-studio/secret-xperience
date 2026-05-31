@@ -712,8 +712,14 @@ export default function EscortsPage() {
           {/* Browse by country */}
           <div style={{ marginTop: '3rem', borderTop: '0.5px solid var(--b)', paddingTop: '2rem' }}>
             <p style={{ fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--t3)', marginBottom: '0.9rem' }}>Browse by country</p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '1.75rem' }}>
               {[['belgium','Belgium'],['netherlands','Netherlands'],['germany','Germany'],['france','France'],['luxembourg','Luxembourg']].map(([slug, label]) => (
+                <Link key={slug} href={`/escorts/${slug}`} style={{ fontSize: '13px', padding: '5px 14px', border: '0.5px solid var(--b)', borderRadius: '20px', color: 'var(--t2)', transition: 'all .2s' }}>{label}</Link>
+              ))}
+            </div>
+            <p style={{ fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--t3)', marginBottom: '0.9rem' }}>Browse by city</p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              {[['brussels','Brussels'],['antwerp','Antwerp'],['ghent','Ghent'],['leuven','Leuven'],['mechelen','Mechelen'],['hasselt','Hasselt'],['liege','Liège'],['bruges','Bruges'],['ostend','Ostend'],['amsterdam','Amsterdam'],['rotterdam','Rotterdam'],['berlin','Berlin'],['paris','Paris'],['luxembourg','Luxembourg']].map(([slug, label]) => (
                 <Link key={slug} href={`/escorts/${slug}`} style={{ fontSize: '13px', padding: '5px 14px', border: '0.5px solid var(--b)', borderRadius: '20px', color: 'var(--t2)', transition: 'all .2s' }}>{label}</Link>
               ))}
             </div>
