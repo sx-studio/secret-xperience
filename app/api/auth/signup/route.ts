@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
   const { allowed } = rateLimit(ip, 'signup', 5, 60_000)
   if (!allowed) return NextResponse.json({ error: 'Too many attempts. Please wait a moment.' }, { status: 429 })
   try {
-    const { email, password, fullName, role, newsletter } = await request.json()
+    const { email, password, fullName, role, newsletter, ref } = await request.json()
 
     const VALID_ROLES = ['client', 'provider']
     if (!email || !password || !role) {
@@ -151,7 +151,7 @@ export async function POST(request: NextRequest) {
       { auth: { autoRefreshToken: false, persistSession: false } }
     )
 
-    const { error: authError } = await supabase.auth.admin.createUser({
+    const { data: created, error: authError } = await supabase.auth.admin.createUser({
       email,
       password,
       user_metadata: { full_name: fullName || '', role },
@@ -160,6 +160,27 @@ export async function POST(request: NextRequest) {
 
     if (authError) {
       return NextResponse.json({ error: authError.message }, { status: 400 })
+    }
+
+    // Referral attribution — record a pending conversion against the referrer.
+    // The reward fires later via DB trigger when this user publishes a listing.
+    const newUserId = created?.user?.id
+    if (ref && typeof ref === 'string' && newUserId) {
+      try {
+        const { data: rc } = await supabase
+          .from('referral_codes')
+          .select('user_id')
+          .eq('code', ref.trim().toUpperCase())
+          .maybeSingle()
+        if (rc?.user_id && rc.user_id !== newUserId) {
+          await supabase.from('referrals').insert({
+            referrer_id: rc.user_id,
+            referred_id: newUserId,
+            referred_email: email.toLowerCase().trim(),
+            status: 'pending',
+          })
+        }
+      } catch { /* never block signup on referral attribution */ }
     }
 
     // Newsletter opt-in

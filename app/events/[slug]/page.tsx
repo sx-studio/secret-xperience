@@ -6,6 +6,18 @@ import { createClient } from '../../lib/supabase'
 const COUNTRY_FLAGS: Record<string, string> = { Belgium: '🇧🇪', Germany: '🇩🇪', Netherlands: '🇳🇱', 'United Kingdom': '🇬🇧', Spain: '🇪🇸', Switzerland: '🇨🇭', France: '🇫🇷', Austria: '🇦🇹', 'Czech Republic': '🇨🇿' }
 const CATEGORY_COLORS: Record<string, string> = { fetish: 'var(--grad-boudoir)', nightlife: 'linear-gradient(140deg,#2a1a3a,#110a18)', lifestyle: 'var(--grad-plum)', wellness: 'linear-gradient(140deg,#1a2a1a,#0a180a)' }
 
+// Only treat a website as linkable if it's a well-formed ASCII http(s) URL —
+// guards against malformed/internationalised domains that won't resolve.
+function validWebsite(url: string | null | undefined): string | null {
+  if (!url) return null
+  try {
+    const u = new URL(url.trim())
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') return null
+    if (/[^\x00-\x7F]/.test(u.hostname)) return null
+    return u.href
+  } catch { return null }
+}
+
 export default function EventDetailPage({ params }: { params: { slug: string } }) {
   const [event, setEvent] = useState<any>(null)
   const [related, setRelated] = useState<any[]>([])
@@ -124,8 +136,8 @@ export default function EventDetailPage({ params }: { params: { slug: string } }
           </div>
           <div style={{ fontSize: '12px', color: 'var(--t3)', marginBottom: '1.5rem' }}>{isFree ? 'Free entry' : 'from per person'}</div>
 
-          {event.website ? (
-            <a href={event.website} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', padding: '12px', background: 'linear-gradient(135deg,var(--gold),var(--goldd))', border: 'none', borderRadius: 'var(--r)', color: '#0a0a0a', fontSize: '14px', fontWeight: 700, cursor: 'pointer', textDecoration: 'none', boxSizing: 'border-box', marginBottom: '1rem' }}>
+          {validWebsite(event.website) ? (
+            <a href={validWebsite(event.website)!} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', padding: '12px', background: 'linear-gradient(135deg,var(--gold),var(--goldd))', border: 'none', borderRadius: 'var(--r)', color: '#0a0a0a', fontSize: '14px', fontWeight: 700, cursor: 'pointer', textDecoration: 'none', boxSizing: 'border-box', marginBottom: '1rem' }}>
               <i className="ti ti-external-link" /> Visit official website
             </a>
           ) : (

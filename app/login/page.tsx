@@ -35,6 +35,14 @@ export default function LoginPage() {
     }
   }, [error])
 
+  // Capture a referral code from ?ref= and remember it through signup
+  useEffect(() => {
+    try {
+      const r = new URLSearchParams(window.location.search).get('ref')
+      if (r) localStorage.setItem('sx_ref', r.trim().toUpperCase())
+    } catch { /* ignore */ }
+  }, [])
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
@@ -64,12 +72,15 @@ export default function LoginPage() {
       }
     } else {
       // Use server-side route to avoid trigger failures on auth.users insert
+      let ref: string | null = null
+      try { ref = localStorage.getItem('sx_ref') } catch { /* ignore */ }
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, fullName, role, newsletter: newsletterChecked }),
+        body: JSON.stringify({ email, password, fullName, role, newsletter: newsletterChecked, ref }),
       })
       const json = await res.json()
+      if (res.ok) { try { localStorage.removeItem('sx_ref') } catch { /* ignore */ } }
       if (!res.ok) {
         setError(json.error || 'Signup failed')
       } else {
