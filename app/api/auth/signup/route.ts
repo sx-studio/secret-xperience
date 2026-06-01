@@ -190,6 +190,28 @@ export async function POST(request: NextRequest) {
       } catch { /* never block signup on referral attribution */ }
     }
 
+    // Signup attribution — record which directory / ad network drove this signup.
+    // First-touch UTM data is captured client-side into the sx_attribution cookie.
+    if (newUserId) {
+      try {
+        const raw = request.cookies.get('sx_attribution')?.value
+        if (raw) {
+          const a = JSON.parse(decodeURIComponent(raw))
+          await supabase.from('signup_sources').insert({
+            user_id: newUserId,
+            email: email.toLowerCase().trim(),
+            utm_source: a.utm_source || null,
+            utm_medium: a.utm_medium || null,
+            utm_campaign: a.utm_campaign || null,
+            utm_term: a.utm_term || null,
+            utm_content: a.utm_content || null,
+            landing_page: a.landing_page || null,
+            referrer: a.referrer || null,
+          })
+        }
+      } catch { /* never block signup on attribution */ }
+    }
+
     // Newsletter opt-in
     if (newsletter) {
       supabase

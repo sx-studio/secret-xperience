@@ -105,6 +105,7 @@ What's next (user hasn't asked for these yet, don't do proactively):
   - Next.js version confirmed as **13.5.1** — `cookies()` is synchronous (no `await`), important for all server code
 
 ## Pending
+- **Apply `20260601_signup_attribution.sql`** — creates `signup_sources` (service-role-only RLS) for the Admin → Acquisition tab. Without it, signups can't be attributed and the Acquisition tab errors.
 - **Apply pending migrations in Supabase SQL editor** (run in order):
   - `20250521_newsletter.sql` ✓ already applied
   - `20250521_tier_auto_expire.sql` (requires pg_cron)

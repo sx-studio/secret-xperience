@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '../lib/supabase'
 
-const TABS = ['Listings', 'Users', 'Verification', 'Bookings', 'Newsletter', 'Contacts'] as const
+const TABS = ['Listings', 'Users', 'Verification', 'Bookings', 'Newsletter', 'Contacts', 'Acquisition'] as const
 type Tab = typeof TABS[number]
 
 const TAB_ICONS: Record<Tab, string> = {
@@ -13,6 +13,7 @@ const TAB_ICONS: Record<Tab, string> = {
   Bookings: 'calendar-event',
   Newsletter: 'mail',
   Contacts: 'address-book',
+  Acquisition: 'chart-arrows-vertical',
 }
 
 const LS_KEY = (t: Tab) => `sx_admin_seen_${t.toLowerCase()}`
@@ -37,7 +38,7 @@ function saveLastSeen(t: Tab) {
 export default function AdminPage() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [tab, setTab] = useState<Tab>('Listings')
-  const [badges, setBadges] = useState<Record<Tab, number>>({ Listings: 0, Users: 0, Verification: 0, Bookings: 0, Newsletter: 0, Contacts: 0 })
+  const [badges, setBadges] = useState<Record<Tab, number>>({ Listings: 0, Users: 0, Verification: 0, Bookings: 0, Newsletter: 0, Contacts: 0, Acquisition: 0 })
   const currentTab = useRef<Tab>('Listings')
   const [listings, setListings] = useState<any[]>([])
   const [users, setUsers] = useState<any[]>([])
@@ -58,6 +59,9 @@ export default function AdminPage() {
   const [nlSubCount, setNlSubCount]   = useState<number | null>(null)
   const [nlSubs, setNlSubs]           = useState<any[]>([])
   const [nlSubsLoading, setNlSubsLoading] = useState(true)
+  const [acq, setAcq]                 = useState<any[]>([])
+  const [acqTotal, setAcqTotal]       = useState<number>(0)
+  const [acqLoading, setAcqLoading]   = useState(true)
 
   useEffect(() => {
     let channel: ReturnType<ReturnType<typeof createClient>['channel']> | null = null
@@ -82,6 +86,12 @@ export default function AdminPage() {
         .then(j => { setNlSubs(j.subscribers || []); setNlSubCount((j.subscribers || []).length) })
         .catch(() => {})
         .finally(() => setNlSubsLoading(false))
+      // signup_sources is service-role-only; fetch aggregated summary via server route
+      fetch('/api/admin/acquisition')
+        .then(r => r.ok ? r.json() : { summary: [], totalTracked: 0 })
+        .then(j => { setAcq(j.summary || []); setAcqTotal(j.totalTracked || 0) })
+        .catch(() => {})
+        .finally(() => setAcqLoading(false))
       setOptinContacts(ocr.data || [])
       setLeads(leadsr.data || [])
       const ls = lr.data || [], us = ur.data || [], bs = br.data || []
@@ -108,6 +118,7 @@ export default function AdminPage() {
         Bookings:     bs.filter((b: any) => new Date(b.created_at).getTime() > seenBookings).length,
         Newsletter:   0,
         Contacts:     (leadsr.data || []).filter((l: any) => new Date(l.created_at).getTime() > seenContacts).length,
+        Acquisition:  0,
       })
       // Mark the initial active tab as seen immediately
       saveLastSeen('Listings')
@@ -372,7 +383,7 @@ export default function AdminPage() {
           <div>
             <h1 style={{ fontFamily: 'var(--serif)', fontWeight: 500, fontSize: '36px', color: 'var(--t, #ece8e1)', margin: 0, lineHeight: 1.1 }}>{tab}</h1>
             <div style={{ font: '300 11px/1 var(--sans)', color: 'var(--t3, #4c4a47)', marginTop: '4px', letterSpacing: '0.04em' }}>
-              {tab === 'Listings' ? `${filteredListings.length} listings` : tab === 'Users' ? `${filteredUsers.length} users` : tab === 'Newsletter' ? (search ? `${filteredNlSubs.length} of ${nlSubCount ?? '…'} subscribers` : `${nlSubCount ?? '…'} subscribers`) : tab === 'Contacts' ? `${optinContacts.length} opted-in · ${leads.length} leads` : `${filteredBookings.length} bookings`}
+              {tab === 'Listings' ? `${filteredListings.length} listings` : tab === 'Users' ? `${filteredUsers.length} users` : tab === 'Newsletter' ? (search ? `${filteredNlSubs.length} of ${nlSubCount ?? '…'} subscribers` : `${nlSubCount ?? '…'} subscribers`) : tab === 'Contacts' ? `${optinContacts.length} opted-in · ${leads.length} leads` : tab === 'Acquisition' ? `${acqTotal} tracked signups · ${acq.length} sources` : `${filteredBookings.length} bookings`}
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -934,6 +945,50 @@ export default function AdminPage() {
               </div>
             )
           })()}
+
+          {/* ── Acquisition (signup attribution) ── */}
+          {tab === 'Acquisition' && (
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+                <div style={{ fontFamily: 'var(--serif)', fontSize: 15, color: 'var(--t2)' }}>
+                  Where your signups come from — <strong style={{ color: 'var(--gold)' }}>{acqTotal}</strong> tracked
+                </div>
+                <button
+                  onClick={() => exportCsv(acq.map(a => ({ source: a.source, medium: a.medium, campaign: a.campaign, signups: a.signups, last_signup: a.last })), `sx-acquisition-${new Date().toISOString().slice(0,10)}.csv`)}
+                  className="adm-action-icon-btn"
+                  style={{ color: 'var(--gold)', borderColor: 'var(--gbrd)', gap: '6px' }}
+                  disabled={acq.length === 0}
+                >
+                  <i className="ti ti-download" />
+                  <span style={{ font: '600 11px/1 var(--sans)', letterSpacing: '0.08em' }}>Export CSV</span>
+                </button>
+              </div>
+              <div style={{ background: 'var(--bg1, #0a0a0a)', border: '0.5px solid var(--b, rgba(255,255,255,0.06))', borderRadius: 'var(--rl, 13px)', overflow: 'hidden' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                  <thead>
+                    <tr style={{ background: 'var(--bg2, rgba(255,255,255,0.02))' }}>
+                      {['Source', 'Medium', 'Campaign', 'Signups', 'Last signup'].map(h => (
+                        <th key={h} style={{ textAlign: h === 'Signups' ? 'right' : 'left', padding: '12px 16px', font: '600 9px/1 var(--sans)', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--t3, #4c4a47)' }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {acqLoading && <tr><td colSpan={5} style={{ padding: '3rem', textAlign: 'center', color: 'var(--t3, #4c4a47)' }}>Loading…</td></tr>}
+                    {!acqLoading && acq.length === 0 && <tr><td colSpan={5} style={{ padding: '3rem', textAlign: 'center', color: 'var(--t3, #4c4a47)' }}>No tracked signups yet — add UTM tags to your directory & ad links (see docs/marketing-rollout.md)</td></tr>}
+                    {acq.map((a, i) => (
+                      <tr key={i} className="adm-tr" style={{ borderTop: '0.5px solid var(--b, rgba(255,255,255,0.04))' }}>
+                        <td style={{ padding: '12px 16px', fontWeight: 600 }}>{a.source}</td>
+                        <td style={{ padding: '12px 16px', color: 'var(--t2, #8c8880)', fontSize: '12px' }}>{a.medium}</td>
+                        <td style={{ padding: '12px 16px', color: 'var(--t2, #8c8880)', fontSize: '12px' }}>{a.campaign}</td>
+                        <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 700, color: 'var(--gold)' }}>{a.signups}</td>
+                        <td style={{ padding: '12px 16px', color: 'var(--t3, #4c4a47)', fontSize: '11px' }}>{a.last ? new Date(a.last).toLocaleDateString() : '—'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
 
           {/* ── Bookings table ── */}
           {tab === 'Bookings' && (
