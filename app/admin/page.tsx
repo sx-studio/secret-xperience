@@ -17,6 +17,16 @@ const TAB_ICONS: Record<Tab, string> = {
 
 const LS_KEY = (t: Tab) => `sx_admin_seen_${t.toLowerCase()}`
 
+function exportCsv(rows: any[], filename: string) {
+  if (!rows.length) return
+  const headers = Object.keys(rows[0])
+  const csv = [headers.join(','), ...rows.map(r => headers.map(h => JSON.stringify(r[h] ?? '')).join(','))].join('\n')
+  const a = document.createElement('a')
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv)
+  a.download = filename
+  a.click()
+}
+
 function loadLastSeen(t: Tab): number {
   try { return parseInt(localStorage.getItem(LS_KEY(t)) || '0', 10) } catch { return 0 }
 }
@@ -46,6 +56,8 @@ export default function AdminPage() {
   const [nlSending, setNlSending]     = useState(false)
   const [nlResult, setNlResult]       = useState<string | null>(null)
   const [nlSubCount, setNlSubCount]   = useState<number | null>(null)
+  const [nlSubs, setNlSubs]           = useState<any[]>([])
+  const [nlSubsLoading, setNlSubsLoading] = useState(true)
 
   useEffect(() => {
     let channel: ReturnType<ReturnType<typeof createClient>['channel']> | null = null
@@ -56,16 +68,20 @@ export default function AdminPage() {
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single()
       if (profile?.role !== 'admin') { window.location.href = '/'; return }
       setIsAdmin(true)
-      const [lr, ur, br, vr, nlr, ocr, leadsr] = await Promise.all([
+      const [lr, ur, br, vr, ocr, leadsr] = await Promise.all([
         supabase.from('listings').select('*').order('created_at', { ascending: false }),
         supabase.from('profiles').select('*').order('created_at', { ascending: false }),
         supabase.from('bookings').select('*, listings(title)').order('created_at', { ascending: false }),
         supabase.from('identity_verifications').select('*, profiles(full_name, username, email, role)').order('submitted_at', { ascending: false }),
-        supabase.from('newsletter_subscribers').select('id', { count: 'exact', head: true }),
         supabase.from('listings').select('id,title,category,city,country,contact_phone,created_at').eq('whatsapp_optin', true).order('created_at', { ascending: false }),
         supabase.from('leads').select('*').order('created_at', { ascending: false }),
       ])
-      setNlSubCount(nlr.count ?? 0)
+      // newsletter_subscribers is service-role-only; fetch via server route
+      fetch('/api/newsletter/list')
+        .then(r => r.ok ? r.json() : { subscribers: [] })
+        .then(j => { setNlSubs(j.subscribers || []); setNlSubCount((j.subscribers || []).length) })
+        .catch(() => {})
+        .finally(() => setNlSubsLoading(false))
       setOptinContacts(ocr.data || [])
       setLeads(leadsr.data || [])
       const ls = lr.data || [], us = ur.data || [], bs = br.data || []
@@ -638,6 +654,54 @@ export default function AdminPage() {
                 </div>
               </div>
 
+              {/* Subscriber list */}
+              <div style={{ marginBottom: '2rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                  <div>
+                    <div style={{ font: '600 11px/1 var(--sans)', color: 'var(--t2, #8c8880)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '4px' }}>
+                      <i className="ti ti-mail" style={{ marginRight: '6px', color: 'var(--gold)' }} />
+                      Subscribers
+                    </div>
+                    <div style={{ font: '300 11px/1 var(--sans)', color: 'var(--t3, #4c4a47)' }}>{nlSubs.filter(s => s.active).length} active · {nlSubs.length} total</div>
+                  </div>
+                  <button
+                    onClick={() => exportCsv(nlSubs.map(s => ({ email: s.email, status: s.active ? 'active' : 'unsubscribed', subscribed_at: s.subscribed_at, unsubscribed_at: s.unsubscribed_at || '' })), `sx-newsletter-${new Date().toISOString().slice(0,10)}.csv`)}
+                    className="adm-action-icon-btn"
+                    style={{ color: 'var(--gold)', borderColor: 'var(--gbrd)', gap: '6px' }}
+                    disabled={nlSubs.length === 0}
+                  >
+                    <i className="ti ti-download" />
+                    <span style={{ font: '600 11px/1 var(--sans)', letterSpacing: '0.08em' }}>Export CSV</span>
+                  </button>
+                </div>
+                <div style={{ background: 'var(--bg1, #0a0a0a)', border: '0.5px solid var(--b, rgba(255,255,255,0.06))', borderRadius: 'var(--rl, 13px)', overflow: 'hidden' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                    <thead>
+                      <tr style={{ background: 'var(--bg2, rgba(255,255,255,0.02))' }}>
+                        {['Email', 'Status', 'Subscribed'].map(h => (
+                          <th key={h} style={{ textAlign: 'left', padding: '12px 16px', font: '600 9px/1 var(--sans)', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--t3, #4c4a47)' }}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {nlSubsLoading && <tr><td colSpan={3} style={{ padding: '3rem', textAlign: 'center', color: 'var(--t3, #4c4a47)' }}>Loading…</td></tr>}
+                      {!nlSubsLoading && nlSubs.length === 0 && <tr><td colSpan={3} style={{ padding: '3rem', textAlign: 'center', color: 'var(--t3, #4c4a47)' }}>No subscribers yet</td></tr>}
+                      {nlSubs.map(s => (
+                        <tr key={s.id} className="adm-tr" style={{ borderTop: '0.5px solid var(--b, rgba(255,255,255,0.04))' }}>
+                          <td style={{ padding: '12px 16px', fontWeight: 500 }}>{s.email}</td>
+                          <td style={{ padding: '12px 16px' }}>
+                            <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 6, font: '600 10px/1.4 var(--sans)', letterSpacing: '0.04em', background: s.active ? 'rgba(62,207,142,0.1)' : 'rgba(212,95,114,0.1)', color: s.active ? '#3ecf8e' : '#d45f72' }}>
+                              {s.active ? 'Active' : 'Unsubscribed'}
+                            </span>
+                          </td>
+                          <td style={{ padding: '12px 16px', color: 'var(--t3, #4c4a47)', fontSize: '11px' }}>{s.subscribed_at ? new Date(s.subscribed_at).toLocaleDateString() : '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14, maxWidth: 600 }}>
                 <div>
                   <label style={{ display: 'block', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--t3)', marginBottom: 6, fontFamily: 'var(--sans)' }}>Subject line</label>
@@ -687,16 +751,6 @@ export default function AdminPage() {
 
           {/* ── Contacts tab ── */}
           {tab === 'Contacts' && (() => {
-            function exportCsv(rows: any[], filename: string) {
-              if (!rows.length) return
-              const headers = Object.keys(rows[0])
-              const csv = [headers.join(','), ...rows.map(r => headers.map(h => JSON.stringify(r[h] ?? '')).join(','))].join('\n')
-              const a = document.createElement('a')
-              a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv)
-              a.download = filename
-              a.click()
-            }
-
             const filteredOptins = optinContacts.filter(c =>
               (!contactFilter.country || (c.country || '').toLowerCase().includes(contactFilter.country.toLowerCase())) &&
               (!contactFilter.category || c.category === contactFilter.category)
