@@ -78,6 +78,8 @@ interface FormState {
   hair:        string
   tier:        string
   website:     string
+  contact_phone:  string
+  whatsapp_optin: boolean
   wh_mon: string; wh_tue: string; wh_wed: string; wh_thu: string
   wh_fri: string; wh_sat: string; wh_sun: string
 }
@@ -192,7 +194,9 @@ export default function CreateListingPage() {
     ethnicity:   '',
     build:       '',
     hair:        '',
-    website:     '',
+    website:        '',
+    contact_phone:  '',
+    whatsapp_optin: false,
     wh_mon: '10-22', wh_tue: '10-22', wh_wed: '10-22', wh_thu: '10-22',
     wh_fri: '10-22', wh_sat: 'off',   wh_sun: 'off',
   })
@@ -446,6 +450,8 @@ export default function CreateListingPage() {
       images:          form.images.length > 0 ? form.images : null,
       tags:            finalTags.length > 0 ? finalTags : null,
       services:        POSSIBILITY_CATEGORIES.has(form.category) && form.services.length > 0 ? form.services : null,
+      contact_phone:   form.contact_phone.trim() || null,
+      whatsapp_optin:  form.whatsapp_optin,
       active:          false,   // stays false until moderation approves
       status:          'pending',
       tier:            form.tier,
@@ -1459,6 +1465,36 @@ export default function CreateListingPage() {
                   />
                 </div>
               )}
+
+              {/* WhatsApp contact opt-in */}
+              <div style={{ marginTop: '1.5rem', background: 'rgba(37,211,102,0.04)', border: '0.5px solid rgba(37,211,102,0.2)', borderRadius: 'var(--r)', padding: '1.25rem' }}>
+                <div style={{ fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--t3)', marginBottom: '0.75rem', fontWeight: 600 }}>WhatsApp contact (optional)</div>
+                <div style={{ marginBottom: '0.75rem' }}>
+                  <label style={{ display: 'block', fontSize: '12px', color: 'var(--t3)', marginBottom: '6px' }}>
+                    Phone number <span style={{ opacity: 0.5, fontWeight: 300 }}>(with country code, e.g. +32 470 …)</span>
+                  </label>
+                  <input
+                    className="cl-input"
+                    type="tel"
+                    autoComplete="tel"
+                    value={form.contact_phone}
+                    onChange={e => set('contact_phone', e.target.value)}
+                    placeholder="+32 470 000 000"
+                  />
+                </div>
+                <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={form.whatsapp_optin}
+                    onChange={e => setForm(f => ({ ...f, whatsapp_optin: e.target.checked }))}
+                    style={{ marginTop: '2px', accentColor: '#25d366', width: 16, height: 16, flexShrink: 0 }}
+                  />
+                  <span style={{ fontSize: '13px', color: 'var(--t2)', lineHeight: 1.5 }}>
+                    I consent to being contacted by SecretXperience via WhatsApp about platform features, promotions and account support.
+                    You can opt out at any time by replying STOP.
+                  </span>
+                </label>
+              </div>
             </div>
           )}
 

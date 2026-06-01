@@ -296,8 +296,10 @@ export default function DashboardPage() {
       country:     listingDraft.country,
       meet_type:   listingDraft.meet_type,
       active:      listingDraft.active,
-      images:      (listingDraft.images || []).filter(Boolean),
-      tags:        tags.length > 0 ? tags : null,
+      images:         (listingDraft.images || []).filter(Boolean),
+      tags:           tags.length > 0 ? tags : null,
+      contact_phone:  listingDraft.contact_phone?.trim() || null,
+      whatsapp_optin: !!listingDraft.whatsapp_optin,
     }
     if (listingDraft.price_from !== '' && listingDraft.price_from !== undefined) updates.price_from = parseFloat(listingDraft.price_from) || null
     if (listingDraft.price_to !== '' && listingDraft.price_to !== undefined) updates.price_to = parseFloat(listingDraft.price_to) || null
@@ -2091,6 +2093,30 @@ export default function DashboardPage() {
                 <div style={{ fontSize:'11px',color:'rgba(255,255,255,0.2)',marginTop:'12px',fontFamily:'var(--sans)' }}>Click the checkmark to toggle a day on or off.</div>
               </div>
             </>)}
+
+            {/* WhatsApp opt-in */}
+            <div style={{ marginTop:'1rem', background:'rgba(37,211,102,0.04)', border:'0.5px solid rgba(37,211,102,0.18)', borderRadius:'var(--r)', padding:'1rem' }}>
+              <div style={{ fontSize:'10px',letterSpacing:'0.14em',textTransform:'uppercase',color:'rgba(37,211,102,0.7)',marginBottom:'0.6rem',fontWeight:600 }}>WhatsApp Contact</div>
+              <input
+                type="tel"
+                className="db-input"
+                value={listingDraft.contact_phone||''}
+                onChange={e => setListingDraft((d:any)=>({...d,contact_phone:e.target.value}))}
+                placeholder="+32 470 000 000"
+                style={{ marginBottom:'0.65rem' }}
+              />
+              <label style={{ display:'flex',alignItems:'flex-start',gap:'8px',cursor:'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={!!listingDraft.whatsapp_optin}
+                  onChange={e => setListingDraft((d:any)=>({...d,whatsapp_optin:e.target.checked}))}
+                  style={{ marginTop:'2px',accentColor:'#25d366',width:14,height:14,flexShrink:0 }}
+                />
+                <span style={{ fontSize:'12px',color:'var(--t2)',lineHeight:1.5 }}>
+                  I consent to WhatsApp contact from SecretXperience for platform updates and support.
+                </span>
+              </label>
+            </div>
 
             <div style={{ display:'flex',gap:'10px',justifyContent:'flex-end',paddingTop:'0.5rem',borderTop:'0.5px solid rgba(255,255,255,0.06)' }}>
               <button onClick={() => setEditingListing(null)} className="db-quick-btn-dark">Cancel</button>

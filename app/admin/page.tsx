@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '../lib/supabase'
 
-const TABS = ['Listings', 'Users', 'Verification', 'Bookings', 'Newsletter'] as const
+const TABS = ['Listings', 'Users', 'Verification', 'Bookings', 'Newsletter', 'Contacts'] as const
 type Tab = typeof TABS[number]
 
 const TAB_ICONS: Record<Tab, string> = {
@@ -12,6 +12,7 @@ const TAB_ICONS: Record<Tab, string> = {
   Verification: 'shield-check',
   Bookings: 'calendar-event',
   Newsletter: 'mail',
+  Contacts: 'address-book',
 }
 
 const LS_KEY = (t: Tab) => `sx_admin_seen_${t.toLowerCase()}`
@@ -26,7 +27,7 @@ function saveLastSeen(t: Tab) {
 export default function AdminPage() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [tab, setTab] = useState<Tab>('Listings')
-  const [badges, setBadges] = useState<Record<Tab, number>>({ Listings: 0, Users: 0, Verification: 0, Bookings: 0, Newsletter: 0 })
+  const [badges, setBadges] = useState<Record<Tab, number>>({ Listings: 0, Users: 0, Verification: 0, Bookings: 0, Newsletter: 0, Contacts: 0 })
   const currentTab = useRef<Tab>('Listings')
   const [listings, setListings] = useState<any[]>([])
   const [users, setUsers] = useState<any[]>([])
@@ -37,6 +38,9 @@ export default function AdminPage() {
   const [search, setSearch] = useState('')
   const [verifWorking, setVerifWorking] = useState<string | null>(null)
   const [verifMsg, setVerifMsg] = useState<{ id: string; ok: boolean; text: string } | null>(null)
+  const [optinContacts, setOptinContacts] = useState<any[]>([])
+  const [leads, setLeads]                 = useState<any[]>([])
+  const [contactFilter, setContactFilter] = useState({ country: '', category: '', status: '' })
   const [nlSubject, setNlSubject]     = useState('')
   const [nlBody, setNlBody]           = useState('')
   const [nlSending, setNlSending]     = useState(false)
@@ -52,14 +56,18 @@ export default function AdminPage() {
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single()
       if (profile?.role !== 'admin') { window.location.href = '/'; return }
       setIsAdmin(true)
-      const [lr, ur, br, vr, nlr] = await Promise.all([
+      const [lr, ur, br, vr, nlr, ocr, leadsr] = await Promise.all([
         supabase.from('listings').select('*').order('created_at', { ascending: false }),
         supabase.from('profiles').select('*').order('created_at', { ascending: false }),
         supabase.from('bookings').select('*, listings(title)').order('created_at', { ascending: false }),
         supabase.from('identity_verifications').select('*, profiles(full_name, username, email, role)').order('submitted_at', { ascending: false }),
         supabase.from('newsletter_subscribers').select('id', { count: 'exact', head: true }),
+        supabase.from('listings').select('id,title,category,city,country,contact_phone,created_at').eq('whatsapp_optin', true).order('created_at', { ascending: false }),
+        supabase.from('leads').select('*').order('created_at', { ascending: false }),
       ])
       setNlSubCount(nlr.count ?? 0)
+      setOptinContacts(ocr.data || [])
+      setLeads(leadsr.data || [])
       const ls = lr.data || [], us = ur.data || [], bs = br.data || []
       // Attach profile data to listings client-side (avoids PostgREST embedded join issues)
       const profileMap = Object.fromEntries(us.map((u: any) => [u.id, u]))
@@ -76,12 +84,14 @@ export default function AdminPage() {
       const seenUsers = loadLastSeen('Users')
       const seenVerification = loadLastSeen('Verification')
       const seenBookings = loadLastSeen('Bookings')
+      const seenContacts = loadLastSeen('Contacts')
       setBadges({
         Listings:     lsWithProfiles.filter((l: any) => new Date(l.created_at).getTime() > seenListings).length,
         Users:        us.filter((u: any) => new Date(u.created_at).getTime() > seenUsers).length,
         Verification: (vr.data || []).filter((v: any) => new Date(v.submitted_at || v.created_at).getTime() > seenVerification).length,
         Bookings:     bs.filter((b: any) => new Date(b.created_at).getTime() > seenBookings).length,
         Newsletter:   0,
+        Contacts:     (leadsr.data || []).filter((l: any) => new Date(l.created_at).getTime() > seenContacts).length,
       })
       // Mark the initial active tab as seen immediately
       saveLastSeen('Listings')
@@ -112,6 +122,10 @@ export default function AdminPage() {
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bookings' }, payload => {
           setBookings(prev => [payload.new, ...prev])
           if (currentTab.current !== 'Bookings') setBadges(b => ({ ...b, Bookings: b.Bookings + 1 }))
+        })
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'leads' }, payload => {
+          setLeads(prev => [payload.new, ...prev])
+          if (currentTab.current !== 'Contacts') setBadges(b => ({ ...b, Contacts: b.Contacts + 1 }))
         })
         .subscribe()
     }
@@ -341,7 +355,7 @@ export default function AdminPage() {
           <div>
             <h1 style={{ fontFamily: 'var(--serif)', fontWeight: 500, fontSize: '36px', color: 'var(--t, #ece8e1)', margin: 0, lineHeight: 1.1 }}>{tab}</h1>
             <div style={{ font: '300 11px/1 var(--sans)', color: 'var(--t3, #4c4a47)', marginTop: '4px', letterSpacing: '0.04em' }}>
-              {tab === 'Listings' ? `${filteredListings.length} listings` : tab === 'Users' ? `${filteredUsers.length} users` : tab === 'Newsletter' ? `${nlSubCount ?? '…'} subscribers` : `${filteredBookings.length} bookings`}
+              {tab === 'Listings' ? `${filteredListings.length} listings` : tab === 'Users' ? `${filteredUsers.length} users` : tab === 'Newsletter' ? `${nlSubCount ?? '…'} subscribers` : tab === 'Contacts' ? `${optinContacts.length} opted-in · ${leads.length} leads` : `${filteredBookings.length} bookings`}
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -670,6 +684,200 @@ export default function AdminPage() {
               </div>
             </div>
           )}
+
+          {/* ── Contacts tab ── */}
+          {tab === 'Contacts' && (() => {
+            function exportCsv(rows: any[], filename: string) {
+              if (!rows.length) return
+              const headers = Object.keys(rows[0])
+              const csv = [headers.join(','), ...rows.map(r => headers.map(h => JSON.stringify(r[h] ?? '')).join(','))].join('\n')
+              const a = document.createElement('a')
+              a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv)
+              a.download = filename
+              a.click()
+            }
+
+            const filteredOptins = optinContacts.filter(c =>
+              (!contactFilter.country || (c.country || '').toLowerCase().includes(contactFilter.country.toLowerCase())) &&
+              (!contactFilter.category || c.category === contactFilter.category)
+            )
+            const filteredLeads = leads.filter(l =>
+              (!contactFilter.country || (l.country || '').toLowerCase().includes(contactFilter.country.toLowerCase())) &&
+              (!contactFilter.category || l.category === contactFilter.category) &&
+              (!contactFilter.status || l.status === contactFilter.status) &&
+              (!search || (l.contact_name || '').toLowerCase().includes(search.toLowerCase()) || (l.email || '').toLowerCase().includes(search.toLowerCase()) || (l.business_name || '').toLowerCase().includes(search.toLowerCase()))
+            )
+
+            const LEAD_STATUS_COLORS: Record<string, { bg: string; color: string }> = {
+              new:       { bg: 'rgba(197,160,90,0.12)',  color: '#c5a05a' },
+              contacted: { bg: 'rgba(100,170,255,0.12)', color: '#64aaff' },
+              converted: { bg: 'rgba(30,207,142,0.12)',  color: '#1ecf8e' },
+              declined:  { bg: 'rgba(184,77,114,0.12)',  color: '#b84d72' },
+            }
+
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+
+                {/* Filter bar */}
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <input
+                    placeholder="Country…"
+                    value={contactFilter.country}
+                    onChange={e => setContactFilter(f => ({ ...f, country: e.target.value }))}
+                    className="adm-search-input"
+                    style={{ width: '140px' }}
+                  />
+                  <select
+                    value={contactFilter.category}
+                    onChange={e => setContactFilter(f => ({ ...f, category: e.target.value }))}
+                    style={{ height: '44px', padding: '0 10px', background: 'var(--bg3, #111)', border: '0.5px solid var(--b2, rgba(255,255,255,0.08))', borderRadius: 'var(--r, 8px)', color: 'var(--t, #ece8e1)', font: '400 13px/1 var(--sans)', outline: 'none' }}
+                  >
+                    <option value="">All categories</option>
+                    <option value="escort_agency">Escort agency</option>
+                    <option value="venue">Venue</option>
+                    <option value="nightlife">Nightlife</option>
+                    <option value="massage">Massage</option>
+                    <option value="other">Other</option>
+                  </select>
+                  <select
+                    value={contactFilter.status}
+                    onChange={e => setContactFilter(f => ({ ...f, status: e.target.value }))}
+                    style={{ height: '44px', padding: '0 10px', background: 'var(--bg3, #111)', border: '0.5px solid var(--b2, rgba(255,255,255,0.08))', borderRadius: 'var(--r, 8px)', color: 'var(--t, #ece8e1)', font: '400 13px/1 var(--sans)', outline: 'none' }}
+                  >
+                    <option value="">All statuses</option>
+                    <option value="new">New</option>
+                    <option value="contacted">Contacted</option>
+                    <option value="converted">Converted</option>
+                    <option value="declined">Declined</option>
+                  </select>
+                  <button
+                    onClick={() => setContactFilter({ country: '', category: '', status: '' })}
+                    style={{ height: '44px', padding: '0 14px', background: 'transparent', border: '0.5px solid var(--b2, rgba(255,255,255,0.1))', borderRadius: 'var(--r, 8px)', color: 'var(--t3, #4c4a47)', cursor: 'pointer', font: '400 12px/1 var(--sans)' }}
+                  >Clear</button>
+                </div>
+
+                {/* Section 1: Provider WhatsApp opt-ins */}
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                    <div>
+                      <div style={{ font: '600 11px/1 var(--sans)', color: 'var(--t2, #8c8880)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '4px' }}>
+                        <i className="ti ti-brand-whatsapp" style={{ marginRight: '6px', color: '#25d366' }} />
+                        Provider WhatsApp Opt-ins
+                      </div>
+                      <div style={{ font: '300 11px/1 var(--sans)', color: 'var(--t3, #4c4a47)' }}>{filteredOptins.length} providers with phone + consent</div>
+                    </div>
+                    <button
+                      onClick={() => exportCsv(filteredOptins.map(c => ({ title: c.title, category: c.category, city: c.city, country: c.country, phone: c.contact_phone, optin_date: c.created_at })), `sx-whatsapp-optins-${new Date().toISOString().slice(0,10)}.csv`)}
+                      className="adm-action-icon-btn"
+                      style={{ color: 'var(--gold)', borderColor: 'var(--gbrd)', gap: '6px' }}
+                    >
+                      <i className="ti ti-download" />
+                      <span style={{ font: '600 11px/1 var(--sans)', letterSpacing: '0.08em' }}>Export CSV</span>
+                    </button>
+                  </div>
+                  <div style={{ background: 'var(--bg1, #0a0a0a)', border: '0.5px solid var(--b, rgba(255,255,255,0.06))', borderRadius: 'var(--rl, 13px)', overflow: 'hidden' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                      <thead>
+                        <tr style={{ background: 'var(--bg2, rgba(255,255,255,0.02))' }}>
+                          {['Listing', 'Category', 'City', 'Country', 'Phone', 'Opted In'].map(h => (
+                            <th key={h} style={{ textAlign: 'left', padding: '12px 16px', font: '600 9px/1 var(--sans)', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--t3, #4c4a47)' }}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredOptins.length === 0 && <tr><td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: 'var(--t3, #4c4a47)' }}>No opted-in providers yet</td></tr>}
+                        {filteredOptins.map(c => (
+                          <tr key={c.id} className="adm-tr" style={{ borderTop: '0.5px solid var(--b, rgba(255,255,255,0.04))' }}>
+                            <td style={{ padding: '12px 16px', fontWeight: 500, maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.title || '—'}</td>
+                            <td style={{ padding: '12px 16px', color: 'var(--t2, #8c8880)', fontSize: '12px' }}>{c.category || '—'}</td>
+                            <td style={{ padding: '12px 16px', color: 'var(--t2, #8c8880)', fontSize: '12px' }}>{c.city || '—'}</td>
+                            <td style={{ padding: '12px 16px', color: 'var(--t2, #8c8880)', fontSize: '12px' }}>{c.country || '—'}</td>
+                            <td style={{ padding: '12px 16px' }}>
+                              <a href={`https://wa.me/${(c.contact_phone || '').replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" style={{ color: '#25d366', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                <i className="ti ti-brand-whatsapp" style={{ fontSize: '14px' }} />
+                                {c.contact_phone}
+                              </a>
+                            </td>
+                            <td style={{ padding: '12px 16px', color: 'var(--t3, #4c4a47)', fontSize: '11px' }}>{new Date(c.created_at).toLocaleDateString()}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Section 2: B2B Leads */}
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                    <div>
+                      <div style={{ font: '600 11px/1 var(--sans)', color: 'var(--t2, #8c8880)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '4px' }}>
+                        <i className="ti ti-building" style={{ marginRight: '6px', color: 'var(--gold)' }} />
+                        B2B Leads
+                      </div>
+                      <div style={{ font: '300 11px/1 var(--sans)', color: 'var(--t3, #4c4a47)' }}>{filteredLeads.length} inbound inquiries via /advertise/agency</div>
+                    </div>
+                    <button
+                      onClick={() => exportCsv(filteredLeads.map(l => ({ business: l.business_name, contact: l.contact_name, email: l.email, phone: l.phone, category: l.category, country: l.country, city: l.city, status: l.status, message: l.message, source: l.source, submitted: l.created_at })), `sx-leads-${new Date().toISOString().slice(0,10)}.csv`)}
+                      className="adm-action-icon-btn"
+                      style={{ color: 'var(--gold)', borderColor: 'var(--gbrd)', gap: '6px' }}
+                    >
+                      <i className="ti ti-download" />
+                      <span style={{ font: '600 11px/1 var(--sans)', letterSpacing: '0.08em' }}>Export CSV</span>
+                    </button>
+                  </div>
+                  <div style={{ background: 'var(--bg1, #0a0a0a)', border: '0.5px solid var(--b, rgba(255,255,255,0.06))', borderRadius: 'var(--rl, 13px)', overflow: 'hidden' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                      <thead>
+                        <tr style={{ background: 'var(--bg2, rgba(255,255,255,0.02))' }}>
+                          {['Business', 'Contact', 'Email', 'Category', 'Location', 'Status', 'Submitted'].map(h => (
+                            <th key={h} style={{ textAlign: 'left', padding: '12px 16px', font: '600 9px/1 var(--sans)', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--t3, #4c4a47)' }}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredLeads.length === 0 && <tr><td colSpan={7} style={{ padding: '3rem', textAlign: 'center', color: 'var(--t3, #4c4a47)' }}>No leads yet</td></tr>}
+                        {filteredLeads.map(l => (
+                          <tr key={l.id} className="adm-tr" style={{ borderTop: '0.5px solid var(--b, rgba(255,255,255,0.04))' }}>
+                            <td style={{ padding: '12px 16px', fontWeight: 500 }}>{l.business_name || <span style={{ color: 'var(--t3)' }}>—</span>}</td>
+                            <td style={{ padding: '12px 16px' }}>{l.contact_name}</td>
+                            <td style={{ padding: '12px 16px' }}>
+                              <a href={`mailto:${l.email}`} style={{ color: 'var(--gold)', textDecoration: 'none' }}>{l.email}</a>
+                            </td>
+                            <td style={{ padding: '12px 16px', color: 'var(--t2)', fontSize: '12px' }}>{l.category || '—'}</td>
+                            <td style={{ padding: '12px 16px', color: 'var(--t2)', fontSize: '12px' }}>{[l.city, l.country].filter(Boolean).join(', ') || '—'}</td>
+                            <td style={{ padding: '12px 16px' }}>
+                              <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                                <span style={{ padding: '3px 10px', borderRadius: '20px', font: '600 10px/1 var(--sans)', letterSpacing: '0.1em', textTransform: 'uppercase', ...(LEAD_STATUS_COLORS[l.status] || { bg: 'rgba(255,255,255,0.06)', color: 'var(--t2)' }) }}>{l.status}</span>
+                                <select
+                                  value={l.status}
+                                  onChange={async e => {
+                                    const newStatus = e.target.value
+                                    const supabase = createClient()
+                                    const upd: Record<string, unknown> = { status: newStatus }
+                                    if (newStatus === 'contacted') upd.contacted_at = new Date().toISOString()
+                                    await supabase.from('leads').update(upd).eq('id', l.id)
+                                    setLeads(prev => prev.map(x => x.id === l.id ? { ...x, ...upd } : x))
+                                  }}
+                                  style={{ height: '28px', padding: '0 6px', background: 'var(--bg3, #111)', border: '0.5px solid var(--b2, rgba(255,255,255,0.08))', borderRadius: '6px', color: 'var(--t2)', font: '400 11px/1 var(--sans)', outline: 'none', cursor: 'pointer' }}
+                                >
+                                  <option value="new">new</option>
+                                  <option value="contacted">contacted</option>
+                                  <option value="converted">converted</option>
+                                  <option value="declined">declined</option>
+                                </select>
+                              </div>
+                            </td>
+                            <td style={{ padding: '12px 16px', color: 'var(--t3)', fontSize: '11px' }}>{new Date(l.created_at).toLocaleDateString()}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+              </div>
+            )
+          })()}
 
           {/* ── Bookings table ── */}
           {tab === 'Bookings' && (
