@@ -796,37 +796,53 @@ document.querySelectorAll('.pw-toggle').forEach(function(btn){
   });
 });
 
-// Login submit (mock)
-document.getElementById('loginSubmit').addEventListener('click',function(){
-  var email=document.getElementById('loginEmail').value.trim();
-  var pw=document.getElementById('loginPw').value.trim();
+// Login submit — real Supabase auth
+document.getElementById('loginSubmit').addEventListener('click',async function(){
+  var btn=document.getElementById('loginSubmit') as HTMLButtonElement;
+  var email=(document.getElementById('loginEmail') as HTMLInputElement).value.trim();
+  var pw=(document.getElementById('loginPw') as HTMLInputElement).value.trim();
   var err=document.getElementById('loginErr');
-  if(!email||!pw){err.classList.add('show');return;}
-  err.classList.remove('show');
-  // Simulate login success
-  setTimeout(function(){
+  if(!email||!pw){if(err)err.classList.add('show');return;}
+  if(err)err.classList.remove('show');
+  btn.disabled=true; btn.textContent='Signing in…';
+  try{
+    var res=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pw})});
+    var json=await res.json();
+    if(!res.ok){if(err){err.classList.add('show');err.textContent=json.error||'Invalid email or password.';}btn.disabled=false;btn.textContent='Sign in';return;}
     closeModal('authModal');
-    showToast('Welcome back to SecretXperience!');
-    document.getElementById('loginBtn').textContent='My account';
-  },300);
+    window.location.href='/dashboard';
+  }catch(e){
+    if(err){err.classList.add('show');err.textContent='Network error — please try again.';}
+    btn.disabled=false;btn.textContent='Sign in';
+  }
 });
 
-// Signup submit (mock)
-document.getElementById('signupSubmit').addEventListener('click',function(){
-  var email=document.getElementById('signupEmail').value.trim();
-  var pw=document.getElementById('signupPw').value.trim();
-  var terms=document.getElementById('termsCheck').checked;
+// Signup submit — real Supabase auth
+document.getElementById('signupSubmit').addEventListener('click',async function(){
+  var btn=document.getElementById('signupSubmit') as HTMLButtonElement;
+  var email=(document.getElementById('signupEmail') as HTMLInputElement).value.trim();
+  var pw=(document.getElementById('signupPw') as HTMLInputElement).value.trim();
+  var terms=(document.getElementById('termsCheck') as HTMLInputElement).checked;
+  var role=(document.querySelector('input[name="role"]:checked') as HTMLInputElement)?.value||'user';
   var err=document.getElementById('signupErr');
-  if(!email||!pw||!terms){err.classList.add('show');err.textContent=!terms?'You must agree to the terms to continue.':'Please fill in all required fields.';return;}
-  err.classList.remove('show');
-  document.getElementById('signupSuccess').classList.add('show');
-  document.getElementById('signupSubmit').style.display='none';
-  setTimeout(function(){
-    closeModal('authModal');
-    document.getElementById('signupSuccess').classList.remove('show');
-    document.getElementById('signupSubmit').style.display='';
-    showToast('Account created — check your email!');
-  },3200);
+  if(!email||!pw||!terms){if(err){err.classList.add('show');err.textContent=!terms?'You must agree to the terms to continue.':'Please fill in all required fields.';}return;}
+  if(pw.length<6){if(err){err.classList.add('show');err.textContent='Password must be at least 6 characters.';}return;}
+  if(err)err.classList.remove('show');
+  btn.disabled=true;btn.textContent='Creating account…';
+  try{
+    var attrCookie=document.cookie.split(';').find(function(c){return c.trim().startsWith('sx_attribution=');});
+    var attrVal=attrCookie?attrCookie.split('=').slice(1).join('=').trim():null;
+    var res=await fetch('/api/auth/signup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pw,role,attribution:attrVal?JSON.parse(decodeURIComponent(attrVal)):null})});
+    var json=await res.json();
+    if(!res.ok){if(err){err.classList.add('show');err.textContent=json.error||'Could not create account.';}btn.disabled=false;btn.textContent='Create account';return;}
+    var succ=document.getElementById('signupSuccess');
+    if(succ)succ.classList.add('show');
+    btn.style.display='none';
+    setTimeout(function(){closeModal('authModal');window.location.href='/dashboard';},2200);
+  }catch(e){
+    if(err){err.classList.add('show');err.textContent='Network error — please try again.';}
+    btn.disabled=false;btn.textContent='Create account';
+  }
 });
 
 // ══ NEWSLETTER ══
@@ -2682,7 +2698,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
           <div class="field"><label>Email address</label><input type="email" id="signupEmail" placeholder="you@example.com"/></div>
           <div class="field"><label>Password</label>
             <div class="pw-wrap">
-              <input type="password" id="signupPw" placeholder="Min. 8 characters"/>
+              <input type="password" id="signupPw" placeholder="Min. 6 characters" minlength="6"/>
               <button class="pw-toggle" data-target="signupPw" aria-label="Show password"><i class="ti ti-eye"></i></button>
             </div>
             <div class="field-hint">Use at least 8 characters with a mix of letters and numbers.</div>

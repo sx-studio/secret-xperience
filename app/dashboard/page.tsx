@@ -174,6 +174,12 @@ export default function DashboardPage() {
   const [boostPlan, setBoostPlan]             = useState<'6h' | 'week' | 'month'>('6h')
   const [boostLoading, setBoostLoading]       = useState(false)
   const [notification, setNotification]       = useState<string | null>(null)
+  const notifTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const setNotificationWithTimeout = useCallback((msg: string | null, ms = 4000) => {
+    if (notifTimerRef.current) clearTimeout(notifTimerRef.current)
+    setNotification(msg)
+    if (msg) notifTimerRef.current = setTimeout(() => setNotification(null), ms)
+  }, [])
   const [connectLoading, setConnectLoading]   = useState(false)
   const [connectLoginLoading, setConnectLoginLoading] = useState(false)
   const [unreadMessages, setUnreadMessages]   = useState(0)
@@ -237,13 +243,13 @@ export default function DashboardPage() {
 
       const params = new URLSearchParams(window.location.search)
       if (params.get('booking') === 'success') {
-        setNotification('Booking confirmed! Payment received.')
+        setNotificationWithTimeout('Booking confirmed! Payment received.')
         window.history.replaceState({}, '', '/dashboard')
       } else if (params.get('boost') === 'success') {
-        setNotification('✦ Your listing is now featured! It will appear at the top of results.')
+        setNotificationWithTimeout('✦ Your listing is now featured! It will appear at the top of results.')
         window.history.replaceState({}, '', '/dashboard')
       } else if (params.get('connect') === 'success') {
-        setNotification('✓ Stripe payouts connected! You\'ll receive payments directly.')
+        setNotificationWithTimeout('✓ Stripe payouts connected! You\'ll receive payments directly.')
         window.history.replaceState({}, '', '/dashboard')
       } else if (params.get('connect') === 'refresh') {
         // Re-trigger onboarding if the link expired
@@ -254,7 +260,7 @@ export default function DashboardPage() {
       if (localStorage.getItem('sx_show_connect_prompt') === '1') {
         localStorage.removeItem('sx_show_connect_prompt')
         if (!profile?.stripe_connect_account_id) {
-          setNotification('🎉 Listing created! Connect Stripe to start receiving payments from bookings.')
+          setNotificationWithTimeout('🎉 Listing created! Connect Stripe to start receiving payments from bookings.')
         }
       }
     }
@@ -281,10 +287,12 @@ export default function DashboardPage() {
     }
     if (profileDraft.age) updates.age = parseInt(profileDraft.age) || null
     if (profileDraft.languages) updates.languages = profileDraft.languages.split(',').map((s: string) => s.trim()).filter(Boolean)
-    await supabase.from('profiles').update(updates).eq('id', session.user.id)
+    const { error: profileErr } = await supabase.from('profiles').update(updates).eq('id', session.user.id)
+    if (profileErr) { setNotificationWithTimeout('Could not save profile — please try again.'); setSavingProfile(false); return }
     setProfile((p: any) => ({ ...p, ...updates }))
     setEditingProfile(false)
     setSavingProfile(false)
+    setNotificationWithTimeout('Profile saved.')
   }
 
   async function saveListing() {
@@ -308,10 +316,12 @@ export default function DashboardPage() {
     }
     if (listingDraft.price_from !== '' && listingDraft.price_from !== undefined) updates.price_from = parseFloat(listingDraft.price_from) || null
     if (listingDraft.price_to !== '' && listingDraft.price_to !== undefined) updates.price_to = parseFloat(listingDraft.price_to) || null
-    await supabase.from('listings').update(updates).eq('id', editingListing.id)
+    const { error: listingErr } = await supabase.from('listings').update(updates).eq('id', editingListing.id)
+    if (listingErr) { setNotificationWithTimeout('Could not save listing — please try again.'); setSavingListing(false); return }
     setListings((prev: any[]) => prev.map(l => l.id === editingListing.id ? { ...l, ...updates } : l))
     setEditingListing(null)
     setSavingListing(false)
+    setNotificationWithTimeout('Listing saved.')
   }
 
   async function handleConnectStripe() {
@@ -345,7 +355,7 @@ export default function DashboardPage() {
       setBoostingListing(null)
       if (json.ok) {
         setTokenBalance(b => (b ?? 0) - 20)
-        setNotification('✦ Flash boost active! Your listing is at the top for 6 hours.')
+        setNotificationWithTimeout('✦ Flash boost active! Your listing is at the top for 6 hours.')
       } else {
         setNotification(json.error || 'Boost failed — check your token balance.')
       }
@@ -372,12 +382,12 @@ export default function DashboardPage() {
       const json = await res.json()
       if (json.ok) {
         setListings(prev => prev.map(l => l.id === listingId ? { ...l, active: true, status: 'approved' } : l))
-        setNotification('✓ Your listing is live again.')
+        setNotificationWithTimeout('✓ Your listing is live again.')
       } else {
         setNotification(json.error || 'Could not set listing live.')
       }
     } catch {
-      setNotification('Network error — please try again.')
+      setNotificationWithTimeout('Network error — please try again.')
     } finally {
       setActivatingListing(null)
     }
@@ -454,7 +464,7 @@ export default function DashboardPage() {
         }, 'image/jpeg', 0.87)
       })
     } catch {
-      setNotification('Could not export photo. Try re-uploading instead.')
+      setNotificationWithTimeout('Could not export photo. Try re-uploading instead.')
     }
     setPhotoSaving(false)
     setPhotoEditing(null)
@@ -1380,7 +1390,7 @@ export default function DashboardPage() {
                       const supabase = (await import('../lib/supabase')).createClient()
                       await supabase.from('profiles').update({ verification_status: 'pending', verification_requested_at: new Date().toISOString() }).eq('id', user.id)
                       setProfile((p: any) => ({ ...p, verification_status: 'pending' }))
-                      setNotification('✓ Verification request submitted. We\'ll review your profile within 48 hours.')
+                      setNotificationWithTimeout('✓ Verification request submitted. We\'ll review your profile within 48 hours.')
                     }}
                     className="db-quick-btn-gold"
                   >

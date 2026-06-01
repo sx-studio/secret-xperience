@@ -131,15 +131,7 @@ function classifyTags(tags: string[]) {
   return { height, weight, age: ageMatch, hair, build, ethnicity, nationality, languages, services, escortType, orientation, workingHours }
 }
 
-function derivedRates(base: number, sym: string) {
-  return [
-    { label: '30 minutes', price: Math.round(base * 0.6) },
-    { label: '1 hour',     price: base },
-    { label: '2 hours',    price: Math.round(base * 1.75) },
-    { label: '3 hours',    price: Math.round(base * 2.5) },
-    { label: 'Overnight',  price: Math.round(base * 5) },
-  ].map(r => ({ ...r, sym }))
-}
+// Rates are shown as-set by the provider only — no fabricated multipliers.
 
 function cap(s: string) { return s.charAt(0).toUpperCase() + s.slice(1) }
 
@@ -207,7 +199,7 @@ export default function EscortProfile({
   // Falls back to the legacy flat tag-derived services for older listings.
   const possibilityGroups = groupSelected(listing.services ?? [])
   const sym     = listing.currency === 'GBP' ? '£' : '€'
-  const rates   = listing.price_from ? derivedRates(listing.price_from, sym) : []
+  const hasRate = !!(listing.price_from || listing.price_to)
   const catLabel = CATEGORY_LABEL[listing.category] ?? cap(listing.category)
   const catColor = CATEGORY_COLOR[listing.category] ?? 'rgba(197,160,90,0.18)'
   const catText  = CATEGORY_TEXT[listing.category]  ?? '#c5a05a'
@@ -359,11 +351,13 @@ export default function EscortProfile({
               VIP
             </span>
           )}
-          {/* Online indicator */}
-          <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: C.green, marginLeft: 'auto' }}>
-            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: C.green, boxShadow: `0 0 6px ${C.green}` }} />
-            Online
-          </span>
+          {/* Available Now badge — only shown when provider tagged their listing as available */}
+          {listing.tags?.some((t: string) => t === 'available-now' || t === 'available_now') && (
+            <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: C.green, marginLeft: 'auto' }}>
+              <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: C.green, boxShadow: `0 0 6px ${C.green}`, animation: 'rl-pulse 2s infinite' }} />
+              Available Now
+            </span>
+          )}
         </div>
 
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
@@ -629,17 +623,19 @@ export default function EscortProfile({
           </div>
 
           {/* Rates */}
-          {rates.length > 0 && (
+          {hasRate && (
             <div className="rl-scard">
-              <div className="rl-section-title" style={{ fontSize: '10px' }}>Rates</div>
-              {rates.map(r => (
-                <div key={r.label} className="rl-rate-row">
-                  <span className="rl-rate-label">{r.label}</span>
-                  <span className="rl-rate-price">{r.sym}{r.price}</span>
-                </div>
-              ))}
+              <div className="rl-section-title" style={{ fontSize: '10px' }}>Rate</div>
+              <div className="rl-rate-row">
+                <span className="rl-rate-label">{listing.subcategory || listing.category}</span>
+                <span className="rl-rate-price">
+                  {listing.price_from ? `${sym}${listing.price_from}` : ''}
+                  {listing.price_from && listing.price_to ? ` – ${sym}${listing.price_to}` : ''}
+                  {!listing.price_from && listing.price_to ? `up to ${sym}${listing.price_to}` : ''}
+                </span>
+              </div>
               <p style={{ marginTop: '10px', fontSize: '11px', color: C.t3, lineHeight: 1.55, padding: '8px 10px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>
-                Prices are indicative. Confirm directly with the provider.
+                Confirm exact pricing and availability directly with the provider.
               </p>
             </div>
           )}

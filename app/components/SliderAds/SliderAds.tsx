@@ -2,6 +2,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { createClient } from '../../lib/supabase'
+import { focusPosition } from '../../lib/imageFocus'
 import gsap from 'gsap'
 
 interface AdSlide {
@@ -12,6 +13,7 @@ interface AdSlide {
   country: string
   price_from?: number
   images?: string[]
+  image_focus?: Record<string, { x: number; y: number }>
   verified?: boolean
   premium?: boolean
 }
@@ -61,7 +63,7 @@ export default function SliderAds() {
     const supabase = createClient()
     supabase
       .from('listings')
-      .select('id,title,category,city,country,price_from,images,verified,premium,featured_until')
+      .select('id,title,category,city,country,price_from,images,image_focus,verified,premium,featured_until')
       .eq('active', true)
       .not('featured_until', 'is', null)
       .order('featured_until', { ascending: false })
@@ -258,7 +260,7 @@ export default function SliderAds() {
               >
                 {/* Photo */}
                 {s.images?.[0] ? (
-                  <img src={s.images[0]} alt={s.title} style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', pointerEvents:'none' }} />
+                  <img src={s.images[0]} alt={s.title} style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', objectPosition: focusPosition(s.image_focus, s.images[0]), pointerEvents:'none' }} />
                 ) : (
                   <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:"'Cormorant Garamond',serif", fontSize:120, fontStyle:'italic', color:`${a}12`, pointerEvents:'none' }}>
                     {s.title.charAt(0)}

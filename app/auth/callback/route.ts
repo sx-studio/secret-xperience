@@ -6,11 +6,16 @@ import { NextResponse } from 'next/server'
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
+  const roleParam = searchParams.get('role') || 'user'
+  const allowedRoles = ['user', 'provider', 'venue', 'creator']
+  const oauthRole = allowedRoles.includes(roleParam) ? roleParam : 'user'
   // Use request origin so OAuth works on preview deployments, not just production
   const siteUrl = origin
 
   if (code) {
     const cookieStore = cookies()
+    // Redirect target determined after we know if the user is new.
+    // Default to dashboard; updated below for new provider-role signups.
     const response = NextResponse.redirect(`${siteUrl}/dashboard`)
 
     const supabase = createServerClient(
@@ -32,14 +37,21 @@ export async function GET(request: Request) {
 
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
-      // Sync email to profiles
+      // Sync email to profiles; set role for new OAuth signups.
       const { data: { user } } = await supabase.auth.getUser()
       if (user?.email) {
+        const createdAtMs = user.created_at ? new Date(user.created_at).getTime() : 0
+        const isNew = createdAtMs > 0 && (Date.now() - createdAtMs < 5 * 60 * 1000)
+        const emailUpdate: Record<string, unknown> = { email: user.email }
+        if (isNew && oauthRole !== 'user') emailUpdate.role = oauthRole
         await supabase
           .from('profiles')
-          .update({ email: user.email })
+          .update(emailUpdate)
           .eq('id', user.id)
-          .is('email', null)  // only update if not already set
+          .is('email', null)  // only update if not already set (i.e. new user)
+        if (isNew && ['provider', 'venue', 'creator'].includes(oauthRole)) {
+          response.headers.set('Location', `${siteUrl}/listings/create`)
+        }
       }
 
       // Signup attribution for OAuth signups (mirrors the email/password route).

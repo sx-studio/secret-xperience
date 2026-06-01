@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
 import { ETHNICITIES, tagMatchesEthnicity, HAIR_COLOURS, tagMatchesHair, BUILDS, tagMatchesBuild, ORIENTATIONS, tagMatchesOrientation, tagMatchesType } from '../lib/attributes'
+import { focusPosition } from '../lib/imageFocus'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -23,6 +24,7 @@ type Listing = {
   currency: string
   meet_type: string | null
   images: string[] | null
+  image_focus: Record<string, { x: number; y: number }> | null
   verified: boolean
   premium: boolean
   rating: number | null
@@ -120,7 +122,7 @@ function SpotlightStrip({ items, discreet }: { items: Listing[]; discreet: boole
               <Link key={l.id} href={`/listings/${l.id}`} style={{ textDecoration: 'none', flexShrink: 0 }}>
                 <div style={{ width: active ? 260 : 140, height: active ? 360 : 200, borderRadius: 'var(--rl)', overflow: 'hidden', position: 'relative', transition: 'all 0.4s cubic-bezier(0.34,1.56,0.64,1)', border: active ? '1.5px solid rgba(197,160,90,0.5)' : '0.5px solid var(--b)', boxShadow: active ? '0 0 28px rgba(197,160,90,0.18), 0 8px 32px rgba(0,0,0,0.5)' : 'none', opacity: active ? 1 : 0.5, cursor: 'pointer' }}>
                   {img
-                    ? <img src={img} alt={l.title} style={{ width: '100%', height: '100%', objectFit: 'cover', filter: discreet ? 'blur(20px) brightness(0.4)' : 'none', transition: 'filter 0.3s' }} />
+                    ? <img src={img} alt={l.title} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: focusPosition(l.image_focus, img), filter: discreet ? 'blur(20px) brightness(0.4)' : 'none', transition: 'filter 0.3s' }} />
                     : <div style={{ width: '100%', height: '100%', background: 'var(--bg2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--serif)', fontSize: '48px', fontStyle: 'italic', color: 'rgba(197,160,90,0.1)' }}>{l.title.charAt(0)}</div>
                   }
                   <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(0deg, rgba(5,5,5,0.9) 0%, transparent 55%)', pointerEvents: 'none' }} />
@@ -200,7 +202,7 @@ function HostCard({ l, discreet, isPremier }: { l: Listing; discreet: boolean; i
       >
         <div style={{ position: 'relative', aspectRatio: '3/4', background: 'var(--bg2)', overflow: 'hidden' }}>
           {img ? (
-            <img src={img} alt={l.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', filter: discreet ? 'blur(24px) brightness(0.5)' : 'none', transition: 'filter 0.3s ease' }} />
+            <img src={img} alt={l.title} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: focusPosition(l.image_focus, img), display: 'block', filter: discreet ? 'blur(24px) brightness(0.5)' : 'none', transition: 'filter 0.3s ease' }} />
           ) : (
             <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--serif)', fontSize: '72px', fontStyle: 'italic', color: 'rgba(197,160,90,0.08)' }}>
               {l.title.charAt(0)}
@@ -308,7 +310,7 @@ export default function PrivateReceptionPage() {
 
     let q = supabase
       .from('listings')
-      .select('id,title,description,category,subcategory,city,country,price_from,price_to,currency,meet_type,images,verified,premium,rating,review_count,tags,created_at,featured_until,age')
+      .select('id,title,description,category,subcategory,city,country,price_from,price_to,currency,meet_type,images,image_focus,verified,premium,rating,review_count,tags,created_at,featured_until,age')
       .eq('active', true)
       .in('category', cats)
 

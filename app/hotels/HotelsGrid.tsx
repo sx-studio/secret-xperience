@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
+import { focusPosition } from '../lib/imageFocus'
 
 interface Listing {
   id: string
@@ -13,6 +14,7 @@ interface Listing {
   price_from?: number | null
   price_to?: number | null
   images?: string[] | null
+  image_focus?: Record<string, { x: number; y: number }>
   verified?: boolean
   premium?: boolean
   rating?: number
@@ -166,7 +168,7 @@ function HotelCard({ l, idx, discreet }: { l: Listing; idx: number; discreet: bo
             src={l.images[0]}
             alt=""
             style={{
-              width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0,
+              width: '100%', height: '100%', objectFit: 'cover', objectPosition: focusPosition(l.image_focus, l.images[0]), position: 'absolute', inset: 0,
               filter: discreet ? 'blur(24px) brightness(0.5)' : 'none',
               transition: 'filter 0.3s ease',
             }}

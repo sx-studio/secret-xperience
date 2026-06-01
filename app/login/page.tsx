@@ -100,9 +100,11 @@ export default function LoginPage() {
 
   async function handleGoogle() {
     const supabase = createClient()
+    // Pass the selected role so the callback can set it on new OAuth signups.
+    const callbackUrl = `${window.location.origin}/auth/callback?role=${encodeURIComponent(role)}`
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: callbackUrl },
     })
   }
 

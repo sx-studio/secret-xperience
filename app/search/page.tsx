@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { focusPosition } from '../lib/imageFocus'
 
 const CATEGORIES = [
   { value: 'all',           label: 'All',             icon: 'ti-layout-grid' },
@@ -65,7 +66,7 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
 
   let query = supabase
     .from('listings')
-    .select('id,title,description,category,subcategory,city,country,price_from,price_to,verified,premium,trending,rating,review_count,meet_type,featured_until,tags,images', { count: 'exact' })
+    .select('id,title,description,category,subcategory,city,country,price_from,price_to,verified,premium,trending,rating,review_count,meet_type,featured_until,tags,images,image_focus', { count: 'exact' })
     .eq('active', true)
 
   if (safeQ) {
@@ -366,7 +367,7 @@ function ListingCard({ l, isFeatured }: { l: any; isFeatured: boolean }) {
     <Link href={`/listings/${l.id}`} className="s-card">
       <div className="s-card-hero" style={{ background: heroBg }}>
         {l.images?.[0] && (
-          <img src={l.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }} />
+          <img src={l.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: focusPosition(l.image_focus, l.images[0]), position: 'absolute', inset: 0 }} />
         )}
         <div style={{ position: 'absolute', top: '0.6rem', left: '0.6rem', display: 'flex', gap: '4px', flexWrap: 'wrap', zIndex: 2 }}>
           {isFeatured && !l.premium && <span className="s-badge s-badge-feat">✦ Featured</span>}

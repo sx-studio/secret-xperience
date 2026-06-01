@@ -26,7 +26,7 @@ export default async function RentalsPage() {
 
   const { data: listings } = await supabase
     .from('listings')
-    .select('id, title, description, category, subcategory, city, country, price_from, price_to, images, verified, premium, rating, review_count, meet_type, featured_until, created_at, tags')
+    .select('id, title, description, category, subcategory, city, country, price_from, price_to, images, verified, premium, rating, review_count, meet_type, featured_until, created_at, tags, image_focus')
     .eq('active', true)
     .eq('category', 'rentals')
     .order('featured_until', { ascending: false, nullsFirst: false })

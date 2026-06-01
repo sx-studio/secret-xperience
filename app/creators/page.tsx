@@ -27,7 +27,7 @@ export default async function CreatorsPage() {
 
   const { data: listings } = await supabase
     .from('listings')
-    .select('id, title, description, category, subcategory, city, country, price_from, price_to, images, verified, premium, trending, rating, review_count, meet_type, featured_until, created_at, tags')
+    .select('id, title, description, category, subcategory, city, country, price_from, price_to, images, image_focus, verified, premium, trending, rating, review_count, meet_type, featured_until, created_at, tags')
     .eq('active', true)
     .eq('category', 'creators')
     .order('featured_until', { ascending: false, nullsFirst: false })
