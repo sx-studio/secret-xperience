@@ -29,8 +29,8 @@ actually drives signups.
    signups · last signup), exportable to CSV.
 
    - Direct/unknown visits stay untracked (won't pollute the report).
-   - **Known limitation:** Google-OAuth signups skip the email/password signup
-     route, so they aren't attributed yet. Email/password signups are.
+   - Both email/password **and Google-OAuth** signups are attributed. OAuth
+     signups are recorded in the `/auth/callback` handler (new users only).
 
 ---
 
