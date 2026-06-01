@@ -272,7 +272,7 @@ function CCard({ l, isFeatured }: { l: any; isFeatured: boolean }) {
   return (
     <Link href={`/listings/${l.id}`} className="c-card">
       <div className="c-card-hero" style={{ background: 'var(--bg2)' }}>
-        {l.images?.[0] && <img src={l.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }} />}
+        {l.images?.[0] && <img src={l.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 20%', position: 'absolute', inset: 0 }} />}
         <div style={{ position: 'absolute', top: '0.6rem', left: '0.6rem', display: 'flex', gap: '4px', flexWrap: 'wrap', zIndex: 2 }}>
           {isFeatured && <span className="c-badge c-badge-feat">✦ Featured</span>}
           {l.verified && <span className="c-badge c-badge-ver">✓ Verified</span>}

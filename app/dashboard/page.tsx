@@ -914,7 +914,7 @@ export default function DashboardPage() {
           position: relative; aspect-ratio: 3/4; border-radius: 8px; overflow: hidden;
           background: #111; border: 0.5px solid rgba(255,255,255,0.08);
         }
-        .db-photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .db-photo-thumb img { width: 100%; height: 100%; object-fit: cover; object-position: center 20%; display: block; }
         .db-photo-thumb-add {
           aspect-ratio: 3/4; border-radius: 8px; border: 0.5px dashed rgba(197,160,90,0.3);
           display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
@@ -1441,6 +1441,11 @@ export default function DashboardPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {listings.map(listing => (
                   <div key={listing.id} className="db-listing-item">
+                    {listing.images?.[0] && (
+                      <div style={{ flexShrink: 0, width: 44, height: 56, borderRadius: 6, overflow: 'hidden', background: 'var(--bg3)' }}>
+                        <img src={listing.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 20%', display: 'block' }} />
+                      </div>
+                    )}
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '5px', flexWrap: 'wrap' }}>
                         <span style={{
@@ -1699,7 +1704,7 @@ export default function DashboardPage() {
                   <a key={l.id} href={`/listings/${l.id}`} style={{ textDecoration: 'none', display: 'block', background: 'var(--bg2)', border: '0.5px solid var(--b2)', borderRadius: 10, overflow: 'hidden', transition: 'border-color .15s' }}>
                     <div style={{ height: 100, background: 'var(--bg3)', position: 'relative', overflow: 'hidden' }}>
                       {l.images?.[0]
-                        ? <img src={l.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ? <img src={l.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 20%' }} />
                         : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--serif)', fontSize: 32, fontStyle: 'italic', color: 'rgba(197,160,90,0.25)' }}>{(l.title||'Xx').slice(0,2)}</div>
                       }
                       <div style={{ position: 'absolute', top: 6, right: 6, width: 22, height: 22, borderRadius: '50%', background: 'rgba(176,67,89,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

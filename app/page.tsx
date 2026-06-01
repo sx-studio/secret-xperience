@@ -657,7 +657,7 @@ document.getElementById('dpSave').addEventListener('click', function(){
   (window as any).__sliderIdx[id] = idx;
   var img = document.getElementById('si-'+id) as HTMLImageElement|null;
   var ctr = document.getElementById('sc-'+id);
-  if (img) img.src = imgs[idx];
+  if (img) { img.src = imgs[idx]; img.style.objectPosition = 'center 20%'; }
   if (ctr) ctr.textContent = (idx+1)+'/'+imgs.length;
 };
 
@@ -1481,7 +1481,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
           onclick="window.location.href='/listings/${l.id||''}'"
           style="cursor:pointer">
           <div class="card-hero ${catClass}" style="height:220px;position:relative;overflow:hidden;">
-            ${l.images && l.images.length > 0 ? `<img id="si-${l.id}" src="${l.images[0]}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" alt="" />` : `<span style="font-family:var(--serif);font-size:72px;font-style:italic;font-weight:400;color:rgba(197,160,90,0.30);line-height:1;position:absolute;bottom:0.25rem;left:1rem;">${monogram}</span>`}
+            ${l.images && l.images.length > 0 ? `<img id="si-${l.id}" src="${l.images[0]}" style="width:100%;height:100%;object-fit:cover;object-position:center 20%;position:absolute;inset:0;" alt="" />` : `<span style="font-family:var(--serif);font-size:72px;font-style:italic;font-weight:400;color:rgba(197,160,90,0.30);line-height:1;position:absolute;bottom:0.25rem;left:1rem;">${monogram}</span>`}
             <div style="position:absolute;inset:0;background:linear-gradient(0deg,rgba(8,8,8,0.65) 0%,transparent 45%);pointer-events:none;"></div>
             ${hasSlider ? `
             <button class="slide-btn slide-prev" onclick="(window.__slideCard||function(){})('${l.id}',-1,event)" aria-label="Previous photo"><i class="ti ti-chevron-left"></i></button>

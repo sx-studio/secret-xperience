@@ -314,7 +314,7 @@ export default function DiscoverPage() {
               {/* Photo */}
               <div style={{ height: 420, background: 'linear-gradient(140deg,#1a0a1a,#0d0610)', position: 'relative', overflow: 'hidden' }}>
                 {card.images?.[0] ? (
-                  <img src={card.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none' }} />
+                  <img src={card.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 20%', pointerEvents: 'none' }} />
                 ) : (
                   <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Cormorant Garamond',serif", fontSize: 96, fontStyle: 'italic', color: 'rgba(197,160,90,0.1)' }}>
                     {card.title.charAt(0)}
