@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '../lib/supabase'
+import { focusPosition } from '../lib/imageFocus'
 import gsap from 'gsap'
 import { Draggable } from 'gsap/Draggable'
 
@@ -16,6 +17,7 @@ interface Card {
   country: string
   price_from: number | null
   images: string[] | null
+  image_focus: Record<string, { x: number; y: number }> | null
   verified: boolean
   premium: boolean
   rating: number | null
@@ -109,7 +111,7 @@ export default function DiscoverPage() {
 
     let q = supabase
       .from('listings')
-      .select('id,title,category,subcategory,city,country,price_from,images,verified,premium,rating,review_count,tags,description,featured_until')
+      .select('id,title,category,subcategory,city,country,price_from,images,image_focus,verified,premium,rating,review_count,tags,description,featured_until')
       .eq('active', true)
       .order('featured_until', { ascending: false, nullsFirst: false })
       .order('rating', { ascending: false, nullsFirst: false })
@@ -314,7 +316,7 @@ export default function DiscoverPage() {
               {/* Photo */}
               <div style={{ height: 420, background: 'linear-gradient(140deg,#1a0a1a,#0d0610)', position: 'relative', overflow: 'hidden' }}>
                 {card.images?.[0] ? (
-                  <img src={card.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 20%', pointerEvents: 'none' }} />
+                  <img src={card.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: focusPosition(card.image_focus, card.images[0]), pointerEvents: 'none' }} />
                 ) : (
                   <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Cormorant Garamond',serif", fontSize: 96, fontStyle: 'italic', color: 'rgba(197,160,90,0.1)' }}>
                     {card.title.charAt(0)}

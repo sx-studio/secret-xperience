@@ -5,6 +5,7 @@ import { signOut } from '../lib/auth'
 import { createClient } from '../lib/supabase'
 import PhoneVerify from '../components/PhoneVerify/PhoneVerify'
 import { ETHNICITIES, ETHNIC_VALUES, HAIR_COLOURS, HAIR_VALUES, BUILDS as CANONICAL_BUILDS, BUILD_VALUES } from '../lib/attributes'
+import { focusPosition } from '../lib/imageFocus'
 
 /* ── Listing edit constants ── */
 const ESCORT_TYPES_OPT = ['Women','Men','Trans Woman','Trans Man','Non-Binary','Couples','Fetish']
@@ -186,6 +187,9 @@ export default function DashboardPage() {
   const [photoPanY, setPhotoPanY]       = useState(0)
   const [photoSaving, setPhotoSaving]   = useState(false)
   const [photoUploading, setPhotoUploading] = useState(false)
+  // Thumbnail focal-point picker state
+  const [focusEditing, setFocusEditing] = useState<{ url: string } | null>(null)
+  const [focusXY, setFocusXY] = useState<{ x: number; y: number }>({ x: 50, y: 20 })
   const previewCanvasRef  = useRef<HTMLCanvasElement | null>(null)
   const photoImgRef       = useRef<HTMLImageElement | null>(null)
   const photoDragRef      = useRef<{ startX: number; startY: number; startPanX: number; startPanY: number } | null>(null)
@@ -208,7 +212,7 @@ export default function DashboardPage() {
         supabase.from('listings').select('*').eq('profile_id', session.user.id),
         supabase.from('bookings').select('*, listing:listings(title,category)').or(`client_id.eq.${session.user.id},provider_id.eq.${session.user.id}`).order('created_at', { ascending: false }).limit(20),
         supabase.from('identity_verifications').select('status').eq('user_id', session.user.id).maybeSingle(),
-        supabase.from('favorites').select('listing_id, listings(id,title,category,city,country,price_from,images,active,tier)').eq('user_id', session.user.id),
+        supabase.from('favorites').select('listing_id, listings(id,title,category,city,country,price_from,images,image_focus,active,tier)').eq('user_id', session.user.id),
         supabase.from('messages').select('*', { count: 'exact', head: true }).eq('receiver_id', session.user.id).eq('read', false),
         supabase.from('user_wallets').select('balance').eq('user_id', session.user.id).maybeSingle(),
       ])
@@ -297,6 +301,7 @@ export default function DashboardPage() {
       meet_type:   listingDraft.meet_type,
       active:      listingDraft.active,
       images:         (listingDraft.images || []).filter(Boolean),
+      image_focus:    pruneFocus(listingDraft.image_focus, listingDraft.images),
       tags:           tags.length > 0 ? tags : null,
       contact_phone:  listingDraft.contact_phone?.trim() || null,
       whatsapp_optin: !!listingDraft.whatsapp_optin,
@@ -501,6 +506,51 @@ export default function DashboardPage() {
     }
     setPhotoUploading(false)
     if (photoFileInputRef.current) photoFileInputRef.current.value = ''
+  }
+
+  // ── Thumbnail focal-point helpers ─────────────────────────────────────
+  // Keep only focus entries whose image still exists in the listing.
+  function pruneFocus(focus: any, images: any[]): Record<string, { x: number; y: number }> {
+    const valid = new Set((images || []).filter(Boolean))
+    const out: Record<string, { x: number; y: number }> = {}
+    if (focus && typeof focus === 'object') {
+      for (const url of Object.keys(focus)) {
+        if (valid.has(url) && focus[url] && typeof focus[url].x === 'number') out[url] = focus[url]
+      }
+    }
+    return out
+  }
+
+  function openFocusPicker(url: string) {
+    const existing = listingDraft.image_focus?.[url]
+    setFocusXY(existing && typeof existing.x === 'number' ? { x: existing.x, y: existing.y } : { x: 50, y: 20 })
+    setFocusEditing({ url })
+  }
+
+  function handleFocusClick(e: React.MouseEvent<HTMLDivElement>) {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = Math.round(Math.min(100, Math.max(0, ((e.clientX - rect.left) / rect.width) * 100)))
+    const y = Math.round(Math.min(100, Math.max(0, ((e.clientY - rect.top) / rect.height) * 100)))
+    setFocusXY({ x, y })
+  }
+
+  function saveFocus() {
+    if (!focusEditing) return
+    setListingDraft((d: any) => ({
+      ...d,
+      image_focus: { ...(d.image_focus || {}), [focusEditing.url]: { x: focusXY.x, y: focusXY.y } },
+    }))
+    setFocusEditing(null)
+  }
+
+  function resetFocus() {
+    if (!focusEditing) return
+    setListingDraft((d: any) => {
+      const next = { ...(d.image_focus || {}) }
+      delete next[focusEditing.url]
+      return { ...d, image_focus: next }
+    })
+    setFocusEditing(null)
   }
 
   // ── End photo editor helpers ──────────────────────────────────────────
@@ -1443,7 +1493,7 @@ export default function DashboardPage() {
                   <div key={listing.id} className="db-listing-item">
                     {listing.images?.[0] && (
                       <div style={{ flexShrink: 0, width: 44, height: 56, borderRadius: 6, overflow: 'hidden', background: 'var(--bg3)' }}>
-                        <img src={listing.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 20%', display: 'block' }} />
+                        <img src={listing.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: focusPosition(listing.image_focus, listing.images[0]), display: 'block' }} />
                       </div>
                     )}
                     <div style={{ flex: 1, minWidth: 0 }}>
@@ -1546,6 +1596,7 @@ export default function DashboardPage() {
                             price_to: listing.price_to ?? '', meet_type: listing.meet_type || 'incall',
                             active: listing.active ?? true,
                             images: Array.isArray(listing.images) ? [...listing.images] : [],
+                            image_focus: listing.image_focus && typeof listing.image_focus === 'object' ? { ...listing.image_focus } : {},
                             ...parsed,
                           })
                           setEditingListing(listing)
@@ -1568,6 +1619,7 @@ export default function DashboardPage() {
                             price_to: listing.price_to ?? '', meet_type: listing.meet_type || 'incall',
                             active: listing.active ?? true,
                             images: Array.isArray(listing.images) ? [...listing.images] : [],
+                            image_focus: listing.image_focus && typeof listing.image_focus === 'object' ? { ...listing.image_focus } : {},
                             ...parsed,
                           })
                           setEditingListing(listing)
@@ -1704,7 +1756,7 @@ export default function DashboardPage() {
                   <a key={l.id} href={`/listings/${l.id}`} style={{ textDecoration: 'none', display: 'block', background: 'var(--bg2)', border: '0.5px solid var(--b2)', borderRadius: 10, overflow: 'hidden', transition: 'border-color .15s' }}>
                     <div style={{ height: 100, background: 'var(--bg3)', position: 'relative', overflow: 'hidden' }}>
                       {l.images?.[0]
-                        ? <img src={l.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 20%' }} />
+                        ? <img src={l.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: focusPosition(l.image_focus, l.images[0]) }} />
                         : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--serif)', fontSize: 32, fontStyle: 'italic', color: 'rgba(197,160,90,0.25)' }}>{(l.title||'Xx').slice(0,2)}</div>
                       }
                       <div style={{ position: 'absolute', top: 6, right: 6, width: 22, height: 22, borderRadius: '50%', background: 'rgba(176,67,89,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -1878,7 +1930,7 @@ export default function DashboardPage() {
               <div className="db-photo-grid">
                 {(listingDraft.images || []).filter(Boolean).map((url: string, i: number, arr: string[]) => (
                   <div key={i} className="db-photo-thumb">
-                    <img src={url} alt="" />
+                    <img src={url} alt="" style={{ objectPosition: focusPosition(listingDraft.image_focus, url) }} />
                     <div className="db-photo-order-badge">{i + 1}</div>
                     <div className="db-photo-actions">
                       <button className="db-photo-act-btn" title="Move left" disabled={i === 0}
@@ -1888,6 +1940,10 @@ export default function DashboardPage() {
                           ;[imgs[i - 1], imgs[i]] = [imgs[i], imgs[i - 1]]
                           return { ...d, images: imgs }
                         })}>‹</button>
+                      <button className="db-photo-act-btn" title="Set thumbnail focus"
+                        onClick={() => openFocusPicker(url)}>
+                        <i className="ti ti-focus-2" style={{ fontSize: 12 }} />
+                      </button>
                       <button className="db-photo-act-btn" title="Edit / crop"
                         onClick={() => {
                           setPhotoZoom(1); setPhotoRotate(0); setPhotoPanX(0); setPhotoPanY(0)
@@ -2198,6 +2254,59 @@ export default function DashboardPage() {
               <button onClick={applyPhotoEdit} disabled={photoSaving} className="db-quick-btn-gold" style={{ flex: 2, padding: '10px' }}>
                 {photoSaving ? 'Uploading…' : 'Apply & Save →'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Thumbnail focal-point picker ── */}
+      {focusEditing && (
+        <div className="db-pe-modal" onClick={() => setFocusEditing(null)}>
+          <div className="db-pe-panel" onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+              <div style={{ fontFamily: 'var(--serif)', fontSize: '20px', fontWeight: 500, color: 'var(--t, #ece8e1)' }}>
+                Thumbnail focus
+              </div>
+              <button
+                onClick={() => setFocusEditing(null)}
+                style={{ background: 'none', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: '50%', width: 30, height: 30, color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >×</button>
+            </div>
+            <p style={{ fontSize: 12, color: 'var(--t3)', fontFamily: 'var(--sans)', margin: '0 0 12px', lineHeight: 1.5 }}>
+              Click the part of the photo that should stay centred in card thumbnails (e.g. the face). The previews update live.
+            </p>
+
+            {/* Full image with focus marker */}
+            <div
+              onClick={handleFocusClick}
+              style={{ position: 'relative', width: '100%', maxHeight: 300, borderRadius: 10, overflow: 'hidden', cursor: 'crosshair', background: '#111', userSelect: 'none' }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={focusEditing.url} alt="" style={{ width: '100%', maxHeight: 300, objectFit: 'contain', display: 'block', pointerEvents: 'none' }} />
+              <div style={{ position: 'absolute', left: `${focusXY.x}%`, top: `${focusXY.y}%`, width: 26, height: 26, transform: 'translate(-50%,-50%)', borderRadius: '50%', border: '2px solid var(--gold, #c5a05a)', boxShadow: '0 0 0 2px rgba(0,0,0,0.5), 0 0 12px rgba(197,160,90,0.6)', pointerEvents: 'none' }}>
+                <div style={{ position: 'absolute', inset: '50% auto auto 50%', width: 4, height: 4, transform: 'translate(-50%,-50%)', borderRadius: '50%', background: 'var(--gold, #c5a05a)' }} />
+              </div>
+            </div>
+
+            {/* Live crop previews at the shapes cards actually use */}
+            <div style={{ display: 'flex', gap: 14, marginTop: 14, alignItems: 'flex-end' }}>
+              <div>
+                <div style={{ width: 90, height: 120, borderRadius: 8, overflow: 'hidden', border: '0.5px solid var(--b2)', background: '#111' }}>
+                  <img src={focusEditing.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: `${focusXY.x}% ${focusXY.y}%`, display: 'block' }} />
+                </div>
+                <div style={{ fontSize: 10, color: 'var(--t3)', fontFamily: 'var(--sans)', textAlign: 'center', marginTop: 4 }}>Portrait</div>
+              </div>
+              <div>
+                <div style={{ width: 140, height: 90, borderRadius: 8, overflow: 'hidden', border: '0.5px solid var(--b2)', background: '#111' }}>
+                  <img src={focusEditing.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: `${focusXY.x}% ${focusXY.y}%`, display: 'block' }} />
+                </div>
+                <div style={{ fontSize: 10, color: 'var(--t3)', fontFamily: 'var(--sans)', textAlign: 'center', marginTop: 4 }}>Wide</div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px', marginTop: '1rem', paddingTop: '1rem', borderTop: '0.5px solid rgba(255,255,255,0.06)' }}>
+              <button onClick={resetFocus} className="db-quick-btn-dark" style={{ flex: 1, padding: '10px' }}>Reset to default</button>
+              <button onClick={saveFocus} className="db-quick-btn-gold" style={{ flex: 2, padding: '10px' }}>Set focus →</button>
             </div>
           </div>
         </div>

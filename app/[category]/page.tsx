@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { focusPosition } from '../lib/imageFocus'
 
 const CATEGORY_META: Record<string, { title: string; description: string; heading: string; icon: string }> = {
   escorts: {
@@ -127,7 +128,7 @@ export default async function CategoryPage({ params }: { params: { category: str
 
   const { data: listings } = await supabase
     .from('listings')
-    .select('id, title, description, category, subcategory, city, country, price_from, price_to, images, verified, premium, trending, rating, review_count, meet_type, featured_until')
+    .select('id, title, description, category, subcategory, city, country, price_from, price_to, images, image_focus, verified, premium, trending, rating, review_count, meet_type, featured_until')
     .eq('active', true)
     .ilike('category', params.category + '%')
     .order('featured_until', { ascending: false, nullsFirst: false })
@@ -272,7 +273,7 @@ function CCard({ l, isFeatured }: { l: any; isFeatured: boolean }) {
   return (
     <Link href={`/listings/${l.id}`} className="c-card">
       <div className="c-card-hero" style={{ background: 'var(--bg2)' }}>
-        {l.images?.[0] && <img src={l.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 20%', position: 'absolute', inset: 0 }} />}
+        {l.images?.[0] && <img src={l.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: focusPosition(l.image_focus, l.images[0]), position: 'absolute', inset: 0 }} />}
         <div style={{ position: 'absolute', top: '0.6rem', left: '0.6rem', display: 'flex', gap: '4px', flexWrap: 'wrap', zIndex: 2 }}>
           {isFeatured && <span className="c-badge c-badge-feat">✦ Featured</span>}
           {l.verified && <span className="c-badge c-badge-ver">✓ Verified</span>}
