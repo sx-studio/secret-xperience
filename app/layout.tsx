@@ -34,8 +34,12 @@ export const metadata: Metadata = {
     images: ['/og-image.jpg'],
   },
   icons: {
-    apple: '/icon-192.png',
-    icon: '/favicon.ico',
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon-96.png', type: 'image/png', sizes: '96x96' },
+      { url: '/icon-192.png', type: 'image/png', sizes: '192x192' },
+    ],
+    apple: '/apple-touch-icon.png',
   },
   verification: {
     google: 'm10S1aWlGhdFAXgWqmAvoEUYF_2GIOYNMU_4_pGseE0',
