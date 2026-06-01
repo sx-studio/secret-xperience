@@ -26,6 +26,11 @@ const CITIES: Record<string, string> = {
   liege:       'Liège',
   bruges:      'Bruges',
   cologne:     'Cologne',
+  zurich:      'Zürich',
+  geneva:      'Geneva',
+  basel:       'Basel',
+  bern:        'Bern',
+  lausanne:    'Lausanne',
 }
 
 /** Country slugs — queries by `country` column instead of `city`. */
@@ -35,6 +40,7 @@ const COUNTRIES: Record<string, { name: string; code: string; cities: string; de
   germany:     { name: 'Germany', code: 'DE', cities: 'Berlin, Cologne & Hamburg', desc: 'Escort directory for Germany — independent escorts, escort agencies and private houses. Find female, male & trans escorts in Berlin, Cologne and beyond. Real photos & reviews.' },
   france:      { name: 'France', code: 'FR', cities: 'Paris, Lyon & Marseille', desc: 'Browse verified escort ads in France — women, men, couples & trans. Independent escorts and agencies for dinner dates, travel and private meetings. Real photos, reviews & prices.' },
   luxembourg:  { name: 'Luxembourg', code: 'LU', cities: 'Luxembourg City', desc: 'Verified escort ads in Luxembourg — women, men, couples & trans. Independent escorts for dinner dates, business trips and private meetings. Real photos, reviews & prices.' },
+  switzerland: { name: 'Switzerland', code: 'CH', cities: 'Zürich, Geneva & Basel', desc: 'Browse verified escort ads in Switzerland — women, men, couples & trans. Independent escorts and agencies in Zürich, Geneva, Basel and beyond for dinner dates, travel and private meetings. Real photos, reviews & prices.' },
 }
 
 const ALL_SLUGS = [...Object.keys(CITIES), ...Object.keys(COUNTRIES)]

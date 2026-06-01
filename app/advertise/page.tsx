@@ -87,7 +87,7 @@ const faqs = [
   { q: 'Is my personal information protected?', a: 'Yes. We never display your real name, address or personal contact details publicly. All client communication goes through our encrypted messaging system.' },
   { q: 'Can I list in multiple cities?', a: 'Yes. You can create listings in any city across Europe and manage them from one dashboard.' },
   { q: 'What is the difference between featured and slider?', a: 'Featured (€29/7 days) gives you a gold badge and priority in category/search pages. Slider (€79/30 days) adds placement in the homepage featured slider seen by every visitor.' },
-  { q: 'Do you accept providers from all European countries?', a: 'Yes. We currently serve Belgium, Netherlands, Germany, France, Spain, Czech Republic, Hungary, Austria and more.' },
+  { q: 'Do you accept providers from all European countries?', a: 'Yes. We currently serve Belgium, Netherlands, Germany, France, Luxembourg, Switzerland, Spain, Czech Republic, Hungary, Austria and more.' },
 ]
 
 export default function AdvertisePage() {

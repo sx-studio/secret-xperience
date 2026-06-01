@@ -61,7 +61,7 @@ export default async function NightlifePage() {
           { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.secretxperience.eu' },
           { '@type': 'ListItem', position: 2, name: 'Nightlife', item: 'https://www.secretxperience.eu/nightlife' },
         ]},
-        { '@context': 'https://schema.org', '@type': 'Service', name: 'Nightlife Services', serviceType: 'Adult Nightlife Services', provider: { '@type': 'Organization', name: 'SecretXperience', url: 'https://www.secretxperience.eu' }, areaServed: ['BE','NL','DE','FR'], url: 'https://www.secretxperience.eu/nightlife', description: 'Exclusive clubs, bars, strip venues and adult nightlife experiences across Europe.' },
+        { '@context': 'https://schema.org', '@type': 'Service', name: 'Nightlife Services', serviceType: 'Adult Nightlife Services', provider: { '@type': 'Organization', name: 'SecretXperience', url: 'https://www.secretxperience.eu' }, areaServed: ['BE','NL','DE','FR','LU','CH'], url: 'https://www.secretxperience.eu/nightlife', description: 'Exclusive clubs, bars, strip venues and adult nightlife experiences across Europe.' },
       ]) }} />
       <style>{`
         

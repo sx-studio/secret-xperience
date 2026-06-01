@@ -1973,7 +1973,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
           url: 'https://www.secretxperience.eu',
           logo: 'https://www.secretxperience.eu/icon-192.png',
           description: 'Premium verified adult services marketplace serving Belgium, Netherlands, Germany, France and the EU.',
-          areaServed: ['BE', 'NL', 'DE', 'FR', 'LU'],
+          areaServed: ['BE', 'NL', 'DE', 'FR', 'LU', 'CH'],
           sameAs: []
         }
       ]) }} />
@@ -2706,7 +2706,8 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
           <div class="field"><label>Country</label>
             <select>
               <option>Belgium</option><option>Netherlands</option><option>France</option>
-              <option>Germany</option><option>Luxembourg</option><option>United Kingdom</option>
+              <option>Germany</option><option>Luxembourg</option><option>Switzerland</option>
+              <option>United Kingdom</option><option>Austria</option>
               <option>Other</option>
             </select>
           </div>

@@ -40,7 +40,7 @@ const jsonLd = {
       url: 'https://www.secretxperience.eu',
       logo: { '@type': 'ImageObject', url: 'https://www.secretxperience.eu/icon-192.png' },
       description: 'Europe\'s premium adult lifestyle marketplace — verified escorts, nightlife, creators, rentals and events across Belgium, Netherlands and Germany.',
-      areaServed: ['BE', 'NL', 'DE', 'FR', 'LU'],
+      areaServed: ['BE', 'NL', 'DE', 'FR', 'LU', 'CH'],
       foundingLocation: { '@type': 'Place', name: 'Belgium' },
       address: {
         '@type': 'PostalAddress',
@@ -78,7 +78,7 @@ const jsonLd = {
       mainEntity: [
         { '@type': 'Question', name: 'What is SecretXperience?', acceptedAnswer: { '@type': 'Answer', text: 'SecretXperience is Europe\'s premium adult lifestyle marketplace, connecting verified escorts, companions, nightlife venues, content creators, and rental hosts with discerning clients across Belgium, the Netherlands, Germany, France, and beyond.' } },
         { '@type': 'Question', name: 'Is SecretXperience safe and discreet?', acceptedAnswer: { '@type': 'Answer', text: 'Yes. Every provider undergoes identity verification before receiving a verified badge. All communication is end-to-end encrypted. Personal information is never displayed publicly, and billing descriptors are fully discreet.' } },
-        { '@type': 'Question', name: 'Which countries does SecretXperience cover?', acceptedAnswer: { '@type': 'Answer', text: 'SecretXperience actively covers Belgium, the Netherlands, Germany, France, Luxembourg, Spain, Czech Republic, Hungary, Austria, and more EU countries.' } },
+        { '@type': 'Question', name: 'Which countries does SecretXperience cover?', acceptedAnswer: { '@type': 'Answer', text: 'SecretXperience actively covers Belgium, the Netherlands, Germany, France, Luxembourg, Switzerland, Spain, Czech Republic, Hungary, Austria, and more EU countries.' } },
         { '@type': 'Question', name: 'How do I list my services on SecretXperience?', acceptedAnswer: { '@type': 'Answer', text: 'Creating a basic profile is completely free. Sign up, choose your category, upload photos, and go live in under 10 minutes. Identity verification unlocks a verified badge and increased search visibility.' } },
         { '@type': 'Question', name: 'What categories are available on SecretXperience?', acceptedAnswer: { '@type': 'Answer', text: 'SecretXperience covers 8 categories: escorts & companions, nightlife venues & clubs, featured listings, creators & content, marketplace & partners, affiliate programmes, brands & webshop, and legal & medical information.' } },
         { '@type': 'Question', name: 'Is SecretXperience free to use?', acceptedAnswer: { '@type': 'Answer', text: 'Browsing is free for all visitors. Providers create a basic listing at no cost. Premium placement (Featured badge, homepage slider) is available from €29 for 7 days.' } },
@@ -228,7 +228,7 @@ export default function WhySecretXperience() {
             <div style={{ marginBottom: '2rem' }}>
               <p style={{ fontSize: '11px', color: S.t3, marginBottom: '0.75rem', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Browse by country</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
-                {[['belgium','Belgium'],['netherlands','Netherlands'],['germany','Germany'],['france','France'],['luxembourg','Luxembourg']].map(([slug,label]) => (
+                {[['belgium','Belgium'],['netherlands','Netherlands'],['germany','Germany'],['france','France'],['luxembourg','Luxembourg'],['switzerland','Switzerland']].map(([slug,label]) => (
                   <Link key={slug} href={`/escorts/${slug}`} style={{ background: 'rgba(197,160,90,0.1)', border: `0.5px solid ${S.b}`, borderRadius: '20px', padding: '5px 14px', fontSize: '13px', color: S.t2, textDecoration: 'none' }}>{label}</Link>
                 ))}
               </div>
@@ -503,7 +503,7 @@ export default function WhySecretXperience() {
             </h2>
             <Q q="What is SecretXperience?" a="SecretXperience is Europe's premium adult lifestyle marketplace, connecting verified escorts, companions, nightlife venues, content creators, and rental hosts with discerning clients across Belgium, the Netherlands, Germany, France, Luxembourg, and beyond. It is the only EU platform covering all eight adult lifestyle verticals in one unified experience." />
             <Q q="Is SecretXperience safe and discreet?" a="Yes. Every provider undergoes identity verification before receiving a verified badge. All communication is end-to-end encrypted and flows through the platform — no personal numbers or email addresses are exchanged. Billing descriptors on all transactions are fully discreet. Personal data is protected under GDPR." />
-            <Q q="Which countries does SecretXperience cover?" a="SecretXperience actively covers Belgium, the Netherlands, Germany, France, Luxembourg, Spain, Czech Republic, Hungary, Austria, and more EU countries. Per-city landing pages exist for Brussels, Antwerp, Ghent, Amsterdam, Rotterdam, Berlin, Hamburg, Paris, Lyon, Luxembourg, Liège, Bruges, and Cologne." />
+            <Q q="Which countries does SecretXperience cover?" a="SecretXperience actively covers Belgium, the Netherlands, Germany, France, Luxembourg, Switzerland, Spain, Czech Republic, Hungary, Austria, and more EU countries. Per-city landing pages exist for Brussels, Antwerp, Ghent, Amsterdam, Rotterdam, Berlin, Hamburg, Paris, Lyon, Luxembourg, Liège, Bruges, and Cologne." />
             <Q q="How do I list my services on SecretXperience?" a="Creating a basic profile is completely free and takes under 10 minutes. Sign up, choose your category (escort, nightlife venue, creator, rental, hotel, or event), upload photos and a description, and go live immediately. Identity verification unlocks a verified badge and increases your search ranking." />
             <Q q="Is SecretXperience free to use?" a="Browsing is free for all visitors. Providers create a basic listing at no cost — with no expiry date. Premium visibility options (Featured badge from €29/7 days, Homepage Slider from €79/30 days) are available when you're ready to grow. Token packages for boosts, tips and gifts start from €2.50." />
             <Q q="How does SecretXperience compare to Vivastreet, AdultWork, or Escort Advisor?" a="Unlike legacy escort directories, SecretXperience offers mandatory identity verification, end-to-end encrypted messaging, a token gift economy, a built-in creator content feed, a webshop, real-time availability signalling, 52 per-city SEO-optimised landing pages, and full GDPR compliance. It is a full adult lifestyle ecosystem, not a classified ad board." />

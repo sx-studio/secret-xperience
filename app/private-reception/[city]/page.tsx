@@ -26,6 +26,11 @@ const CITIES: Record<string, string> = {
   liege:       'Liège',
   bruges:      'Bruges',
   cologne:     'Cologne',
+  zurich:      'Zürich',
+  geneva:      'Geneva',
+  basel:       'Basel',
+  bern:        'Bern',
+  lausanne:    'Lausanne',
 }
 
 /** Country slugs — queries by `country` column instead of `city`. */
@@ -35,6 +40,7 @@ const COUNTRIES: Record<string, { name: string; code: string; cities: string; de
   germany:     { name: 'Germany', code: 'DE', cities: 'Berlin, Cologne & Hamburg', desc: 'Private reception directory for Germany — women, couples, men & trans offering home reception and private houses in Berlin, Cologne and beyond. Real photos, reviews & prices.' },
   france:      { name: 'France', code: 'FR', cities: 'Paris, Lyon & Marseille', desc: 'View private reception ads in France — women, couples, men & trans for home reception and private houses. Companionship, massage and erotic experiences. Real photos, reviews & prices.' },
   luxembourg:  { name: 'Luxembourg', code: 'LU', cities: 'Luxembourg City', desc: 'Private reception ads in Luxembourg — women, couples, men & trans offering home reception. Companionship, massage and erotic experiences at their location. Real photos & prices.' },
+  switzerland: { name: 'Switzerland', code: 'CH', cities: 'Zürich, Geneva & Basel', desc: 'Private reception ads in Switzerland — women, couples, men & trans offering home reception in Zürich, Geneva, Basel and beyond. Companionship, massage and erotic experiences at their location. Real photos & prices.' },
 }
 
 const ALL_SLUGS = [...Object.keys(CITIES), ...Object.keys(COUNTRIES)]

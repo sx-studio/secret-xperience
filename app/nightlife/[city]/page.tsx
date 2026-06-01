@@ -18,6 +18,11 @@ const CITIES: Record<string, string> = {
   liege:      'Liège',
   bruges:     'Bruges',
   cologne:    'Cologne',
+  zurich:     'Zürich',
+  geneva:     'Geneva',
+  basel:      'Basel',
+  bern:       'Bern',
+  lausanne:   'Lausanne',
 }
 
 export async function generateStaticParams() {

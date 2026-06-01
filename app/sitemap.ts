@@ -4,8 +4,8 @@ import { MetadataRoute } from 'next'
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
 const BASE = 'https://www.secretxperience.eu'
 
-const CITIES = ['brussels', 'antwerp', 'ghent', 'grimbergen', 'leuven', 'mechelen', 'hasselt', 'namur', 'charleroi', 'kortrijk', 'ostend', 'amsterdam', 'rotterdam', 'berlin', 'hamburg', 'paris', 'lyon', 'luxembourg', 'liege', 'bruges', 'cologne']
-const COUNTRIES = ['belgium', 'netherlands', 'germany', 'france', 'luxembourg']
+const CITIES = ['brussels', 'antwerp', 'ghent', 'grimbergen', 'leuven', 'mechelen', 'hasselt', 'namur', 'charleroi', 'kortrijk', 'ostend', 'amsterdam', 'rotterdam', 'berlin', 'hamburg', 'paris', 'lyon', 'luxembourg', 'liege', 'bruges', 'cologne', 'zurich', 'geneva', 'basel', 'bern', 'lausanne']
+const COUNTRIES = ['belgium', 'netherlands', 'germany', 'france', 'luxembourg', 'switzerland']
 const CITY_CATEGORIES = ['escorts', 'private-reception', 'nightlife', 'hotels', 'rentals']
 const COUNTRY_CATEGORIES = ['escorts', 'private-reception']
 

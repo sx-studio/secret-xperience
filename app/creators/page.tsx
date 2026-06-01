@@ -52,7 +52,7 @@ export default async function CreatorsPage() {
           { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.secretxperience.eu' },
           { '@type': 'ListItem', position: 2, name: 'Creators', item: 'https://www.secretxperience.eu/creators' },
         ]},
-        { '@context': 'https://schema.org', '@type': 'Service', name: 'Adult Content Creators', serviceType: 'Adult Content Creation', provider: { '@type': 'Organization', name: 'SecretXperience', url: 'https://www.secretxperience.eu' }, areaServed: ['BE','NL','DE','FR'], url: 'https://www.secretxperience.eu/creators', description: 'Subscribe to verified adult content creators — photos, videos, live sessions and custom content across Europe.' },
+        { '@context': 'https://schema.org', '@type': 'Service', name: 'Adult Content Creators', serviceType: 'Adult Content Creation', provider: { '@type': 'Organization', name: 'SecretXperience', url: 'https://www.secretxperience.eu' }, areaServed: ['BE','NL','DE','FR','LU','CH'], url: 'https://www.secretxperience.eu/creators', description: 'Subscribe to verified adult content creators — photos, videos, live sessions and custom content across Europe.' },
       ]) }} />
       <style>{`
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

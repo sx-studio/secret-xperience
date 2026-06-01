@@ -402,7 +402,7 @@ export default function EscortsPage() {
       name: 'Escort Services',
       serviceType: 'Adult Escort Services',
       provider: { '@type': 'Organization', name: 'SecretXperience', url: 'https://www.secretxperience.eu' },
-      areaServed: ['BE', 'NL', 'DE', 'FR'],
+      areaServed: ['BE', 'NL', 'DE', 'FR', 'LU', 'CH'],
       url: 'https://www.secretxperience.eu/escorts',
       description: 'Browse verified independent escorts across Belgium, Netherlands, Germany and France. Filter by city, type, price and availability.',
     },
@@ -485,7 +485,7 @@ export default function EscortsPage() {
           <div style={{ marginTop: '1.5rem' }}>
             <div style={{ fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--t3)', marginBottom: '0.6rem' }}>Browse by location</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '7px' }}>
-              {[['belgium','🇧🇪 Belgium'],['netherlands','🇳🇱 Netherlands'],['germany','🇩🇪 Germany'],['france','🇫🇷 France'],['luxembourg','🇱🇺 Luxembourg']].map(([slug, label]) => (
+              {[['belgium','🇧🇪 Belgium'],['netherlands','🇳🇱 Netherlands'],['germany','🇩🇪 Germany'],['france','🇫🇷 France'],['luxembourg','🇱🇺 Luxembourg'],['switzerland','🇨🇭 Switzerland']].map(([slug, label]) => (
                 <Link key={slug} href={`/escorts/${slug}`} style={{ fontSize: '13px', padding: '6px 14px', border: '0.5px solid var(--gbrd)', borderRadius: '20px', color: 'var(--gold)', background: 'var(--gbg)', textDecoration: 'none', whiteSpace: 'nowrap', fontWeight: 500 }}>{label}</Link>
               ))}
               {[['brussels','Brussels'],['antwerp','Antwerp'],['amsterdam','Amsterdam'],['berlin','Berlin'],['paris','Paris']].map(([slug, label]) => (
@@ -728,13 +728,13 @@ export default function EscortsPage() {
           <div style={{ marginTop: '3rem', borderTop: '0.5px solid var(--b)', paddingTop: '2rem' }}>
             <p style={{ fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--t3)', marginBottom: '0.9rem' }}>Browse by country</p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '1.75rem' }}>
-              {[['belgium','Belgium'],['netherlands','Netherlands'],['germany','Germany'],['france','France'],['luxembourg','Luxembourg']].map(([slug, label]) => (
+              {[['belgium','Belgium'],['netherlands','Netherlands'],['germany','Germany'],['france','France'],['luxembourg','Luxembourg'],['switzerland','Switzerland']].map(([slug, label]) => (
                 <Link key={slug} href={`/escorts/${slug}`} style={{ fontSize: '13px', padding: '5px 14px', border: '0.5px solid var(--b)', borderRadius: '20px', color: 'var(--t2)', transition: 'all .2s' }}>{label}</Link>
               ))}
             </div>
             <p style={{ fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--t3)', marginBottom: '0.9rem' }}>Browse by city</p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-              {[['brussels','Brussels'],['antwerp','Antwerp'],['ghent','Ghent'],['leuven','Leuven'],['mechelen','Mechelen'],['hasselt','Hasselt'],['liege','Liège'],['bruges','Bruges'],['ostend','Ostend'],['amsterdam','Amsterdam'],['rotterdam','Rotterdam'],['berlin','Berlin'],['paris','Paris'],['luxembourg','Luxembourg']].map(([slug, label]) => (
+              {[['brussels','Brussels'],['antwerp','Antwerp'],['ghent','Ghent'],['leuven','Leuven'],['mechelen','Mechelen'],['hasselt','Hasselt'],['liege','Liège'],['bruges','Bruges'],['ostend','Ostend'],['amsterdam','Amsterdam'],['rotterdam','Rotterdam'],['berlin','Berlin'],['paris','Paris'],['luxembourg','Luxembourg'],['zurich','Zürich'],['geneva','Geneva'],['basel','Basel']].map(([slug, label]) => (
                 <Link key={slug} href={`/escorts/${slug}`} style={{ fontSize: '13px', padding: '5px 14px', border: '0.5px solid var(--b)', borderRadius: '20px', color: 'var(--t2)', transition: 'all .2s' }}>{label}</Link>
               ))}
             </div>
