@@ -654,8 +654,54 @@ export default function AdminPage() {
                 </div>
               </div>
 
+              {/* Broadcast form */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14, maxWidth: 600 }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--t3)', marginBottom: 6, fontFamily: 'var(--sans)' }}>Subject line</label>
+                  <input
+                    value={nlSubject}
+                    onChange={e => setNlSubject(e.target.value)}
+                    placeholder="e.g. New listings this week — exclusive access"
+                    style={{ width: '100%', padding: '10px 14px', background: 'var(--bg2)', border: '0.5px solid var(--b2)', borderRadius: 10, color: 'var(--t)', fontSize: 14, fontFamily: 'var(--sans)', outline: 'none' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--t3)', marginBottom: 6, fontFamily: 'var(--sans)' }}>Email body (HTML or plain text)</label>
+                  <textarea
+                    value={nlBody}
+                    onChange={e => setNlBody(e.target.value)}
+                    rows={10}
+                    placeholder={`<h2>Hello from SecretXperience</h2>\n<p>This week we have...</p>`}
+                    style={{ width: '100%', padding: '10px 14px', background: 'var(--bg2)', border: '0.5px solid var(--b2)', borderRadius: 10, color: 'var(--t)', fontSize: 13, fontFamily: 'var(--sans)', outline: 'none', resize: 'vertical', lineHeight: 1.6 }}
+                  />
+                </div>
+                <button
+                  disabled={nlSending || !nlSubject.trim() || !nlBody.trim()}
+                  onClick={async () => {
+                    if (!confirm(`Send to ${nlSubCount} subscribers?`)) return
+                    setNlSending(true); setNlResult(null)
+                    const res = await fetch('/api/newsletter/broadcast', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ subject: nlSubject, html: nlBody }),
+                    })
+                    const json = await res.json()
+                    setNlResult(res.ok ? `✓ Sent to ${json.sent ?? nlSubCount} subscribers` : `✗ ${json.error || 'Failed'}`)
+                    setNlSending(false)
+                  }}
+                  style={{ alignSelf: 'flex-start', padding: '10px 28px', background: nlSending ? 'var(--bg3)' : 'linear-gradient(135deg,#c5a05a,#a07840)', color: nlSending ? 'var(--t3)' : '#0a0808', border: 'none', borderRadius: 10, fontFamily: 'var(--sans)', fontSize: 13, fontWeight: 700, letterSpacing: '0.06em', cursor: nlSending ? 'default' : 'pointer' }}
+                >
+                  {nlSending ? 'Sending…' : 'Send broadcast'}
+                </button>
+                {nlResult && (
+                  <div style={{ padding: '10px 14px', borderRadius: 10, background: nlResult.startsWith('✓') ? 'rgba(62,207,142,0.08)' : 'rgba(212,95,114,0.08)', border: `0.5px solid ${nlResult.startsWith('✓') ? 'rgba(62,207,142,0.3)' : 'rgba(212,95,114,0.3)'}`, color: nlResult.startsWith('✓') ? '#3ecf8e' : '#d45f72', fontSize: 13, fontFamily: 'var(--sans)' }}>
+                    {nlResult}
+                  </div>
+                )}
+              </div>
+
               {/* Subscriber list */}
-              <div style={{ marginBottom: '2rem' }}>
+              <div style={{ marginTop: '2.5rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
                   <div>
                     <div style={{ font: '600 11px/1 var(--sans)', color: 'var(--t2, #8c8880)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '4px' }}>
@@ -700,51 +746,6 @@ export default function AdminPage() {
                     </tbody>
                   </table>
                 </div>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14, maxWidth: 600 }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--t3)', marginBottom: 6, fontFamily: 'var(--sans)' }}>Subject line</label>
-                  <input
-                    value={nlSubject}
-                    onChange={e => setNlSubject(e.target.value)}
-                    placeholder="e.g. New listings this week — exclusive access"
-                    style={{ width: '100%', padding: '10px 14px', background: 'var(--bg2)', border: '0.5px solid var(--b2)', borderRadius: 10, color: 'var(--t)', fontSize: 14, fontFamily: 'var(--sans)', outline: 'none' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: 11, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--t3)', marginBottom: 6, fontFamily: 'var(--sans)' }}>Email body (HTML or plain text)</label>
-                  <textarea
-                    value={nlBody}
-                    onChange={e => setNlBody(e.target.value)}
-                    rows={10}
-                    placeholder={`<h2>Hello from SecretXperience</h2>\n<p>This week we have...</p>`}
-                    style={{ width: '100%', padding: '10px 14px', background: 'var(--bg2)', border: '0.5px solid var(--b2)', borderRadius: 10, color: 'var(--t)', fontSize: 13, fontFamily: 'var(--sans)', outline: 'none', resize: 'vertical', lineHeight: 1.6 }}
-                  />
-                </div>
-                <button
-                  disabled={nlSending || !nlSubject.trim() || !nlBody.trim()}
-                  onClick={async () => {
-                    if (!confirm(`Send to ${nlSubCount} subscribers?`)) return
-                    setNlSending(true); setNlResult(null)
-                    const res = await fetch('/api/newsletter/broadcast', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ subject: nlSubject, html: nlBody }),
-                    })
-                    const json = await res.json()
-                    setNlResult(res.ok ? `✓ Sent to ${json.sent ?? nlSubCount} subscribers` : `✗ ${json.error || 'Failed'}`)
-                    setNlSending(false)
-                  }}
-                  style={{ alignSelf: 'flex-start', padding: '10px 28px', background: nlSending ? 'var(--bg3)' : 'linear-gradient(135deg,#c5a05a,#a07840)', color: nlSending ? 'var(--t3)' : '#0a0808', border: 'none', borderRadius: 10, fontFamily: 'var(--sans)', fontSize: 13, fontWeight: 700, letterSpacing: '0.06em', cursor: nlSending ? 'default' : 'pointer' }}
-                >
-                  {nlSending ? 'Sending…' : 'Send broadcast'}
-                </button>
-                {nlResult && (
-                  <div style={{ padding: '10px 14px', borderRadius: 10, background: nlResult.startsWith('✓') ? 'rgba(62,207,142,0.08)' : 'rgba(212,95,114,0.08)', border: `0.5px solid ${nlResult.startsWith('✓') ? 'rgba(62,207,142,0.3)' : 'rgba(212,95,114,0.3)'}`, color: nlResult.startsWith('✓') ? '#3ecf8e' : '#d45f72', fontSize: 13, fontFamily: 'var(--sans)' }}>
-                    {nlResult}
-                  </div>
-                )}
               </div>
             </div>
           )}
