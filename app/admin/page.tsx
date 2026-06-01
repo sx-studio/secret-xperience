@@ -278,6 +278,7 @@ export default function AdminPage() {
     b.profiles?.full_name?.toLowerCase().includes(search.toLowerCase()) ||
     b.status?.toLowerCase().includes(search.toLowerCase())
   )
+  const filteredNlSubs = nlSubs.filter(s => !search || s.email?.toLowerCase().includes(search.toLowerCase()))
 
   if (loading) return (
     <div style={{ minHeight: '100vh', background: 'var(--bg, #050505)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -371,7 +372,7 @@ export default function AdminPage() {
           <div>
             <h1 style={{ fontFamily: 'var(--serif)', fontWeight: 500, fontSize: '36px', color: 'var(--t, #ece8e1)', margin: 0, lineHeight: 1.1 }}>{tab}</h1>
             <div style={{ font: '300 11px/1 var(--sans)', color: 'var(--t3, #4c4a47)', marginTop: '4px', letterSpacing: '0.04em' }}>
-              {tab === 'Listings' ? `${filteredListings.length} listings` : tab === 'Users' ? `${filteredUsers.length} users` : tab === 'Newsletter' ? `${nlSubCount ?? '…'} subscribers` : tab === 'Contacts' ? `${optinContacts.length} opted-in · ${leads.length} leads` : `${filteredBookings.length} bookings`}
+              {tab === 'Listings' ? `${filteredListings.length} listings` : tab === 'Users' ? `${filteredUsers.length} users` : tab === 'Newsletter' ? (search ? `${filteredNlSubs.length} of ${nlSubCount ?? '…'} subscribers` : `${nlSubCount ?? '…'} subscribers`) : tab === 'Contacts' ? `${optinContacts.length} opted-in · ${leads.length} leads` : `${filteredBookings.length} bookings`}
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -708,13 +709,13 @@ export default function AdminPage() {
                       <i className="ti ti-mail" style={{ marginRight: '6px', color: 'var(--gold)' }} />
                       Subscribers
                     </div>
-                    <div style={{ font: '300 11px/1 var(--sans)', color: 'var(--t3, #4c4a47)' }}>{nlSubs.filter(s => s.active).length} active · {nlSubs.length} total</div>
+                    <div style={{ font: '300 11px/1 var(--sans)', color: 'var(--t3, #4c4a47)' }}>{filteredNlSubs.filter(s => s.active).length} active · {filteredNlSubs.length}{search ? ` of ${nlSubs.length}` : ''} total</div>
                   </div>
                   <button
-                    onClick={() => exportCsv(nlSubs.map(s => ({ email: s.email, status: s.active ? 'active' : 'unsubscribed', subscribed_at: s.subscribed_at, unsubscribed_at: s.unsubscribed_at || '' })), `sx-newsletter-${new Date().toISOString().slice(0,10)}.csv`)}
+                    onClick={() => exportCsv(filteredNlSubs.map(s => ({ email: s.email, status: s.active ? 'active' : 'unsubscribed', subscribed_at: s.subscribed_at, unsubscribed_at: s.unsubscribed_at || '' })), `sx-newsletter-${new Date().toISOString().slice(0,10)}.csv`)}
                     className="adm-action-icon-btn"
                     style={{ color: 'var(--gold)', borderColor: 'var(--gbrd)', gap: '6px' }}
-                    disabled={nlSubs.length === 0}
+                    disabled={filteredNlSubs.length === 0}
                   >
                     <i className="ti ti-download" />
                     <span style={{ font: '600 11px/1 var(--sans)', letterSpacing: '0.08em' }}>Export CSV</span>
@@ -731,8 +732,8 @@ export default function AdminPage() {
                     </thead>
                     <tbody>
                       {nlSubsLoading && <tr><td colSpan={3} style={{ padding: '3rem', textAlign: 'center', color: 'var(--t3, #4c4a47)' }}>Loading…</td></tr>}
-                      {!nlSubsLoading && nlSubs.length === 0 && <tr><td colSpan={3} style={{ padding: '3rem', textAlign: 'center', color: 'var(--t3, #4c4a47)' }}>No subscribers yet</td></tr>}
-                      {nlSubs.map(s => (
+                      {!nlSubsLoading && filteredNlSubs.length === 0 && <tr><td colSpan={3} style={{ padding: '3rem', textAlign: 'center', color: 'var(--t3, #4c4a47)' }}>{search ? `No subscribers matching "${search}"` : 'No subscribers yet'}</td></tr>}
+                      {filteredNlSubs.map(s => (
                         <tr key={s.id} className="adm-tr" style={{ borderTop: '0.5px solid var(--b, rgba(255,255,255,0.04))' }}>
                           <td style={{ padding: '12px 16px', fontWeight: 500 }}>{s.email}</td>
                           <td style={{ padding: '12px 16px' }}>
