@@ -714,15 +714,26 @@ export default function DashboardPage() {
           border-radius: var(--rl, 13px);
           padding: 1rem 1.125rem;
           display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 12px;
+          flex-direction: column;
+          gap: 10px;
           transition: border-color var(--t-base, 0.22s) var(--ease-out), background var(--t-base, 0.22s) var(--ease-out);
         }
         .db-listing-item:hover {
           border-color: var(--b3, rgba(255,255,255,0.12));
           background: var(--bg2, rgba(255,255,255,0.03));
         }
+        .db-listing-top { display: flex; gap: 12px; align-items: flex-start; }
+        .db-listing-info { flex: 1; min-width: 0; }
+        .db-listing-title {
+          font-family: var(--serif); font-size: 16px; font-weight: 400;
+          color: var(--t, #ece8e1); letter-spacing: 0.01em;
+          overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+          margin-bottom: 5px;
+        }
+        .db-listing-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .db-listing-bottom { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+        .db-listing-badges { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
+        .db-listing-actions { display: flex; gap: 6px; align-items: center; margin-left: auto; flex-shrink: 0; }
 
         .db-icon-btn {
           background: transparent;
@@ -1485,142 +1496,114 @@ export default function DashboardPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {listings.map(listing => (
                   <div key={listing.id} className="db-listing-item">
-                    {listing.images?.[0] && (
-                      <div style={{ flexShrink: 0, width: 44, height: 56, borderRadius: 6, overflow: 'hidden', background: 'var(--bg3)' }}>
-                        <img src={listing.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: focusPosition(listing.image_focus, listing.images[0]), display: 'block' }} />
-                      </div>
-                    )}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '5px', flexWrap: 'wrap' }}>
-                        <span style={{
-                          fontFamily: 'var(--serif)',
-                          fontSize: '16px',
-                          fontWeight: 400,
-                          color: 'var(--t, #ece8e1)',
-                          letterSpacing: '0.01em',
-                          whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                        }}>
-                          {listing.title}
-                        </span>
-                        {listing.category && (
-                          <span className="db-category-pill">{listing.category}</span>
-                        )}
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                        {listing.city && (
-                          <span style={{
-                            fontSize: '13px',
-                            color: 'var(--t3, rgba(255,255,255,0.28))',
-                            fontFamily: 'var(--sans)',
-                            fontWeight: 300,
-                          }}>
-                            {listing.city}
-                          </span>
-                        )}
-                        {viewCounts[listing.id] != null && (
-                          <span style={{ fontSize: '12px', color: 'var(--t3)', fontFamily: 'var(--sans)', display: 'flex', alignItems: 'center', gap: 3 }}>
-                            <i className="ti ti-eye" style={{ fontSize: 11 }} /> {viewCounts[listing.id].toLocaleString()} view{viewCounts[listing.id] !== 1 ? 's' : ''}
-                          </span>
-                        )}
-                        {(listing.price_from || listing.price_to) && (
-                          <span style={{
-                            fontSize: '13px',
-                            color: 'var(--goldl, rgba(197,160,90,0.5))',
-                            fontFamily: 'var(--sans)',
-                            fontWeight: 300,
-                          }}>
-                            {listing.price_from && listing.price_to
-                              ? `€${listing.price_from} – €${listing.price_to}`
-                              : listing.price_from
-                              ? `from €${listing.price_from}`
-                              : `up to €${listing.price_to}`}
-                          </span>
-                        )}
+
+                    {/* ── Top: thumbnail + title/meta ── */}
+                    <div className="db-listing-top">
+                      {listing.images?.[0] && (
+                        <div style={{ flexShrink: 0, width: 52, height: 64, borderRadius: 8, overflow: 'hidden', background: 'var(--bg3)' }}>
+                          <img src={listing.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: focusPosition(listing.image_focus, listing.images[0]), display: 'block' }} />
+                        </div>
+                      )}
+                      <div className="db-listing-info">
+                        <div className="db-listing-title">{listing.title || '—'}</div>
+                        <div className="db-listing-meta">
+                          {listing.category && <span className="db-category-pill">{listing.category}</span>}
+                          {listing.city && <span style={{ fontSize: '13px', color: 'var(--t3)', fontWeight: 300 }}>{listing.city}</span>}
+                          {viewCounts[listing.id] != null && (
+                            <span style={{ fontSize: '12px', color: 'var(--t3)', display: 'flex', alignItems: 'center', gap: 3 }}>
+                              <i className="ti ti-eye" style={{ fontSize: 11 }} /> {viewCounts[listing.id].toLocaleString()} view{viewCounts[listing.id] !== 1 ? 's' : ''}
+                            </span>
+                          )}
+                          {(listing.price_from || listing.price_to) && (
+                            <span style={{ fontSize: '13px', color: 'var(--goldl, rgba(197,160,90,0.55))', fontWeight: 300 }}>
+                              {listing.price_from && listing.price_to
+                                ? `€${listing.price_from}–€${listing.price_to}`
+                                : listing.price_from ? `from €${listing.price_from}` : `up to €${listing.price_to}`}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-                      {listing.featured_until && new Date(listing.featured_until) > new Date() && (
-                        <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '20px', background: 'var(--gbg)', color: 'var(--gold)', border: '0.5px solid var(--gbrd)', fontFamily: 'var(--sans)', fontWeight: 500 }}>
-                          ✦ Featured · {new Date(listing.featured_until).toLocaleDateString('en-GB', { day:'numeric', month:'short' })}
+                    {/* ── Bottom: status badges + action buttons ── */}
+                    <div className="db-listing-bottom">
+                      <div className="db-listing-badges">
+                        {listing.featured_until && new Date(listing.featured_until) > new Date() && (
+                          <span style={{ fontSize: '11px', padding: '3px 8px', borderRadius: '20px', background: 'var(--gbg)', color: 'var(--gold)', border: '0.5px solid var(--gbrd)', fontWeight: 500 }}>
+                            ✦ Featured · {new Date(listing.featured_until).toLocaleDateString('en-GB', { day:'numeric', month:'short' })}
+                          </span>
+                        )}
+                        {listing.verified && <span className="db-status-pill-active">✓ Verified</span>}
+                        {listing.status === 'pending' && <span className="db-status-pill-paused">⏳ Under review</span>}
+                        {listing.status === 'rejected' && (
+                          <span className="db-status-pill-inactive" style={{ color: '#e05a5a', borderColor: 'rgba(224,90,90,0.35)' }}>✗ Rejected</span>
+                        )}
+                        <span className={listing.active ? 'db-status-pill-active' : 'db-status-pill-inactive'}>
+                          {listing.active ? 'Live' : 'Inactive'}
                         </span>
-                      )}
-                      {listing.verified && (
-                        <span className="db-status-pill-active">
-                          ✓ Verified
-                        </span>
-                      )}
-                      {listing.status === 'pending' && (
-                        <span className="db-status-pill-paused">⏳ Under review</span>
-                      )}
-                      {listing.status === 'rejected' && (
-                        <span className="db-status-pill-inactive" style={{ color: '#e05a5a', borderColor: 'rgba(224,90,90,0.35)' }}>✗ Rejected</span>
-                      )}
-                      <span className={listing.active ? 'db-status-pill-active' : 'db-status-pill-inactive'}>
-                        {listing.active ? 'Live' : 'Inactive'}
-                      </span>
-                      {/* Reactivate button — free; only for approved listings (not pending/rejected) */}
-                      {!listing.active && listing.status !== 'rejected' && listing.status !== 'pending' && (
+                      </div>
+
+                      <div className="db-listing-actions">
+                        {!listing.active && listing.status !== 'rejected' && listing.status !== 'pending' && (
+                          <button
+                            onClick={() => reactivateListing(listing.id)}
+                            disabled={activatingListing === listing.id}
+                            title="Set your listing live again — free"
+                            style={{ padding: '5px 12px', borderRadius: 'var(--r, 8px)', border: '0.5px solid rgba(38,212,160,0.5)', background: activatingListing === listing.id ? 'rgba(38,212,160,0.08)' : 'rgba(38,212,160,0.12)', color: 'var(--verified, #1dc9a0)', cursor: activatingListing === listing.id ? 'default' : 'pointer', fontSize: '12px', fontWeight: 600, letterSpacing: '0.04em', transition: 'all .15s', opacity: activatingListing === listing.id ? 0.6 : 1 }}
+                          >
+                            {activatingListing === listing.id ? '…' : 'Set live'}
+                          </button>
+                        )}
+                        <a
+                          href={`/boost?listing=${listing.id}`}
+                          style={{ padding: '5px 12px', borderRadius: 'var(--r, 8px)', border: '0.5px solid var(--gbrd, rgba(197,160,90,0.4))', background: 'transparent', color: 'var(--gold, #c5a05a)', cursor: 'pointer', fontSize: '12px', fontWeight: 500, letterSpacing: '0.04em', transition: 'all .15s', textDecoration: 'none', display: 'inline-block' }}
+                          onMouseOver={e => { (e.currentTarget as HTMLElement).style.background = 'var(--gbg, rgba(197,160,90,0.1))' }}
+                          onMouseOut={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}
+                        >✦ Feature</a>
                         <button
-                          onClick={() => reactivateListing(listing.id)}
-                          disabled={activatingListing === listing.id}
-                          title="Set your listing live again — free"
-                          style={{ padding: '5px 12px', borderRadius: 'var(--r, 8px)', border: '0.5px solid rgba(38,212,160,0.5)', background: activatingListing === listing.id ? 'rgba(38,212,160,0.08)' : 'rgba(38,212,160,0.12)', color: 'var(--verified, #1dc9a0)', cursor: activatingListing === listing.id ? 'default' : 'pointer', fontSize: '12px', fontWeight: 600, fontFamily: 'var(--sans)', letterSpacing: '0.04em', transition: 'all .15s', opacity: activatingListing === listing.id ? 0.6 : 1 }}
+                          className="db-icon-btn"
+                          title="Edit photos"
+                          onClick={() => {
+                            const parsed = parseListingTags(listing.tags)
+                            setListingDraft({
+                              title: listing.title || '', description: listing.description || '',
+                              category: listing.category || '', city: listing.city || '',
+                              country: listing.country || '', price_from: listing.price_from ?? '',
+                              price_to: listing.price_to ?? '', meet_type: listing.meet_type || 'incall',
+                              active: listing.active ?? true,
+                              images: Array.isArray(listing.images) ? [...listing.images] : [],
+                              image_focus: listing.image_focus && typeof listing.image_focus === 'object' ? { ...listing.image_focus } : {},
+                              ...parsed,
+                            })
+                            setEditingListing(listing)
+                            setTimeout(() => {
+                              document.getElementById('listing-photos-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                            }, 120)
+                          }}
                         >
-                          {activatingListing === listing.id ? '…' : 'Set live'}
+                          <i className="ti ti-photo" aria-hidden="true" />
                         </button>
-                      )}
-                      <a
-                        href={`/boost?listing=${listing.id}`}
-                        style={{ padding: '5px 12px', borderRadius: 'var(--r, 8px)', border: '0.5px solid var(--gbrd, rgba(197,160,90,0.4))', background: 'transparent', color: 'var(--gold, #c5a05a)', cursor: 'pointer', fontSize: '12px', fontWeight: 500, fontFamily: 'var(--sans)', letterSpacing: '0.04em', transition: 'all .15s', textDecoration: 'none', display: 'inline-block' }}
-                        onMouseOver={e => { (e.currentTarget as HTMLElement).style.background = 'var(--gbg, rgba(197,160,90,0.1))' }}
-                        onMouseOut={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}
-                      >✦ Feature</a>
-                      <button
-                        className="db-icon-btn"
-                        title="Edit photos"
-                        onClick={() => {
-                          const parsed = parseListingTags(listing.tags)
-                          setListingDraft({
-                            title: listing.title || '', description: listing.description || '',
-                            category: listing.category || '', city: listing.city || '',
-                            country: listing.country || '', price_from: listing.price_from ?? '',
-                            price_to: listing.price_to ?? '', meet_type: listing.meet_type || 'incall',
-                            active: listing.active ?? true,
-                            images: Array.isArray(listing.images) ? [...listing.images] : [],
-                            image_focus: listing.image_focus && typeof listing.image_focus === 'object' ? { ...listing.image_focus } : {},
-                            ...parsed,
-                          })
-                          setEditingListing(listing)
-                          setTimeout(() => {
-                            document.getElementById('listing-photos-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                          }, 120)
-                        }}
-                      >
-                        <i className="ti ti-photo" aria-hidden="true" />
-                      </button>
-                      <button
-                        className="db-icon-btn"
-                        title="Edit listing"
-                        onClick={() => {
-                          const parsed = parseListingTags(listing.tags)
-                          setListingDraft({
-                            title: listing.title || '', description: listing.description || '',
-                            category: listing.category || '', city: listing.city || '',
-                            country: listing.country || '', price_from: listing.price_from ?? '',
-                            price_to: listing.price_to ?? '', meet_type: listing.meet_type || 'incall',
-                            active: listing.active ?? true,
-                            images: Array.isArray(listing.images) ? [...listing.images] : [],
-                            image_focus: listing.image_focus && typeof listing.image_focus === 'object' ? { ...listing.image_focus } : {},
-                            ...parsed,
-                          })
-                          setEditingListing(listing)
-                        }}
-                      >
-                        <i className="ti ti-edit" aria-hidden="true" />
-                      </button>
+                        <button
+                          className="db-icon-btn"
+                          title="Edit listing"
+                          onClick={() => {
+                            const parsed = parseListingTags(listing.tags)
+                            setListingDraft({
+                              title: listing.title || '', description: listing.description || '',
+                              category: listing.category || '', city: listing.city || '',
+                              country: listing.country || '', price_from: listing.price_from ?? '',
+                              price_to: listing.price_to ?? '', meet_type: listing.meet_type || 'incall',
+                              active: listing.active ?? true,
+                              images: Array.isArray(listing.images) ? [...listing.images] : [],
+                              image_focus: listing.image_focus && typeof listing.image_focus === 'object' ? { ...listing.image_focus } : {},
+                              ...parsed,
+                            })
+                            setEditingListing(listing)
+                          }}
+                        >
+                          <i className="ti ti-edit" aria-hidden="true" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}

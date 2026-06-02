@@ -1174,14 +1174,14 @@ footer{background:var(--bg1);border-top:0.5px solid var(--b);padding:2.5rem 1.5r
 .nav-drawer-links{flex:1;padding:.5rem 0;}
 .nav-drawer-link{
   display:flex;align-items:center;gap:12px;
-  padding:14px 1.25rem;color:var(--t);
+  padding:14px 1.25rem;color:#f0ebe4;
   font-size:15px;font-weight:500;text-decoration:none;
   background:none;border:none;cursor:pointer;
   width:100%;text-align:left;font-family:var(--sans);
   transition:background .15s;
 }
-.nav-drawer-link:hover,.nav-drawer-link:active{background:var(--bg2)}
-.nav-drawer-link i{font-size:18px;color:var(--gold);width:20px;text-align:center;flex-shrink:0;opacity:.85}
+.nav-drawer-link:hover,.nav-drawer-link:active{background:rgba(255,255,255,0.06)}
+.nav-drawer-link i{font-size:18px;color:var(--gold);width:20px;text-align:center;flex-shrink:0;opacity:1}
 .nav-drawer-footer{
   padding:1rem 1.25rem;border-top:0.5px solid var(--b);flex-shrink:0;
 }

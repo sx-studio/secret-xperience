@@ -304,7 +304,7 @@ export default function AdminPage() {
   if (!isAdmin) return null
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg, #050505)', color: 'var(--t, #ece8e1)', fontFamily: 'var(--sans)', display: 'flex' }}>
+    <div className="adm-shell" style={{ minHeight: '100vh', background: 'var(--bg, #050505)', color: 'var(--t, #ece8e1)', fontFamily: 'var(--sans)', display: 'flex' }}>
       <style>{`
         @keyframes spin{to{transform:rotate(360deg)}}
         *{box-sizing:border-box}
@@ -315,6 +315,34 @@ export default function AdminPage() {
         .adm-action-btn { transition: opacity var(--t-fast, 0.15s); }
         .adm-action-btn:hover { opacity: 0.8; }
         .adm-tab-btn:hover { color: var(--gold, #c5a05a) !important; }
+        @media (max-width: 768px) {
+          .adm-shell { flex-direction: column !important; }
+          .adm-sidebar {
+            width: 100% !important; height: auto !important;
+            position: static !important; border-right: none !important;
+            border-bottom: 0.5px solid var(--b, rgba(255,255,255,0.06)) !important;
+            flex-direction: row !important; align-items: center !important;
+            padding: 0 !important;
+          }
+          .adm-sidebar-brand { display: none !important; }
+          .adm-sidebar-footer { display: none !important; }
+          .adm-sidebar nav { flex-direction: row !important; overflow-x: auto !important; padding: 0 !important; flex: 1; display: flex; scrollbar-width: none; }
+          .adm-sidebar nav::-webkit-scrollbar { display: none; }
+          .adm-tab-btn {
+            padding: 14px 16px !important; white-space: nowrap;
+            border-left: none !important; border-bottom: 2px solid transparent !important;
+            font-size: 12px !important; flex-shrink: 0 !important;
+          }
+          .adm-main { overflow: visible !important; }
+          .adm-main-header {
+            flex-direction: column !important; align-items: flex-start !important; gap: 10px !important;
+            padding: 1rem !important;
+          }
+          .adm-search-input { width: 100% !important; }
+          .adm-content { padding: 1rem !important; }
+          .adm-stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 0.75rem !important; }
+          .adm-table-wrap { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+        }
         .adm-search-input {
           height: 44px;
           padding: 0 14px;
@@ -347,8 +375,8 @@ export default function AdminPage() {
       `}</style>
 
       {/* ── Sidebar ── */}
-      <div style={{ width: '220px', background: 'var(--bg1, #080808)', borderRight: '0.5px solid var(--b, rgba(255,255,255,0.06))', display: 'flex', flexDirection: 'column', flexShrink: 0, position: 'sticky', top: 0, height: '100vh' }}>
-        <div style={{ padding: '1.5rem', borderBottom: '0.5px solid var(--b, rgba(255,255,255,0.06))' }}>
+      <div className="adm-sidebar" style={{ width: '220px', background: 'var(--bg1, #080808)', borderRight: '0.5px solid var(--b, rgba(255,255,255,0.06))', display: 'flex', flexDirection: 'column', flexShrink: 0, position: 'sticky', top: 0, height: '100vh' }}>
+        <div className="adm-sidebar-brand" style={{ padding: '1.5rem', borderBottom: '0.5px solid var(--b, rgba(255,255,255,0.06))' }}>
           <div style={{ fontFamily: 'var(--serif)', color: 'var(--gold, #c5a05a)', fontSize: '18px', marginBottom: '6px' }}>SecretXperience</div>
           <div style={{ display: 'inline-block', background: 'var(--gbg)', color: 'var(--gold)', border: '0.5px solid var(--gbrd)', borderRadius: '20px', padding: '3px 10px', font: '600 10px/1 var(--sans)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Admin</div>
         </div>
@@ -370,16 +398,16 @@ export default function AdminPage() {
             </button>
           ))}
         </nav>
-        <div style={{ padding: '1rem 1.5rem', borderTop: '0.5px solid var(--b, rgba(255,255,255,0.06))' }}>
+        <div className="adm-sidebar-footer" style={{ padding: '1rem 1.5rem', borderTop: '0.5px solid var(--b, rgba(255,255,255,0.06))' }}>
           <button onClick={() => window.location.href = '/'} style={{ width: '100%', padding: '0.6rem', background: 'transparent', border: '0.5px solid var(--b2, rgba(255,255,255,0.1))', borderRadius: 'var(--r, 8px)', color: 'var(--t3, #4c4a47)', cursor: 'pointer', font: '400 12px/1 var(--sans)' }}>← Back to site</button>
         </div>
       </div>
 
       {/* ── Main ── */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div className="adm-main" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
         {/* ── Page header ── */}
-        <div style={{ background: 'var(--bg1, #080808)', borderBottom: '0.5px solid var(--b, rgba(255,255,255,0.06))', padding: '1rem 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+        <div className="adm-main-header" style={{ background: 'var(--bg1, #080808)', borderBottom: '0.5px solid var(--b, rgba(255,255,255,0.06))', padding: '1rem 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
           <div>
             <h1 style={{ fontFamily: 'var(--serif)', fontWeight: 500, fontSize: '36px', color: 'var(--t, #ece8e1)', margin: 0, lineHeight: 1.1 }}>{tab}</h1>
             <div style={{ font: '300 11px/1 var(--sans)', color: 'var(--t3, #4c4a47)', marginTop: '4px', letterSpacing: '0.04em' }}>
@@ -397,10 +425,10 @@ export default function AdminPage() {
           </div>
         </div>
 
-        <div style={{ flex: 1, overflow: 'auto', padding: '2rem' }}>
+        <div className="adm-content" style={{ flex: 1, overflow: 'auto', padding: '2rem' }}>
 
           {/* ── Stats row ── */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
+          <div className="adm-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
             {[
               { icon: 'ti-layout-list', label: 'Active Listings', value: stats.listings, sub: 'total listings' },
               { icon: 'ti-users',       label: 'Total Users',     value: stats.users,    sub: 'registered' },
@@ -420,8 +448,8 @@ export default function AdminPage() {
 
           {/* ── Listings table ── */}
           {tab === 'Listings' && (
-            <div style={{ background: 'var(--bg1, #0a0a0a)', border: '0.5px solid var(--b, rgba(255,255,255,0.06))', borderRadius: 'var(--rl, 13px)', overflow: 'hidden' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+            <div className="adm-table-wrap" style={{ background: 'var(--bg1, #0a0a0a)', border: '0.5px solid var(--b, rgba(255,255,255,0.06))', borderRadius: 'var(--rl, 13px)', overflow: 'hidden' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', minWidth: '700px' }}>
                 <thead>
                   <tr style={{ background: 'var(--bg2, rgba(255,255,255,0.02))' }}>
                     {['Title / Location', 'Category', 'Provider', 'Price', 'Status / Tier', 'Actions'].map(h => (
@@ -520,8 +548,8 @@ export default function AdminPage() {
 
           {/* ── Users table ── */}
           {tab === 'Users' && (
-            <div style={{ background: 'var(--bg1, #0a0a0a)', border: '0.5px solid var(--b, rgba(255,255,255,0.06))', borderRadius: 'var(--rl, 13px)', overflow: 'hidden' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+            <div className="adm-table-wrap" style={{ background: 'var(--bg1, #0a0a0a)', border: '0.5px solid var(--b, rgba(255,255,255,0.06))', borderRadius: 'var(--rl, 13px)', overflow: 'hidden' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', minWidth: '640px' }}>
                 <thead>
                   <tr style={{ background: 'var(--bg2, rgba(255,255,255,0.02))' }}>
                     {['User', 'Role', 'Joined', 'Badges', 'Actions'].map(h => (
