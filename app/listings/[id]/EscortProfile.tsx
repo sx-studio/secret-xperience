@@ -15,14 +15,6 @@ import { ETHNIC_VALUES, HAIR_VALUES, BUILD_VALUES } from '../../lib/attributes'
                 Personal details → Location
    ───────────────────────────────────────────────────────── */
 
-interface Review {
-  id: string
-  rating: number
-  content: string | null
-  created_at: string
-  profiles: { full_name: string | null; username: string | null } | null
-}
-
 interface EscortProfileProps {
   listing: {
     id: string
@@ -54,16 +46,11 @@ interface EscortProfileProps {
     }
     tags?: string[] | null
     services?: string[] | null
-    rating?: number
-    review_count?: number
   }
-  reviews: Review[]
   session: any
   onBook: () => void
   onMessage: () => void
-  onReviewSubmit: (rating: number, text: string) => Promise<void>
   isBookable?: boolean
-  canReview?: boolean
 }
 
 /* ── Tag classification ────────────────────────────────── */
@@ -162,15 +149,10 @@ const CATEGORY_TEXT: Record<string,string> = {
 }
 
 export default function EscortProfile({
-  listing, reviews, session, onBook, onMessage, onReviewSubmit, isBookable = false, canReview = false,
+  listing, session, onBook, onMessage, isBookable = false,
 }: EscortProfileProps) {
   const [imgIdx, setImgIdx]     = useState(0)
   const [lightbox, setLightbox] = useState(false)
-  const [rvRating, setRvRating] = useState(0)
-  const [rvHover,  setRvHover]  = useState(0)
-  const [rvText,   setRvText]   = useState('')
-  const [rvBusy,   setRvBusy]   = useState(false)
-  const [showRvForm, setShowRvForm] = useState(false)
   const [shared, setShared] = useState(false)
 
   async function handleShare() {
@@ -205,13 +187,6 @@ export default function EscortProfile({
   const catColor = CATEGORY_COLOR[listing.category] ?? 'rgba(197,160,90,0.18)'
   const catText  = CATEGORY_TEXT[listing.category]  ?? '#c5a05a'
   const meetLabel = listing.meet_type === 'both' ? 'Incall & Outcall' : listing.meet_type ? cap(listing.meet_type) : null
-
-  async function handleRvSubmit() {
-    if (rvRating === 0) return
-    setRvBusy(true)
-    await onReviewSubmit(rvRating, rvText)
-    setRvRating(0); setRvText(''); setShowRvForm(false); setRvBusy(false)
-  }
 
   /* ── Shared token colours ──────────────────────────────── */
   const C = {
@@ -294,11 +269,6 @@ export default function EscortProfile({
         .rl-btn-outline { width:100%;padding:12px;border-radius:10px;font-family:'Poppins',sans-serif;font-size:13px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;background:transparent;transition:border-color 0.2s,background 0.2s; }
         .rl-btn-outline:hover { background:rgba(197,160,90,0.05); }
 
-        /* Review */
-        .rv-star { cursor:pointer;font-size:22px;color:rgba(197,160,90,0.22);transition:color 0.15s,transform 0.1s;line-height:1;background:none;border:none;padding:0 2px; }
-        .rv-star.filled { color:#c5a05a; }
-        .rv-star:hover { transform:scale(1.15); }
-
         /* Two-column layout */
         .rl-layout { display:block; }
         @media (min-width:860px) {
@@ -365,15 +335,6 @@ export default function EscortProfile({
           <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(26px,4vw,40px)', fontWeight: 400, fontStyle: 'italic', color: C.t, lineHeight: 1.1, letterSpacing: '-0.01em' }}>
             {listing.title}
           </h1>
-          {/* Rating */}
-          {(listing.rating ?? 0) > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-              <div style={{ display: 'flex', gap: '1px' }}>
-                {[1,2,3,4,5].map(s => <span key={s} style={{ fontSize: '14px', color: s <= Math.round(listing.rating ?? 0) ? C.gold : 'rgba(197,160,90,0.2)' }}>★</span>)}
-              </div>
-              <span style={{ fontSize: '13px', color: C.t3 }}>{Number(listing.rating).toFixed(1)} <span style={{ opacity: 0.6 }}>({listing.review_count} reviews)</span></span>
-            </div>
-          )}
         </div>
 
         <div style={{ display: 'flex', gap: '12px', marginTop: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -519,59 +480,6 @@ export default function EscortProfile({
             </p>
           </div>
 
-          {/* Reviews */}
-          <div className="rl-section">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.9rem' }}>
-              <div className="rl-section-title" style={{ marginBottom: 0 }}>Reviews <span style={{ color: C.t3, fontWeight: 400, letterSpacing: 0, textTransform: 'none', fontSize: '12px' }}>({reviews.length})</span></div>
-              {canReview && !showRvForm && (
-                <button onClick={() => setShowRvForm(true)} style={{ background: 'none', border: `0.5px solid ${C.b2}`, borderRadius: '8px', color: C.gold, fontSize: '12px', padding: '5px 12px', cursor: 'pointer', fontFamily: "'Poppins',sans-serif" }}>
-                  + Leave review
-                </button>
-              )}
-            </div>
-
-            {showRvForm && (
-              <div style={{ background: C.bg1, border: `0.5px solid ${C.b}`, borderRadius: '12px', padding: '1.2rem', marginBottom: '1.25rem' }}>
-                <div style={{ display: 'flex', gap: '4px', marginBottom: '1rem' }}>
-                  {[1,2,3,4,5].map(s => (
-                    <button key={s} className={`rv-star${s <= (rvHover || rvRating) ? ' filled' : ''}`} onMouseEnter={() => setRvHover(s)} onMouseLeave={() => setRvHover(0)} onClick={() => setRvRating(s)}>★</button>
-                  ))}
-                </div>
-                <textarea
-                  value={rvText} onChange={e => setRvText(e.target.value)}
-                  placeholder="Describe your experience (optional)…" rows={3}
-                  style={{ width: '100%', background: C.bg2, border: `0.5px solid ${C.b}`, borderRadius: '8px', color: C.t, padding: '10px 12px', fontSize: '14px', resize: 'vertical', fontFamily: "'Poppins',sans-serif", outline: 'none' }}
-                />
-                <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
-                  <button disabled={rvRating === 0 || rvBusy} onClick={handleRvSubmit} style={{ padding: '9px 22px', background: 'linear-gradient(135deg,#c5a05a,#a0803d)', border: 'none', borderRadius: '8px', color: '#080808', fontWeight: 600, fontSize: '12px', cursor: rvRating === 0 ? 'not-allowed' : 'pointer', opacity: rvRating === 0 ? 0.4 : 1, fontFamily: "'Poppins',sans-serif" }}>
-                    {rvBusy ? 'Submitting…' : 'Submit review'}
-                  </button>
-                  <button onClick={() => setShowRvForm(false)} style={{ padding: '9px 18px', background: 'none', border: `0.5px solid ${C.b}`, borderRadius: '8px', color: C.t3, fontSize: '12px', cursor: 'pointer', fontFamily: "'Poppins',sans-serif" }}>Cancel</button>
-                </div>
-              </div>
-            )}
-
-            {reviews.length === 0 ? (
-              <p style={{ color: C.t3, fontSize: '14px' }}>No reviews yet. Be the first to leave one.</p>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-                {reviews.map(r => (
-                  <div key={r.id} style={{ background: C.bg1, border: `0.5px solid ${C.b}`, borderRadius: '12px', padding: '1rem 1.2rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                      <div style={{ display: 'flex', gap: '1px' }}>
-                        {[1,2,3,4,5].map(s => <span key={s} style={{ fontSize: '13px', color: s <= r.rating ? C.gold : 'rgba(197,160,90,0.18)' }}>★</span>)}
-                      </div>
-                      <span style={{ fontSize: '11px', color: C.t3 }}>{timeAgo(r.created_at)}</span>
-                    </div>
-                    {r.content && <p style={{ fontSize: '14px', color: C.t2, lineHeight: 1.65 }}>{r.content}</p>}
-                    <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.2)', marginTop: '6px' }}>
-                      — {r.profiles?.full_name ?? r.profiles?.username ?? 'Anonymous'}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
 
         </div>
 

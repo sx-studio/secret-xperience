@@ -28,8 +28,6 @@ type Listing = {
   image_focus: Record<string, { x: number; y: number }> | null
   verified: boolean
   premium: boolean
-  rating: number | null
-  review_count: number | null
   tags: string[] | null
   created_at: string
   featured_until: string | null
@@ -256,16 +254,6 @@ function EscortCard({ l, discreet, isPremier }: { l: Listing; discreet: boolean;
             <span style={{ background: 'var(--grad-gold)', color: '#000', fontWeight: 700, fontSize: '13px', padding: '10px 24px', borderRadius: '999px', letterSpacing: '0.06em' }}>View Profile →</span>
           </div>
         </div>
-
-        {/* Rating row */}
-        {(l.rating ?? 0) > 0 && (
-          <div style={{ padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '6px', borderTop: '0.5px solid var(--b)' }}>
-            <div style={{ display: 'flex', gap: '1px' }}>
-              {[1,2,3,4,5].map(s => <span key={s} style={{ fontSize: '11px', color: s <= Math.round(l.rating ?? 0) ? 'var(--gold)' : 'rgba(197,160,90,0.18)' }}>★</span>)}
-            </div>
-            <span style={{ fontSize: '11px', color: 'var(--t3)' }}>{Number(l.rating).toFixed(1)} ({l.review_count})</span>
-          </div>
-        )}
       </article>
     </Link>
   )
@@ -293,14 +281,14 @@ export default function EscortsPage() {
   const [hairColor, setHairColor]       = useState('Any')
   const [build, setBuild]               = useState('Any')
   const [selectedServices, setSelectedServices] = useState<string[]>([])
-  const [sortBy, setSortBy]             = useState<'rating' | 'price_asc' | 'price_desc' | 'newest' | 'available'>('newest')
+  const [sortBy, setSortBy]             = useState<'price_asc' | 'price_desc' | 'newest' | 'available'>('newest')
 
   const fetchListings = useCallback(async () => {
     setLoading(true)
     try {
     let q = supabase
       .from('listings')
-      .select('id,title,description,category,subcategory,city,country,price_from,price_to,currency,meet_type,images,image_focus,verified,premium,rating,review_count,tags,created_at,featured_until,age')
+      .select('id,title,description,category,subcategory,city,country,price_from,price_to,currency,meet_type,images,image_focus,verified,premium,tags,created_at,featured_until,age')
       .eq('active', true)
       .in('category', ['escorts', 'companionship', 'domination', 'experiences', 'massage'])
 
@@ -310,8 +298,7 @@ export default function EscortsPage() {
     if (priceMin > 0) q = q.gte('price_from', priceMin)
     if (priceMax < 1000) q = q.lte('price_from', priceMax)
 
-    if (sortBy === 'rating') q = q.order('rating', { ascending: false, nullsFirst: false })
-    else if (sortBy === 'price_asc') q = q.order('price_from', { ascending: true, nullsFirst: false })
+    if (sortBy === 'price_asc') q = q.order('price_from', { ascending: true, nullsFirst: false })
     else if (sortBy === 'price_desc') q = q.order('price_from', { ascending: false, nullsFirst: false })
     else q = q.order('created_at', { ascending: false })
 
@@ -656,7 +643,6 @@ export default function EscortsPage() {
                 onChange={e => setSortBy(e.target.value as any)}
                 style={{ width: 'auto', padding: '6px 10px' }}
               >
-                <option value="rating">Top rated</option>
                 <option value="available">Available now</option>
                 <option value="price_asc">Price: Low → High</option>
                 <option value="price_desc">Price: High → Low</option>

@@ -66,7 +66,7 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
 
   let query = supabase
     .from('listings')
-    .select('id,title,description,category,subcategory,city,country,price_from,price_to,verified,premium,trending,rating,review_count,meet_type,featured_until,tags,images,image_focus', { count: 'exact' })
+    .select('id,title,description,category,subcategory,city,country,price_from,price_to,verified,premium,trending,meet_type,featured_until,tags,images,image_focus', { count: 'exact' })
     .eq('active', true)
 
   if (safeQ) {
@@ -83,13 +83,9 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
   if (maxPrice != null) query = query.lte('price_from', maxPrice)
 
   query = query.order('featured_until', { ascending: false, nullsFirst: false })
-  if (sort === 'rating') query = query.order('rating', { ascending: false, nullsFirst: false })
-  else if (sort === 'price_asc') query = query.order('price_from', { ascending: true, nullsFirst: false })
+  if (sort === 'price_asc') query = query.order('price_from', { ascending: true, nullsFirst: false })
   else if (sort === 'price_desc') query = query.order('price_from', { ascending: false, nullsFirst: false })
-  else if (sort === 'relevance' && safeQ) {
-    // Title matches first, then rating, then recency
-    query = query.order('rating', { ascending: false, nullsFirst: false })
-  } else {
+  else {
     query = query.order('created_at', { ascending: false })
   }
 
@@ -214,7 +210,7 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
               })}
             </div>
             <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
-              {[{ v: 'relevance', label: 'Relevant' }, { v: 'rating', label: '★ Rating' }, { v: 'price_asc', label: 'Price ↑' }, { v: 'price_desc', label: 'Price ↓' }].map(s => (
+              {[{ v: 'relevance', label: 'Relevant' }, { v: 'price_asc', label: 'Price ↑' }, { v: 'price_desc', label: 'Price ↓' }].map(s => (
                 <Link
                   key={s.v}
                   href={`/search?${new URLSearchParams({ ...(q && { q }), ...(category !== 'all' && { category }), ...(city && city !== 'All cities' && { city }), sort: s.v }).toString()}`}
@@ -386,7 +382,6 @@ function ListingCard({ l, isFeatured }: { l: any; isFeatured: boolean }) {
           <span style={{ color: 'var(--gold)', fontFamily: 'var(--serif)' }}>
             {l.price_from ? `€${l.price_from}${l.price_to ? `–€${l.price_to}` : ''}` : 'POA'}
           </span>
-          {l.rating > 0 && <span style={{ color: 'var(--t3)' }}>★ {Number(l.rating).toFixed(1)}</span>}
         </div>
         <div style={{ fontSize: '12px', color: 'var(--t3)', marginTop: '6px' }}>
           <i className="ti ti-map-pin" style={{ marginRight: '4px' }} />{l.city}{l.country ? `, ${l.country}` : ''}

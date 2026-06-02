@@ -20,8 +20,6 @@ interface Card {
   image_focus: Record<string, { x: number; y: number }> | null
   verified: boolean
   premium: boolean
-  rating: number | null
-  review_count: number | null
   tags: string[] | null
   description: string | null
   featured_until: string | null
@@ -111,10 +109,10 @@ export default function DiscoverPage() {
 
     let q = supabase
       .from('listings')
-      .select('id,title,category,subcategory,city,country,price_from,images,image_focus,verified,premium,rating,review_count,tags,description,featured_until')
+      .select('id,title,category,subcategory,city,country,price_from,images,image_focus,verified,premium,tags,description,featured_until')
       .eq('active', true)
       .order('featured_until', { ascending: false, nullsFirst: false })
-      .order('rating', { ascending: false, nullsFirst: false })
+      .order('created_at', { ascending: false })
       .limit(BATCH + skipped.size + 10)
 
     if (cat === '__verified') {
@@ -353,12 +351,6 @@ export default function DiscoverPage() {
                       <i className="ti ti-map-pin" style={{ fontSize: 11 }} />
                       {card.city}{card.country ? `, ${card.country}` : ''}
                     </span>
-                    {card.rating && card.rating > 0 && (
-                      <span style={{ fontSize: 11, color: '#c5a05a', display: 'flex', alignItems: 'center', gap: 3 }}>
-                        <i className="ti ti-star-filled" style={{ fontSize: 10 }} />
-                        {Number(card.rating).toFixed(1)}
-                      </span>
-                    )}
                   </div>
                 </div>
               </div>
