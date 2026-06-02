@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from './lib/supabase'
 import SliderAds from './components/SliderAds/SliderAds'
 import CategoryAnimations from './components/CategoryAnimations/CategoryAnimations'
+import DesignDemos from './components/DesignDemos'
 
 export default function Home() {
   useEffect(() => {
@@ -3225,6 +3226,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
 </div><!-- #app -->` }} />
       {/* GSAP slider ads — rendered as React portal anchored after #featuredBanner */}
       <SliderAds />
+      <DesignDemos />
     </>
   )
 }
