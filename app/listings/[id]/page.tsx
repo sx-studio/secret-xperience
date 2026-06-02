@@ -47,19 +47,6 @@ const MEET_LABELS: Record<string, string> = {
 
 /* ─── Types ─────────────────────────────────────────────── */
 
-interface Review {
-  id:          string
-  listing_id:  string
-  reviewer_id: string
-  rating:      number
-  content:     string | null
-  created_at:  string
-  profiles: {
-    full_name: string | null
-    username:  string | null
-  } | null
-}
-
 interface Listing {
   id:          string
   title:       string
@@ -103,31 +90,8 @@ export default function ListingDetailPage() {
   const [isFaved,   setIsFaved]   = useState(false)
   const [favLoading, setFavLoading] = useState(false)
 
-  // Reviews state
-  const [reviews,        setReviews]        = useState<Review[]>([])
-  const [reviewsLoading, setReviewsLoading] = useState(false)
-  const [showReviewForm, setShowReviewForm] = useState(false)
-  const [selectedRating, setSelectedRating] = useState(0)
-  const [hoverRating,    setHoverRating]    = useState(0)
-  const [reviewText,     setReviewText]     = useState('')
-  const [submitting,     setSubmitting]     = useState(false)
-  const [submitError,    setSubmitError]    = useState<string | null>(null)
   const [similarListings, setSimilarListings] = useState<any[]>([])
-  const [hasConfirmedBooking, setHasConfirmedBooking] = useState(false)
   const [copied, setCopied] = useState(false)
-
-  async function fetchReviews() {
-    if (!id) return
-    setReviewsLoading(true)
-    const supabase = createClient()
-    const { data } = await supabase
-      .from('reviews')
-      .select('*, profiles(full_name, username)')
-      .eq('listing_id', id)
-      .order('created_at', { ascending: false })
-    setReviews((data as Review[]) || [])
-    setReviewsLoading(false)
-  }
 
   useEffect(() => {
     if (!id) return
@@ -159,8 +123,6 @@ export default function ListingDetailPage() {
       if (sess?.user?.id) {
         supabase.from('favorites').select('listing_id').eq('user_id', sess.user.id).eq('listing_id', id).maybeSingle()
           .then(({ data: fav }) => setIsFaved(!!fav))
-        supabase.from('bookings').select('id').eq('client_id', sess.user.id).eq('listing_id', id).eq('status', 'confirmed').limit(1)
-          .then(({ data: bk }) => setHasConfirmedBooking(!!(bk && bk.length > 0)))
       }
       if (error || !data) {
         setNotFound(true)
@@ -226,7 +188,6 @@ export default function ListingDetailPage() {
       setPageLoading(false)
     }
     load()
-    fetchReviews()
   }, [id])
 
   async function submitReview() {
