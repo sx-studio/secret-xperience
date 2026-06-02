@@ -1307,23 +1307,7 @@ export default function DashboardPage() {
             )
           })()}
 
-          {/* ── Phone & WhatsApp verification (providers) ── */}
-          {isProvider && (
-            <PhoneVerify
-              profile={profile}
-              onUpdate={async (patch) => {
-                setProfile((p: any) => ({ ...p, ...patch }))
-                // Display toggles aren't persisted by the verify API — save them here.
-                const toggles: Record<string, any> = {}
-                if ('show_phone' in patch) toggles.show_phone = patch.show_phone
-                if ('show_whatsapp' in patch) toggles.show_whatsapp = patch.show_whatsapp
-                if (Object.keys(toggles).length && user?.id) {
-                  const supabase = createClient()
-                  await supabase.from('profiles').update(toggles).eq('id', user.id)
-                }
-              }}
-            />
-          )}
+          {/* Phone verification temporarily disabled */}
 
           {/* ── Role Selector (members only) ── */}
           {profile?.role === 'user' && (

@@ -379,23 +379,6 @@ export default function CreateListingPage() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) { window.location.href = '/login'; return }
 
-    // Gate: provider must have approved identity verification
-    const { data: verif } = await supabase
-      .from('identity_verifications')
-      .select('status')
-      .eq('user_id', session.user.id)
-      .maybeSingle()
-
-    if (!verif || verif.status !== 'approved') {
-      setError(
-        verif?.status === 'pending'
-          ? 'Your identity verification is still under review. You can publish once approved.'
-          : 'Identity verification is required before publishing a listing. Please verify your identity in your dashboard.'
-      )
-      setLoading(false)
-      return
-    }
-
     // Basic tier: enforce one listing per 24 hours
     if (form.tier === 'basic') {
       const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
