@@ -177,14 +177,28 @@ function injectSpotlightCSS() {
     .card:hover {
       box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 0 0.5px rgba(197,160,90,0.35);
     }
+    @media (hover: none) {
+      .card:active {
+        transform: scale(0.975) !important;
+        box-shadow: 0 8px 28px rgba(0,0,0,0.5), 0 0 0 0.5px rgba(197,160,90,0.3) !important;
+        transition: transform 0.1s ease, box-shadow 0.1s ease !important;
+      }
+      .card:active::before {
+        opacity: 1;
+        --sx: 50%;
+        --sy: 50%;
+      }
+    }
   `
   document.head.appendChild(style)
 }
 
 function setupSpotlightAndTilt() {
-  // Use event delegation on the cards container so dynamically added cards work too
   const container = document.getElementById('listingCards')
   if (!container) return
+
+  // Touch devices get the CSS :active fallback — skip mouse handlers
+  if (navigator.maxTouchPoints > 0) return
 
   let activeCard: HTMLElement | null = null
 

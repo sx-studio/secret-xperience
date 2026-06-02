@@ -283,7 +283,7 @@ export default function AdminPage() {
   }
 
   const filteredListings = listings.filter(l => !search || l.title?.toLowerCase().includes(search.toLowerCase()) || l.city?.toLowerCase().includes(search.toLowerCase()))
-  const filteredUsers = users.filter(u => !search || u.full_name?.toLowerCase().includes(search.toLowerCase()) || u.username?.toLowerCase().includes(search.toLowerCase()))
+  const filteredUsers = users.filter(u => !search || u.full_name?.toLowerCase().includes(search.toLowerCase()) || u.username?.toLowerCase().includes(search.toLowerCase()) || u.email?.toLowerCase().includes(search.toLowerCase()))
   const filteredBookings = bookings.filter(b => !search ||
     b.listings?.title?.toLowerCase().includes(search.toLowerCase()) ||
     b.profiles?.full_name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -571,9 +571,23 @@ export default function AdminPage() {
                         )}
                       </td>
                       <td style={{ padding: '14px 16px' }}>
-                        <select value={u.role || 'user'} onChange={e => setUserRole(u.id, e.target.value)} style={{ background: 'var(--bg2, #151515)', border: '0.5px solid var(--b2, rgba(255,255,255,0.1))', borderRadius: 'var(--r, 6px)', color: 'var(--t, #ece8e1)', padding: '5px 10px', font: '400 12px/1 var(--sans)', cursor: 'pointer', outline: 'none' }}>
-                          {['user', 'provider', 'venue', 'creator', 'admin'].map(r => <option key={r} value={r}>{r}</option>)}
-                        </select>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          {(() => {
+                            const role = u.role || 'user'
+                            const roleStyles: Record<string, { bg: string; color: string }> = {
+                              admin:    { bg: 'rgba(239,68,68,0.15)',   color: '#ef4444' },
+                              provider: { bg: 'rgba(197,160,90,0.15)',  color: 'var(--gold, #c5a05a)' },
+                              venue:    { bg: 'rgba(99,102,241,0.15)',  color: '#818cf8' },
+                              creator:  { bg: 'rgba(168,85,247,0.15)', color: '#c084fc' },
+                              user:     { bg: 'rgba(255,255,255,0.06)', color: 'var(--t2, #8c8880)' },
+                            }
+                            const s = roleStyles[role] || roleStyles.user
+                            return <span style={{ display: 'inline-block', background: s.bg, color: s.color, padding: '2px 8px', borderRadius: '20px', font: '600 10px/1.4 var(--sans)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{role}</span>
+                          })()}
+                          <select value={u.role || 'user'} onChange={e => setUserRole(u.id, e.target.value)} style={{ background: 'var(--bg2, #151515)', border: '0.5px solid var(--b2, rgba(255,255,255,0.1))', borderRadius: 'var(--r, 6px)', color: 'var(--t, #ece8e1)', padding: '5px 10px', font: '400 12px/1 var(--sans)', cursor: 'pointer', outline: 'none', width: '100px' }}>
+                            {['user', 'provider', 'venue', 'creator', 'admin'].map(r => <option key={r} value={r}>{r}</option>)}
+                          </select>
+                        </div>
                       </td>
                       <td style={{ padding: '14px 16px', color: 'var(--t2, #8c8880)', fontSize: '12px' }}>{new Date(u.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
                       <td style={{ padding: '14px 16px' }}>

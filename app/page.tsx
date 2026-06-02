@@ -1935,6 +1935,14 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
     // Cache must be wired before initial fetchListings call so search has data
     ;(window as any).__sxCacheListings = (data: any[]) => { allListings = data }
 
+    // Strip OAuth error params (e.g. ?error=access_denied) before they show in the URL bar
+    if (window.location.search) {
+      const urlParams = new URLSearchParams(window.location.search)
+      if (urlParams.has('error') || urlParams.has('error_code') || urlParams.has('error_description')) {
+        history.replaceState({}, '', window.location.pathname)
+      }
+    }
+
     // Initial load
     fetchListings(activeFilters).then(async () => {
       // Deep-link: /?listing=UUID → auto-open detail panel for that listing
