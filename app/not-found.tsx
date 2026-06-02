@@ -159,7 +159,7 @@ export default function NotFound() {
           <Link href="/advertise" className="nf-link nf-link-ghost">
             Advertise
           </Link>
-          <Link href="mailto:support@secret-xperience.eu" className="nf-link nf-link-ghost">
+          <Link href="mailto:support@secretxperience.eu" className="nf-link nf-link-ghost">
             Contact
           </Link>
         </div>

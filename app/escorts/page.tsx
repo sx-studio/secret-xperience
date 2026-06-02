@@ -579,8 +579,8 @@ export default function EscortsPage() {
                     €{priceMax === 1000 ? '1000+' : priceMax}
                   </div>
                 </div>
-                <input type="range" className="price-slider" min={0} max={1000} step={25} value={priceMin} onChange={e => setPriceMin(Number(e.target.value))} />
-                <input type="range" className="price-slider" min={0} max={1000} step={25} value={priceMax} onChange={e => setPriceMax(Number(e.target.value))} style={{ marginTop: '4px' }} />
+                <input type="range" aria-label="Minimum price" className="price-slider" min={0} max={1000} step={25} value={priceMin} onChange={e => setPriceMin(Math.min(Number(e.target.value), priceMax))} />
+                <input type="range" aria-label="Maximum price" className="price-slider" min={0} max={1000} step={25} value={priceMax} onChange={e => setPriceMax(Math.max(Number(e.target.value), priceMin))} style={{ marginTop: '4px' }} />
               </div>
 
               {/* Ethnicity */}

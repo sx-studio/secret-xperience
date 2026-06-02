@@ -135,7 +135,7 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
         .s-search:focus { outline:none; border-color:var(--gbrd); }
         .s-search::placeholder { color:var(--t3); }
         @media(max-width:640px) { .s-grid { grid-template-columns:1fr 1fr; gap:10px; } .s-card-hero { height:140px; } .s-nav { padding:0 1rem; } }
-        @media(max-width:480px) { .s-grid { grid-template-columns:1fr; } .s-card-hero { height:180px; } .s-price-row { width:100%; margin-left:0!important; } }
+        @media(max-width:480px) { .s-grid { grid-template-columns:1fr 1fr; gap:8px; } .s-card-hero { height:150px; } .s-price-row { width:100%; margin-left:0!important; } }
       `}</style>
 
       <div style={{ background: 'var(--bg)', minHeight: '100vh', color: 'var(--t)' }}>

@@ -310,7 +310,7 @@ export default function HowItWorksPage() {
             Questions?{' '}
             <a href="/faq" style={{ color: '#c5a05a' }}>Browse the FAQ</a>
             {' '}or contact{' '}
-            <a href="mailto:support@secret-xperience.eu" style={{ color: '#c5a05a' }}>support@secret-xperience.eu</a>
+            <a href="mailto:support@secretxperience.eu" style={{ color: '#c5a05a' }}>support@secretxperience.eu</a>
             <br />
             <a href="/trust-safety" style={{ color: '#c5a05a66', fontSize: 11, letterSpacing: '0.05em' }}>Trust &amp; Safety →</a>
           </div>

@@ -164,6 +164,9 @@ export default function ListingDetailPage() {
       }
       if (error || !data) {
         setNotFound(true)
+      } else if ((data.active === false || (data.status && data.status !== 'approved')) && data.profile_id !== sess?.user?.id) {
+        // Pending/rejected listings are only visible to their owner.
+        setNotFound(true)
       } else {
         setListing(data as any)
         if (data.images?.length) setActiveImg(data.images[0])
@@ -411,11 +414,12 @@ export default function ListingDetailPage() {
               listing={{ ...listing, tags: (listing as any).tags ?? [], services: (listing as any).services ?? [] }}
               reviews={reviews}
               session={session}
+              canReview={!!session && session.user.id !== listing.profile_id && hasConfirmedBooking}
               isBookable={isBookable}
               onBook={isBookable ? goToBook : goToMessage}
               onMessage={goToMessage}
               onReviewSubmit={async (rating, text) => {
-                if (!session) return
+                if (!session || session.user.id === listing.profile_id || !hasConfirmedBooking) return
                 const supabase = createClient()
                 await supabase.from('reviews').insert({ listing_id: id, reviewer_id: session.user.id, rating, content: text.trim() || null })
                 await fetchReviews()

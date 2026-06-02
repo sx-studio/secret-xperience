@@ -63,6 +63,7 @@ interface EscortProfileProps {
   onMessage: () => void
   onReviewSubmit: (rating: number, text: string) => Promise<void>
   isBookable?: boolean
+  canReview?: boolean
 }
 
 /* ── Tag classification ────────────────────────────────── */
@@ -161,7 +162,7 @@ const CATEGORY_TEXT: Record<string,string> = {
 }
 
 export default function EscortProfile({
-  listing, reviews, session, onBook, onMessage, onReviewSubmit, isBookable = false,
+  listing, reviews, session, onBook, onMessage, onReviewSubmit, isBookable = false, canReview = false,
 }: EscortProfileProps) {
   const [imgIdx, setImgIdx]     = useState(0)
   const [lightbox, setLightbox] = useState(false)
@@ -315,11 +316,11 @@ export default function EscortProfile({
         <div className="rl-lb" onClick={() => setLightbox(false)}>
           {images.length > 1 && (
             <>
-              <button className="rl-lb-arrow" style={{ left: 16 }} onClick={e => { e.stopPropagation(); setImgIdx(i => (i - 1 + images.length) % images.length) }}>‹</button>
-              <button className="rl-lb-arrow" style={{ right: 16 }} onClick={e => { e.stopPropagation(); setImgIdx(i => (i + 1) % images.length) }}>›</button>
+              <button aria-label="Previous photo" className="rl-lb-arrow" style={{ left: 16 }} onClick={e => { e.stopPropagation(); setImgIdx(i => (i - 1 + images.length) % images.length) }}>‹</button>
+              <button aria-label="Next photo" className="rl-lb-arrow" style={{ right: 16 }} onClick={e => { e.stopPropagation(); setImgIdx(i => (i + 1) % images.length) }}>›</button>
             </>
           )}
-          <img src={images[imgIdx]} alt="" onClick={e => e.stopPropagation()} />
+          <img src={images[imgIdx]} alt={listing.title} onClick={e => e.stopPropagation()} />
         </div>
       )}
 
@@ -522,7 +523,7 @@ export default function EscortProfile({
           <div className="rl-section">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.9rem' }}>
               <div className="rl-section-title" style={{ marginBottom: 0 }}>Reviews <span style={{ color: C.t3, fontWeight: 400, letterSpacing: 0, textTransform: 'none', fontSize: '12px' }}>({reviews.length})</span></div>
-              {session && !showRvForm && (
+              {canReview && !showRvForm && (
                 <button onClick={() => setShowRvForm(true)} style={{ background: 'none', border: `0.5px solid ${C.b2}`, borderRadius: '8px', color: C.gold, fontSize: '12px', padding: '5px 12px', cursor: 'pointer', fontFamily: "'Poppins',sans-serif" }}>
                   + Leave review
                 </button>

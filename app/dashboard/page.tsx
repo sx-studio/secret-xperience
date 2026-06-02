@@ -1561,8 +1561,8 @@ export default function DashboardPage() {
                       <span className={listing.active ? 'db-status-pill-active' : 'db-status-pill-inactive'}>
                         {listing.active ? 'Live' : 'Inactive'}
                       </span>
-                      {/* Reactivate button — free; basic listings are always free to keep live */}
-                      {!listing.active && (
+                      {/* Reactivate button — free; only for approved listings (not pending/rejected) */}
+                      {!listing.active && listing.status !== 'rejected' && listing.status !== 'pending' && (
                         <button
                           onClick={() => reactivateListing(listing.id)}
                           disabled={activatingListing === listing.id}

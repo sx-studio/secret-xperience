@@ -810,6 +810,7 @@ export default function CreateListingPage() {
           .cl-category-grid { grid-template-columns: repeat(2, 1fr) !important; }
           .cl-price-grid    { grid-template-columns: 1fr !important; }
           .cl-location-grid { grid-template-columns: 1fr !important; }
+          .cl-stats-grid    { grid-template-columns: 1fr !important; }
         }
       `}</style>
 
@@ -1164,7 +1165,7 @@ export default function CreateListingPage() {
                   }}>
                     These are appended as tags on your listing.
                   </p>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+                  <div className="cl-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
                     {/* Ethnicity */}
                     <div>
                       <label style={{ ...label, marginBottom: '4px' }}>Ethnicity</label>
@@ -1485,6 +1486,14 @@ export default function CreateListingPage() {
           {step === 4 && (
             <div>
               <h2 className="cl-section-heading">Add Photos</h2>
+              {form.images.length === 0 && uploadingImages.length === 0 && (
+                <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', background: 'rgba(245,168,38,0.08)', border: '0.5px solid rgba(245,168,38,0.3)', borderRadius: 10, padding: '12px 14px', marginBottom: '1rem' }}>
+                  <i className="ti ti-alert-triangle" style={{ color: '#f5a826', fontSize: 18, flexShrink: 0, marginTop: 1 }} />
+                  <div style={{ fontSize: 13, color: 'var(--t2, #b8b4ad)', lineHeight: 1.5 }}>
+                    Listings without photos get far fewer views. Add at least one clear photo to stand out.
+                  </div>
+                </div>
+              )}
               {/* Hidden file input */}
               <input
                 ref={fileInputRef}

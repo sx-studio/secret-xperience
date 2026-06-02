@@ -24,6 +24,7 @@ export default function LoginPage() {
   const [showPass, setShowPass] = useState(false)
   const [shake, setShake]       = useState(false)
   const [success, setSuccess]   = useState(false)
+  const [successKind, setSuccessKind] = useState<'signup' | 'reset'>('signup')
   const [termsChecked, setTermsChecked]         = useState(false)
   const [newsletterChecked, setNewsletterChecked] = useState(true)
 
@@ -50,7 +51,16 @@ export default function LoginPage() {
 
     if (mode === 'login') {
       const { error } = await signIn(email, password)
-      if (error) { setError(error.message) } else {
+      if (error) {
+        const m = error.message?.toLowerCase() || ''
+        setError(
+          m.includes('invalid login') || m.includes('credentials')
+            ? 'Wrong email or password. Please try again.'
+            : m.includes('email not confirmed')
+            ? 'Please confirm your email first — check your inbox for the link.'
+            : error.message || 'Could not sign you in. Please try again.'
+        )
+      } else {
         // Providers/venues/creators with no listings → onboard them straight to create
         const nextUrl = new URLSearchParams(window.location.search).get('next')
         if (nextUrl && nextUrl.startsWith('/')) {
@@ -100,12 +110,27 @@ export default function LoginPage() {
 
   async function handleGoogle() {
     const supabase = createClient()
-    // Pass the selected role so the callback can set it on new OAuth signups.
-    const callbackUrl = `${window.location.origin}/auth/callback?role=${encodeURIComponent(role)}`
+    // Only pass role when signing up — on login the role already exists in the DB
+    // and must not be overwritten (e.g. a provider logging in via Google).
+    const callbackUrl = mode === 'signup'
+      ? `${window.location.origin}/auth/callback?role=${encodeURIComponent(role)}`
+      : `${window.location.origin}/auth/callback`
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: callbackUrl },
     })
+  }
+
+  async function handleForgot() {
+    setError('')
+    if (!email.trim()) { setError('Enter your email above first, then tap “Forgot password?”.'); return }
+    const supabase = createClient()
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/reset-password`,
+    })
+    if (error) { setError(error.message || 'Could not send the reset link. Try again.'); return }
+    setSuccessKind('reset')
+    setSuccess(true)
   }
 
   function switchMode(next: 'login' | 'signup') {
@@ -598,9 +623,15 @@ export default function LoginPage() {
                   lineHeight: 1.7,
                   fontWeight: 300,
                 }}>
-                  We sent a confirmation link to{' '}
-                  <span style={{ color: 'rgba(236,232,225,0.75)' }}>{email}</span>.
-                  <br />Click it to confirm your email and activate your account.
+                  {successKind === 'reset' ? (
+                    <>We sent a password reset link to{' '}
+                    <span style={{ color: 'rgba(236,232,225,0.75)' }}>{email}</span>.
+                    <br />Click it to choose a new password.</>
+                  ) : (
+                    <>We sent a confirmation link to{' '}
+                    <span style={{ color: 'rgba(236,232,225,0.75)' }}>{email}</span>.
+                    <br />Click it to confirm your email and activate your account.</>
+                  )}
                 </p>
               </div>
             ) : (
@@ -723,6 +754,17 @@ export default function LoginPage() {
                         <i className={`ti ${showPass ? 'ti-eye-off' : 'ti-eye'}`} />
                       </button>
                     </div>
+                    {mode === 'login' && (
+                      <div style={{ textAlign: 'right', marginTop: 8 }}>
+                        <button
+                          type="button"
+                          onClick={handleForgot}
+                          style={{ background: 'none', border: 'none', color: 'var(--gold, #c5a05a)', fontSize: 12, cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}
+                        >
+                          Forgot password?
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   {/* Terms + Newsletter (signup only) */}
