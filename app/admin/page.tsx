@@ -535,7 +535,12 @@ export default function AdminPage() {
                     <tr key={u.id} className="adm-tr" style={{ borderTop: '0.5px solid var(--b, rgba(255,255,255,0.04))', color: 'var(--t, #ece8e1)', transition: 'background var(--t-fast, .1s)' }}>
                       <td style={{ padding: '14px 16px' }}>
                         <div style={{ fontWeight: 500 }}>{u.full_name || u.username || 'Anonymous'}</div>
-                        <div style={{ font: '400 10px/1 monospace', color: 'var(--t3, #4c4a47)', marginTop: '3px' }}>{u.id.slice(0, 12)}…</div>
+                        <div style={{ font: '400 10px/1 monospace', color: 'var(--t3, #4c4a47)', marginTop: '3px' }}>{u.email || u.id.slice(0, 12) + '…'}</div>
+                        {(u.phone || u.whatsapp) && (
+                          <div style={{ font: '400 10px/1 monospace', color: u.phone_verified ? '#4aa8ff' : 'var(--t3, #4c4a47)', marginTop: '2px' }}>
+                            {u.phone || u.whatsapp}{u.phone_verified ? ' ✓' : ''}
+                          </div>
+                        )}
                       </td>
                       <td style={{ padding: '14px 16px' }}>
                         <select value={u.role || 'user'} onChange={e => setUserRole(u.id, e.target.value)} style={{ background: 'var(--bg2, #151515)', border: '0.5px solid var(--b2, rgba(255,255,255,0.1))', borderRadius: 'var(--r, 6px)', color: 'var(--t, #ece8e1)', padding: '5px 10px', font: '400 12px/1 var(--sans)', cursor: 'pointer', outline: 'none' }}>
@@ -550,7 +555,7 @@ export default function AdminPage() {
                         </div>
                       </td>
                       <td style={{ padding: '14px 16px' }}>
-                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
                           <button
                             className="adm-action-icon-btn adm-action-btn"
                             onClick={() => toggleUser(u.id, 'verified', u.verified)}
@@ -567,6 +572,17 @@ export default function AdminPage() {
                             <i className={`ti ${u.premium ? 'ti-star-off' : 'ti-star'}`} aria-hidden="true" />
                             <span style={{ font: '600 10px/1 var(--sans)', letterSpacing: '0.06em' }}>{u.premium ? 'Unpremium' : 'Premium'}</span>
                           </button>
+                          {(u.phone || u.whatsapp) && (
+                            <button
+                              className="adm-action-icon-btn adm-action-btn"
+                              title={u.phone || u.whatsapp}
+                              onClick={() => toggleUser(u.id, 'phone_verified', u.phone_verified)}
+                              style={{ color: u.phone_verified ? 'var(--t2, #8c8880)' : '#4aa8ff', borderColor: u.phone_verified ? 'var(--b2)' : 'rgba(74,168,255,0.3)' }}
+                            >
+                              <i className={`ti ${u.phone_verified ? 'ti-phone-off' : 'ti-phone-check'}`} aria-hidden="true" />
+                              <span style={{ font: '600 10px/1 var(--sans)', letterSpacing: '0.06em' }}>{u.phone_verified ? 'Unverify #' : 'Verify #'}</span>
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
