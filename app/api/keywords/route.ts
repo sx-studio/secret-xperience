@@ -53,22 +53,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Provide at least one keyword.' }, { status: 400 })
   }
 
-  // Use DataForSEO Labs (clickstream-backed) — Google Ads Keyword Planner
-  // returns NULL volume for adult/sexual keywords, but Labs + clickstream does not.
+  // Exact volume: use the dedicated clickstream search-volume endpoint — it
+  // computes volume for ANY keyword (incl. adult terms not in the Labs static DB,
+  // which Google Ads nulls and keyword_overview returns empty for).
+  // Ideas: Labs keyword_ideas expands seeds into DB keywords with clickstream volume.
   const endpoint = mode === 'ideas'
     ? '/v3/dataforseo_labs/google/keyword_ideas/live'
-    : '/v3/dataforseo_labs/google/keyword_overview/live'
+    : '/v3/keywords_data/clickstream_data/dataforseo_search_volume/live'
 
   const reqBody: any = {
     location_name: market.location,
     language_code: language,
-    include_clickstream_data: true,   // unlocks volume for adult keywords
   }
   if (mode === 'ideas') {
-    reqBody.keywords = keywords.slice(0, 20)   // ideas takes seeds
+    reqBody.keywords = keywords.slice(0, 20)   // seeds
     reqBody.limit = 100
+    reqBody.include_clickstream_data = true    // unlocks volume for adult keywords
   } else {
-    reqBody.keywords = keywords.slice(0, 100)  // overview takes exact terms
+    reqBody.keywords = keywords.slice(0, 1000) // clickstream endpoint takes many exact terms
   }
 
   const auth = Buffer.from(`${DFS_LOGIN}:${DFS_PASS}`).toString('base64')
