@@ -110,8 +110,8 @@ export async function POST(req: NextRequest) {
       })
       .sort((a, b) => (b.volume || 0) - (a.volume || 0))
 
-    // Observability (no creds, no PII) — log both top-level and task-level status.
-    console.error(`[keywords] mode=${mode} market=${marketKey}/${language} in=${keywords.length} httpStatus=${upstream.status} apiCode=${statusCode} apiMsg="${statusMsg}" taskCode=${taskCode} taskMsg="${taskMsg}" items=${items.length} out=${results.length}`)
+    // Observability (no creds, no PII).
+    console.log(`[keywords] mode=${mode} market=${marketKey}/${language} in=${keywords.length} apiCode=${statusCode} taskCode=${taskCode} items=${items.length} out=${results.length}`)
 
     // Surface DataForSEO task-level errors (e.g. clickstream not in plan) to the UI.
     if (taskCode >= 40000) {
@@ -120,24 +120,12 @@ export async function POST(req: NextRequest) {
     if (!upstream.ok || statusCode >= 40000) {
       return NextResponse.json({ error: `DataForSEO: ${statusMsg}`, results }, { status: 502 })
     }
-    if (results.length === 0) {
-      // Structural diagnostics so we can see the real response shape from the UI.
-      const resultLen = Array.isArray(task?.result) ? task.result.length : 0
-      const firstKeys = Object.keys(task?.result?.[0] || {}).join(',')
-      const itemKeys = Object.keys(task?.result?.[0]?.items?.[0] || {}).join(',')
+    // Friendly note when the provider has no volume for these terms (common for
+    // exact adult keywords in smaller EU markets — use ideas mode / broader seeds).
+    if (results.length === 0 || results.every(r => r.volume == null)) {
       return NextResponse.json({
         market: marketKey, language, mode, results,
-        note: `0 rows · apiCode=${statusCode} taskCode=${taskCode} taskMsg="${taskMsg}" resultLen=${resultLen} resultKeys=[${firstKeys}] items=${items.length} itemKeys=[${itemKeys}]`,
-      })
-    }
-
-    // If rows exist but every volume is null, dump the raw item shape so we can
-    // see exactly where this endpoint puts search_volume.
-    if (results.every(r => r.volume == null)) {
-      const sample = JSON.stringify(items[0] || {}).slice(0, 500)
-      return NextResponse.json({
-        market: marketKey, language, mode, results,
-        note: `volumes null · itemKeys=[${Object.keys(items[0] || {}).join(',')}] sample=${sample}`,
+        note: 'No volume data from DataForSEO for these terms in this market. Adult exact-match terms are often sparse — try "Keyword ideas" mode, a broader seed, or English.',
       })
     }
 

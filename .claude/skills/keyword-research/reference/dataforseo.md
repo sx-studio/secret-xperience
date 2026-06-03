@@ -39,14 +39,32 @@ Check they exist before calling:
 
 Use `location_name`/`language_name` if you don't have the numeric codes handy — the API accepts either.
 
-## ⚠️ Adult-keyword gotcha (important)
+## ⚠️ Adult-keyword data coverage (verified 2026-06-03)
 
-Google Ads Keyword Planner **returns NULL search volume for adult/sexual keywords**
-(Google content policy). So the `keywords_data/google_ads/*` endpoints come back with
-empty volume for terms like "escort brussels". **Use the DataForSEO Labs endpoints with
-`include_clickstream_data: true` instead** — clickstream volume is derived independently
-of Google Ads and returns real numbers for adult terms. The in-app `/api/keywords` route
-already does this (keyword_overview / keyword_ideas + clickstream).
+Hard-won findings from wiring the in-app tool — adult keyword **volume** is sparse across
+ALL DataForSEO sources, especially for smaller EU markets (e.g. Belgium):
+
+- **Google Ads** (`keywords_data/google_ads/search_volume`) → returns the keyword rows but
+  `search_volume: null` for adult terms (Google content policy).
+- **Labs keyword_overview** (exact lookup) → returns an **empty item** for adult exact terms
+  not in its static DB (e.g. "escort brussels" → `items=1, itemKeys=[]`).
+- **Clickstream** (`keywords_data/clickstream_data/dataforseo_search_volume`) → returns the
+  keyword but `search_volume: null, monthly_searches: null` (no clickstream signal for that
+  exact phrase in BE).
+- **Labs keyword_ideas** (seed expansion) → DOES return volumes, BUT for the seed "escort"
+  in BE/Dutch it surfaces non-adult meanings (Ford Escort car: "escort zetec", "escort rally";
+  "escort watch"; "ski escort"), all at volume ~10. The adult-services terms are essentially
+  absent from the dataset.
+
+**Conclusion:** DataForSEO (like most providers) has thin adult-vertical volume data for EU
+markets. The in-app tool works perfectly; the *data* is the limitation. Practical guidance:
+- Use the tool for the **non-restricted parts of the funnel** where data is rich: hotels,
+  rentals, nightlife, city/venue terms, and informational/content keywords
+  ("escort legal belgium", "discreet hotel brussels").
+- For the **core adult-services terms**, rely on the skill's **Tier 1 relative estimates**
+  (High/Med/Low) prioritised by live listing inventory — that's the realistic signal.
+- The route maps EU markets to DataForSEO location/language and uses the clickstream
+  search-volume endpoint for exact terms + Labs keyword_ideas for discovery.
 
 ## The three endpoints you'll actually use
 
