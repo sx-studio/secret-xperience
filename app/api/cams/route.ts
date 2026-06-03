@@ -10,6 +10,7 @@ const API_KEY  = process.env.STRIPCASH_API_KEY  || ''
 const AGG_URL   = 'https://go.mavrtracktor.com/app/models-ext/models'
 const BASIC_URL = 'https://go.mavrtracktor.com/api/models/online'
 
+export const runtime = 'edge'
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {

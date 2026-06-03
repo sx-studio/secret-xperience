@@ -222,7 +222,7 @@ export default function LivePage() {
         {/* Model grid */}
         <div className="lp-grid">
           {loading
-            ? Array.from({ length: 12 }).map((_, i) => (
+            ? Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="mc-skel" />
               ))
             : error
@@ -239,7 +239,8 @@ export default function LivePage() {
                   <img
                     src={m.snapshotUrl || m.previewUrlThumbSmall}
                     alt={m.username}
-                    loading="lazy"
+                    loading={models.indexOf(m) < 6 ? 'eager' : 'lazy'}
+                    fetchPriority={models.indexOf(m) < 4 ? 'high' : 'auto'}
                     onError={(e) => {
                       const img = e.currentTarget
                       if (img.src !== m.previewUrlThumbSmall) {
