@@ -39,6 +39,15 @@ Check they exist before calling:
 
 Use `location_name`/`language_name` if you don't have the numeric codes handy — the API accepts either.
 
+## ⚠️ Adult-keyword gotcha (important)
+
+Google Ads Keyword Planner **returns NULL search volume for adult/sexual keywords**
+(Google content policy). So the `keywords_data/google_ads/*` endpoints come back with
+empty volume for terms like "escort brussels". **Use the DataForSEO Labs endpoints with
+`include_clickstream_data: true` instead** — clickstream volume is derived independently
+of Google Ads and returns real numbers for adult terms. The in-app `/api/keywords` route
+already does this (keyword_overview / keyword_ideas + clickstream).
+
 ## The three endpoints you'll actually use
 
 ### 1. Search volume (exact terms you already have)

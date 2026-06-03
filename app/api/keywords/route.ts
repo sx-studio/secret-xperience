@@ -53,9 +53,23 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Provide at least one keyword.' }, { status: 400 })
   }
 
+  // Use DataForSEO Labs (clickstream-backed) — Google Ads Keyword Planner
+  // returns NULL volume for adult/sexual keywords, but Labs + clickstream does not.
   const endpoint = mode === 'ideas'
-    ? '/v3/keywords_data/google_ads/keywords_for_keywords/live'
-    : '/v3/keywords_data/google_ads/search_volume/live'
+    ? '/v3/dataforseo_labs/google/keyword_ideas/live'
+    : '/v3/dataforseo_labs/google/keyword_overview/live'
+
+  const reqBody: any = {
+    location_name: market.location,
+    language_code: language,
+    include_clickstream_data: true,   // unlocks volume for adult keywords
+  }
+  if (mode === 'ideas') {
+    reqBody.keywords = keywords.slice(0, 20)   // ideas takes seeds
+    reqBody.limit = 100
+  } else {
+    reqBody.keywords = keywords.slice(0, 100)  // overview takes exact terms
+  }
 
   const auth = Buffer.from(`${DFS_LOGIN}:${DFS_PASS}`).toString('base64')
 
@@ -66,27 +80,28 @@ export async function POST(req: NextRequest) {
         'Authorization': `Basic ${auth}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify([{
-        location_name: market.location,
-        language_code: language,
-        keywords: keywords.slice(0, mode === 'ideas' ? 20 : 100),
-      }]),
+      body: JSON.stringify([reqBody]),
     })
 
     const json = await upstream.json().catch(() => null)
     const statusMsg = json?.status_message || 'unknown'
-    const items: any[] = json?.tasks?.[0]?.result || []
+    // Labs nests rows under result[0].items; fall back to flat result for safety.
+    const items: any[] = json?.tasks?.[0]?.result?.[0]?.items || json?.tasks?.[0]?.result || []
 
-    // Normalise to a stable shape the UI/skill can rely on.
+    // Normalise. Prefer clickstream volume (works for adult terms), then Google Ads.
     const results = items
       .filter((it: any) => it && it.keyword)
-      .map((it: any) => ({
-        keyword:    it.keyword,
-        volume:     it.search_volume ?? null,
-        cpc:        it.cpc ?? null,
-        competition: it.competition ?? null,
-        competitionIndex: it.competition_index ?? null,
-      }))
+      .map((it: any) => {
+        const ki = it.keyword_info || {}
+        const cs = it.clickstream_keyword_info || {}
+        return {
+          keyword:    it.keyword,
+          volume:     ki.search_volume ?? cs.search_volume ?? it.search_volume ?? null,
+          cpc:        ki.cpc ?? it.cpc ?? null,
+          competition: ki.competition_level ?? ki.competition ?? it.competition ?? null,
+          difficulty: it.keyword_properties?.keyword_difficulty ?? null,
+        }
+      })
       .sort((a, b) => (b.volume || 0) - (a.volume || 0))
 
     // Observability (no creds, no PII).

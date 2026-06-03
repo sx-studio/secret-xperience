@@ -1142,7 +1142,7 @@ export default function AdminPage() {
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                     <thead>
                       <tr style={{ background: 'var(--bg2, rgba(255,255,255,0.02))' }}>
-                        {['Keyword', 'Volume / mo', 'CPC', 'Competition'].map(h => (
+                        {['Keyword', 'Volume / mo', 'CPC', 'Competition', 'Difficulty'].map(h => (
                           <th key={h} style={{ textAlign: h === 'Keyword' ? 'left' : 'right', padding: '12px 16px', font: '600 9px/1 var(--sans)', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--t3, #4c4a47)' }}>{h}</th>
                         ))}
                       </tr>
@@ -1154,6 +1154,7 @@ export default function AdminPage() {
                           <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 700, color: 'var(--gold)' }}>{r.volume != null ? r.volume.toLocaleString() : '—'}</td>
                           <td style={{ padding: '12px 16px', textAlign: 'right', color: 'var(--t2, #8c8880)' }}>{r.cpc != null ? `€${Number(r.cpc).toFixed(2)}` : '—'}</td>
                           <td style={{ padding: '12px 16px', textAlign: 'right', color: 'var(--t2, #8c8880)', fontSize: '12px', textTransform: 'capitalize' }}>{r.competition || '—'}</td>
+                          <td style={{ padding: '12px 16px', textAlign: 'right', color: 'var(--t2, #8c8880)', fontSize: '12px' }}>{r.difficulty != null ? r.difficulty : '—'}</td>
                         </tr>
                       ))}
                     </tbody>
