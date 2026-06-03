@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '../lib/supabase'
 
-const TABS = ['Listings', 'Users', 'Verification', 'Bookings', 'Newsletter', 'Contacts', 'Acquisition'] as const
+const TABS = ['Listings', 'Users', 'Verification', 'Bookings', 'Newsletter', 'Contacts', 'Acquisition', 'Keywords'] as const
 type Tab = typeof TABS[number]
 
 const TAB_ICONS: Record<Tab, string> = {
@@ -14,6 +14,7 @@ const TAB_ICONS: Record<Tab, string> = {
   Newsletter: 'mail',
   Contacts: 'address-book',
   Acquisition: 'chart-arrows-vertical',
+  Keywords: 'search',
 }
 
 const LS_KEY = (t: Tab) => `sx_admin_seen_${t.toLowerCase()}`
@@ -38,7 +39,7 @@ function saveLastSeen(t: Tab) {
 export default function AdminPage() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [tab, setTab] = useState<Tab>('Listings')
-  const [badges, setBadges] = useState<Record<Tab, number>>({ Listings: 0, Users: 0, Verification: 0, Bookings: 0, Newsletter: 0, Contacts: 0, Acquisition: 0 })
+  const [badges, setBadges] = useState<Record<Tab, number>>({ Listings: 0, Users: 0, Verification: 0, Bookings: 0, Newsletter: 0, Contacts: 0, Acquisition: 0, Keywords: 0 })
   const currentTab = useRef<Tab>('Listings')
   const [listings, setListings] = useState<any[]>([])
   const [users, setUsers] = useState<any[]>([])
@@ -62,6 +63,14 @@ export default function AdminPage() {
   const [acq, setAcq]                 = useState<any[]>([])
   const [acqTotal, setAcqTotal]       = useState<number>(0)
   const [acqLoading, setAcqLoading]   = useState(true)
+  // Keywords (DataForSEO) tool
+  const [kwInput, setKwInput]         = useState('')
+  const [kwMarket, setKwMarket]       = useState('be')
+  const [kwLang, setKwLang]           = useState('nl')
+  const [kwMode, setKwMode]           = useState<'volume' | 'ideas'>('volume')
+  const [kwResults, setKwResults]     = useState<any[]>([])
+  const [kwLoading, setKwLoading]     = useState(false)
+  const [kwError, setKwError]         = useState<string | null>(null)
 
   useEffect(() => {
     let channel: ReturnType<ReturnType<typeof createClient>['channel']> | null = null
@@ -119,6 +128,7 @@ export default function AdminPage() {
         Newsletter:   0,
         Contacts:     (leadsr.data || []).filter((l: any) => new Date(l.created_at).getTime() > seenContacts).length,
         Acquisition:  0,
+        Keywords:     0,
       })
       // Mark the initial active tab as seen immediately
       saveLastSeen('Listings')
@@ -282,6 +292,26 @@ export default function AdminPage() {
     setVerifWorking(null)
   }
 
+  async function runKeywords() {
+    const keywords = kwInput.split('\n').map(s => s.trim()).filter(Boolean)
+    if (keywords.length === 0) { setKwError('Enter at least one keyword (one per line).'); return }
+    setKwLoading(true); setKwError(null); setKwResults([])
+    try {
+      const res = await fetch('/api/keywords', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ keywords, market: kwMarket, language: kwLang, mode: kwMode }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setKwError(data.error || 'Request failed.'); setKwResults(data.results || []) }
+      else setKwResults(data.results || [])
+    } catch {
+      setKwError('Network error reaching the keyword API.')
+    } finally {
+      setKwLoading(false)
+    }
+  }
+
   const filteredListings = listings.filter(l => !search || l.title?.toLowerCase().includes(search.toLowerCase()) || l.city?.toLowerCase().includes(search.toLowerCase()))
   const filteredUsers = users.filter(u => !search || u.full_name?.toLowerCase().includes(search.toLowerCase()) || u.username?.toLowerCase().includes(search.toLowerCase()) || u.email?.toLowerCase().includes(search.toLowerCase()))
   const filteredBookings = bookings.filter(b => !search ||
@@ -411,7 +441,7 @@ export default function AdminPage() {
           <div>
             <h1 style={{ fontFamily: 'var(--serif)', fontWeight: 500, fontSize: '36px', color: 'var(--t, #ece8e1)', margin: 0, lineHeight: 1.1 }}>{tab}</h1>
             <div style={{ font: '300 11px/1 var(--sans)', color: 'var(--t3, #4c4a47)', marginTop: '4px', letterSpacing: '0.04em' }}>
-              {tab === 'Listings' ? `${filteredListings.length} listings` : tab === 'Users' ? `${filteredUsers.length} users` : tab === 'Newsletter' ? (search ? `${filteredNlSubs.length} of ${nlSubCount ?? '…'} subscribers` : `${nlSubCount ?? '…'} subscribers`) : tab === 'Contacts' ? `${optinContacts.length} opted-in · ${leads.length} leads` : tab === 'Acquisition' ? `${acqTotal} tracked signups · ${acq.length} sources` : `${filteredBookings.length} bookings`}
+              {tab === 'Listings' ? `${filteredListings.length} listings` : tab === 'Users' ? `${filteredUsers.length} users` : tab === 'Newsletter' ? (search ? `${filteredNlSubs.length} of ${nlSubCount ?? '…'} subscribers` : `${nlSubCount ?? '…'} subscribers`) : tab === 'Contacts' ? `${optinContacts.length} opted-in · ${leads.length} leads` : tab === 'Acquisition' ? `${acqTotal} tracked signups · ${acq.length} sources` : tab === 'Keywords' ? `${kwResults.length ? `${kwResults.length} results` : 'SEO research'}` : `${filteredBookings.length} bookings`}
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -1045,6 +1075,91 @@ export default function AdminPage() {
                   </tbody>
                 </table>
               </div>
+            </div>
+          )}
+
+          {/* ── Keywords (DataForSEO) ── */}
+          {tab === 'Keywords' && (
+            <div>
+              <div style={{ marginBottom: '1rem', fontFamily: 'var(--serif)', fontSize: 15, color: 'var(--t2)' }}>
+                SEO keyword research — live volume, CPC & competition from <strong style={{ color: 'var(--gold)' }}>DataForSEO</strong>
+              </div>
+              <div style={{ background: 'var(--bg1, #0a0a0a)', border: '0.5px solid var(--b, rgba(255,255,255,0.06))', borderRadius: 'var(--rl, 13px)', padding: '1.25rem', marginBottom: '1.25rem' }}>
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'flex-end', marginBottom: '12px' }}>
+                  <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', font: '600 10px/1 var(--sans)', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--t3)' }}>
+                    Market
+                    <select value={kwMarket} onChange={e => { const m = e.target.value; setKwMarket(m); setKwLang(({ be: 'nl', nl: 'nl', de: 'de', fr: 'fr', lu: 'fr', ch: 'de' } as any)[m] || 'en') }}
+                      style={{ background: 'var(--bg2, #111)', color: 'var(--t)', border: '0.5px solid var(--b)', borderRadius: '8px', padding: '8px 10px', font: '400 13px var(--sans)' }}>
+                      <option value="be">Belgium</option>
+                      <option value="nl">Netherlands</option>
+                      <option value="de">Germany</option>
+                      <option value="fr">France</option>
+                      <option value="lu">Luxembourg</option>
+                      <option value="ch">Switzerland</option>
+                    </select>
+                  </label>
+                  <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', font: '600 10px/1 var(--sans)', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--t3)' }}>
+                    Language
+                    <select value={kwLang} onChange={e => setKwLang(e.target.value)}
+                      style={{ background: 'var(--bg2, #111)', color: 'var(--t)', border: '0.5px solid var(--b)', borderRadius: '8px', padding: '8px 10px', font: '400 13px var(--sans)' }}>
+                      <option value="nl">Dutch</option>
+                      <option value="fr">French</option>
+                      <option value="de">German</option>
+                      <option value="en">English</option>
+                      <option value="it">Italian</option>
+                      <option value="es">Spanish</option>
+                    </select>
+                  </label>
+                  <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', font: '600 10px/1 var(--sans)', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--t3)' }}>
+                    Mode
+                    <select value={kwMode} onChange={e => setKwMode(e.target.value as 'volume' | 'ideas')}
+                      style={{ background: 'var(--bg2, #111)', color: 'var(--t)', border: '0.5px solid var(--b)', borderRadius: '8px', padding: '8px 10px', font: '400 13px var(--sans)' }}>
+                      <option value="volume">Exact volume (these terms)</option>
+                      <option value="ideas">Keyword ideas (expand seeds)</option>
+                    </select>
+                  </label>
+                </div>
+                <textarea value={kwInput} onChange={e => setKwInput(e.target.value)} rows={5}
+                  placeholder={'One keyword per line, e.g.\nescort brussels\nescort antwerpen\nprivé ontvangst brussel'}
+                  style={{ width: '100%', background: 'var(--bg2, #111)', color: 'var(--t)', border: '0.5px solid var(--b)', borderRadius: '8px', padding: '10px 12px', font: '400 13px/1.6 var(--sans)', resize: 'vertical' }} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '12px' }}>
+                  <button onClick={runKeywords} disabled={kwLoading}
+                    style={{ background: 'var(--gold, #c5a05a)', color: '#0a0a0a', border: 'none', borderRadius: '8px', padding: '10px 20px', font: '600 13px var(--sans)', cursor: kwLoading ? 'wait' : 'pointer', opacity: kwLoading ? 0.6 : 1 }}>
+                    {kwLoading ? 'Querying…' : 'Research'}
+                  </button>
+                  {kwResults.length > 0 && (
+                    <button onClick={() => exportCsv(kwResults, `sx-keywords-${kwMarket}-${new Date().toISOString().slice(0,10)}.csv`)}
+                      className="adm-action-icon-btn" style={{ color: 'var(--gold)', borderColor: 'var(--gbrd)', gap: '6px' }}>
+                      <i className="ti ti-download" /><span style={{ font: '600 11px/1 var(--sans)', letterSpacing: '0.08em' }}>Export CSV</span>
+                    </button>
+                  )}
+                  {kwError && <span style={{ color: '#e0607a', fontSize: '12px' }}>{kwError}</span>}
+                </div>
+              </div>
+
+              {kwResults.length > 0 && (
+                <div style={{ background: 'var(--bg1, #0a0a0a)', border: '0.5px solid var(--b, rgba(255,255,255,0.06))', borderRadius: 'var(--rl, 13px)', overflow: 'hidden' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                    <thead>
+                      <tr style={{ background: 'var(--bg2, rgba(255,255,255,0.02))' }}>
+                        {['Keyword', 'Volume / mo', 'CPC', 'Competition'].map(h => (
+                          <th key={h} style={{ textAlign: h === 'Keyword' ? 'left' : 'right', padding: '12px 16px', font: '600 9px/1 var(--sans)', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--t3, #4c4a47)' }}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {kwResults.map((r, i) => (
+                        <tr key={i} className="adm-tr" style={{ borderTop: '0.5px solid var(--b, rgba(255,255,255,0.04))' }}>
+                          <td style={{ padding: '12px 16px', fontWeight: 600 }}>{r.keyword}</td>
+                          <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 700, color: 'var(--gold)' }}>{r.volume != null ? r.volume.toLocaleString() : '—'}</td>
+                          <td style={{ padding: '12px 16px', textAlign: 'right', color: 'var(--t2, #8c8880)' }}>{r.cpc != null ? `€${Number(r.cpc).toFixed(2)}` : '—'}</td>
+                          <td style={{ padding: '12px 16px', textAlign: 'right', color: 'var(--t2, #8c8880)', fontSize: '12px', textTransform: 'capitalize' }}>{r.competition || '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           )}
 
