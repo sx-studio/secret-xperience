@@ -85,8 +85,12 @@ export async function POST(req: NextRequest) {
 
     const json = await upstream.json().catch(() => null)
     const statusMsg = json?.status_message || 'unknown'
+    const statusCode = json?.status_code ?? 0
+    const task = json?.tasks?.[0] || {}
+    const taskMsg = task?.status_message || 'n/a'
+    const taskCode = task?.status_code ?? 0
     // Labs nests rows under result[0].items; fall back to flat result for safety.
-    const items: any[] = json?.tasks?.[0]?.result?.[0]?.items || json?.tasks?.[0]?.result || []
+    const items: any[] = task?.result?.[0]?.items || task?.result || []
 
     // Normalise. Prefer clickstream volume (works for adult terms), then Google Ads.
     const results = items
@@ -104,11 +108,18 @@ export async function POST(req: NextRequest) {
       })
       .sort((a, b) => (b.volume || 0) - (a.volume || 0))
 
-    // Observability (no creds, no PII).
-    console.log(`[keywords] mode=${mode} market=${marketKey}/${language} in=${keywords.length} status="${statusMsg}" out=${results.length}`)
+    // Observability (no creds, no PII) — log both top-level and task-level status.
+    console.error(`[keywords] mode=${mode} market=${marketKey}/${language} in=${keywords.length} httpStatus=${upstream.status} apiCode=${statusCode} apiMsg="${statusMsg}" taskCode=${taskCode} taskMsg="${taskMsg}" items=${items.length} out=${results.length}`)
 
-    if (!upstream.ok || json?.status_code >= 40000) {
+    // Surface DataForSEO task-level errors (e.g. clickstream not in plan) to the UI.
+    if (taskCode >= 40000) {
+      return NextResponse.json({ error: `DataForSEO task ${taskCode}: ${taskMsg}`, results: [] }, { status: 502 })
+    }
+    if (!upstream.ok || statusCode >= 40000) {
       return NextResponse.json({ error: `DataForSEO: ${statusMsg}`, results }, { status: 502 })
+    }
+    if (results.length === 0) {
+      return NextResponse.json({ market: marketKey, language, mode, results, note: `No rows returned (task: ${taskMsg}).` })
     }
 
     return NextResponse.json({ market: marketKey, language, mode, results })

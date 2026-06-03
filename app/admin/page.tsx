@@ -304,7 +304,7 @@ export default function AdminPage() {
       })
       const data = await res.json()
       if (!res.ok) { setKwError(data.error || 'Request failed.'); setKwResults(data.results || []) }
-      else setKwResults(data.results || [])
+      else { setKwResults(data.results || []); if (data.note) setKwError(data.note) }
     } catch {
       setKwError('Network error reaching the keyword API.')
     } finally {
