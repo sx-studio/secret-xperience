@@ -29,7 +29,10 @@
       "mcp__resend__list-contacts",
       "mcp__resend__list-segments",
       "mcp__resend__list-emails",
-      "mcp__resend__list-logs"
+      "mcp__resend__list-logs",
+      "Bash(rm -f ~/.dataforseo.env)",
+      "Bash(sed -i '/DataForSEO/d; /DATAFORSEO_/d' ~/.bashrc ~/.profile)",
+      "Read(//root/**)"
     ]
   }
 }
