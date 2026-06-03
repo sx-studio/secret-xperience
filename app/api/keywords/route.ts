@@ -131,6 +131,16 @@ export async function POST(req: NextRequest) {
       })
     }
 
+    // If rows exist but every volume is null, dump the raw item shape so we can
+    // see exactly where this endpoint puts search_volume.
+    if (results.every(r => r.volume == null)) {
+      const sample = JSON.stringify(items[0] || {}).slice(0, 500)
+      return NextResponse.json({
+        market: marketKey, language, mode, results,
+        note: `volumes null · itemKeys=[${Object.keys(items[0] || {}).join(',')}] sample=${sample}`,
+      })
+    }
+
     return NextResponse.json({ market: marketKey, language, mode, results })
   } catch (e: any) {
     console.error(`[keywords] fetch failed: ${e?.message || e}`)
