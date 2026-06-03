@@ -2020,6 +2020,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
       <button onclick="__cycleTheme()" aria-label="Toggle theme" style="width:34px;height:34px;background:var(--bg2);border:0.5px solid var(--b2);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--t2);font-size:16px;flex-shrink:0;"><i class="ti ti-moon-stars" id="themeIcon"></i></button>
       <!-- logged-out -->
       <a href="/discover" class="nb" style="text-decoration:none;display:flex;align-items:center;gap:5px;color:var(--gold);font-weight:500;" title="Swipe to discover"><i class="ti ti-sparkles" aria-hidden="true"></i> Discover</a>
+      <a href="/live" class="nb" style="text-decoration:none;display:flex;align-items:center;gap:5px;color:#ef4444;font-weight:500;" title="Live cams"><i class="ti ti-live-photo" aria-hidden="true"></i> Live <span style="width:5px;height:5px;border-radius:50%;background:#ef4444;display:inline-block;animation:liveblink 1.2s ease-in-out infinite;margin-left:1px;"></span></a>
       <a href="/events" class="nb" style="text-decoration:none;display:flex;align-items:center;gap:6px;"><i class="ti ti-calendar-event" aria-hidden="true"></i> Events</a>
       <button class="nb" id="loginBtn">Log in</button>
       <button class="nb pri" id="signupBtn" onclick="window.location.href='/advertise'">List your service</button>
@@ -2205,6 +2206,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
       <!-- always-visible: quick actions -->
       <a href="/search" class="nav-drawer-link"><i class="ti ti-search"></i> Search</a>
       <a href="/discover" class="nav-drawer-link" style="color:var(--gold)"><i class="ti ti-sparkles"></i> ✦ Discover</a>
+      <a href="/live" class="nav-drawer-link" style="color:#ef4444"><i class="ti ti-live-photo"></i> <span style="display:inline-flex;align-items:center;gap:5px">Live Cams <span style="width:6px;height:6px;border-radius:50%;background:#ef4444;display:inline-block;animation:liveblink 1.2s ease-in-out infinite" /></span></a>
       <!-- ── CATEGORY GROUPS ── -->
       <div class="nd-group-hd">Companions</div>
       <a href="/escorts" class="nd-sub-link"><i class="ti ti-heart-handshake"></i> Escorts <span style="font-size:10px;color:var(--t3);margin-left:4px;">(outcall)</span></a>
@@ -2602,11 +2604,12 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         <div class="footer-col">
           <div class="footer-col-title">Browse</div>
           <a href="/escorts">Escorts</a>
-          <a href="/companionship">Companionship</a>
+          <a href="/private-reception?cat=companionship">Companionship</a>
           <a href="/nightlife">Nightlife</a>
           <a href="/events">Events</a>
           <a href="/creators">Creators</a>
           <a href="/rentals">Rentals</a>
+          <a href="/live">Live Cams</a>
         </div>
         <div class="footer-col">
           <div class="footer-col-title">Resources</div>
