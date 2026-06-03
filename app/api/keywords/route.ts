@@ -119,7 +119,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: `DataForSEO: ${statusMsg}`, results }, { status: 502 })
     }
     if (results.length === 0) {
-      return NextResponse.json({ market: marketKey, language, mode, results, note: `No rows returned (task: ${taskMsg}).` })
+      // Structural diagnostics so we can see the real response shape from the UI.
+      const resultLen = Array.isArray(task?.result) ? task.result.length : 0
+      const firstKeys = Object.keys(task?.result?.[0] || {}).join(',')
+      const itemKeys = Object.keys(task?.result?.[0]?.items?.[0] || {}).join(',')
+      return NextResponse.json({
+        market: marketKey, language, mode, results,
+        note: `0 rows · apiCode=${statusCode} taskCode=${taskCode} taskMsg="${taskMsg}" resultLen=${resultLen} resultKeys=[${firstKeys}] items=${items.length} itemKeys=[${itemKeys}]`,
+      })
     }
 
     return NextResponse.json({ market: marketKey, language, mode, results })
