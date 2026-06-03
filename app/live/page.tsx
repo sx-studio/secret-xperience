@@ -147,6 +147,16 @@ export default function LivePage() {
         .mc-viewers i{font-size:11px}
         .mc-flag{font-size:13px;line-height:1}
 
+        /* token CTA — fades in on hover */
+        .mc-cta{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+          background:rgba(0,0,0,.55);opacity:0;transition:opacity .2s;pointer-events:none}
+        .mc:hover .mc-cta{opacity:1}
+        .mc-cta-pill{background:var(--gold,#c5a05a);color:#050505;
+          padding:6px 14px;border-radius:20px;font:700 11px/1.4 var(--sans);
+          letter-spacing:.04em;white-space:nowrap;
+          box-shadow:0 4px 16px rgba(197,160,90,.4)}
+        @media(hover:none){.mc-cta{display:none}}
+
         /* skeleton loader */
         .mc-skel{border-radius:12px;aspect-ratio:9/13;
           background:linear-gradient(90deg,#111 25%,#1a1a1a 50%,#111 75%);
@@ -238,6 +248,9 @@ export default function LivePage() {
                     }}
                   />
                   <div className="mc-overlay" />
+                  <div className="mc-cta">
+                    <span className="mc-cta-pill">Get 50 Tokens Free</span>
+                  </div>
                   <div className="mc-top">
                     <div className="mc-live">
                       <span />

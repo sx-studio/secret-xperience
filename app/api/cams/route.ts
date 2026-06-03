@@ -30,6 +30,9 @@ export async function GET(req: NextRequest) {
     limit: String(limit),
     broadcastHD: '0',   // include SD too — more models
     status: 'public',
+    // EU audience targeting — surface EN/NL/DE/FR/PT/PL speakers first
+    modelsLanguage: 'en,nl,de,fr,pt,pl,it,es',
+    scLabel: '1',       // required by EU law for EU-facing ad placements
   })
 
   try {
@@ -71,7 +74,7 @@ export async function GET(req: NextRequest) {
         username:             m.username,
         snapshotUrl:          m.snapshotUrl,
         previewUrlThumbSmall: m.previewUrlThumbSmall,
-        clickUrl:             m.clickUrl,
+        clickUrl:             m.clickUrl ? `${m.clickUrl}${m.clickUrl.includes('?') ? '&' : '?'}action=sb50tokens` : m.clickUrl,
         modelsCountry:        m.modelsCountry || '',
         tags:                 m.tags || [],
         viewersCount:         m.viewersCount || 0,
