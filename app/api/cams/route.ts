@@ -41,20 +41,25 @@ export async function GET(req: NextRequest) {
     if (API_KEY) headers['Authorization'] = `Bearer ${API_KEY}`
 
     let models: any[] = []
+    let upstreamStatus = 0
+    let upstreamUsed = 'aggregator'
 
     const aggRes = await fetch(`${AGG_URL}?${params}`, {
       headers,
       next: { revalidate: 30 },
     })
+    upstreamStatus = aggRes.status
 
     if (aggRes.ok) {
       const d = await aggRes.json()
       models = d.models || []
     } else {
       // Fallback: basic endpoint
+      upstreamUsed = 'basic'
       const basicRes = await fetch(`${BASIC_URL}?${params}`, {
         next: { revalidate: 30 },
       })
+      upstreamStatus = basicRes.status
       if (basicRes.ok) {
         const d = await basicRes.json()
         models = d.models || []
@@ -84,10 +89,14 @@ export async function GET(req: NextRequest) {
         streamRatio:          m.stream ? (m.stream.height > m.stream.width ? 'vertical' : 'horizontal') : 'horizontal',
       }))
 
+    // Observability (no PII): credential presence, upstream status, counts.
+    console.log(`[cams] tag=${tag} keyPresent=${!!API_KEY} userIdPresent=${!!USER_ID} upstream=${upstreamUsed} status=${upstreamStatus} raw=${models.length} returned=${filtered.length} viewer=${viewerCountry || 'n/a'}`)
+
     return NextResponse.json({ models: filtered }, {
       headers: { 'Cache-Control': 's-maxage=30, stale-while-revalidate=60' },
     })
-  } catch {
+  } catch (e: any) {
+    console.error(`[cams] fetch failed keyPresent=${!!API_KEY} userIdPresent=${!!USER_ID} err=${e?.message || e}`)
     return NextResponse.json({ models: [] }, { status: 503 })
   }
 }
