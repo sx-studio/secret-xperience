@@ -1157,6 +1157,8 @@ footer{background:var(--bg1);border-top:0.5px solid var(--b);padding:2.5rem 1.5r
   padding:0;
   display:flex;flex-direction:column;
   overflow-y:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
 }
 .nav-drawer.open{transform:translateX(0)}
 .nav-drawer-hd{
