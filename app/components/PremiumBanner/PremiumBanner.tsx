@@ -75,13 +75,25 @@ export default function PremiumBanner({ placement, category, portalTo }: Props) 
   const eyebrow = isHome ? 'Homepage Premium' : 'Featured in this section'
 
   const banner = (
+    <>
+    <style>{`
+      .pbanner { transition: border-color .18s, box-shadow .18s; }
+      .pbanner:hover { border-color: ${accent}99 !important; box-shadow: 0 12px 38px rgba(0,0,0,0.45), inset 0 0 0 1px ${accent}22 !important; }
+      @media(max-width:520px){
+        .pbanner { grid-template-columns: 1fr !important; }
+        .pbanner > div:first-child { min-height: 150px; }
+        .pbanner .pbanner-body { padding: 1.1rem 1.2rem !important; }
+      }
+    `}</style>
     <a
       href={href}
       className="pbanner"
       style={{
         // Full-width, image-left / content-right premium banner.
+        // Image column scales with the container (min 130px, up to ~32%) so it
+        // stays balanced from phone to wide desktop instead of a tiny fixed image.
         display: 'grid',
-        gridTemplateColumns: 'minmax(120px, 220px) 1fr',
+        gridTemplateColumns: 'minmax(130px, 32%) 1fr',
         gap: 0,
         textDecoration: 'none',
         borderRadius: 16,
@@ -113,7 +125,7 @@ export default function PremiumBanner({ placement, category, portalTo }: Props) 
       </div>
 
       {/* Content */}
-      <div style={{ padding: isHome ? '1.4rem 1.6rem' : '1.1rem 1.3rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 6 }}>
+      <div className="pbanner-body" style={{ padding: isHome ? '1.4rem 1.6rem' : '1.1rem 1.3rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 6, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 700, color: accent }}>
             ✦ {eyebrow}
@@ -148,15 +160,8 @@ export default function PremiumBanner({ placement, category, portalTo }: Props) 
           </span>
         </div>
       </div>
-
-      <style>{`
-        .pbanner:hover { border-color: ${accent}99; box-shadow: 0 12px 38px rgba(0,0,0,0.45), inset 0 0 0 1px ${accent}22; }
-        @media(max-width:520px){
-          .pbanner { grid-template-columns: 1fr !important; }
-          .pbanner > div:first-child { min-height: 150px; }
-        }
-      `}</style>
     </a>
+    </>
   )
 
   if (portalTo) {
