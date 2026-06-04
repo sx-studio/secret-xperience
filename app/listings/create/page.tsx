@@ -177,6 +177,8 @@ export default function CreateListingPage() {
   const [success, setSuccess] = useState(false)
   const [error, setError]     = useState('')
   const [wallet, setWallet]   = useState<{ balance: number } | null>(null)
+  // Identity-verification gate: 'loading' until checked, then verified / pending / rejected / none.
+  const [verifGate, setVerifGate] = useState<'loading' | 'verified' | 'pending' | 'rejected' | 'none'>('loading')
 
   const [form, setForm] = useState<FormState>({
     tier:        'basic',
@@ -218,6 +220,20 @@ export default function CreateListingPage() {
       const { data: prof } = await supabase
         .from('profiles').select('*').eq('id', session.user.id).single()
       setProfile(prof)
+      // Identity-verification gate (Verotel compliance): a provider can only
+      // publish once their ID is approved. Mirror the RLS check on the client
+      // so unverified users see a clear "verify first" screen instead of a
+      // form that would fail on submit.
+      if (prof?.verified === true || prof?.role === 'admin') {
+        setVerifGate('verified')
+      } else {
+        const { data: verif } = await supabase
+          .from('identity_verifications').select('status').eq('user_id', session.user.id).maybeSingle()
+        setVerifGate(verif?.status === 'approved' ? 'verified'
+          : verif?.status === 'pending' ? 'pending'
+          : verif?.status === 'rejected' ? 'rejected'
+          : 'none')
+      }
       // Load token wallet
       const { data: w } = await supabase
         .from('user_wallets').select('balance').eq('user_id', session.user.id).maybeSingle()
@@ -380,6 +396,14 @@ export default function CreateListingPage() {
     const supabase = createClient()
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) { window.location.href = '/login'; return }
+
+    // Compliance gate: never attempt to publish for an unverified provider
+    // (RLS blocks it anyway, but show a friendly message instead of a DB error).
+    if (verifGate !== 'verified') {
+      setError('You need an approved identity verification before you can publish a listing.')
+      setLoading(false)
+      return
+    }
 
     // Basic tier: enforce one listing per 24 hours
     if (form.tier === 'basic') {
@@ -602,11 +626,40 @@ export default function CreateListingPage() {
     </>
   )
 
+  /* ─── Identity-verification gate ─── */
+  // Block the create flow until the provider's ID is approved. This mirrors the
+  // RLS policy that enforces the same rule server-side (Verotel compliance).
+  if (verifGate !== 'loading' && verifGate !== 'verified') {
+    const gate = {
+      none:     { icon: 'ti-id-badge-2', title: 'Verify your identity to publish', body: 'For everyone’s safety, all providers must confirm their identity and age before a listing can go live. It takes about two minutes — upload a photo ID and a selfie, and our team reviews it.', cta: 'Verify my identity', href: '/verify' },
+      pending:  { icon: 'ti-clock-hour-4', title: 'Verification in review', body: 'Thanks — we’ve received your documents and our team is reviewing them. You’ll be notified the moment you’re approved, and then you can publish your listing.', cta: 'Check verification status', href: '/verify' },
+      rejected: { icon: 'ti-alert-triangle', title: 'Verification needs attention', body: 'We couldn’t verify your last submission. Please resubmit with a clear photo ID and selfie, or contact support if you think this is a mistake.', cta: 'Resubmit documents', href: '/verify' },
+    }[verifGate]
+    return (
+      <>
+        <style>{`@import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css');@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}`}</style>
+        <div style={{ minHeight: '100vh', background: 'var(--bg, #050505)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', fontFamily: 'var(--sans, "Poppins", sans-serif)' }}>
+          <div style={{ maxWidth: 460, textAlign: 'center', color: 'var(--t, #ece8e1)', animation: 'fadeUp 0.5s ease' }}>
+            <div style={{ width: 64, height: 64, margin: '0 auto 1.5rem', borderRadius: '50%', background: 'linear-gradient(135deg,rgba(197,160,90,0.15),rgba(197,160,90,0.05))', border: '0.5px solid rgba(197,160,90,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <i className={`ti ${gate.icon}`} style={{ fontSize: 30, color: 'var(--gold, #c5a05a)' }} />
+            </div>
+            <h1 style={{ fontFamily: "'Cormorant Garamond', var(--serif, serif)", fontSize: 30, fontWeight: 400, marginBottom: '0.75rem', lineHeight: 1.15 }}>{gate.title}</h1>
+            <p style={{ color: 'var(--t2, rgba(255,255,255,0.5))', fontSize: 14, fontWeight: 300, lineHeight: 1.6, marginBottom: '2rem' }}>{gate.body}</p>
+            <a href={gate.href} style={{ display: 'inline-block', padding: '13px 30px', background: 'linear-gradient(90deg,#c5a05a,#e8c97a)', borderRadius: 12, color: '#0a0a0a', fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>{gate.cta} →</a>
+            <div style={{ marginTop: '1.25rem' }}>
+              <a href="/dashboard" style={{ color: 'var(--t3, rgba(255,255,255,0.35))', fontSize: 13, textDecoration: 'none' }}>← Back to dashboard</a>
+            </div>
+          </div>
+        </div>
+      </>
+    )
+  }
+
   /* ─── Main render ─── */
   return (
     <>
       <style>{`
-        
+
         @import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 

@@ -43,6 +43,7 @@ What's next (user hasn't asked for these yet, don't do proactively):
 ---
 
 ## Done (recent work, don't redo)
+- **Verotel compliance fixes (2026-06-04)** — (1) **Verification gate re-enabled**: `/listings/create` now blocks unverified providers with a clear "verify first / pending / rejected" screen (checks `profiles.verified` then `identity_verifications.status`), plus a submit-handler guard. Real enforcement is a RESTRICTIVE RLS policy (migration `20260604_verification_gate.sql`, **pending apply**) so it can't be bypassed via direct API. (2) **Explicit consent checkbox** added to `/verify` — affirmative 18+/ownership/processing consent, required to submit; recorded as `consent_given`+`consent_at` on `identity_verifications` (submit API resilient if columns not yet migrated). Admin verification card shows "✓ Consent given · date".
 - **Ad tier pricing + 2 new placements (2026-06-04)** — benchmarked vs Quartier-Rouge (BE): slider €25/wk, section €30/wk, homepage €140/mo. Repriced to undercut ~20%: Featured 50tok/€5 (entry hook, unchanged), Slider 75→200tok/€20, Premium 150→300tok/€30. Added **Section Premium** (240tok/7d/€24 — full-width banner on one category page) and **Homepage Premium** (1100tok/30d/€110 — full-width banner on homepage). New `PremiumBanner` component (`app/components/PremiumBanner/`) renders image-left/content-right banner; returns null when unsold so layouts stay clean. Mounted on homepage (portal → `#homepagePremiumMount`) + all 7 category pages scoped by category. Tier costs synced across `tokens/spend` route, `tokens` page, `listings/create`. **Migration `20260604_ad_tiers_section_homepage.sql` still needs applying** (see Pending).
 - Mobile nav drawer scroll fix — body scroll lock on open + `overscroll-behavior:contain` so the drawer scrolls, not the page behind.
 - Token system migrations applied (`token_packages`, `user_wallets`, `token_ledger`, `payment_orders`)
@@ -107,6 +108,16 @@ What's next (user hasn't asked for these yet, don't do proactively):
   - Next.js version confirmed as **13.5.1** — `cookies()` is synchronous (no `await`), important for all server code
 
 ## Pending
+- **Apply `20260604_verification_gate.sql`** — COMPLIANCE (Verotel). Adds a RESTRICTIVE RLS policy so only `profiles.verified = true` (or admin) users can INSERT listings, and adds `consent_given`/`consent_at` columns to `identity_verifications`. Until applied: the client gate + consent checkbox still work and the submit API falls back gracefully (logs a warning, skips consent columns), but the **server-side publish gate is NOT enforced** and consent isn't recorded. Run in Supabase SQL editor:
+  ```sql
+  DROP POLICY IF EXISTS "Only verified providers can publish listings" ON public.listings;
+  CREATE POLICY "Only verified providers can publish listings" ON public.listings
+    AS RESTRICTIVE FOR INSERT TO authenticated
+    WITH CHECK (EXISTS (SELECT 1 FROM public.profiles p WHERE p.id = auth.uid() AND (p.verified = true OR p.role = 'admin')));
+  ALTER TABLE public.identity_verifications
+    ADD COLUMN IF NOT EXISTS consent_given boolean NOT NULL DEFAULT false,
+    ADD COLUMN IF NOT EXISTS consent_at timestamptz;
+  ```
 - **Apply `20260604_ad_tiers_section_homepage.sql`** — widens `listings.tier` CHECK to allow `section` + `homepage`, adds partial indexes. **REQUIRED** before anyone can buy the two new ad tiers, or the token spend fails the constraint. Run in Supabase SQL editor:
   ```sql
   ALTER TABLE public.listings DROP CONSTRAINT IF EXISTS listings_tier_check;

@@ -686,6 +686,11 @@ export default function AdminPage() {
                           Submitted: {v.submitted_at ? new Date(v.submitted_at).toLocaleString() : '—'}
                           {v.reviewed_at && ` · Reviewed: ${new Date(v.reviewed_at).toLocaleString()}`}
                         </div>
+                        {v.consent_given && (
+                          <div style={{ fontSize: 11, color: '#26d4a0', marginTop: 3 }}>
+                            ✓ Consent given{v.consent_at ? ` · ${new Date(v.consent_at).toLocaleString()}` : ''}
+                          </div>
+                        )}
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

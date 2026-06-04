@@ -36,6 +36,9 @@ export default function VerifyPage() {
   const [backPreview,   setBackPreview]   = useState<string | null>(null)
   const [selfiePreview, setSelfiePreview] = useState<string | null>(null)
 
+  // Explicit, affirmative consent — required before documents can be submitted.
+  const [consent, setConsent] = useState(false)
+
   useEffect(() => {
     const supabase = createClient()
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -55,6 +58,7 @@ export default function VerifyPage() {
 
   async function handleSubmit() {
     if (!frontFile || !selfieFile) { setError('Front of ID and selfie are required.'); return }
+    if (!consent) { setError('Please confirm the consent statement before submitting.'); return }
     if (!session) { window.location.href = '/login?next=/verify'; return }
     setLoading(true); setError('')
 
@@ -79,7 +83,7 @@ export default function VerifyPage() {
       const res = await fetch('/api/verify/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ frontPath, backPath, selfiePath }),
+        body: JSON.stringify({ frontPath, backPath, selfiePath, consent: true }),
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Submission failed'); setLoading(false); return }
@@ -206,14 +210,27 @@ export default function VerifyPage() {
                 onChange={e => e.target.files?.[0] && handleFile(e.target.files[0], setSelfieFile, setSelfiePreview)} />
             </div>
 
+            {/* Explicit consent — required for compliance (Verotel) */}
+            <label htmlFor="verifConsent" style={{ display:'flex', gap:12, alignItems:'flex-start', cursor:'pointer', background: consent ? 'rgba(29,201,143,0.05)' : 'rgba(255,255,255,0.02)', border:`0.5px solid ${consent ? S.green + '55' : '#ffffff14'}`, borderRadius:12, padding:'1rem 1.1rem', transition:'background .2s,border-color .2s' }}>
+              <input id="verifConsent" type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)}
+                style={{ display:'block', width:18, height:18, marginTop:2, accentColor:S.gold, cursor:'pointer', flexShrink:0 }} />
+              <span style={{ fontSize:12.5, color:S.t2, lineHeight:1.65 }}>
+                I confirm that I am <strong style={{ color:S.t }}>at least 18 years old</strong> (and of legal age in my country),
+                that the ID and selfie I am uploading <strong style={{ color:S.t }}>belong to me</strong>, and that I
+                <strong style={{ color:S.t }}> consent</strong> to SecretXperience processing these documents to verify my
+                identity and age, and to displaying any listing I publish. I give this consent freely and can withdraw it by
+                contacting <a href="/contact">support</a>.
+              </span>
+            </label>
+
             {error && (
               <p style={{ fontSize:13, color:S.red, background:'rgba(224,90,90,0.08)', border:`0.5px solid ${S.red}44`, borderRadius:8, padding:'10px 14px' }}>
                 {error}
               </p>
             )}
 
-            <button onClick={handleSubmit} disabled={loading || !frontFile || !selfieFile}
-              style={{ padding:'14px 28px', background: (!frontFile || !selfieFile) ? '#1a1a1a' : 'linear-gradient(90deg,#c5a05a,#d4b06e)', border:'none', borderRadius:10, color: (!frontFile || !selfieFile) ? S.t3 : '#080808', fontFamily:S.sans, fontWeight:600, fontSize:14, cursor: (!frontFile || !selfieFile) ? 'not-allowed' : 'pointer', letterSpacing:'0.04em' }}>
+            <button onClick={handleSubmit} disabled={loading || !frontFile || !selfieFile || !consent}
+              style={{ padding:'14px 28px', background: (!frontFile || !selfieFile || !consent) ? '#1a1a1a' : 'linear-gradient(90deg,#c5a05a,#d4b06e)', border:'none', borderRadius:10, color: (!frontFile || !selfieFile || !consent) ? S.t3 : '#080808', fontFamily:S.sans, fontWeight:600, fontSize:14, cursor: (!frontFile || !selfieFile || !consent) ? 'not-allowed' : 'pointer', letterSpacing:'0.04em' }}>
               {loading ? 'Submitting…' : 'Submit for review'}
             </button>
 

@@ -40,9 +40,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
   }
 
-  const { frontPath, backPath, selfiePath } = body
+  const { frontPath, backPath, selfiePath, consent } = body
   if (!frontPath || !selfiePath) {
     return NextResponse.json({ error: 'frontPath and selfiePath are required' }, { status: 400 })
+  }
+  // Compliance: explicit consent is mandatory and recorded with a timestamp.
+  if (consent !== true) {
+    return NextResponse.json({ error: 'Consent is required to submit identity documents.' }, { status: 400 })
   }
 
   const bucket = 'identity-docs'
@@ -66,15 +70,26 @@ export async function POST(req: NextRequest) {
     const backUrl   = backPath ? await signPath(backPath) : null
     const selfieUrl = await signPath(selfiePath)
 
-    const { error } = await admin.from('identity_verifications').upsert({
+    const now = new Date().toISOString()
+    const baseRow = {
       user_id:       uid,
       status:        'pending',
       doc_front_url: frontUrl,
       doc_back_url:  backUrl,
       selfie_url:    selfieUrl,
-      submitted_at:  new Date().toISOString(),
-      updated_at:    new Date().toISOString(),
-    }, { onConflict: 'user_id' })
+      submitted_at:  now,
+      updated_at:    now,
+    }
+
+    let { error } = await admin.from('identity_verifications')
+      .upsert({ ...baseRow, consent_given: true, consent_at: now }, { onConflict: 'user_id' })
+
+    // Graceful fallback if the consent columns aren't migrated yet (42703 = undefined_column).
+    if (error && (error.code === '42703' || /consent_given|consent_at|column/i.test(error.message))) {
+      console.warn('[verify/submit] consent columns missing — apply 20260604_verification_gate.sql. Recording without consent fields.')
+      const retry = await admin.from('identity_verifications').upsert(baseRow, { onConflict: 'user_id' })
+      error = retry.error
+    }
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
