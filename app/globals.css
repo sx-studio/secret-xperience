@@ -272,14 +272,14 @@
    RESET + BASE
    ════════════════════════════════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; overflow-x: hidden; }
+html { scroll-behavior: smooth; }
 body {
   background: var(--bg);
   color: var(--t);
   font-family: var(--sans);
   font-size: 14px;
   line-height: 1.65;
-  overflow-x: hidden;
+  overflow-x: clip;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
   position: relative;
@@ -796,6 +796,7 @@ select.input { appearance: none; padding-right: 32px; background-image: linear-g
 .catbar{
   display:flex;gap:6px;padding:.75rem 1.25rem;
   overflow-x:auto;scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;
   border-bottom:0.5px solid var(--b);
   background:var(--bg);
   flex-shrink:0;
@@ -968,13 +969,14 @@ select.input { appearance: none; padding-right: 32px; background-image: linear-g
 .ft-btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(197,160,90,0.35)}
 
 /* ── TABS ── */
-.tabs{display:flex;border-bottom:0.5px solid var(--b);margin-bottom:1.1rem;overflow-x:auto;scrollbar-width:none}
+.tabs{display:flex;border-bottom:0.5px solid var(--b);margin-bottom:1.1rem;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .tabs::-webkit-scrollbar{display:none}
 .tab{
-  padding:8px 16px;font-size:13px;cursor:pointer;
+  padding:10px 16px;font-size:13px;cursor:pointer;min-height:44px;
   color:var(--t2);border-bottom:2px solid transparent;
   margin-bottom:-.5px;white-space:nowrap;flex-shrink:0;
   transition:color .15s;letter-spacing:.03em;
+  display:flex;align-items:center;
 }
 .tab.active{color:var(--gold);border-bottom-color:var(--gold);font-weight:500}
 .tab:hover{color:var(--t)}
@@ -1129,10 +1131,11 @@ footer{background:var(--bg1);border-top:0.5px solid var(--b);padding:2.5rem 1.5r
 }
 .bnav-items{display:flex;justify-content:stretch;width:100%}
 .bni{
-  display:flex;flex-direction:column;align-items:center;gap:2px;
-  cursor:pointer;padding:4px 0;border-radius:var(--r);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  cursor:pointer;padding:6px 0;min-height:44px;border-radius:var(--r);
   background:transparent;border:none;color:var(--t3);
   transition:color .15s;flex:1;min-width:0;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
 }
 .bni.active,.bni:hover{color:var(--gold)}
 .bni i{font-size:21px}
@@ -1227,7 +1230,18 @@ footer{background:var(--bg1);border-top:0.5px solid var(--b);padding:2.5rem 1.5r
   .sidebar-title{color:var(--t2)}
   .fsec{margin-bottom:1.6rem}
   .filter-toggle{display:flex}
-  .main{padding:1rem .9rem;padding-bottom:calc(var(--bnav-h) + 1rem)}
+  .main{padding:1rem 0;padding-bottom:calc(var(--bnav-h) + 1rem)}
+  /* Restore lateral padding on elements INSIDE .main that should have it */
+  .main>.admin-bar,.main>.featured,.main>.res-row,.main>.filter-toggle,
+  .main>.how-steps,.main>.cards,.main>#recentViewedSection,
+  #listingCards,.res-row,.filter-toggle,.admin-bar,.featured,.how-steps{
+    margin-left:.9rem;margin-right:.9rem
+  }
+  /* Tabs: full-bleed with inner padding so active underline reaches edge */
+  .tabs{
+    margin:0;padding:0 .9rem;
+    border-radius:0;
+  }
   .how-wrap{padding:1.5rem .9rem;padding-bottom:calc(var(--bnav-h) + 1.5rem)}
   .admin-stats{grid-template-columns:repeat(2,1fr)}
   .cards{grid-template-columns:repeat(2,1fr);gap:9px}
@@ -1243,6 +1257,20 @@ footer{background:var(--bg1);border-top:0.5px solid var(--b);padding:2.5rem 1.5r
   .footer-grid{grid-template-columns:1fr 1fr!important;gap:1.5rem!important}
   /* Language picker: float above the bottom nav */
   #langPickerWrap{bottom:calc(var(--bnav-h) + 12px)!important}
+  /* Improve all horizontal scroll containers */
+  [style*="overflow-x:auto"],[style*="overflow-x: auto"]{
+    -webkit-overflow-scrolling:touch;
+    touch-action:pan-x;
+  }
+  /* Prevent rubber-band on sidebars/modals */
+  .sidebar,.nav-drawer{overscroll-behavior:contain}
+  /* Tap highlight suppression */
+  button,a,[role="button"],[role="tab"]{-webkit-tap-highlight-color:transparent}
+  /* Better touch targets for filter chips */
+  .cat{min-height:36px;display:inline-flex;align-items:center}
+  .etype{min-height:44px;display:flex;align-items:center}
+  /* Sort select easier to tap */
+  .sort-sel,.filter-select{min-height:44px}
 }
 @media(max-width:420px){
   .cards{grid-template-columns:repeat(2,1fr);gap:7px}
