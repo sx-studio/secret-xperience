@@ -135,6 +135,7 @@ export default function TokensPage() {
   const [session,  setSession]  = useState<any>(null)
   const [loading,  setLoading]  = useState(false)
   const [selected, setSelected] = useState<string | null>(null)
+  const [showPayModal, setShowPayModal] = useState(false)
   const [status,   setStatus]   = useState<'idle' | 'success' | 'cancel'>('idle')
   const [role,     setRole]     = useState<string>('Member')
 
@@ -166,25 +167,10 @@ export default function TokensPage() {
       .then(({ data }) => setPackages(data || []))
   }, [])
 
-  async function handlePurchase(pkg: Package | typeof FALLBACK_PACKAGES[0]) {
+  function handlePurchase(pkg: Package | typeof FALLBACK_PACKAGES[0]) {
     if (!session) { window.location.href = '/login?next=/tokens'; return }
-    setLoading(true)
     setSelected(pkg.id)
-    try {
-      const res  = await fetch('/api/ccbill/charge', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ packageId: pkg.id }),
-      })
-      const data = await res.json()
-      if (data.url) window.location.href = data.url
-      else alert(data.error || 'Payment initiation failed')
-    } catch {
-      alert('Network error — please try again')
-    } finally {
-      setLoading(false)
-      setSelected(null)
-    }
+    setShowPayModal(true)
   }
 
   // Compute stats from ledger
@@ -968,11 +954,48 @@ export default function TokensPage() {
             ))}
           </div>
           <p style={{ fontSize: 12, color: 'rgba(236,232,225,0.28)', lineHeight: 1.8, maxWidth: 640, fontWeight: 300 }}>
-            Payments are processed securely via CCBill, an adult-friendly payment processor. All transactions are encrypted. Tokens are non-refundable except as required by applicable Belgian consumer law (14-day withdrawal right). Token purchases appear discreetly on your statement. By purchasing you agree to our{' '}
+            Payments are processed securely via an adult-friendly payment processor. All transactions are encrypted. Tokens are non-refundable except as required by applicable Belgian consumer law (14-day withdrawal right). Token purchases appear discreetly on your statement. By purchasing you agree to our{' '}
             <a href="/terms" style={{ color: 'rgba(197,160,90,0.6)', textDecoration: 'none' }}>Terms of Use</a>.
           </p>
         </div>
       </main>
+
+      {/* Payment coming-soon modal */}
+      {showPayModal && (
+        <div
+          onClick={() => { setShowPayModal(false); setSelected(null) }}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(8,6,14,0.82)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ background: 'linear-gradient(135deg, #12101a 0%, #1a1525 100%)', border: '0.5px solid rgba(232,201,122,0.3)', borderRadius: 20, padding: '2.5rem 2rem', maxWidth: 400, width: '100%', textAlign: 'center', boxShadow: '0 24px 64px rgba(0,0,0,0.6)' }}
+          >
+            <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(232,201,122,0.1)', border: '1px solid rgba(232,201,122,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem' }}>
+              <i className="ti ti-lock" style={{ fontSize: 24, color: '#e8c97a' }} />
+            </div>
+            <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 26, fontWeight: 400, color: '#ece8e1', marginBottom: 10 }}>
+              Payment coming soon
+            </div>
+            <p style={{ fontSize: 14, color: 'rgba(236,232,225,0.55)', lineHeight: 1.6, marginBottom: 24 }}>
+              Secure token checkout is being finalised. To purchase tokens or enquire about early access, contact us directly.
+            </p>
+            <a
+              href="mailto:support@secretxperience.eu"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'linear-gradient(90deg, #e8c97a, #c5a05a)', color: '#0a0a0a', fontWeight: 700, fontSize: 13, padding: '10px 22px', borderRadius: 10, textDecoration: 'none', marginBottom: 12 }}
+            >
+              <i className="ti ti-mail" /> Contact support
+            </a>
+            <div style={{ marginTop: 8 }}>
+              <button
+                onClick={() => { setShowPayModal(false); setSelected(null) }}
+                style={{ background: 'none', border: 'none', color: 'rgba(236,232,225,0.35)', fontSize: 12, cursor: 'pointer', padding: '6px 12px' }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <footer style={{ borderTop: '0.5px solid rgba(197,160,90,0.1)', padding: '2rem 24px', textAlign: 'center' }}>
         <p style={{ fontSize: 11, color: 'rgba(236,232,225,0.25)', fontWeight: 300 }}>
