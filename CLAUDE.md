@@ -43,6 +43,8 @@ What's next (user hasn't asked for these yet, don't do proactively):
 ---
 
 ## Done (recent work, don't redo)
+- **Ad tier pricing + 2 new placements (2026-06-04)** — benchmarked vs Quartier-Rouge (BE): slider €25/wk, section €30/wk, homepage €140/mo. Repriced to undercut ~20%: Featured 50tok/€5 (entry hook, unchanged), Slider 75→200tok/€20, Premium 150→300tok/€30. Added **Section Premium** (240tok/7d/€24 — full-width banner on one category page) and **Homepage Premium** (1100tok/30d/€110 — full-width banner on homepage). New `PremiumBanner` component (`app/components/PremiumBanner/`) renders image-left/content-right banner; returns null when unsold so layouts stay clean. Mounted on homepage (portal → `#homepagePremiumMount`) + all 7 category pages scoped by category. Tier costs synced across `tokens/spend` route, `tokens` page, `listings/create`. **Migration `20260604_ad_tiers_section_homepage.sql` still needs applying** (see Pending).
+- Mobile nav drawer scroll fix — body scroll lock on open + `overscroll-behavior:contain` so the drawer scrolls, not the page behind.
 - Token system migrations applied (`token_packages`, `user_wallets`, `token_ledger`, `payment_orders`)
 - Identity verification table + flow (`identity_verifications`)
 - Auto-expire pg_cron job
@@ -105,6 +107,14 @@ What's next (user hasn't asked for these yet, don't do proactively):
   - Next.js version confirmed as **13.5.1** — `cookies()` is synchronous (no `await`), important for all server code
 
 ## Pending
+- **Apply `20260604_ad_tiers_section_homepage.sql`** — widens `listings.tier` CHECK to allow `section` + `homepage`, adds partial indexes. **REQUIRED** before anyone can buy the two new ad tiers, or the token spend fails the constraint. Run in Supabase SQL editor:
+  ```sql
+  ALTER TABLE public.listings DROP CONSTRAINT IF EXISTS listings_tier_check;
+  ALTER TABLE public.listings ADD CONSTRAINT listings_tier_check
+    CHECK (tier IN ('basic','featured','slider','premium','section','homepage'));
+  CREATE INDEX IF NOT EXISTS listings_section_tier_idx ON public.listings (category, tier_expires_at) WHERE tier = 'section' AND active = true;
+  CREATE INDEX IF NOT EXISTS listings_homepage_tier_idx ON public.listings (tier_expires_at) WHERE tier = 'homepage' AND active = true;
+  ```
 - **Apply `20260601_signup_attribution.sql`** — creates `signup_sources` (service-role-only RLS) for the Admin → Acquisition tab. Without it, signups can't be attributed and the Acquisition tab errors.
 - **Apply pending migrations in Supabase SQL editor** (run in order):
   - `20250521_newsletter.sql` ✓ already applied
