@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { createClient } from './lib/supabase'
 import SliderAds from './components/SliderAds/SliderAds'
 import PremiumBanner from './components/PremiumBanner/PremiumBanner'
+import LiveBanner from './components/LiveBanner/LiveBanner'
 import CategoryAnimations from './components/CategoryAnimations/CategoryAnimations'
 import DesignDemos from './components/DesignDemos'
 
@@ -2405,6 +2406,9 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         </div>
       </div>
 
+      <!-- Live now banner mount point -->
+      <div id="liveBannerMount"></div>
+
       <!-- Featured -->
       <div class="featured" id="featuredBanner" style="display:none">
         <div class="ft-left">
@@ -3243,6 +3247,8 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
   </nav>
 
 </div><!-- #app -->` }} />
+      {/* Live-now ticker — portal into #liveBannerMount, renders only when a provider is broadcasting */}
+      <LiveBanner />
       {/* Homepage Premium banner — portal into #homepagePremiumMount, renders only when sold */}
       <PremiumBanner placement="homepage" portalTo="homepagePremiumMount" />
       {/* GSAP slider ads — rendered as React portal anchored after #featuredBanner */}
