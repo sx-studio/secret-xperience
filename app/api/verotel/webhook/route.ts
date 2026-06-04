@@ -28,7 +28,10 @@ const VEROTEL_SIGNATURE_KEY = process.env.VEROTEL_SIGNATURE_KEY
 function signParams(params: Record<string, string>, secret: string): string {
   const keys = Object.keys(params)
     .filter(k => k !== 'signature' && params[k] !== '' && params[k] != null)
-    .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
+    .sort((a, b) => {
+      const la = a.toLowerCase(), lb = b.toLowerCase()
+      return la < lb ? -1 : la > lb ? 1 : 0
+    })
   let text = secret
   for (const k of keys) text += `:${k}=${params[k]}`
   return createHash('sha256').update(text, 'utf8').digest('hex').toLowerCase()
@@ -53,7 +56,7 @@ async function handle(req: NextRequest) {
   }
 
   const incomingSig = params.signature || ''
-  const expectedSig = signParams(params, VEROTEL_SIGNATURE_KEY)
+  const expectedSig = signParams(params, VEROTEL_SIGNATURE_KEY.trim())
   if (!incomingSig || incomingSig.toLowerCase() !== expectedSig) {
     console.error('Verotel webhook: invalid signature')
     return new NextResponse('Invalid signature', { status: 400 })

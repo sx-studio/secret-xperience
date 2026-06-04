@@ -37,7 +37,10 @@ const FLEXPAY_START_URL     = 'https://secure.verotel.com/startorder'
 function signParams(params: Record<string, string>, secret: string): string {
   const keys = Object.keys(params)
     .filter(k => k !== 'signature' && params[k] !== '' && params[k] != null)
-    .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
+    .sort((a, b) => {
+      const la = a.toLowerCase(), lb = b.toLowerCase()
+      return la < lb ? -1 : la > lb ? 1 : 0
+    })
   let text = secret
   for (const k of keys) text += `:${k}=${params[k]}`
   return createHash('sha256').update(text, 'utf8').digest('hex').toLowerCase()
@@ -97,22 +100,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Failed to create order' }, { status: 500 })
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.secretxperience.eu'
-
   // Plain (unencoded) values used for signing; URLSearchParams encodes for the query string.
+  // NOTE: success/decline URLs are configured in the Verotel panel (FlexPay options),
+  // NOT passed as request params — passing them breaks signature verification.
   const flexParams: Record<string, string> = {
     shopID:        String(VEROTEL_SHOP_ID),
     priceAmount:   priceStr,
     priceCurrency: 'EUR',
     type:          'purchase',
-    description:   `${totalTokens} tokens — SecretXperience`,
+    description:   `${totalTokens} tokens - SecretXperience`,
     custom1:       order.id,
     custom2:       session.user.id,
     version:       '4',
-    successURL:    `${siteUrl}/tokens?status=success`,
-    declineURL:    `${siteUrl}/tokens?status=cancel`,
   }
-  flexParams.signature = signParams(flexParams, VEROTEL_SIGNATURE_KEY)
+  flexParams.signature = signParams(flexParams, VEROTEL_SIGNATURE_KEY.trim())
 
   const url = `${FLEXPAY_START_URL}?${new URLSearchParams(flexParams).toString()}`
 
