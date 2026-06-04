@@ -55,6 +55,9 @@ export default async function ShopPage() {
         .sort-sel:focus { border-color: var(--gbrd); }
         @media(max-width:640px) { .shop-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
         @media(max-width:380px) { .shop-grid { grid-template-columns: 1fr; } }
+        .dorcel-banner { transition: border-color .18s, box-shadow .18s; }
+        .dorcel-banner:hover { border-color: rgba(180,20,40,0.75) !important; box-shadow: 0 12px 40px rgba(0,0,0,0.55) !important; }
+        @media(max-width:560px) { .dorcel-banner { grid-template-columns: 1fr !important; gap: 1rem !important; } }
       `}</style>
 
       <div style={{ background: 'var(--bg)', minHeight: '100vh', color: 'var(--t)', fontFamily: 'var(--sans)' }}>
@@ -141,6 +144,7 @@ export default async function ShopPage() {
             href="https://www.dorcelclub.com/en?aff=8103"
             target="_blank"
             rel="noopener noreferrer"
+            className="dorcel-banner"
             style={{
               display: 'grid',
               gridTemplateColumns: '1fr auto',
@@ -153,10 +157,7 @@ export default async function ShopPage() {
               marginBottom: '2rem',
               textDecoration: 'none',
               boxShadow: '0 8px 30px rgba(0,0,0,0.4)',
-              transition: 'border-color .18s, box-shadow .18s',
             }}
-            onMouseOver={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(180,20,40,0.75)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 40px rgba(0,0,0,0.55)' }}
-            onMouseOut={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(180,20,40,0.4)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 30px rgba(0,0,0,0.4)' }}
           >
             <div>
               <div style={{ fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 700, color: '#e02030', marginBottom: 8 }}>
