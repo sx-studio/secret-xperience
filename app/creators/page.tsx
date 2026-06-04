@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
 import CreatorsGrid from './CreatorsGrid'
+import PremiumBanner from '../components/PremiumBanner/PremiumBanner'
 import CreatorFeed from './CreatorFeed'
 
 export async function generateMetadata() {
@@ -137,6 +138,7 @@ export default async function CreatorsPage() {
           {allListings.length > 0 && (
             <h2 style={{ fontFamily: 'var(--serif)', fontSize: '24px', fontWeight: 400, margin: '0 0 1.25rem' }}>Book a creator</h2>
           )}
+          <PremiumBanner placement="section" category="creators" />
           <CreatorsGrid listings={allListings} />
 
           {/* CTA BANNER */}

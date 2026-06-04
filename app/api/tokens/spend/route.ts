@@ -2,11 +2,13 @@
  * Spend tokens to publish / upgrade a listing tier
  *
  * POST { listingId, tier }
- * Tier costs:
- *   basic    →  25 tokens / 7 days
- *   featured →  50 tokens / 7 days
- *   slider   →  75 tokens / 7 days
- *   premium  → 150 tokens / 30 days
+ * Tier costs (priced ~20% under competitor Quartier-Rouge):
+ *   basic    →   free / permanent
+ *   featured →   50 tokens / 7 days   (€5  — entry placement)
+ *   slider   →  200 tokens / 7 days   (€20 — rotating slideshow ad)
+ *   premium  →  300 tokens / 30 days  (€30 — top of category for a month)
+ *   section  →  240 tokens / 7 days   (€24 — full-width banner on one category page)
+ *   homepage → 1100 tokens / 30 days  (€110 — full-width banner on the homepage)
  *
  * Deducts from user wallet, writes ledger entry, updates listing tier.
  */
@@ -16,10 +18,12 @@ import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 
 export const TIER_COSTS: Record<string, { tokens: number; days: number; label: string }> = {
-  basic:    { tokens: 0,   days: 1,  label: 'Basic listing (24 hours)'  },
-  featured: { tokens: 50,  days: 7,  label: 'Featured listing (7 days)' },
-  slider:   { tokens: 75,  days: 7,  label: 'Slider Ad (7 days)'        },
-  premium:  { tokens: 150, days: 30, label: 'Premium listing (30 days)' },
+  basic:    { tokens: 0,    days: 1,  label: 'Basic listing (24 hours)'         },
+  featured: { tokens: 50,   days: 7,  label: 'Featured listing (7 days)'        },
+  slider:   { tokens: 200,  days: 7,  label: 'Slider Ad (7 days)'               },
+  premium:  { tokens: 300,  days: 30, label: 'Premium listing (30 days)'        },
+  section:  { tokens: 240,  days: 7,  label: 'Section Premium banner (7 days)'  },
+  homepage: { tokens: 1100, days: 30, label: 'Homepage Premium banner (30 days)'},
 }
 
 export async function POST(req: NextRequest) {
@@ -97,12 +101,14 @@ export async function POST(req: NextRequest) {
     tier,
     tier_expires_at: base.toISOString(),
   }
-  // Sync legacy columns for backwards compat with existing queries
+  // Sync legacy columns for backwards compat with existing queries.
+  // Every paid tier sets featured_until so it keeps slider/featured visibility;
+  // premium/section/homepage also flip the premium badge on.
   if (tier === 'featured' || tier === 'slider') {
     tierUpdates.featured_until = base.toISOString()
     tierUpdates.premium        = false
   }
-  if (tier === 'premium') {
+  if (tier === 'premium' || tier === 'section' || tier === 'homepage') {
     tierUpdates.featured_until = base.toISOString()
     tierUpdates.premium        = true
   }

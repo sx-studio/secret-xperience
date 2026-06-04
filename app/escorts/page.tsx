@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
 import { ETHNICITIES, tagMatchesEthnicity, HAIR_COLOURS, tagMatchesHair, BUILDS, tagMatchesBuild, ORIENTATIONS, tagMatchesOrientation, tagMatchesType } from '../lib/attributes'
+import PremiumBanner from '../components/PremiumBanner/PremiumBanner'
 import { focusPosition } from '../lib/imageFocus'
 
 const supabase = createClient(
@@ -650,6 +651,9 @@ export default function EscortsPage() {
               </select>
             </div>
           </div>
+
+          {/* Section Premium banner — renders only when a provider has bought it */}
+          <PremiumBanner placement="section" category="escorts" />
 
           {/* Active filter chips */}
           {activeFilterCount > 0 && (

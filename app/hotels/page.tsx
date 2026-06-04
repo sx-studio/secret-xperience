@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
 import HotelsGrid from './HotelsGrid'
+import PremiumBanner from '../components/PremiumBanner/PremiumBanner'
 
 export async function generateMetadata() {
   return {
@@ -121,6 +122,7 @@ export default async function HotelsPage() {
 
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2.5rem 1.5rem 6rem' }}>
 
+          <PremiumBanner placement="section" category="hotels" />
           <HotelsGrid listings={allListings} />
 
           {/* HOTEL CTA */}

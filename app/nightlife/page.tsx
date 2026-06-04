@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import NightlifeGrid from './NightlifeGrid'
+import PremiumBanner from '../components/PremiumBanner/PremiumBanner'
 
 /* ─── Types ─────────────────────────────────────────────── */
 
@@ -628,6 +629,9 @@ export default async function NightlifePage() {
         </div>
       </section>
 
+      <div style={{ maxWidth: 900, margin: '0 auto', padding: '2.5rem 1.5rem 0' }}>
+        <PremiumBanner placement="section" category="nightlife" />
+      </div>
       <NightlifeGrid listings={listings} />
     </>
   )

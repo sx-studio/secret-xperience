@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { createClient } from './lib/supabase'
 import SliderAds from './components/SliderAds/SliderAds'
+import PremiumBanner from './components/PremiumBanner/PremiumBanner'
 import CategoryAnimations from './components/CategoryAnimations/CategoryAnimations'
 import DesignDemos from './components/DesignDemos'
 
@@ -2411,6 +2412,9 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         <button class="ft-btn" id="featuredBannerBtn">View listing <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
       </div>
 
+      <!-- Homepage Premium banner mount point -->
+      <div id="homepagePremiumMount"></div>
+
       <!-- Slider Ads mount point -->
       <div id="sliderAdsMount"></div>
 
@@ -3235,6 +3239,8 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
   </nav>
 
 </div><!-- #app -->` }} />
+      {/* Homepage Premium banner — portal into #homepagePremiumMount, renders only when sold */}
+      <PremiumBanner placement="homepage" portalTo="homepagePremiumMount" />
       {/* GSAP slider ads — rendered as React portal anchored after #featuredBanner */}
       <SliderAds />
       <DesignDemos />

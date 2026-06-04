@@ -28,10 +28,12 @@ interface LedgerEntry {
 }
 
 const TIER_COSTS = [
-  { tier: 'basic',    label: 'Basic Listing',    tokens: 0,   days: 1,  desc: 'Standard grid listing — free, 24-hour duration, one per day.' },
-  { tier: 'featured', label: 'Featured Listing',  tokens: 50,  days: 7,  desc: 'Gold-bordered card, priority placement in category grid.' },
-  { tier: 'slider',   label: 'Slider Ad',         tokens: 75,  days: 7,  desc: 'Animated ad in the GSAP slider on every page — maximum visibility.' },
-  { tier: 'premium',  label: 'Premium Listing',   tokens: 150, days: 30, desc: 'Top of category for 30 days, larger card, premium badge.' },
+  { tier: 'basic',    label: 'Basic Listing',     tokens: 0,    days: 0,  desc: 'Standard grid listing — free and always on.' },
+  { tier: 'featured', label: 'Featured Listing',  tokens: 50,   days: 7,  desc: 'Gold-bordered card, priority placement in category grid.' },
+  { tier: 'slider',   label: 'Slider Ad',         tokens: 200,  days: 7,  desc: 'Rotating slideshow ad on the home page and section pages — high visibility.' },
+  { tier: 'section',  label: 'Section Premium',   tokens: 240,  days: 7,  desc: 'Full-width premium banner across your whole category section.' },
+  { tier: 'premium',  label: 'Premium Listing',   tokens: 300,  days: 30, desc: 'Top of category for 30 days, larger card, premium badge.' },
+  { tier: 'homepage', label: 'Homepage Premium',  tokens: 1100, days: 30, desc: 'Full-width banner on the homepage — our most-visited page. Maximum exposure.' },
 ]
 
 const ADD_ONS = [
@@ -910,7 +912,7 @@ export default function TokensPage() {
                 </div>
                 <p style={{ fontSize: 12, color: 'rgba(236,232,225,0.45)', lineHeight: 1.6, marginBottom: '0.5rem', fontWeight: 300 }}>{t.desc}</p>
                 <p style={{ fontSize: 11, color: 'rgba(236,232,225,0.25)' }}>
-                  Duration: {t.days === 1 ? '24 hours' : `${t.days} days`}
+                  {t.days === 0 ? 'Always on' : `Duration: ${t.days} days`}
                 </p>
               </div>
             ))}

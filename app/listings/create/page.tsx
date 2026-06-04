@@ -85,10 +85,12 @@ interface FormState {
 }
 
 const LISTING_TIERS = [
-  { id: 'basic',    label: 'Basic',     tokens: 0,   days: 1,  desc: 'Standard grid listing — 24 hours, one per day', color: '#ffffff44' },
-  { id: 'featured', label: 'Featured',  tokens: 50,  days: 7,  desc: 'Gold-border, priority in category grid',        color: '#c5a05a' },
-  { id: 'slider',   label: 'Slider Ad', tokens: 75,  days: 7,  desc: 'Animated hero slider — site-wide visibility',   color: '#7a8aee' },
-  { id: 'premium',  label: 'Premium',   tokens: 150, days: 30, desc: 'Top of category, 30 days, premium badge',       color: '#e0a0c8' },
+  { id: 'basic',    label: 'Basic',            tokens: 0,    days: 1,  desc: 'Standard grid listing — free, always on',          color: '#ffffff44' },
+  { id: 'featured', label: 'Featured',         tokens: 50,   days: 7,  desc: 'Gold-border, priority in category grid',           color: '#c5a05a' },
+  { id: 'slider',   label: 'Slider Ad',        tokens: 200,  days: 7,  desc: 'Rotating slideshow ad — site-wide visibility',     color: '#7a8aee' },
+  { id: 'section',  label: 'Section Premium',  tokens: 240,  days: 7,  desc: 'Full-width banner across your category page',      color: '#5ec8c0' },
+  { id: 'premium',  label: 'Premium',          tokens: 300,  days: 30, desc: 'Top of category for 30 days, premium badge',       color: '#e0a0c8' },
+  { id: 'homepage', label: 'Homepage Premium', tokens: 1100, days: 30, desc: 'Full-width banner on the homepage — max exposure', color: '#e8c97a' },
 ]
 
 interface UploadingImage {
@@ -412,7 +414,7 @@ export default function CreateListingPage() {
     }
     const finalTags = [...form.tags, ...statTags, ...whTags]
 
-    const tierDays: Record<string, number> = { basic: 1, featured: 7, slider: 7, premium: 30 }
+    const tierDays: Record<string, number> = { basic: 1, featured: 7, slider: 7, section: 7, premium: 30, homepage: 30 }
     const tierExpiry = new Date()
     tierExpiry.setDate(tierExpiry.getDate() + (tierDays[form.tier] ?? 1))
 
@@ -1652,11 +1654,11 @@ export default function CreateListingPage() {
                         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'0.4rem' }}>
                           <span style={{ fontSize:13, fontWeight:600, color: active ? t.color : 'var(--t,#ece8e1)' }}>{t.label}</span>
                           <span style={{ fontSize:11, fontWeight:700, color:t.color, background:`${t.color}18`, borderRadius:6, padding:'2px 7px' }}>
-                            {t.id === 'basic' ? 'Free · 24h' : `${t.tokens} ◈`}
+                            {t.id === 'basic' ? 'Free' : `${t.tokens} ◈`}
                           </span>
                         </div>
                         <p style={{ fontSize:11, color:'var(--t3,rgba(255,255,255,0.25))', lineHeight:1.5, marginBottom:'0.3rem' }}>{t.desc}</p>
-                        <p style={{ fontSize:10, color:'var(--t3,rgba(255,255,255,0.2))' }}>{t.days} days</p>
+                        <p style={{ fontSize:10, color:'var(--t3,rgba(255,255,255,0.2))' }}>{t.id === 'basic' ? 'Always on' : `${t.days} days`}</p>
                       </button>
                     )
                   })}
