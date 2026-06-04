@@ -29,6 +29,7 @@ interface EscortProfileProps {
     currency: string
     meet_type: string | null
     images: string[] | null
+    videos: string[] | null
     verified: boolean
     premium: boolean
     profile_id: string
@@ -176,6 +177,7 @@ export default function EscortProfile({
   }
 
   const images  = (listing.images ?? []).filter(Boolean)
+  const videos  = (listing.videos ?? []).filter(Boolean)
   const tags    = listing.tags ?? []
   const { height, weight, age, hair, build, ethnicity, nationality, languages, services, escortType, orientation, workingHours } = classifyTags(tags)
   // Structured Possibilities (new): grouped checklist from listing.services.
@@ -275,9 +277,12 @@ export default function EscortProfile({
           .rl-layout { display:grid;grid-template-columns:1fr 300px;gap:2rem;align-items:start; }
           .rl-mobile-cta { display:none !important; }
         }
+        /* Listing video player */
+        .rl-video { width:100%;border-radius:12px;background:#000;display:block;max-height:460px;outline:none; }
         @media (max-width:520px) {
           .rl-main-photo { aspect-ratio:3/4; border-radius:8px; }
           .rl-possibilities { grid-template-columns:1fr; }
+          .rl-video { border-radius:8px;max-height:70vh; }
         }
       `}</style>
 
@@ -389,9 +394,26 @@ export default function EscortProfile({
               )}
             </div>
 
+            {/* Video(s) — sit between the main photo and the photo grid */}
+            {videos.length > 0 && (
+              <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {videos.map((src, i) => (
+                  <video
+                    key={i}
+                    src={src}
+                    controls
+                    preload="metadata"
+                    playsInline
+                    className="rl-video"
+                    aria-label={`Video ${i + 1}`}
+                  />
+                ))}
+              </div>
+            )}
+
             {/* Thumbnail grid */}
             {images.length > 1 && (
-              <div className="rl-thumb-grid">
+              <div className="rl-thumb-grid" style={{ marginTop: videos.length > 0 ? '10px' : '8px' }}>
                 {images.slice(0, 8).map((src, i) => (
                   <img key={i} src={src} alt="" className={`rl-thumb${i === imgIdx ? ' active' : ''}`} onClick={() => setImgIdx(i)} />
                 ))}

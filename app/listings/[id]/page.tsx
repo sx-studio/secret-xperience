@@ -761,6 +761,7 @@ export default function ListingDetailPage() {
                         src={url}
                         controls
                         preload="metadata"
+                        playsInline
                         style={{ width: '100%', borderRadius: 10, background: '#000', maxHeight: 360, outline: 'none' }}
                         aria-label={`Video ${i + 1}`}
                       />
