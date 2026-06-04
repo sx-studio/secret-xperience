@@ -64,6 +64,16 @@ const SECTIONS: Section[] = [
   },
 
   {
+    id: 'premium-content',
+    title: 'Premium Adult Content',
+    emoji: '🎬',
+    description: 'Award-winning adult studios and premium content platforms. High-converting affiliate programmes with quality European productions.',
+    items: [
+      { name: 'Dorcel Club', emoji: '🔴', tagline: 'Marc Dorcel\'s flagship premium paysite — Europe\'s most prestigious adult studio. Exclusive HD films, series and live shows. Approved affiliate partner.', url: 'https://www.dorcelclub.com/en?aff=8103', network: 'Dorcel Cash', badge: 'Official Partner' },
+    ],
+  },
+
+  {
     id: 'nightlife-venues',
     title: 'Nightlife & Gentleman\'s Clubs',
     emoji: '🥂',
