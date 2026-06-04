@@ -634,7 +634,7 @@ export default function MessagesPage() {
           <div className="msg-empty-state">
             <i className="ti ti-message-circle" style={{ fontSize: '48px', color: 'var(--t3, rgba(255,255,255,0.2))' }} />
             <div style={{ fontFamily: 'var(--serif, "Cormorant Garamond", serif)', fontSize: '22px', color: 'var(--t, #ece8e1)' }}>No conversations yet</div>
-            <div style={{ fontSize: '13px', color: 'var(--t2, rgba(255,255,255,0.4))', lineHeight: 1.6 }}>Browse listings and message a advertiser to get started</div>
+            <div style={{ fontSize: '13px', color: 'var(--t2, rgba(255,255,255,0.4))', lineHeight: 1.6 }}>Browse advertisements and message a advertiser to get started</div>
             <button
               onClick={() => window.location.href = '/'}
               style={{

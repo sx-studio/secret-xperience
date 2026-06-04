@@ -141,7 +141,7 @@ export default function VerifyPage() {
             </p>
             <p style={{ fontSize:14, color:S.t2, marginBottom:'2rem' }}>
               {status === 'approved'
-                ? 'You can now publish listings on SecretXperience.'
+                ? 'You can now publish advertisements on SecretXperience.'
                 : 'We\'ll review your submission within 24–48 hours and notify you by email.'}
             </p>
             <a href="/dashboard" style={{ display:'inline-block', padding:'12px 28px', background:'linear-gradient(90deg,#c5a05a,#d4b06e)', borderRadius:8, color:'#080808', fontWeight:600, fontSize:13, letterSpacing:'0.04em' }}>

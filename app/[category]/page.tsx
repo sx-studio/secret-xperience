@@ -190,7 +190,7 @@ export default async function CategoryPage({ params }: { params: { category: str
             </div>
             <p style={{ fontSize: '15px', color: 'var(--t2)', maxWidth: '560px', lineHeight: 1.7, marginBottom: '1.25rem' }}>{meta.description}</p>
             <div style={{ fontSize: '13px', color: 'var(--t3)' }}>
-              <span style={{ color: 'var(--gold)', fontWeight: 500 }}>{listings?.length || 0}</span> listings available
+              <span style={{ color: 'var(--gold)', fontWeight: 500 }}>{listings?.length || 0}</span> advertisements available
             </div>
           </div>
         </div>
@@ -230,7 +230,7 @@ export default async function CategoryPage({ params }: { params: { category: str
             <div style={{ textAlign: 'center', padding: '5rem 2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.25rem' }}>
               <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(197,160,90,0.08)', border: '0.5px solid rgba(197,160,90,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px' }}>✦</div>
               <div style={{ fontFamily: 'var(--serif)', fontSize: '22px' }}>Be among the first</div>
-              <p style={{ fontSize: '14px', color: 'var(--t3)', maxWidth: '320px', lineHeight: 1.6 }}>No listings yet in this category. Be an early advertiser and reach clients from day one.</p>
+              <p style={{ fontSize: '14px', color: 'var(--t3)', maxWidth: '320px', lineHeight: 1.6 }}>No advertisements yet in this category. Be an early advertiser and reach clients from day one.</p>
               <Link href="/listings/create" style={{ padding: '12px 28px', background: 'linear-gradient(135deg,var(--gold),var(--goldd))', borderRadius: 'var(--r)', color: '#0a0a0a', textDecoration: 'none', fontWeight: 700, fontSize: '14px' }}>List your service →</Link>
             </div>
           ) : (

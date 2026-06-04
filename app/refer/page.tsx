@@ -6,7 +6,7 @@ import { createClient } from '../lib/supabase'
 const SITE = 'https://secretxperience.eu'
 
 const MSG_ADVERTISER = (link: string) =>
-  `Hey! I list on SecretXperience — the new premium adult platform across the EU. Free to join, real bookings, discreet. Create your listing here: ${link}`
+  `Hey! I list on SecretXperience — the new premium adult platform across the EU. Free to join, real bookings, discreet. Create your advertisement here: ${link}`
 
 const MSG_CLIENT = (link: string) =>
   `Check out SecretXperience — the most discreet way to find escorts, venues, events and more across Europe. Sign up here: ${link}`
@@ -136,7 +136,7 @@ export default function ReferPage() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '1rem' }}>
               {[
                 { label: 'Invited', value: stats.pending + stats.qualified, hint: 'signed up' },
-                { label: 'Qualified', value: stats.qualified, hint: 'published a listing' },
+                { label: 'Qualified', value: stats.qualified, hint: 'published an advertisement' },
                 { label: 'Tokens earned', value: stats.rewardTokens, hint: 'credited to you' },
               ].map(s => (
                 <div key={s.label} style={{ ...card, textAlign: 'center', padding: '1.25rem 0.75rem' }}>

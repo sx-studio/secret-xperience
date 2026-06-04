@@ -19,7 +19,7 @@ import { cookies } from 'next/headers'
 
 export const TIER_COSTS: Record<string, { tokens: number; days: number; label: string }> = {
   basic:    { tokens: 0,    days: 1,  label: 'Basic listing (24 hours)'         },
-  featured: { tokens: 50,   days: 7,  label: 'Featured listing (7 days)'        },
+  featured: { tokens: 50,   days: 7,  label: 'Featured advertisement (7 days)'        },
   slider:   { tokens: 200,  days: 7,  label: 'Slider Ad (7 days)'               },
   premium:  { tokens: 300,  days: 30, label: 'Premium listing (30 days)'        },
   section:  { tokens: 240,  days: 7,  label: 'Section Premium banner (7 days)'  },
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
     { auth: { autoRefreshToken: false, persistSession: false } }
   )
 
-  // Verify listing belongs to this user
+  // Verify advertisement belongs to this user
   const { data: listing } = await admin
     .from('listings')
     .select('id, profile_id, tier, tier_expires_at')

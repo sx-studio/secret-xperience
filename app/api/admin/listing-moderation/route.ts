@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
       .footer{margin-top:40px;font-size:11px;color:#444;border-top:0.5px solid #1a1a1a;padding-top:16px}
     </style></head><body><div class="wrap">
       <div class="brand">Secret<span>Xperience</span></div>
-      <h1>${isApproved ? '✓ Your listing is live' : 'Listing update'}</h1>
+      <h1>${isApproved ? '✓ Your advertisement is live' : 'Listing update'}</h1>
       <p>Hi ${ownerName},</p>
       ${isApproved
         ? `<p>Your listing <strong style="color:#e8e0d0">"${listing.title}"</strong> has been reviewed and approved. It is now visible to members across the platform.</p>

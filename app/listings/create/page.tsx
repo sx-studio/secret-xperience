@@ -648,7 +648,7 @@ export default function CreateListingPage() {
             letterSpacing: '0.03em',
             marginBottom: '2rem',
           }}>
-            Your listing is under review and will go live shortly. You'll be notified once approved.
+            Your advertisement is under review and will go live shortly. You'll be notified once approved.
           </p>
           <span style={{
             fontSize: '12px',
@@ -669,7 +669,7 @@ export default function CreateListingPage() {
   if (verifGate !== 'loading' && verifGate !== 'verified') {
     const gate = {
       none:     { icon: 'ti-id-badge-2', title: 'Verify your identity to publish', body: 'For everyone’s safety, all advertisers must confirm their identity and age before a listing can go live. It takes about two minutes — upload a photo ID and a selfie, and our team reviews it.', cta: 'Verify my identity', href: '/verify' },
-      pending:  { icon: 'ti-clock-hour-4', title: 'Verification in review', body: 'Thanks — we’ve received your documents and our team is reviewing them. You’ll be notified the moment you’re approved, and then you can publish your listing.', cta: 'Check verification status', href: '/verify' },
+      pending:  { icon: 'ti-clock-hour-4', title: 'Verification in review', body: 'Thanks — we’ve received your documents and our team is reviewing them. You’ll be notified the moment you’re approved, and then you can publish your advertisement.', cta: 'Check verification status', href: '/verify' },
       rejected: { icon: 'ti-alert-triangle', title: 'Verification needs attention', body: 'We couldn’t verify your last submission. Please resubmit with a clear photo ID and selfie, or contact support if you think this is a mistake.', cta: 'Resubmit documents', href: '/verify' },
     }[verifGate]
     return (
@@ -1118,7 +1118,7 @@ export default function CreateListingPage() {
                     letterSpacing: '0.02em',
                     marginBottom: '10px',
                   }}>
-                    Select all that apply — shown on your listing.
+                    Select all that apply — shown on your advertisement.
                   </p>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                     {SERVICE_TAGS[form.category].map(tag => (
@@ -1159,7 +1159,7 @@ export default function CreateListingPage() {
                     letterSpacing: '0.02em',
                     marginBottom: '14px',
                   }}>
-                    Tick everything you offer. These appear as a clear checklist on your listing.
+                    Tick everything you offer. These appear as a clear checklist on your advertisement.
                   </p>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
                     {POSSIBILITY_GROUPS.map(group => (
@@ -1255,7 +1255,7 @@ export default function CreateListingPage() {
                     letterSpacing: '0.02em',
                     marginBottom: '12px',
                   }}>
-                    These are appended as tags on your listing.
+                    These are appended as tags on your advertisement.
                   </p>
                   <div className="cl-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
                     {/* Ethnicity */}
@@ -1778,7 +1778,7 @@ export default function CreateListingPage() {
               {/* ── Tier picker ── */}
               <div style={{ marginBottom:'2rem' }}>
                 <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'0.75rem' }}>
-                  <p style={{ fontSize:13, fontWeight:600, color:'var(--t,#ece8e1)', letterSpacing:'0.04em' }}>Choose your listing tier</p>
+                  <p style={{ fontSize:13, fontWeight:600, color:'var(--t,#ece8e1)', letterSpacing:'0.04em' }}>Choose your advertisement tier</p>
                   {wallet ? (
                     <a href="/tokens" target="_blank" rel="noopener" style={{ fontSize:12, color:'var(--gold,#c5a05a)', textDecoration:'none' }}>
                       ◈ {wallet.balance} tokens available

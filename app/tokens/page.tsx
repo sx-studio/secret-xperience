@@ -29,7 +29,7 @@ interface LedgerEntry {
 
 const TIER_COSTS = [
   { tier: 'basic',    label: 'Basic Listing',     tokens: 0,    days: 0,  desc: 'Standard grid listing — free and always on.' },
-  { tier: 'featured', label: 'Featured Listing',  tokens: 50,   days: 7,  desc: 'Gold-bordered card, priority placement in category grid.' },
+  { tier: 'featured', label: 'Featured Advertisement',  tokens: 50,   days: 7,  desc: 'Gold-bordered card, priority placement in category grid.' },
   { tier: 'slider',   label: 'Slider Ad',         tokens: 200,  days: 7,  desc: 'Rotating slideshow ad on the home page and section pages — high visibility.' },
   { tier: 'section',  label: 'Section Premium',   tokens: 240,  days: 7,  desc: 'Full-width premium banner across your whole category section.' },
   { tier: 'premium',  label: 'Premium Listing',   tokens: 300,  days: 30, desc: 'Top of category for 30 days, larger card, premium badge.' },
@@ -63,7 +63,7 @@ const FALLBACK_PACKAGES = [
     price_eur: 5,
     popular: false,
     rate: '€0.10/token',
-    perks: ['One Featured listing (7 days)', 'Two flash boosts'],
+    perks: ['One Featured advertisement (7 days)', 'Two flash boosts'],
   },
   {
     id: 'standard',
@@ -85,7 +85,7 @@ const FALLBACK_PACKAGES = [
     price_eur: 20,
     popular: true,
     rate: '€0.095/token · +10 bonus',
-    perks: ['Featured listing for 7 days', 'Flash boost × 5', 'Slider ad for 7 days'],
+    perks: ['Featured advertisement for 7 days', 'Flash boost × 5', 'Slider ad for 7 days'],
   },
   {
     id: 'pro',
@@ -96,7 +96,7 @@ const FALLBACK_PACKAGES = [
     price_eur: 35,
     popular: false,
     rate: '€0.093/token · +25 bonus',
-    perks: ['Slider ad for 30 days', 'Featured listing × 3', 'Priority placement'],
+    perks: ['Slider ad for 30 days', 'Featured advertisement × 3', 'Priority placement'],
   },
   {
     id: 'business',

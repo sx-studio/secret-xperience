@@ -481,7 +481,7 @@ async function loadSimilarListings(excludeId, category) {
       .order('rating', { ascending: false })
       .limit(3)
     if (!sims || !sims.length) {
-      el.innerHTML = '<div style="color:#4c4a47;font-size:12px;padding:.5rem">No similar listings found.</div>'
+      el.innerHTML = '<div style="color:#4c4a47;font-size:12px;padding:.5rem">No similar advertisements found.</div>'
       return
     }
     el.innerHTML = sims.map(function(l) {
@@ -1576,7 +1576,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
       if (loadMoreBtn) {
         loadMoreBtn.style.display = totalListings.length > PAGE_SIZE ? 'block' : 'none'
       }
-      // Update featured banner with top featured listing
+      // Update featured banner with top featured advertisement
       const topFeatured = (data || []).find((l: any) => l.featured_until && new Date(l.featured_until) > new Date())
       const banner = document.getElementById('featuredBanner')
       if (banner) {
@@ -2168,7 +2168,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         </div>
         <p class="t-meta" style="color:var(--t3);margin-top:0.75rem;text-align:center;letter-spacing:0.16em;">SECRET · XPERIENCE</p>
       </div>
-      <!-- RIGHT: featured listing card -->
+      <!-- RIGHT: featured advertisement card -->
       <div class="hero-hero-col" id="heroFeaturedCard" style="width:100%;max-width:320px;border-radius:var(--rl);border:0.5px solid var(--b2);box-shadow:var(--shadow-card-h);overflow:hidden;cursor:pointer;" onclick="document.getElementById('heroFeaturedCard').style.transform='translateY(-3px)'">
         <div class="cat-escort" style="height:240px;position:relative;display:flex;align-items:flex-end;padding:1.25rem;">
           <img id="heroCardImg" src="" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;" />
@@ -2415,7 +2415,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
           <div class="live-dot"><span></span> Live · Brussels</div>
         </div>
         <div class="admin-stats">
-          <div class="astat"><div class="astat-v" id="statListingsAdmin">—</div><div class="astat-l">Active listings</div></div>
+          <div class="astat"><div class="astat-v" id="statListingsAdmin">—</div><div class="astat-l">Active advertisements</div></div>
           <div class="astat"><div class="astat-v" id="statAdvertisers">—</div><div class="astat-l">Advertisers</div></div>
           <div class="astat"><div class="astat-v" id="statUsers">—</div><div class="astat-l">Registered users</div></div>
           <div class="astat"><div class="astat-v" id="statRevenue">—</div><div class="astat-l">Revenue this month</div></div>
@@ -2428,7 +2428,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
       <!-- Featured -->
       <div class="featured" id="featuredBanner" style="display:none">
         <div class="ft-left">
-          <div class="ft-tag">✦ Featured listing</div>
+          <div class="ft-tag">✦ Featured advertisement</div>
           <div class="ft-title" id="featuredBannerTitle">—</div>
           <div class="ft-sub" id="featuredBannerSub">—</div>
         </div>
@@ -2470,7 +2470,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
       </button>
 
       <div class="res-row">
-        <div class="res-count">248 listings found</div>
+        <div class="res-count">248 advertisements found</div>
         <select class="sort-sel" id="sortSel" aria-label="Sort listings">
           <option>Sort: Relevance</option>
           <option>Sort: Rating ↓</option>
@@ -3082,8 +3082,8 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
       <button class="dp-back" id="dpClose" style="display:flex;align-items:center;gap:6px;"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back</button>
       <div class="dp-actions" style="margin-left:auto;display:flex;gap:6px;">
         <button class="dp-action" id="dpShare" aria-label="Share listing"><i class="ti ti-share"></i></button>
-        <button class="dp-action" id="dpSave" aria-label="Save listing"><i class="ti ti-heart"></i></button>
-        <button class="dp-action" id="dpReport" aria-label="Report listing"><i class="ti ti-flag"></i></button>
+        <button class="dp-action" id="dpSave" aria-label="Save advertisement"><i class="ti ti-heart"></i></button>
+        <button class="dp-action" id="dpReport" aria-label="Report advertisement"><i class="ti ti-flag"></i></button>
       </div>
     </div>
 
@@ -3242,7 +3242,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
 
     <!-- Sticky CTA -->
     <div class="dp-cta" style="background:linear-gradient(0deg, var(--bg1) 60%, transparent 100%);">
-      <button class="dp-cta-share" title="Copy link" aria-label="Copy listing link" style="flex-shrink:0;width:40px;height:40px;border-radius:10px;border:0.5px solid rgba(255,255,255,0.12);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#8c8880;font-size:16px">
+      <button class="dp-cta-share" title="Copy link" aria-label="Copy advertisement link" style="flex-shrink:0;width:40px;height:40px;border-radius:10px;border:0.5px solid rgba(255,255,255,0.12);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#8c8880;font-size:16px">
         <i class="ti ti-share" aria-hidden="true"></i>
       </button>
       <button class="dp-cta-msg"><i class="ti ti-message-circle" aria-hidden="true"></i> Send message</button>

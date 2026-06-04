@@ -80,7 +80,7 @@ const jsonLd = {
         { '@type': 'Question', name: 'Is SecretXperience safe and discreet?', acceptedAnswer: { '@type': 'Answer', text: 'Yes. Every advertiser undergoes identity verification before receiving a verified badge. All communication is end-to-end encrypted. Personal information is never displayed publicly, and billing descriptors are fully discreet.' } },
         { '@type': 'Question', name: 'Which countries does SecretXperience cover?', acceptedAnswer: { '@type': 'Answer', text: 'SecretXperience actively covers Belgium, the Netherlands, Germany, France, Luxembourg, Switzerland, Spain, Czech Republic, Hungary, Austria, and more EU countries.' } },
         { '@type': 'Question', name: 'How do I list my services on SecretXperience?', acceptedAnswer: { '@type': 'Answer', text: 'Creating a basic profile is completely free. Sign up, choose your category, upload photos, and go live in under 10 minutes. Identity verification unlocks a verified badge and increased search visibility.' } },
-        { '@type': 'Question', name: 'What categories are available on SecretXperience?', acceptedAnswer: { '@type': 'Answer', text: 'SecretXperience covers 8 categories: escorts & companions, nightlife venues & clubs, featured listings, creators & content, marketplace & partners, affiliate programmes, brands & webshop, and legal & medical information.' } },
+        { '@type': 'Question', name: 'What categories are available on SecretXperience?', acceptedAnswer: { '@type': 'Answer', text: 'SecretXperience covers 8 categories: escorts & companions, nightlife venues & clubs, featured advertisements, creators & content, marketplace & partners, affiliate programmes, brands & webshop, and legal & medical information.' } },
         { '@type': 'Question', name: 'Is SecretXperience free to use?', acceptedAnswer: { '@type': 'Answer', text: 'Browsing is free for all visitors. Advertisers create a basic listing at no cost. Premium placement (Featured badge, homepage slider) is available from €29 for 7 days.' } },
         { '@type': 'Question', name: 'How does SecretXperience compare to other escort directories?', acceptedAnswer: { '@type': 'Answer', text: 'Unlike legacy escort directories, SecretXperience offers identity verification, encrypted messaging, a token gifting economy, a built-in webshop, creator content feeds, real-time booking, and full GDPR compliance — all on a single platform built for the modern EU market.' } },
       ],
@@ -209,7 +209,7 @@ export default function WhySecretXperience() {
             </div>
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '2.5rem' }}>
               <Link href="/search" style={{ padding: '14px 32px', background: `linear-gradient(135deg,${G},#b8914a)`, borderRadius: '10px', color: '#0a0a0a', fontWeight: 700, fontSize: '15px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                <i className="ti ti-search" /> Browse listings
+                <i className="ti ti-search" /> Browse advertisements
               </Link>
               <Link href="#why-great" style={{ padding: '14px 28px', border: `0.5px solid ${S.b2}`, borderRadius: '10px', color: S.t2, fontSize: '15px', textDecoration: 'none' }}>
                 Read on ↓
@@ -265,7 +265,7 @@ export default function WhySecretXperience() {
         <Section id="why-great" eyebrow="Section 01 — Why it's great" heading="The adult lifestyle platform" italic="Europe has been waiting for">
           <div style={{ fontSize: '16px', color: S.t2, lineHeight: 1.9, marginBottom: '2rem' }}>
             <p style={{ marginBottom: '1.25rem' }}>
-              For too long, the European adult services market has been fragmented — advertisers scattered across outdated directories, clients navigating dozens of inconsistent sites, and venues with no central home. <strong style={{ color: S.t }}>SecretXperience changes that</strong>. One platform. Eight verticals. Thousands of real, verified listings across Belgium, the Netherlands, Germany, France, Luxembourg, and beyond.
+              For too long, the European adult services market has been fragmented — advertisers scattered across outdated directories, clients navigating dozens of inconsistent sites, and venues with no central home. <strong style={{ color: S.t }}>SecretXperience changes that</strong>. One platform. Eight verticals. Thousands of real, verified advertisements across Belgium, the Netherlands, Germany, France, Luxembourg, and beyond.
             </p>
             <p style={{ marginBottom: '1.25rem' }}>
               Whether you are looking for a <Link href="/escorts" style={{ color: G }}>verified escort in Brussels</Link>, a <Link href="/nightlife" style={{ color: G }}>fetish club in Amsterdam</Link>, a <Link href="/rentals" style={{ color: G }}>private apartment in Berlin</Link>, or a <Link href="/creators" style={{ color: G }}>content creator to follow</Link> — everything lives in one beautifully designed, mobile-optimised experience.
@@ -280,7 +280,7 @@ export default function WhySecretXperience() {
             {[
               ['layout-list', 'Advertisements & Premium Services', 'Independent escorts, companion agencies, erotic massage, tantra, domination and experiential services — every advertiser category covered with premium placement tools.'],
               ['calendar-event', 'Events, Venues & Clubs', 'From fetish parties in Antwerp to swingers nights in Berlin and lifestyle events across France — discover and book adult events and nightlife venues across Europe.'],
-              ['star', 'Featured Listings', 'Gold-badged featured profiles appear at the top of every category and search result — maximum visibility for advertisers who want to stand out.'],
+              ['star', 'Featured Advertisements', 'Gold-badged featured profiles appear at the top of every category and search result — maximum visibility for advertisers who want to stand out.'],
               ['camera', 'Creators & Content', 'OnlyFans models, Fansly creators, cam performers — publish content, grow followers, receive token gifts and link all your external platforms from one creator profile.'],
               ['building-store', 'Marketplace & Partners', 'A curated adult lifestyle webshop plus 50+ verified affiliate partners across wellness, toys, lingerie, and lifestyle brands — all in one ecosystem.'],
               ['link', 'Affiliate & Referral', 'Earn platform tokens by referring new advertisers. Creators and partners earn recurring credit through our affiliate programme with no cap on rewards.'],
@@ -312,13 +312,13 @@ export default function WhySecretXperience() {
               Proof is not a promise — it is a track record. SecretXperience was engineered with the infrastructure, verification processes, and feature depth that only come from a team that deeply understands the EU adult services landscape. Every decision is data-informed: which cities have the highest demand, which listing types convert best, which boost formats drive the most profile views.
             </p>
             <p>
-              Advertisers who upgrade to a Featured listing report significantly higher inbound message volume within 48 hours. Verified profiles consistently rank above unverified listings in search and category pages — not by accident, but because verification is a direct quality signal embedded into our ranking algorithm.
+              Advertisers who upgrade to a Featured advertisement report significantly higher inbound message volume within 48 hours. Verified profiles consistently rank above unverified advertisements in search and category pages — not by accident, but because verification is a direct quality signal embedded into our ranking algorithm.
             </p>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
             {[
-              ['bolt', 'Instant live listings', 'A new listing goes live in under 10 minutes after sign-up. No waiting room. No review queue for basic profiles. Verification adds the badge — your listing is live immediately.'],
+              ['bolt', 'Instant live advertisements', 'A new advertisement goes live in under 10 minutes after sign-up. No waiting room. No review queue for basic profiles. Verification adds the badge — your advertisement is live immediately.'],
               ['chart-bar', 'Real search volume, real cities', 'Our per-city pages — escorts Brussels, nightlife Amsterdam, rentals Berlin — are built to capture the exact long-tail searches EU clients actually type. Every page is server-rendered, crawlable, and indexed.'],
               ['clock', 'Always-on availability engine', 'Advertisers set real-time availability. The "Available Now" badge surfaces in-category listings in real time, helping clients find someone tonight — not tomorrow.'],
               ['refresh', 'Self-updating event calendar', 'A nightly pg_cron job automatically rolls recurring events forward, removes stale listings, and keeps the events calendar accurate without any manual intervention.'],
@@ -507,7 +507,7 @@ export default function WhySecretXperience() {
             <Q q="How do I list my services on SecretXperience?" a="Creating a basic profile is completely free and takes under 10 minutes. Sign up, choose your category (escort, nightlife venue, creator, rental, hotel, or event), upload photos and a description, and go live immediately. Identity verification unlocks a verified badge and increases your search ranking." />
             <Q q="Is SecretXperience free to use?" a="Browsing is free for all visitors. Advertisers create a basic listing at no cost — with no expiry date. Premium visibility options (Featured badge from €29/7 days, Homepage Slider from €79/30 days) are available when you're ready to grow. Token packages for boosts, tips and gifts start from €2.50." />
             <Q q="How does SecretXperience compare to Vivastreet, AdultWork, or Escort Advisor?" a="Unlike legacy escort directories, SecretXperience offers mandatory identity verification, end-to-end encrypted messaging, a token gift economy, a built-in creator content feed, a webshop, real-time availability signalling, 52 per-city SEO-optimised landing pages, and full GDPR compliance. It is a full adult lifestyle ecosystem, not a classified ad board." />
-            <Q q="What is the token system and how does it work?" a="Tokens are SecretXperience's platform currency — 1 token = €0.10. They are used to boost listing visibility, send gifts to creators (25–200 tokens), and tip advertisers. Tokens can be purchased in packages from €2.50. Advertisers earn tokens through the referral programme (75 tokens per referred advertiser who lists) and by receiving fan gifts." />
+            <Q q="What is the token system and how does it work?" a="Tokens are SecretXperience's platform currency — 1 token = €0.10. They are used to boost advertisement visibility, send gifts to creators (25–200 tokens), and tip advertisers. Tokens can be purchased in packages from €2.50. Advertisers earn tokens through the referral programme (75 tokens per referred advertiser who lists) and by receiving fan gifts." />
           </div>
         </section>
 
@@ -529,7 +529,7 @@ export default function WhySecretXperience() {
                 <i className="ti ti-plus" /> Create your free profile
               </Link>
               <Link href="/search" style={{ padding: '15px 28px', border: `0.5px solid ${S.b2}`, borderRadius: '10px', color: S.t2, fontSize: '15px', textDecoration: 'none' }}>
-                Browse listings
+                Browse advertisements
               </Link>
             </div>
             <p style={{ marginTop: '1.5rem', fontSize: '12px', color: S.t3 }}>

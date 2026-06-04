@@ -10,7 +10,7 @@ const PLANS = [
     price: '€29',
     per: '€4.14 / day',
     badge: null,
-    description: 'Get noticed this week. Your listing appears at the top of every search and category page with a ✦ Featured badge.',
+    description: 'Get noticed this week. Your advertisement appears at the top of every search and category page with a ✦ Featured badge.',
   },
   {
     key: 'month',
@@ -117,12 +117,12 @@ export default function BoostPage() {
         <div className="boost-inner">
           <div className="boost-header">
             <div className="boost-eyebrow">✦ Featured Placement</div>
-            <h1 className="boost-title">Put your listing<br /><em style={{ fontStyle:'italic', color:'#c5a05a' }}>in front of everyone</em></h1>
-            <p className="boost-subtitle">Featured listings appear at the top of every search and category page, and in the homepage slider — seen by every visitor.</p>
+            <h1 className="boost-title">Put your advertisement<br /><em style={{ fontStyle:'italic', color:'#c5a05a' }}>in front of everyone</em></h1>
+            <p className="boost-subtitle">Featured advertisements appear at the top of every search and category page, and in the homepage slider — seen by every visitor.</p>
           </div>
 
           {loading ? (
-            <div style={{ textAlign:'center', padding:'3rem', color:'rgba(236,232,225,0.4)', fontSize:14 }}>Loading your listings…</div>
+            <div style={{ textAlign:'center', padding:'3rem', color:'rgba(236,232,225,0.4)', fontSize:14 }}>Loading your advertisements…</div>
           ) : !authed ? (
             <div style={{ textAlign:'center', padding:'3rem' }}>
               <p style={{ color:'rgba(236,232,225,0.55)', marginBottom:'1.5rem', fontSize:14 }}>You need to be signed in to feature a listing.</p>
@@ -137,7 +137,7 @@ export default function BoostPage() {
             <>
               {/* Step 1: Listing picker */}
               <div style={{ marginBottom: '2rem' }}>
-                <div className="section-label">Step 1 — Choose your listing</div>
+                <div className="section-label">Step 1 — Choose your advertisement</div>
                 <select
                   className="listing-select"
                   value={selectedListing}

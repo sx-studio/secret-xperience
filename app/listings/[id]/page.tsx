@@ -1124,7 +1124,7 @@ export default function ListingDetailPage() {
                   }}
                 >
                   <i className={isFaved ? 'ti ti-heart-filled' : 'ti ti-heart'} />
-                  {isFaved ? 'Saved' : 'Save listing'}
+                  {isFaved ? 'Saved' : 'Save advertisement'}
                 </button>
 
                 {/* Share button */}
@@ -1159,7 +1159,7 @@ export default function ListingDetailPage() {
                   onMouseOut={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.2)')}
                 >
                   <i className="ti ti-flag" style={{ fontSize: '12px' }} />
-                  Report listing
+                  Report advertisement
                 </a>
               </div>
 

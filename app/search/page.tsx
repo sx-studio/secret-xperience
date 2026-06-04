@@ -282,7 +282,7 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
           {!listings || listings.length === 0 ? (
             <div className="s-empty">
               <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(197,160,90,0.08)', border: '0.5px solid rgba(197,160,90,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px' }}>✦</div>
-              <div style={{ fontFamily: 'var(--serif)', fontSize: '22px', color: 'var(--t)' }}>No listings found</div>
+              <div style={{ fontFamily: 'var(--serif)', fontSize: '22px', color: 'var(--t)' }}>No advertisements found</div>
               <p style={{ fontSize: '14px', color: 'var(--t3)', maxWidth: '320px', lineHeight: 1.6 }}>
                 {q ? `No results for "${q}". Try different keywords or browse by category.` : 'No listings match these filters. Try broadening your search.'}
               </p>

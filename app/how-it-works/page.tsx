@@ -95,7 +95,7 @@ const venueSteps = [
     num: '03',
     icon: '◉',
     title: 'Get Verified',
-    body: 'Complete identity and property verification to earn the verified badge. Verified listings rank higher in search and receive significantly more booking requests from trusted clients.',
+    body: 'Complete identity and property verification to earn the verified badge. Verified advertisements rank higher in search and receive significantly more booking requests from trusted clients.',
   },
   {
     num: '04',
@@ -121,7 +121,7 @@ const advertiserSteps = [
   {
     num: '02',
     icon: '◈',
-    title: 'Build Your Listing',
+    title: 'Build Your Advertisement',
     body: 'Create a profile that represents you. Write a description in your own words, upload photos, set your rates, and define your availability. You are always in control of what is shown and what is hidden.',
   },
   {

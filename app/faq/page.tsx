@@ -35,7 +35,7 @@ const faqGroups = [
       },
       {
         q: 'How do I know a profile is real?',
-        a: `Look for the gold verification badge. This indicates the advertiser has passed our identity and age verification process — including a government ID check and facial liveness verification conducted by our third-party partner. Unverified listings are marked accordingly. We also encourage reading client reviews, which are only submitted by users who have completed a booking.`,
+        a: `Look for the gold verification badge. This indicates the advertiser has passed our identity and age verification process — including a government ID check and facial liveness verification conducted by our third-party partner. Unverified advertisements are marked accordingly. We also encourage reading client reviews, which are only submitted by users who have completed a booking.`,
       },
     ],
   },
@@ -44,7 +44,7 @@ const faqGroups = [
     items: [
       {
         q: 'How do I list my services?',
-        a: `Create an account with your email address and choose a display name. From your advertiser dashboard, click "Create Listing" and complete your profile — bio, photos, rates, availability, and service areas. Your listing will be held for moderation review and typically approved within 24 hours. You can update your listing at any time.`,
+        a: `Create an account with your email address and choose a display name. From your advertiser dashboard, click "Create Advertisement" and complete your profile — bio, photos, rates, availability, and service areas. Your advertisement will be held for moderation review and typically approved within 24 hours. You can update your advertisement at any time.`,
       },
       {
         q: 'How do I get verified?',

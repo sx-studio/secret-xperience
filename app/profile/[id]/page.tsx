@@ -753,7 +753,7 @@ export default function ProfilePage() {
               ? ratingsWithValues.reduce((sum, l) => sum + (l.rating ?? 0), 0) / ratingsWithValues.length
               : null
             const stats: { label: string; value: string }[] = []
-            stats.push({ label: 'Active Listings', value: String(activeCount) })
+            stats.push({ label: 'Active Advertisements', value: String(activeCount) })
             if (memberSince) stats.push({ label: 'Member Since', value: memberSince })
             if (avgRating != null) stats.push({ label: 'Avg Rating', value: `⭐ ${avgRating.toFixed(1)}` })
             return (
@@ -863,7 +863,7 @@ export default function ProfilePage() {
             margin: '0 0 20px',
             letterSpacing: '0.01em',
           }}>
-            Active Listings
+            Active Advertisements
           </h2>
 
           {listings.length === 0 ? (

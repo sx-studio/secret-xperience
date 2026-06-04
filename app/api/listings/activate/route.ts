@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     { auth: { autoRefreshToken: false, persistSession: false } }
   )
 
-  // Verify listing belongs to this user
+  // Verify advertisement belongs to this user
   const { data: listing } = await admin
     .from('listings')
     .select('id, profile_id')

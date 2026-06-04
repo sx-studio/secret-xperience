@@ -29,7 +29,7 @@ So we built SecretXperience.`,
 
 Every design decision, every policy, every feature on this platform flows from three guiding principles:
 
-• Verified — Every advertiser on SecretXperience completes an identity verification process before their listing goes live. Clients can browse with confidence, knowing who they are engaging with.
+• Verified — Every advertiser on SecretXperience completes an identity verification process before their advertisement goes live. Clients can browse with confidence, knowing who they are engaging with.
 
 • Safe — We maintain a zero-tolerance policy toward exploitation, coercion, and any content involving minors. Our moderation team operates around the clock. We cooperate fully with law enforcement.
 

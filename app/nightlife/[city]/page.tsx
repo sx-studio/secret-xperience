@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: { params: { city: string } })
   if (!cityName) return { title: 'SecretXperience' }
   return {
     title: `Nightlife in ${cityName} | SecretXperience`,
-    description: `Adult nightlife venues in ${cityName} — clubs, fetish bars, swingers nights, and private events. Verified listings on SecretXperience.`,
+    description: `Adult nightlife venues in ${cityName} — clubs, fetish bars, swingers nights, and private events. Verified advertisements on SecretXperience.`,
     openGraph: {
       title: `Nightlife in ${cityName} | SecretXperience`,
       description: `Browse adult nightlife venues in ${cityName}. Clubs, fetish bars, swingers events and more.`,

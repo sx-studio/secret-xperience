@@ -28,7 +28,7 @@ const tokenPackages = [
 
 const tokenUsage = [
   { service: 'Basic listing (7 days)', tokens: '25' },
-  { service: 'Featured listing (7 days)', tokens: '50' },
+  { service: 'Featured advertisement (7 days)', tokens: '50' },
   { service: 'Top boost', tokens: '75' },
   { service: 'Premium listing (30 days)', tokens: '150' },
   { service: 'Verification badge', tokens: '25' },

@@ -295,7 +295,7 @@ export default function AdvertisePage() {
           <Link href="/medical" style={{ color: 'var(--t3)', textDecoration: 'none' }}>Medical Info</Link>
           <Link href="/terms" style={{ color: 'var(--t3)', textDecoration: 'none' }}>Terms</Link>
           <Link href="/privacy" style={{ color: 'var(--t3)', textDecoration: 'none' }}>Privacy</Link>
-          <Link href="/" style={{ color: 'var(--t3)', textDecoration: 'none' }}>Browse listings</Link>
+          <Link href="/" style={{ color: 'var(--t3)', textDecoration: 'none' }}>Browse advertisements</Link>
           <span>© 2025 SecretXperience.eu</span>
         </div>
       </footer>

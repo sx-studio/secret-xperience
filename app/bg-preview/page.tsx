@@ -164,7 +164,7 @@ export default function BgPreviewPage() {
               </p>
               <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
                 <span style={{ padding: '14px 34px', background: 'linear-gradient(135deg,#c5a05a,#a0803d)', borderRadius: '10px', fontSize: '15px', fontWeight: 700, color: '#080612', cursor: 'default', boxShadow: showBg ? '0 8px 40px rgba(197,160,90,0.45)' : '0 4px 16px rgba(197,160,90,0.2)', transition: 'box-shadow .45s' }}>
-                  Browse listings
+                  Browse advertisements
                 </span>
                 <span style={{ padding: '14px 34px', background: showBg ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.04)', border: '0.5px solid rgba(255,255,255,0.12)', borderRadius: '10px', fontSize: '15px', color: 'rgba(236,232,225,0.65)', cursor: 'default', backdropFilter: 'blur(16px)', transition: 'background .45s' }}>
                   ✦ Discover
@@ -218,7 +218,7 @@ export default function BgPreviewPage() {
             transition: 'background .45s',
           }}>
             <div style={{ maxWidth: '900px', margin: '0 auto', display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '2rem' }}>
-              {[['2,400+', 'Verified listings'], ['8', 'EU countries'], ['100%', 'Discreet'], ['24/7', 'Support']].map(([num, label]) => (
+              {[['2,400+', 'Verified advertisements'], ['8', 'EU countries'], ['100%', 'Discreet'], ['24/7', 'Support']].map(([num, label]) => (
                 <div key={label} style={{ textAlign: 'center' }}>
                   <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: '2.6rem', fontWeight: 300, color: '#c5a05a', lineHeight: 1, textShadow: showBg ? '0 0 30px rgba(197,160,90,0.4)' : 'none', transition: 'text-shadow .45s' }}>{num}</div>
                   <div style={{ fontSize: '11px', color: 'rgba(236,232,225,0.35)', letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: '5px' }}>{label}</div>

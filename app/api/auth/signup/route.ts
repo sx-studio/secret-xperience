@@ -24,7 +24,7 @@ function advertiserWelcomeHtml(name: string) {
         <tr>
           <td width="34" valign="top"><div style="width:26px;height:26px;border-radius:50%;background:#c5a05a;color:#080612;font-weight:700;font-size:13px;text-align:center;line-height:26px;">1</div></td>
           <td valign="top" style="padding-bottom:18px;">
-            <div style="font-size:15px;color:#ece8e1;font-weight:600;margin-bottom:3px;">Create your listing — free, forever</div>
+            <div style="font-size:15px;color:#ece8e1;font-weight:600;margin-bottom:3px;">Create your advertisement — free, forever</div>
             <div style="font-size:13px;line-height:1.6;color:rgba(236,232,225,0.55);">A basic listing stays live permanently. No daily re-listing, no expiry.</div>
           </td>
         </tr>
@@ -39,7 +39,7 @@ function advertiserWelcomeHtml(name: string) {
           <td width="34" valign="top"><div style="width:26px;height:26px;border-radius:50%;background:#c5a05a;color:#080612;font-weight:700;font-size:13px;text-align:center;line-height:26px;">3</div></td>
           <td valign="top" style="padding-bottom:6px;">
             <div style="font-size:15px;color:#ece8e1;font-weight:600;margin-bottom:3px;">Get to the top</div>
-            <div style="font-size:13px;line-height:1.6;color:rgba(236,232,225,0.55);">Feature your listing for 7 or 30 days to lead the grid and homepage slider.</div>
+            <div style="font-size:13px;line-height:1.6;color:rgba(236,232,225,0.55);">Feature your advertisement for 7 or 30 days to lead the grid and homepage slider.</div>
           </td>
         </tr>
       </table>

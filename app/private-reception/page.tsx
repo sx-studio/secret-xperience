@@ -713,7 +713,7 @@ export default function PrivateReceptionPage() {
               <div>
                 <div style={{ fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--gold)', marginBottom: '0.6rem' }}>Private Hosts & Studios</div>
                 <h3 style={{ fontFamily: 'var(--serif)', fontSize: '26px', fontStyle: 'italic', fontWeight: 400, marginBottom: '0.5rem' }}>List your private space</h3>
-                <p style={{ color: 'var(--t2)', fontSize: '14px', lineHeight: 1.65, maxWidth: '420px' }}>Receive clients at your location. Free listing, discreet, no middlemen.</p>
+                <p style={{ color: 'var(--t2)', fontSize: '14px', lineHeight: 1.65, maxWidth: '420px' }}>Receive clients at your location. Free advertisement, discreet, no middlemen.</p>
               </div>
               <Link href="/listings/create" style={{ background: 'var(--grad-gold)', borderRadius: '999px', padding: '12px 28px', color: '#000', fontWeight: 700, fontSize: '14px', textDecoration: 'none', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
                 Create profile →

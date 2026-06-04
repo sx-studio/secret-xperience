@@ -233,7 +233,7 @@ export default function AdminPage() {
   }
 
   async function deleteListing(id: string) {
-    if (!confirm('Delete this listing? This cannot be undone.')) return
+    if (!confirm('Delete this advertisement? This cannot be undone.')) return
     const supabase = createClient()
     await supabase.from('listings').delete().eq('id', id)
     setListings(prev => prev.filter(l => l.id !== id))
@@ -269,7 +269,7 @@ export default function AdminPage() {
     await supabase.from('notifications').insert({
       user_id: userId, type: 'verification',
       title: '✓ You are now verified!',
-      body: 'Your identity has been verified. You can now publish listings on SecretXperience.',
+      body: 'Your identity has been verified. You can now publish advertisements on SecretXperience.',
       link: '/listings/create',
     })
     setVerifications(prev => prev.map(v => v.id === verifId ? { ...v, status: 'approved' } : v))
@@ -480,7 +480,7 @@ export default function AdminPage() {
           {/* ── Stats row ── */}
           <div className="adm-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
             {[
-              { icon: 'ti-layout-list', label: 'Active Listings', value: stats.listings, sub: 'total listings' },
+              { icon: 'ti-layout-list', label: 'Active Advertisements', value: stats.listings, sub: 'total advertisements' },
               { icon: 'ti-users',       label: 'Total Users',     value: stats.users,    sub: 'registered' },
               { icon: 'ti-calendar-event', label: 'Bookings',     value: stats.bookings, sub: 'all time' },
               { icon: 'ti-coin-euro',   label: 'Revenue',         value: `€${(stats.revenue / 100).toLocaleString()}`, sub: 'confirmed bookings' },
@@ -508,7 +508,7 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredListings.length === 0 && <tr><td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: 'var(--t3, #4c4a47)', fontFamily: 'var(--sans)' }}>No listings found</td></tr>}
+                  {filteredListings.length === 0 && <tr><td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: 'var(--t3, #4c4a47)', fontFamily: 'var(--sans)' }}>No advertisements found</td></tr>}
                   {filteredListings.map(l => (
                     <tr key={l.id} className="adm-tr" style={{ borderTop: '0.5px solid var(--b, rgba(255,255,255,0.04))', color: 'var(--t, #ece8e1)', transition: 'background var(--t-fast, .1s)' }}>
                       <td style={{ padding: '14px 16px' }}>
@@ -544,7 +544,7 @@ export default function AdminPage() {
                               className="adm-action-icon-btn adm-action-btn"
                               onClick={() => toggleListing(l.id, 'verified', l.verified)}
                               style={{ color: l.verified ? 'var(--t2, #8c8880)' : 'var(--verified, #1dc9a0)', borderColor: l.verified ? 'var(--b2)' : 'rgba(38,212,160,0.3)' }}
-                              title={l.verified ? 'Remove verification' : 'Verify listing'}
+                              title={l.verified ? 'Remove verification' : 'Verify advertisement'}
                             >
                               <i className={`ti ${l.verified ? 'ti-circle-x' : 'ti-circle-check'}`} aria-hidden="true" />
                               <span style={{ font: '600 10px/1 var(--sans)', letterSpacing: '0.06em' }}>{l.verified ? 'Unverify' : 'Verify'}</span>
@@ -553,7 +553,7 @@ export default function AdminPage() {
                               className="adm-action-icon-btn adm-action-btn"
                               onClick={() => toggleListing(l.id, 'active', l.active)}
                               style={{ color: l.active ? 'var(--wine, #b84d72)' : 'var(--verified, #1dc9a0)', borderColor: l.active ? 'rgba(184,77,114,0.3)' : 'rgba(38,212,160,0.3)' }}
-                              title={l.active ? 'Hide listing' : 'Show listing'}
+                              title={l.active ? 'Hide advertisement' : 'Show advertisement'}
                             >
                               <i className={`ti ${l.active ? 'ti-eye-off' : 'ti-eye'}`} aria-hidden="true" />
                               <span style={{ font: '600 10px/1 var(--sans)', letterSpacing: '0.06em' }}>{l.active ? 'Hide' : 'Show'}</span>
@@ -562,7 +562,7 @@ export default function AdminPage() {
                               className="adm-action-icon-btn adm-action-btn"
                               onClick={() => deleteListing(l.id)}
                               style={{ color: 'var(--danger, #e2536b)', borderColor: 'rgba(226,83,107,0.3)' }}
-                              title="Delete listing permanently"
+                              title="Delete advertisement permanently"
                             >
                               <i className="ti ti-trash" aria-hidden="true" />
                             </button>

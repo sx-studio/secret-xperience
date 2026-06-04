@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     { auth: { autoRefreshToken: false, persistSession: false } }
   )
 
-  // Verify listing ownership
+  // Verify advertisement ownership
   const { data: listing } = await supabaseAdmin
     .from('listings')
     .select('id, title, featured_until')

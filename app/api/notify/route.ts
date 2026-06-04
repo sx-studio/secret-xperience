@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
             <div class="header"><div class="logo">Secret<em>Xperience</em></div></div>
             <div class="body">
               <div class="title">New booking request</div>
-              <div class="sub">Hi ${advertiser?.full_name || 'there'}, <strong style="color:#ece8e1">${client?.full_name || 'A client'}</strong> has requested a booking for your listing.</div>
+              <div class="sub">Hi ${advertiser?.full_name || 'there'}, <strong style="color:#ece8e1">${client?.full_name || 'A client'}</strong> has requested a booking for your advertisement.</div>
               ${bookingCard}
               ${booking.notes ? `<div style="background:rgba(197,160,90,0.05);border:1px solid rgba(197,160,90,0.15);border-radius:8px;padding:12px 16px;margin-bottom:24px;font-size:13px;color:#8c8880"><strong style="color:#c5a05a;font-size:11px;text-transform:uppercase;letter-spacing:0.1em">Client notes</strong><br>${booking.notes}</div>` : ''}
               <div style="text-align:center"><a href="${siteUrl}/dashboard" class="btn">View in dashboard →</a></div>
@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (type === 'listing_boosted') {
-      // Fetch listing details for boost notification
+      // Fetch advertisement details for boost notification
       const { data: boostListing } = await supabase
         .from('listings')
         .select('id, title, featured_until, profile:profiles!profile_id(full_name, email)')
@@ -139,9 +139,9 @@ export async function POST(req: NextRequest) {
                   <div style="font-size:14px;color:#c5a05a;font-weight:500">Featured until</div>
                   <div style="font-size:18px;color:#ece8e1;margin-top:4px">${boostListing?.featured_until ? new Date(boostListing.featured_until).toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'}) : '—'}</div>
                 </div>
-                <div style="text-align:center"><a href="${siteUrl}/dashboard" class="btn">View your listing →</a></div>
+                <div style="text-align:center"><a href="${siteUrl}/dashboard" class="btn">View your advertisement →</a></div>
               </div>
-              <div class="footer">SecretXperience.eu · Thank you for boosting your listing.</div>
+              <div class="footer">SecretXperience.eu · Thank you for boosting your advertisement.</div>
             </div>
           </body></html>`,
         })

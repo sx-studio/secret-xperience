@@ -246,7 +246,7 @@ export default function DashboardPage() {
         setNotificationWithTimeout('Booking confirmed! Payment received.')
         window.history.replaceState({}, '', '/dashboard')
       } else if (params.get('boost') === 'success') {
-        setNotificationWithTimeout('✦ Your listing is now featured! It will appear at the top of results.')
+        setNotificationWithTimeout('✦ Your advertisement is now featured! It will appear at the top of results.')
         window.history.replaceState({}, '', '/dashboard')
       } else if (params.get('connect') === 'success') {
         setNotificationWithTimeout('✓ Stripe payouts connected! You\'ll receive payments directly.')
@@ -355,7 +355,7 @@ export default function DashboardPage() {
       setBoostingListing(null)
       if (json.ok) {
         setTokenBalance(b => (b ?? 0) - 20)
-        setNotificationWithTimeout('✦ Flash boost active! Your listing is at the top for 6 hours.')
+        setNotificationWithTimeout('✦ Flash boost active! Your advertisement is at the top for 6 hours.')
       } else {
         setNotification(json.error || 'Boost failed — check your token balance.')
       }
@@ -382,7 +382,7 @@ export default function DashboardPage() {
       const json = await res.json()
       if (json.ok) {
         setListings(prev => prev.map(l => l.id === listingId ? { ...l, active: true, status: 'approved' } : l))
-        setNotificationWithTimeout('✓ Your listing is live again.')
+        setNotificationWithTimeout('✓ Your advertisement is live again.')
       } else {
         setNotification(json.error || 'Could not set listing live.')
       }
@@ -1291,7 +1291,7 @@ export default function DashboardPage() {
           {/* ── Identity Verification Card ── */}
           {(() => {
             const cfg = {
-              not_submitted: { icon: 'ti-id',           color: 'var(--gold,#c5a05a)',    bg: 'rgba(197,160,90,0.08)',   border: 'var(--gbrd,rgba(197,160,90,0.25))', label: 'Verify your identity',   sub: 'Submit your ID to unlock listing. Required before you can publish.', btn: 'Start verification →', btnStyle: 'db-quick-btn-gold' },
+              not_submitted: { icon: 'ti-id',           color: 'var(--gold,#c5a05a)',    bg: 'rgba(197,160,90,0.08)',   border: 'var(--gbrd,rgba(197,160,90,0.25))', label: 'Verify your identity',   sub: 'Submit your ID to unlock advertisement. Required before you can publish.', btn: 'Start verification →', btnStyle: 'db-quick-btn-gold' },
               pending:       { icon: 'ti-clock',         color: 'rgba(245,168,38,0.9)',  bg: 'rgba(245,168,38,0.08)',   border: 'rgba(245,168,38,0.3)',              label: 'Verification under review', sub: 'We\'re reviewing your documents. Usually within 24–48 hours.',       btn: null,                   btnStyle: '' },
               approved:      { icon: 'ti-shield-check',  color: 'var(--verified,#3ecf8e)', bg: 'rgba(62,207,142,0.08)', border: 'rgba(62,207,142,0.2)',              label: 'Identity verified ✓',    sub: 'Your identity is confirmed. You can publish listings.',               btn: null,                   btnStyle: '' },
               rejected:      { icon: 'ti-shield-x',      color: '#e05a5a',               bg: 'rgba(224,90,90,0.08)',    border: 'rgba(224,90,90,0.25)',              label: 'Verification rejected',  sub: 'Your submission was rejected. Please re-submit with clearer documents.', btn: 'Re-submit →',         btnStyle: 'db-quick-btn-gold' },
@@ -1442,7 +1442,7 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* ── My Listings ── */}
+          {/* ── My Advertisements ── */}
           <div className="db-card" style={{ marginBottom: '1.5rem' }}>
             <div style={{
               display: 'flex',
@@ -1450,7 +1450,7 @@ export default function DashboardPage() {
               alignItems: 'center',
               marginBottom: '1.375rem',
             }}>
-              <span className="db-section-title">My listings</span>
+              <span className="db-section-title">My advertisements</span>
               <button
                 className="db-edit-btn"
                 onClick={() => window.location.href = '/listings/create'}
@@ -1473,7 +1473,7 @@ export default function DashboardPage() {
                   color: 'var(--t, #ece8e1)',
                   marginBottom: '4px',
                 }}>
-                  No listings yet
+                  No advertisements yet
                 </p>
                 <p style={{
                   color: 'var(--t3, rgba(255,255,255,0.28))',
@@ -1548,7 +1548,7 @@ export default function DashboardPage() {
                           <button
                             onClick={() => reactivateListing(listing.id)}
                             disabled={activatingListing === listing.id}
-                            title="Set your listing live again — free"
+                            title="Set your advertisement live again — free"
                             style={{ padding: '5px 12px', borderRadius: 'var(--r, 8px)', border: '0.5px solid rgba(38,212,160,0.5)', background: activatingListing === listing.id ? 'rgba(38,212,160,0.08)' : 'rgba(38,212,160,0.12)', color: 'var(--verified, #1dc9a0)', cursor: activatingListing === listing.id ? 'default' : 'pointer', fontSize: '12px', fontWeight: 600, letterSpacing: '0.04em', transition: 'all .15s', opacity: activatingListing === listing.id ? 0.6 : 1 }}
                           >
                             {activatingListing === listing.id ? '…' : 'Set live'}
@@ -1585,7 +1585,7 @@ export default function DashboardPage() {
                         </button>
                         <button
                           className="db-icon-btn"
-                          title="Edit listing"
+                          title="Edit advertisement"
                           onClick={() => {
                             const parsed = parseListingTags(listing.tags)
                             setListingDraft({
@@ -1628,7 +1628,7 @@ export default function DashboardPage() {
                     <i className="ti ti-calendar" aria-hidden="true" style={{ fontSize: '22px', color: 'var(--gold)' }} />
                   </div>
                   <p style={{ color: 'var(--t3)', fontSize: '13px', fontWeight: 300, fontFamily: 'var(--sans)', letterSpacing: '0.03em' }}>
-                    No booking requests yet. Once clients book your listings they will appear here.
+                    No booking requests yet. Once clients book your advertisements they will appear here.
                   </p>
                 </div>
               ) : (
@@ -1839,7 +1839,7 @@ export default function DashboardPage() {
           <div onClick={e => e.stopPropagation()} style={{ background:'#0e0e0e',border:'0.5px solid rgba(197,160,90,0.25)',borderRadius:'20px',padding:'2rem',width:'100%',maxWidth:'640px',boxShadow:'0 24px 80px rgba(0,0,0,0.7)',marginBottom:'2rem' }}>
 
             <div style={{ display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'1.75rem' }}>
-              <div style={{ fontFamily:'var(--serif)',fontSize:'24px',fontWeight:500,color:'var(--t, #ece8e1)' }}>Edit Listing</div>
+              <div style={{ fontFamily:'var(--serif)',fontSize:'24px',fontWeight:500,color:'var(--t, #ece8e1)' }}>Edit Advertisement</div>
               <button onClick={() => setEditingListing(null)} style={{ background:'none',border:'0.5px solid rgba(255,255,255,0.1)',borderRadius:'50%',width:32,height:32,color:'rgba(255,255,255,0.4)',cursor:'pointer',fontSize:'16px',display:'flex',alignItems:'center',justifyContent:'center' }}>×</button>
             </div>
 
@@ -1848,7 +1848,7 @@ export default function DashboardPage() {
               <div className="db-form-section-title">Basic Info</div>
               <div style={{ marginBottom:'1rem' }}>
                 <label style={{ display:'block',font:'600 10px/1 var(--sans)',color:'rgba(255,255,255,0.35)',letterSpacing:'0.1em',marginBottom:'7px',textTransform:'uppercase' }}>Title / Name</label>
-                <input type="text" value={listingDraft.title||''} onChange={e => setListingDraft((d:any)=>({...d,title:e.target.value}))} placeholder="Your listing title" className="db-input" />
+                <input type="text" value={listingDraft.title||''} onChange={e => setListingDraft((d:any)=>({...d,title:e.target.value}))} placeholder="Your advertisement title" className="db-input" />
               </div>
               <div style={{ marginBottom:'1rem' }}>
                 <label style={{ display:'block',font:'600 10px/1 var(--sans)',color:'rgba(255,255,255,0.35)',letterSpacing:'0.1em',marginBottom:'7px',textTransform:'uppercase' }}>About / Description</label>
@@ -2349,8 +2349,8 @@ export default function DashboardPage() {
             </div>
             <div style={{ background:'var(--gbg, rgba(197,160,90,0.06))',border:'0.5px solid var(--gbrd, rgba(197,160,90,0.15))',borderRadius:'var(--r, 8px)',padding:'0.875rem 1rem',marginBottom:'1.5rem',fontSize:'12px',color:'var(--t2, #8c8880)',lineHeight:1.6 }}>
               {boostPlan === '6h'
-                ? 'Your listing will appear at the top of results for 6 hours, then return to its normal position.'
-                : 'Your listing will appear at the top of all search results and category pages with a ✦ Featured badge for the selected duration.'}
+                ? 'Your advertisement will appear at the top of results for 6 hours, then return to its normal position.'
+                : 'Your advertisement will appear at the top of all search results and category pages with a ✦ Featured badge for the selected duration.'}
             </div>
             <div style={{ display:'flex',gap:'10px',justifyContent:'flex-end' }}>
               <button onClick={() => setBoostingListing(null)} className="db-quick-btn-dark">Cancel</button>

@@ -78,7 +78,7 @@ function Slot({ channel, numberKey, verifiedKey, showKey, label, icon, hint, pro
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--t2,#8c8880)', cursor: 'pointer' }}>
               <input type="checkbox" checked={profile?.[showKey] !== false} onChange={e => onUpdate({ [showKey]: e.target.checked })} />
-              Show on listing
+              Show on advertisement
             </label>
             <button style={btnGhost} onClick={() => { setEditing(true); setStage('idle'); setNumber(saved) }}>Change</button>
           </div>
@@ -116,7 +116,7 @@ export default function PhoneVerify({ profile, onUpdate }: Props) {
         <span style={{ fontSize: '15px', fontWeight: 500, color: 'var(--t,#ece8e1)' }}>Contact numbers</span>
       </div>
       <p style={{ fontSize: '12px', color: 'var(--t2,#8c8880)', lineHeight: 1.5, marginBottom: '4px' }}>
-        Verify a phone and/or WhatsApp number. Verified numbers appear on your listings so clients can reach you directly. You choose which to show.
+        Verify a phone and/or WhatsApp number. Verified numbers appear on your advertisements so clients can reach you directly. You choose which to show.
       </p>
       {SLOTS.map(s => <Slot key={s.channel} {...s} profile={profile} onUpdate={onUpdate} />)}
     </div>

@@ -125,7 +125,7 @@ export default function EventsPage() {
           Secret<em style={{ fontStyle: 'italic', fontWeight: 300 }}>Xperience</em>
         </Link>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <Link href="/" style={{ height: '36px', padding: '0 14px', background: 'transparent', border: '0.5px solid var(--b2)', borderRadius: 'var(--r)', color: 'var(--t2)', fontSize: '13px', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}><i className="ti ti-arrow-left" /> Browse listings</Link>
+          <Link href="/" style={{ height: '36px', padding: '0 14px', background: 'transparent', border: '0.5px solid var(--b2)', borderRadius: 'var(--r)', color: 'var(--t2)', fontSize: '13px', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}><i className="ti ti-arrow-left" /> Browse advertisements</Link>
           <Link href="/advertise" style={{ height: '36px', padding: '0 16px', background: 'linear-gradient(135deg,var(--gold),var(--goldd))', borderRadius: 'var(--r)', color: '#0a0a0a', fontSize: '13px', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}><i className="ti ti-plus" /> List an event</Link>
         </div>
       </nav>

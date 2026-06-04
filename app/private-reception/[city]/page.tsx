@@ -151,7 +151,7 @@ export default async function PrivateReceptionCityPage({ params }: { params: { c
     ]
     const TIERS = [
       { name: 'Free', price: '€0', period: '/month', highlight: false, features: ['1 host listing', 'Basic photo gallery (5 photos)', 'Direct messaging', 'City search visibility', 'Visit requests'] },
-      { name: 'Premium', price: '€29', period: '/month', highlight: true, features: ['Unlimited listings', 'Full photo gallery (20 photos)', 'Priority in search results', 'Verified badge eligibility', 'Spotlight placement', 'Analytics dashboard', 'Featured on homepage'] },
+      { name: 'Premium', price: '€29', period: '/month', highlight: true, features: ['Unlimited advertisements', 'Full photo gallery (20 photos)', 'Priority in search results', 'Verified badge eligibility', 'Spotlight placement', 'Analytics dashboard', 'Featured on homepage'] },
       { name: 'Elite', price: '€69', period: '/month', highlight: false, features: ['Everything in Premium', 'Top-of-page placement', 'Profile featured in newsletter', 'Dedicated account manager', 'Token wallet (500 tokens/mo)', 'Video profile support'] },
     ]
     const countryCities = Object.entries(CITIES)
@@ -216,7 +216,7 @@ export default async function PrivateReceptionCityPage({ params }: { params: { c
                 <a href="#listings" className="cta-btn-outline">Browse active hosts</a>
               </div>
               <div style={{ marginTop: '2rem', display: 'flex', gap: '2rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-                {['✓ Free listing', '✓ No commission', '✓ Verified badge', '✓ You control access'].map(t => (
+                {['✓ Free advertisement', '✓ No commission', '✓ Verified badge', '✓ You control access'].map(t => (
                   <span key={t} style={{ fontSize: 13, color: S.t2 }}>{t}</span>
                 ))}
               </div>

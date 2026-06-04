@@ -58,7 +58,7 @@ export default function SliderAds() {
     })
   }, [])
 
-  // Load featured listings
+  // Load featured advertisements
   useEffect(() => {
     const supabase = createClient()
     supabase
@@ -355,7 +355,7 @@ export default function SliderAds() {
       {/* Advertise CTA */}
       <div style={{ marginTop:'0.85rem', display:'flex', alignItems:'center', justifyContent:'center', gap:12, flexWrap:'wrap' }}>
         <span style={{ fontSize:11, color:'rgba(236,232,225,0.4)', letterSpacing:'.04em', fontFamily:'var(--sans)' }}>
-          This could be your listing
+          This could be your advertisement
         </span>
         <a href={ctaHref}
           style={{
@@ -372,7 +372,7 @@ export default function SliderAds() {
           onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 7px 26px ${accent}88, inset 0 1px 0 rgba(255,255,255,0.3)` }}
           onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = `0 4px 18px ${accent}55, inset 0 1px 0 rgba(255,255,255,0.25)` }}>
           <i className="ti ti-sparkles" style={{ fontSize:14 }} aria-hidden="true" />
-          Feature your listing
+          Feature your advertisement
         </a>
       </div>
     </div>

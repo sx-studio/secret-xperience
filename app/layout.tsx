@@ -114,7 +114,7 @@ const sxTranslationsScript = `
     'Discreet mode':    {fr:'Mode discret',   nl:'Discrete modus', de:'Diskreter Modus',  es:'Modo discreto',   it:'Modalità discreta',pt:'Modo Discreto',    pl:'Tryb dyskretny',   ro:'Mod discret'},
     // ── Dashboard & navigation ────────────────────────────────────────────────
     'Dashboard':        {fr:'Tableau de bord',nl:'Dashboard',      de:'Dashboard',        es:'Panel',           it:'Pannello',         pt:'Painel',           pl:'Panel',            ro:'Panou'},
-    'My Listings':      {fr:'Mes annonces',   nl:'Mijn Advertenties',de:'Meine Anzeigen', es:'Mis anuncios',    it:'I miei annunci',   pt:'Os meus anúncios', pl:'Moje ogłoszenia',  ro:'Anunțurile mele'},
+    'My Advertisements':      {fr:'Mes annonces',   nl:'Mijn Advertenties',de:'Meine Anzeigen', es:'Mis anuncios',    it:'I miei annunci',   pt:'Os meus anúncios', pl:'Moje ogłoszenia',  ro:'Anunțurile mele'},
     'Messages':         {fr:'Messages',       nl:'Berichten',      de:'Nachrichten',      es:'Mensajes',        it:'Messaggi',         pt:'Mensagens',        pl:'Wiadomości',       ro:'Mesaje'},
     'Bookings':         {fr:'Réservations',   nl:'Boekingen',      de:'Buchungen',        es:'Reservas',        it:'Prenotazioni',     pt:'Reservas',         pl:'Rezerwacje',       ro:'Rezervări'},
     'Favorites':        {fr:'Favoris',        nl:'Favorieten',     de:'Favoriten',        es:'Favoritos',       it:'Preferiti',        pt:'Favoritos',        pl:'Ulubione',         ro:'Favorite'},
@@ -151,7 +151,7 @@ const sxTranslationsScript = `
     'Loading':          {fr:'Chargement…',    nl:'Laden…',         de:'Laden…',           es:'Cargando…',       it:'Caricamento…',     pt:'A carregar…',      pl:'Ładowanie…',       ro:'Se încarcă…'},
     'Loading...':       {fr:'Chargement…',    nl:'Laden…',         de:'Laden…',           es:'Cargando…',       it:'Caricamento…',     pt:'A carregar…',      pl:'Ładowanie…',       ro:'Se încarcă…'},
     // ── Homepage stats ────────────────────────────────────────────────────────
-    'Active Listings':  {fr:'Annonces actives',nl:'Actieve Advertenties',de:'Aktive Anzeigen',es:'Anuncios activos',it:'Annunci attivi',pt:'Anúncios Ativos',pl:'Aktywne ogłoszenia',ro:'Anunțuri active'},
+    'Active Advertisements':  {fr:'Annonces actives',nl:'Actieve Advertenties',de:'Aktive Anzeigen',es:'Anuncios activos',it:'Annunci attivi',pt:'Anúncios Ativos',pl:'Aktywne ogłoszenia',ro:'Anunțuri active'},
     'Verified Advertisers':{fr:'Prestataires vérifiés',nl:'Geverifieerde Aanbieders',de:'Verifizierte Anbieter',es:'Proveedores verificados',it:'Fornitori verificati',pt:'Prestadores Verificados',pl:'Zweryfikowani',ro:'Furnizori verificați'},
     'Cities Covered':   {fr:'Villes couvertes',nl:'Steden',        de:'Städte',           es:'Ciudades',        it:'Città',            pt:'Cidades Cobertas', pl:'Miasta',           ro:'Orașe acoperite'},
     'Private Gallery':  {fr:'Galerie Privée', nl:'Privé Galerij',  de:'Private Galerie',  es:'Galería Privada', it:'Galleria Privata', pt:'Galeria Privada',  pl:'Prywatna Galeria', ro:'Galerie Privată'},
