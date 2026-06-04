@@ -63,6 +63,15 @@ export default function AdminPage() {
   const [acq, setAcq]                 = useState<any[]>([])
   const [acqTotal, setAcqTotal]       = useState<number>(0)
   const [acqLoading, setAcqLoading]   = useState(true)
+  // Token grant tool
+  const [grantEmail, setGrantEmail]   = useState('')
+  const [grantAmount, setGrantAmount] = useState('500')
+  const [grantNote, setGrantNote]     = useState('')
+  const [grantLoading, setGrantLoading] = useState(false)
+  const [grantMsg, setGrantMsg]       = useState<{ ok: boolean; text: string } | null>(null)
+  // inline per-user grant
+  const [inlineGrant, setInlineGrant] = useState<{ userId: string; amount: string } | null>(null)
+  const [inlineGrantMsg, setInlineGrantMsg] = useState<{ userId: string; ok: boolean; text: string } | null>(null)
   // Keywords (DataForSEO) tool
   const [kwInput, setKwInput]         = useState('')
   const [kwMarket, setKwMarket]       = useState('be')
@@ -290,6 +299,17 @@ export default function AdminPage() {
     setVerifications(prev => prev.map(v => v.id === verifId ? { ...v, status: 'rejected' } : v))
     setVerifMsg({ id: verifId, ok: true, text: 'Rejected — provider notified.' })
     setVerifWorking(null)
+  }
+
+  async function grantTokens(email: string, amount: number, note?: string): Promise<{ ok: boolean; text: string }> {
+    const res = await fetch('/api/admin/grant-tokens', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, amount, note }),
+    })
+    const data = await res.json()
+    if (!res.ok) return { ok: false, text: data.error || 'Grant failed' }
+    return { ok: true, text: `Granted ${data.granted} tokens. New balance: ${data.newBalance}` }
   }
 
   async function runKeywords() {
@@ -576,8 +596,81 @@ export default function AdminPage() {
             </div>
           )}
 
-          {/* ── Users table ── */}
+          {/* ── Users tab ── */}
           {tab === 'Users' && (
+            <>
+            {/* Grant tokens panel */}
+            <div style={{ background: 'var(--bg1)', border: '0.5px solid var(--gbrd, rgba(197,160,90,0.2))', borderRadius: 'var(--rl, 13px)', padding: '20px 24px', marginBottom: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+                <i className="ti ti-coins" style={{ color: 'var(--gold)', fontSize: '16px' }} />
+                <span style={{ font: '600 13px/1 var(--sans)', color: 'var(--gold)' }}>Grant Tokens to User</span>
+              </div>
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', flex: '1 1 200px' }}>
+                  <label style={{ font: '500 10px/1 var(--sans)', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--t3)' }}>Email</label>
+                  <input
+                    value={grantEmail}
+                    onChange={e => setGrantEmail(e.target.value)}
+                    placeholder="user@email.com"
+                    style={{ background: 'var(--bg2)', border: '0.5px solid var(--b2)', borderRadius: 'var(--r)', color: 'var(--t)', padding: '8px 12px', font: '400 13px/1 var(--sans)', outline: 'none', width: '100%' }}
+                  />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', flex: '0 0 120px' }}>
+                  <label style={{ font: '500 10px/1 var(--sans)', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--t3)' }}>Amount</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={grantAmount}
+                    onChange={e => setGrantAmount(e.target.value)}
+                    style={{ background: 'var(--bg2)', border: '0.5px solid var(--b2)', borderRadius: 'var(--r)', color: 'var(--t)', padding: '8px 12px', font: '400 13px/1 var(--sans)', outline: 'none', width: '100%' }}
+                  />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', flex: '1 1 150px' }}>
+                  <label style={{ font: '500 10px/1 var(--sans)', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--t3)' }}>Note (optional)</label>
+                  <input
+                    value={grantNote}
+                    onChange={e => setGrantNote(e.target.value)}
+                    placeholder="Dev account, promo, etc."
+                    style={{ background: 'var(--bg2)', border: '0.5px solid var(--b2)', borderRadius: 'var(--r)', color: 'var(--t)', padding: '8px 12px', font: '400 13px/1 var(--sans)', outline: 'none', width: '100%' }}
+                  />
+                </div>
+                <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+                  <button
+                    disabled={grantLoading || !grantEmail || !grantAmount}
+                    onClick={async () => {
+                      setGrantLoading(true); setGrantMsg(null)
+                      const r = await grantTokens(grantEmail, parseInt(grantAmount), grantNote || undefined)
+                      setGrantMsg(r)
+                      if (r.ok) { setGrantEmail(''); setGrantNote('') }
+                      setGrantLoading(false)
+                    }}
+                    style={{ background: 'var(--gbg)', border: '0.5px solid var(--gbrd)', borderRadius: 'var(--r)', color: 'var(--gold)', padding: '8px 16px', font: '600 12px/1 var(--sans)', cursor: 'pointer', opacity: grantLoading ? 0.6 : 1 }}
+                  >
+                    {grantLoading ? 'Granting…' : 'Grant'}
+                  </button>
+                  <button
+                    disabled={grantLoading || !grantEmail}
+                    onClick={async () => {
+                      setGrantLoading(true); setGrantMsg(null)
+                      const r = await grantTokens(grantEmail, 999999, 'Unlimited dev account')
+                      setGrantMsg(r)
+                      if (r.ok) { setGrantEmail(''); setGrantNote('') }
+                      setGrantLoading(false)
+                    }}
+                    style={{ background: 'rgba(99,102,241,0.12)', border: '0.5px solid rgba(99,102,241,0.3)', borderRadius: 'var(--r)', color: '#818cf8', padding: '8px 16px', font: '600 12px/1 var(--sans)', cursor: 'pointer', opacity: grantLoading ? 0.6 : 1, whiteSpace: 'nowrap' }}
+                  >
+                    Unlimited (999k)
+                  </button>
+                </div>
+              </div>
+              {grantMsg && (
+                <div style={{ marginTop: '10px', font: '500 12px/1.4 var(--sans)', color: grantMsg.ok ? '#26d4a0' : '#b84d72' }}>
+                  {grantMsg.ok ? '✓ ' : '✕ '}{grantMsg.text}
+                </div>
+              )}
+            </div>
+
+          {/* ── Users table ── */}
             <div className="adm-table-wrap" style={{ background: 'var(--bg1, #0a0a0a)', border: '0.5px solid var(--b, rgba(255,255,255,0.06))', borderRadius: 'var(--rl, 13px)', overflow: 'hidden' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', minWidth: '640px' }}>
                 <thead>
@@ -655,6 +748,57 @@ export default function AdminPage() {
                               <span style={{ font: '600 10px/1 var(--sans)', letterSpacing: '0.06em' }}>{u.phone_verified ? 'Unverify #' : 'Verify #'}</span>
                             </button>
                           )}
+                          {/* Inline token grant */}
+                          {(() => {
+                            const ig = inlineGrant
+                            const igm = inlineGrantMsg
+                            return ig !== null && ig.userId === u.id ? (
+                              <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                                <input
+                                  type="number"
+                                  min="1"
+                                  value={ig.amount}
+                                  onChange={e => setInlineGrant({ userId: u.id, amount: e.target.value })}
+                                  style={{ width: '70px', background: 'var(--bg2)', border: '0.5px solid var(--gbrd)', borderRadius: 'var(--r)', color: 'var(--t)', padding: '5px 8px', font: '400 12px/1 var(--sans)', outline: 'none' }}
+                                />
+                                <button
+                                  className="adm-action-icon-btn adm-action-btn"
+                                  onClick={async () => {
+                                    const r = await grantTokens(u.email, parseInt(ig.amount), 'Admin panel inline grant')
+                                    setInlineGrantMsg({ userId: u.id, ...r })
+                                    setInlineGrant(null)
+                                  }}
+                                  style={{ color: 'var(--gold)', borderColor: 'var(--gbrd)' }}
+                                >
+                                  <i className="ti ti-check" />
+                                  <span style={{ font: '600 10px/1 var(--sans)' }}>Send</span>
+                                </button>
+                                <button
+                                  className="adm-action-icon-btn adm-action-btn"
+                                  onClick={() => setInlineGrant(null)}
+                                  style={{ color: 'var(--t2)', borderColor: 'var(--b2)' }}
+                                >
+                                  <i className="ti ti-x" />
+                                </button>
+                              </div>
+                            ) : (
+                              <>
+                                <button
+                                  className="adm-action-icon-btn adm-action-btn"
+                                  onClick={() => { setInlineGrant({ userId: u.id, amount: '500' }); setInlineGrantMsg(null) }}
+                                  style={{ color: '#c084fc', borderColor: 'rgba(192,132,252,0.3)' }}
+                                >
+                                  <i className="ti ti-coins" aria-hidden="true" />
+                                  <span style={{ font: '600 10px/1 var(--sans)', letterSpacing: '0.06em' }}>Tokens</span>
+                                </button>
+                                {igm !== null && igm.userId === u.id && (
+                                  <span style={{ font: '500 10px/1 var(--sans)', color: igm.ok ? '#26d4a0' : '#b84d72' }}>
+                                    {igm.ok ? '✓' : '✕'} {igm.text}
+                                  </span>
+                                )}
+                              </>
+                            )
+                          })()}
                         </div>
                       </td>
                     </tr>
@@ -662,6 +806,7 @@ export default function AdminPage() {
                 </tbody>
               </table>
             </div>
+            </>
           )}
 
           {/* ── Verification requests ── */}
@@ -716,7 +861,7 @@ export default function AdminPage() {
                             </>
                           )}
                         </div>
-                        {verifMsg?.id === v.id && (
+                        {verifMsg !== null && verifMsg.id === v.id && (
                           <div style={{ fontSize: 11, color: verifMsg.ok ? '#26d4a0' : '#b84d72', fontWeight: 500 }}>
                             {verifMsg.text}
                           </div>
