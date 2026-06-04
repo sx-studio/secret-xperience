@@ -167,10 +167,25 @@ export default function TokensPage() {
       .then(({ data }) => setPackages(data || []))
   }, [])
 
-  function handlePurchase(pkg: Package | typeof FALLBACK_PACKAGES[0]) {
+  async function handlePurchase(pkg: Package | typeof FALLBACK_PACKAGES[0]) {
     if (!session) { window.location.href = '/login?next=/tokens'; return }
     setSelected(pkg.id)
-    setShowPayModal(true)
+    setLoading(true)
+    try {
+      const res  = await fetch('/api/verotel/charge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ packageId: pkg.id }),
+      })
+      const data = await res.json()
+      if (data.url) { window.location.href = data.url; return }
+      // Not configured / error → graceful modal, never a raw error page.
+      setShowPayModal(true)
+    } catch {
+      setShowPayModal(true)
+    } finally {
+      setLoading(false)
+    }
   }
 
   // Compute stats from ledger
