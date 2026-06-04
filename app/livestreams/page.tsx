@@ -14,14 +14,14 @@ export default function LiveStreamsPage() {
     async function load() {
       const { data } = await supabase
         .from('live_streams')
-        .select('id, title, viewer_count, started_at, profiles:provider_id(full_name, username, avatar_url)')
+        .select('id, title, viewer_count, started_at, thumbnail_url, profiles:provider_id(full_name, username, avatar_url)')
         .eq('status', 'live').order('viewer_count', { ascending: false })
       setStreams(data || [])
       setLoading(false)
       // Past shows that have a saved recording.
       const { data: past } = await supabase
         .from('live_streams')
-        .select('id, title, peak_viewers, ended_at, recording_url, profiles:provider_id(full_name, username, avatar_url)')
+        .select('id, title, peak_viewers, ended_at, recording_url, thumbnail_url, profiles:provider_id(full_name, username, avatar_url)')
         .eq('status', 'ended').not('recording_url', 'is', null)
         .order('ended_at', { ascending: false }).limit(12)
       setReplays(past || [])
@@ -75,9 +75,11 @@ export default function LiveStreamsPage() {
               return (
                 <a key={s.id} href={`/livestreams/${s.id}`} className="ls-card">
                   <div className="ls-card-media">
-                    {s.profiles?.avatar_url
-                      ? <img src={s.profiles.avatar_url} alt={host} />
-                      : <div className="ls-card-ph"><i className="ti ti-video" /></div>}
+                    {s.thumbnail_url
+                      ? <img src={s.thumbnail_url} alt={host} />
+                      : s.profiles?.avatar_url
+                        ? <img src={s.profiles.avatar_url} alt={host} />
+                        : <div className="ls-card-ph"><i className="ti ti-video" /></div>}
                     <div className="ls-card-live"><span /> LIVE</div>
                     <div className="ls-card-viewers"><i className="ti ti-eye" /> {s.viewer_count}</div>
                   </div>
@@ -100,9 +102,11 @@ export default function LiveStreamsPage() {
                 return (
                   <a key={s.id} href={`/livestreams/${s.id}`} className="ls-card">
                     <div className="ls-card-media">
-                      {s.profiles?.avatar_url
-                        ? <img src={s.profiles.avatar_url} alt={host} />
-                        : <div className="ls-card-ph"><i className="ti ti-player-play" /></div>}
+                      {s.thumbnail_url
+                        ? <img src={s.thumbnail_url} alt={host} />
+                        : s.profiles?.avatar_url
+                          ? <img src={s.profiles.avatar_url} alt={host} />
+                          : <div className="ls-card-ph"><i className="ti ti-player-play" /></div>}
                       <div className="ls-card-replay"><i className="ti ti-player-play" /> REPLAY</div>
                     </div>
                     <div className="ls-card-info">

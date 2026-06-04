@@ -25,6 +25,7 @@ export default function GoLivePage() {
   const previewStream = useRef<MediaStream | null>(null)
   const keepStream = useRef(false)   // true once going live, so the setup cleanup won't kill the camera
   const chatEndRef = useRef<HTMLDivElement>(null)
+  const thumbBusy  = useRef(false)
 
   // ── Auth + verification gate ──────────────────────────────
   useEffect(() => {
@@ -116,7 +117,7 @@ export default function GoLivePage() {
     }
   }
 
-  // ── Live timer + viewer heartbeat ─────────────────────────
+  // ── Live timer + viewer heartbeat + thumbnail capture ─────
   useEffect(() => {
     if (phase !== 'live') return
     const t = setInterval(() => setElapsed(e => e + 1), 1000)
@@ -128,8 +129,44 @@ export default function GoLivePage() {
         }).catch(() => {})
       }
     }, 15000)
-    return () => { clearInterval(t); clearInterval(hb) }
+    // Grab a poster frame shortly after going live, then refresh it periodically.
+    const firstShot = setTimeout(captureThumbnail, 4000)
+    const thumb = setInterval(captureThumbnail, 30000)
+    return () => { clearInterval(t); clearInterval(hb); clearInterval(thumb); clearTimeout(firstShot) }
   }, [phase])
+
+  // ── Thumbnail: snapshot the live video and store it on the stream row ──
+  async function captureThumbnail() {
+    const v = videoRef.current
+    if (!v || !streamId.current || thumbBusy.current) return
+    if (!v.videoWidth || !v.videoHeight) return
+    thumbBusy.current = true
+    try {
+      const w = 640
+      const h = Math.round((v.videoHeight / v.videoWidth) * w) || 360
+      const canvas = document.createElement('canvas')
+      canvas.width = w; canvas.height = h
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
+      // Camera preview is mirrored via CSS; un-mirror for a natural thumbnail.
+      ctx.translate(w, 0); ctx.scale(-1, 1)
+      ctx.drawImage(v, 0, 0, w, h)
+      const blob: Blob | null = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.7))
+      if (!blob) return
+      const supabase = createClient()
+      const path = `live-thumbs/${streamId.current}.jpg`
+      const { error } = await supabase.storage.from('listings').upload(path, blob, { contentType: 'image/jpeg', upsert: true })
+      if (error) return
+      const url = supabase.storage.from('listings').getPublicUrl(path).data.publicUrl + `?t=${Date.now()}`
+      // live_streams writes are service-role only; go through the server route.
+      await fetch('/api/live/thumbnail', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ streamId: streamId.current, url }),
+      }).catch(() => {})
+    } catch {} finally {
+      thumbBusy.current = false
+    }
+  }
 
   // ── Chat (Supabase Realtime) ──────────────────────────────
   function subscribeChat() {
