@@ -16,7 +16,7 @@ type LiveStream = {
   profiles: { full_name: string | null; username: string | null } | null
 }
 
-// Scrolling "live now" strip on the homepage. Renders nothing when no provider
+// Scrolling "live now" strip on the homepage. Renders nothing when no advertiser
 // is broadcasting, so it stays invisible until there's something to watch.
 export default function LiveBanner() {
   const [streams, setStreams] = useState<LiveStream[]>([])

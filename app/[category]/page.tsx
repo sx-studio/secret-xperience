@@ -7,13 +7,13 @@ import { focusPosition } from '../lib/imageFocus'
 const CATEGORY_META: Record<string, { title: string; description: string; heading: string; icon: string }> = {
   escorts: {
     title: 'Escort Services | SecretXperience',
-    description: 'Browse verified escort services across Europe. Discreet, professional and fully verified providers in major cities.',
+    description: 'Browse verified escort services across Europe. Discreet, professional and fully verified advertisers in major cities.',
     heading: 'Escort Services',
     icon: 'ti-user',
   },
   companionship: {
     title: 'Companionship Services | SecretXperience',
-    description: 'Refined companionship experiences. Verified providers for dinner dates, travel companions, and private meetings.',
+    description: 'Refined companionship experiences. Verified advertisers for dinner dates, travel companions, and private meetings.',
     heading: 'Companionship',
     icon: 'ti-heart',
   },
@@ -55,7 +55,7 @@ const CATEGORY_META: Record<string, { title: string; description: string; headin
   },
   adult: {
     title: 'Adult Services | SecretXperience',
-    description: 'Premium adult services and experiences. All providers verified and independently listed.',
+    description: 'Premium adult services and experiences. All advertisers verified and independently listed.',
     heading: 'Adult Services',
     icon: 'ti-flame',
   },
@@ -230,7 +230,7 @@ export default async function CategoryPage({ params }: { params: { category: str
             <div style={{ textAlign: 'center', padding: '5rem 2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.25rem' }}>
               <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(197,160,90,0.08)', border: '0.5px solid rgba(197,160,90,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px' }}>✦</div>
               <div style={{ fontFamily: 'var(--serif)', fontSize: '22px' }}>Be among the first</div>
-              <p style={{ fontSize: '14px', color: 'var(--t3)', maxWidth: '320px', lineHeight: 1.6 }}>No listings yet in this category. Be an early provider and reach clients from day one.</p>
+              <p style={{ fontSize: '14px', color: 'var(--t3)', maxWidth: '320px', lineHeight: 1.6 }}>No listings yet in this category. Be an early advertiser and reach clients from day one.</p>
               <Link href="/listings/create" style={{ padding: '12px 28px', background: 'linear-gradient(135deg,var(--gold),var(--goldd))', borderRadius: 'var(--r)', color: '#0a0a0a', textDecoration: 'none', fontWeight: 700, fontSize: '14px' }}>List your service →</Link>
             </div>
           ) : (
@@ -242,7 +242,7 @@ export default async function CategoryPage({ params }: { params: { category: str
           {/* CTA */}
           {(listings?.length || 0) > 0 && (
             <div style={{ marginTop: '4rem', padding: '2.5rem', background: 'var(--bg1)', border: '0.5px solid var(--b)', borderRadius: 'var(--rl)', textAlign: 'center' }}>
-              <div style={{ fontFamily: 'var(--serif)', fontSize: '22px', marginBottom: '0.75rem' }}>Are you a {meta.heading.toLowerCase()} provider?</div>
+              <div style={{ fontFamily: 'var(--serif)', fontSize: '22px', marginBottom: '0.75rem' }}>Are you a {meta.heading.toLowerCase()} advertiser?</div>
               <p style={{ fontSize: '14px', color: 'var(--t2)', marginBottom: '1.5rem' }}>List your service for free and reach thousands of verified clients across Europe.</p>
               <Link href="/advertise" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 28px', background: 'linear-gradient(135deg,var(--gold),var(--goldd))', borderRadius: 'var(--r)', color: '#0a0a0a', fontSize: '14px', fontWeight: 700, textDecoration: 'none' }}>
                 <i className="ti ti-plus" /> List your service — it's free

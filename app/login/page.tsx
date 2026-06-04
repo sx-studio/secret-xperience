@@ -8,7 +8,7 @@ type Role = 'user' | 'provider' | 'venue' | 'creator'
 
 const ROLES: { value: Role; label: string; description: string; icon: string }[] = [
   { value: 'user',     label: 'Member',   description: 'Discover & book experiences', icon: 'ti-user' },
-  { value: 'provider', label: 'Provider', description: 'Offer premium services',      icon: 'ti-sparkles' },
+  { value: 'provider', label: 'Advertiser', description: 'Offer premium services',      icon: 'ti-sparkles' },
   { value: 'venue',    label: 'Venue',    description: 'List your space',              icon: 'ti-building' },
   { value: 'creator',  label: 'Creator',  description: 'Share exclusive content',      icon: 'ti-camera' },
 ]
@@ -61,7 +61,7 @@ export default function LoginPage() {
             : error.message || 'Could not sign you in. Please try again.'
         )
       } else {
-        // Providers/venues/creators with no listings → onboard them straight to create
+        // Advertisers/venues/creators with no listings → onboard them straight to create
         const nextUrl = new URLSearchParams(window.location.search).get('next')
         if (nextUrl && nextUrl.startsWith('/')) {
           window.location.href = nextUrl
@@ -100,8 +100,8 @@ export default function LoginPage() {
           // Account exists but sign-in failed — send them to login tab
           setSuccess(true)
         } else {
-          const isProviderRole = ['provider', 'venue', 'creator'].includes(role)
-          window.location.href = isProviderRole ? '/listings/create' : '/dashboard'
+          const isAdvertiserRole = ['provider', 'venue', 'creator'].includes(role)
+          window.location.href = isAdvertiserRole ? '/listings/create' : '/dashboard'
         }
       }
     }
@@ -111,12 +111,12 @@ export default function LoginPage() {
   async function handleGoogle() {
     const supabase = createClient()
     // Only pass role when signing up — on login the role already exists in the DB
-    // and must not be overwritten (e.g. a provider logging in via Google).
+    // and must not be overwritten (e.g. a advertiser logging in via Google).
     const callbackUrl = mode === 'signup'
       ? `${window.location.origin}/auth/callback?role=${encodeURIComponent(role)}`
       : `${window.location.origin}/auth/callback`
     await supabase.auth.signInWithOAuth({
-      provider: 'google',
+      advertiser: 'google',
       options: { redirectTo: callbackUrl },
     })
   }

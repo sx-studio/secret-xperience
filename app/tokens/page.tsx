@@ -157,7 +157,7 @@ export default function TokensPage() {
         supabase.from('profiles').select('role').eq('id', session.user.id).maybeSingle()
           .then(({ data }) => {
             if (data?.role) {
-              const map: Record<string, string> = { user: 'Member', provider: 'Provider', venue: 'Venue', creator: 'Creator' }
+              const map: Record<string, string> = { user: 'Member', advertiser: 'Advertiser', venue: 'Venue', creator: 'Creator' }
               setRole(map[data.role] || 'Member')
             }
           })

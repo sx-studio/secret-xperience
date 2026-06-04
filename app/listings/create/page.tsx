@@ -256,7 +256,7 @@ export default function CreateListingPage() {
       const { data: prof } = await supabase
         .from('profiles').select('*').eq('id', session.user.id).single()
       setProfile(prof)
-      // Identity-verification gate (Verotel compliance): a provider can only
+      // Identity-verification gate (Verotel compliance): a advertiser can only
       // publish once their ID is approved. Mirror the RLS check on the client
       // so unverified users see a clear "verify first" screen instead of a
       // form that would fail on submit.
@@ -433,7 +433,7 @@ export default function CreateListingPage() {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) { window.location.href = '/login'; return }
 
-    // Compliance gate: never attempt to publish for an unverified provider
+    // Compliance gate: never attempt to publish for an unverified advertiser
     // (RLS blocks it anyway, but show a friendly message instead of a DB error).
     if (verifGate !== 'verified') {
       setError('You need an approved identity verification before you can publish a listing.')
@@ -545,7 +545,7 @@ export default function CreateListingPage() {
       }
     }
 
-    // Check if provider has Stripe connected
+    // Check if advertiser has Stripe connected
     const { data: profile } = await supabase
       .from('profiles')
       .select('stripe_connect_account_id, role')
@@ -664,11 +664,11 @@ export default function CreateListingPage() {
   )
 
   /* ─── Identity-verification gate ─── */
-  // Block the create flow until the provider's ID is approved. This mirrors the
+  // Block the create flow until the advertiser's ID is approved. This mirrors the
   // RLS policy that enforces the same rule server-side (Verotel compliance).
   if (verifGate !== 'loading' && verifGate !== 'verified') {
     const gate = {
-      none:     { icon: 'ti-id-badge-2', title: 'Verify your identity to publish', body: 'For everyone’s safety, all providers must confirm their identity and age before a listing can go live. It takes about two minutes — upload a photo ID and a selfie, and our team reviews it.', cta: 'Verify my identity', href: '/verify' },
+      none:     { icon: 'ti-id-badge-2', title: 'Verify your identity to publish', body: 'For everyone’s safety, all advertisers must confirm their identity and age before a listing can go live. It takes about two minutes — upload a photo ID and a selfie, and our team reviews it.', cta: 'Verify my identity', href: '/verify' },
       pending:  { icon: 'ti-clock-hour-4', title: 'Verification in review', body: 'Thanks — we’ve received your documents and our team is reviewing them. You’ll be notified the moment you’re approved, and then you can publish your listing.', cta: 'Check verification status', href: '/verify' },
       rejected: { icon: 'ti-alert-triangle', title: 'Verification needs attention', body: 'We couldn’t verify your last submission. Please resubmit with a clear photo ID and selfie, or contact support if you think this is a mistake.', cta: 'Resubmit documents', href: '/verify' },
     }[verifGate]

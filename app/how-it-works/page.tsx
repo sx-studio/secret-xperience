@@ -17,7 +17,7 @@ const clientSteps = [
     num: '01',
     icon: '◎',
     title: 'Browse Listings',
-    body: 'Explore hundreds of verified provider profiles across Belgium and the EU. Filter by location, availability, service type, and language. All listings display a verification badge once identity has been confirmed.',
+    body: 'Explore hundreds of verified advertiser profiles across Belgium and the EU. Filter by location, availability, service type, and language. All listings display a verification badge once identity has been confirmed.',
   },
   {
     num: '02',
@@ -29,7 +29,7 @@ const clientSteps = [
     num: '03',
     icon: '◉',
     title: 'View the Profile',
-    body: 'Each profile page includes a gallery, a personal description written by the provider, rates, availability calendar, and verified reviews from previous clients. What you see is what you get.',
+    body: 'Each profile page includes a gallery, a personal description written by the advertiser, rates, availability calendar, and verified reviews from previous clients. What you see is what you get.',
   },
   {
     num: '04',
@@ -41,7 +41,7 @@ const clientSteps = [
     num: '05',
     icon: '◆',
     title: 'Confirm & Pay',
-    body: 'Once the provider accepts your request, complete your booking with a secure payment processed by Stripe. Your billing statement will show a discreet descriptor. A confirmation is sent to your registered email.',
+    body: 'Once the advertiser accepts your request, complete your booking with a secure payment processed by Stripe. Your billing statement will show a discreet descriptor. A confirmation is sent to your registered email.',
   },
 ]
 
@@ -83,7 +83,7 @@ const venueSteps = [
     num: '01',
     icon: '◎',
     title: 'Create a Host Account',
-    body: 'Sign up free and select the Provider role. Whether you manage a private apartment, a BDSM studio, an adult hotel, or a vacation rental — choose the category that fits your property.',
+    body: 'Sign up free and select the Advertiser role. Whether you manage a private apartment, a BDSM studio, an adult hotel, or a vacation rental — choose the category that fits your property.',
   },
   {
     num: '02',
@@ -111,7 +111,7 @@ const venueSteps = [
   },
 ]
 
-const providerSteps = [
+const advertiserSteps = [
   {
     num: '01',
     icon: '◎',
@@ -128,7 +128,7 @@ const providerSteps = [
     num: '03',
     icon: '◉',
     title: 'Get Verified',
-    body: 'Complete our secure identity and age verification process. Verification is handled by a trusted third-party provider — your documents are never stored on our servers. Verified profiles receive a badge that significantly increases trust and bookings.',
+    body: 'Complete our secure identity and age verification process. Verification is handled by a trusted third-party advertiser — your documents are never stored on our servers. Verified profiles receive a badge that significantly increases trust and bookings.',
   },
   {
     num: '04',
@@ -237,11 +237,11 @@ export default function HowItWorksPage() {
           <span style={{ fontSize: 22, color: '#c5a05a22', letterSpacing: '0.4em' }}>✦ ✦ ✦</span>
         </div>
 
-        {/* For Providers */}
+        {/* For Advertisers */}
         <section style={{ marginBottom: 80 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 8 }}>
             <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 400, color: '#e8e0d0', letterSpacing: '0.02em' }}>
-              For Providers
+              For Advertisers
             </h2>
             <span style={{ fontSize: 11, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#c5a05a', border: '0.5px solid #c5a05a44', padding: '3px 10px', borderRadius: 2 }}>
               List &amp; Earn
@@ -251,7 +251,7 @@ export default function HowItWorksPage() {
           <p style={{ fontSize: 14, color: '#555', lineHeight: 1.7, marginBottom: 8 }}>
             List your services professionally, reach verified clients, and manage your schedule on your terms.
           </p>
-          {providerSteps.map((step, i) => (
+          {advertiserSteps.map((step, i) => (
             <StepCard key={step.num} step={step} index={i} />
           ))}
         </section>

@@ -409,7 +409,7 @@ export default function EscortsPage() {
       '@type': 'Service',
       name: 'Escort Services',
       serviceType: 'Adult Escort Services',
-      provider: { '@type': 'Organization', name: 'SecretXperience', url: 'https://www.secretxperience.eu' },
+      advertiser: { '@type': 'Organization', name: 'SecretXperience', url: 'https://www.secretxperience.eu' },
       areaServed: ['BE', 'NL', 'DE', 'FR', 'LU', 'CH'],
       url: 'https://www.secretxperience.eu/escorts',
       description: 'Browse verified independent escorts across Belgium, Netherlands, Germany and France. Filter by city, type, price and availability.',
@@ -673,7 +673,7 @@ export default function EscortsPage() {
             </div>
           </div>
 
-          {/* Section Premium banner — renders only when a provider has bought it */}
+          {/* Section Premium banner — renders only when a advertiser has bought it */}
           <PremiumBanner placement="section" category="escorts" />
 
           {/* Active filter chips */}

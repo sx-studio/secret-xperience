@@ -15,9 +15,9 @@ export default function Page2257() {
         <h1 style={{ fontFamily: S.serif, fontSize: 'clamp(30px,4vw,48px)', fontWeight: 400, color: S.t, marginBottom: '0.5rem', lineHeight: 1.1 }}>18 U.S.C. § 2257 <em style={{ fontStyle: 'italic', color: S.gold }}>Compliance Statement</em></h1>
         <p style={{ color: S.t2, fontSize: 14, marginBottom: '3rem' }}>Record-Keeping Requirements</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', fontSize: 14, color: S.t2, lineHeight: 1.85 }}>
-          <p>SecretXperience.eu is an online marketplace platform that connects adult content creators and service providers with clients. The platform does not itself produce, create, or distribute sexually explicit content and therefore operates as a <strong style={{ color: S.t }}>secondary producer</strong> as defined under 18 U.S.C. § 2257.</p>
+          <p>SecretXperience.eu is an online marketplace platform that connects adult content creators and service advertisers with clients. The platform does not itself produce, create, or distribute sexually explicit content and therefore operates as a <strong style={{ color: S.t }}>secondary producer</strong> as defined under 18 U.S.C. § 2257.</p>
           <section>
-            <h2 style={{ fontFamily: S.serif, fontSize: 20, fontWeight: 500, color: S.t, marginBottom: '0.6rem' }}>Provider responsibility</h2>
+            <h2 style={{ fontFamily: S.serif, fontSize: 20, fontWeight: 500, color: S.t, marginBottom: '0.6rem' }}>Advertiser responsibility</h2>
             <p>All individuals who create or publish content on this platform, including photographs, videos, and written material depicting sexually explicit conduct, are <strong style={{ color: S.t }}>primary producers</strong> under 18 U.S.C. § 2257 and are solely responsible for:</p>
             <ul style={{ marginTop: '0.75rem', paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
               <li>Maintaining records verifying that all depicted persons are 18 years of age or older at the time of production;</li>
@@ -28,7 +28,7 @@ export default function Page2257() {
           <section>
             <h2 style={{ fontFamily: S.serif, fontSize: 20, fontWeight: 500, color: S.t, marginBottom: '0.6rem' }}>Platform compliance</h2>
             <p>As a secondary producer, SecretXperience.eu maintains records — in the form of user account information and identity verification data — in compliance with 18 U.S.C. § 2257 and 28 C.F.R. Part 75, to the extent required of secondary producers.</p>
-            <p style={{ marginTop: '0.75rem' }}>All providers must confirm, during account registration and listing creation, that all content they upload depicts only individuals who are 18 years of age or older. Uploading content depicting minors is strictly prohibited and will result in immediate account termination and referral to appropriate law enforcement authorities.</p>
+            <p style={{ marginTop: '0.75rem' }}>All advertisers must confirm, during account registration and listing creation, that all content they upload depicts only individuals who are 18 years of age or older. Uploading content depicting minors is strictly prohibited and will result in immediate account termination and referral to appropriate law enforcement authorities.</p>
           </section>
           <section>
             <h2 style={{ fontFamily: S.serif, fontSize: 20, fontWeight: 500, color: S.t, marginBottom: '0.6rem' }}>Custodian of records</h2>

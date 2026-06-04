@@ -114,8 +114,8 @@ export default function TermsPage() {
           </div>
           <div style={{ height: '0.5px', background: 'linear-gradient(90deg, #c5a05a44 0%, transparent 70%)', marginBottom: 24 }} />
           <div style={{ fontSize: 15, lineHeight: 1.85, color: '#999' }}>
-            <p style={{ marginBottom: '1rem' }}>SecretXperience ("the Platform," "we," "us," or "our") is a premium adult services marketplace operated by <strong style={{ color: S.t }}>3S.lifestyle bv</strong>, Tangendallaan 23, 1850 Grimbergen, Belgium (BE 0749.661.728). The Platform connects adult service providers with clients seeking companionship, entertainment, and related adult experiences.</p>
-            <p style={{ marginBottom: '1rem' }}>SecretXperience does not arrange, broker, or facilitate meetings between users. It acts solely as an advertising and communication medium. All interactions between providers and clients take place independently of the Platform and are the exclusive responsibility of the parties involved.</p>
+            <p style={{ marginBottom: '1rem' }}>SecretXperience ("the Platform," "we," "us," or "our") is a premium adult services marketplace operated by <strong style={{ color: S.t }}>3S.lifestyle bv</strong>, Tangendallaan 23, 1850 Grimbergen, Belgium (BE 0749.661.728). The Platform connects adult service advertisers with clients seeking companionship, entertainment, and related adult experiences.</p>
+            <p style={{ marginBottom: '1rem' }}>SecretXperience does not arrange, broker, or facilitate meetings between users. It acts solely as an advertising and communication medium. All interactions between advertisers and clients take place independently of the Platform and are the exclusive responsibility of the parties involved.</p>
             <p>This Platform is intended exclusively for adults aged 18 or older. By accessing or using SecretXperience.eu you acknowledge that you are at least 18 years of age and that you have read, understood, and agree to be bound by these Terms of Use in their entirety. If you do not agree, you must leave the Platform immediately.</p>
           </div>
         </article>
@@ -128,7 +128,7 @@ export default function TermsPage() {
           </div>
           <div style={{ height: '0.5px', background: 'linear-gradient(90deg, #c5a05a44 0%, transparent 70%)', marginBottom: 24 }} />
           <div style={{ fontSize: 15, lineHeight: 1.85, color: '#999' }}>
-            <p style={{ marginBottom: '1rem' }}>These Terms of Use apply to all Users of the Platform, including visitors, registered users, providers, and clients. By accessing or using any part of the Platform, you agree to be bound by these Terms of Use, our <a href="/privacy">Privacy Policy</a>, and our <a href="/cookies">Cookie Policy</a>, all of which are incorporated herein by reference.</p>
+            <p style={{ marginBottom: '1rem' }}>These Terms of Use apply to all Users of the Platform, including visitors, registered users, advertisers, and clients. By accessing or using any part of the Platform, you agree to be bound by these Terms of Use, our <a href="/privacy">Privacy Policy</a>, and our <a href="/cookies">Cookie Policy</a>, all of which are incorporated herein by reference.</p>
             <p style={{ marginBottom: '1rem' }}>We reserve the right to modify these Terms at any time. Updated terms will be posted on this page with a revised "last updated" date. Continued use of the Platform after changes are posted constitutes your acceptance of the revised Terms.</p>
             <p>These Terms constitute a legally binding agreement between you and 3S.lifestyle bv.</p>
           </div>

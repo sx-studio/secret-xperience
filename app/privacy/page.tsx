@@ -117,7 +117,7 @@ export default function PrivacyPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div style={{ borderLeft: `2px solid ${S.b}`, paddingLeft: '1rem' }}>
                 <strong style={{ color: S.t, display: 'block', marginBottom: '0.25rem' }}>Account &amp; Identity Data</strong>
-                <span>Email address, chosen username, and — for providers undergoing verification — government-issued ID documents and a selfie for age and identity confirmation. Verification documents are processed by a trusted third-party partner.</span>
+                <span>Email address, chosen username, and — for advertisers undergoing verification — government-issued ID documents and a selfie for age and identity confirmation. Verification documents are processed by a trusted third-party partner.</span>
               </div>
               <div style={{ borderLeft: `2px solid ${S.b}`, paddingLeft: '1rem' }}>
                 <strong style={{ color: S.t, display: 'block', marginBottom: '0.25rem' }}>Profile Data</strong>
@@ -177,11 +177,11 @@ export default function PrivacyPage() {
           <div style={{ height: '0.5px', background: 'linear-gradient(90deg, #c5a05a44 0%, transparent 70%)', marginBottom: 24 }} />
           <div style={{ fontSize: 15, lineHeight: 1.85, color: '#999' }}>
             <p style={{ marginBottom: '1rem' }}>We do not sell, rent, or trade your personal data to third parties for their own commercial purposes.</p>
-            <p style={{ marginBottom: '1.25rem' }}>We share data only with the following categories of trusted service providers, subject to binding data processing agreements:</p>
+            <p style={{ marginBottom: '1.25rem' }}>We share data only with the following categories of trusted service advertisers, subject to binding data processing agreements:</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div style={{ borderLeft: `2px solid ${S.b}`, paddingLeft: '1rem' }}>
                 <strong style={{ color: S.t, display: 'block', marginBottom: '0.25rem' }}>Hosting &amp; Infrastructure</strong>
-                <span>Our database and backend infrastructure provider stores your account and profile data on secure, EU-hosted infrastructure. They act as a data processor and may not use your data for any independent purpose.</span>
+                <span>Our database and backend infrastructure advertiser stores your account and profile data on secure, EU-hosted infrastructure. They act as a data processor and may not use your data for any independent purpose.</span>
               </div>
               <div style={{ borderLeft: `2px solid ${S.b}`, paddingLeft: '1rem' }}>
                 <strong style={{ color: S.t, display: 'block', marginBottom: '0.25rem' }}>Payment Processors</strong>
@@ -189,7 +189,7 @@ export default function PrivacyPage() {
               </div>
               <div style={{ borderLeft: `2px solid ${S.b}`, paddingLeft: '1rem' }}>
                 <strong style={{ color: S.t, display: 'block', marginBottom: '0.25rem' }}>Identity Verification Partners</strong>
-                <span>Third-party providers engaged solely to verify user ages and identities. Data shared is limited to what is strictly necessary for verification.</span>
+                <span>Third-party advertisers engaged solely to verify user ages and identities. Data shared is limited to what is strictly necessary for verification.</span>
               </div>
               <div style={{ borderLeft: `2px solid ${S.b}`, paddingLeft: '1rem' }}>
                 <strong style={{ color: S.t, display: 'block', marginBottom: '0.25rem' }}>Analytics</strong>
@@ -211,7 +211,7 @@ export default function PrivacyPage() {
           </div>
           <div style={{ height: '0.5px', background: 'linear-gradient(90deg, #c5a05a44 0%, transparent 70%)', marginBottom: 24 }} />
           <div style={{ fontSize: 15, lineHeight: 1.85, color: '#999' }}>
-            <p style={{ marginBottom: '1rem' }}>Your personal data is primarily stored and processed within the European Economic Area (EEA). Where we engage service providers outside the EEA, we ensure appropriate safeguards are in place, including:</p>
+            <p style={{ marginBottom: '1rem' }}>Your personal data is primarily stored and processed within the European Economic Area (EEA). Where we engage service advertisers outside the EEA, we ensure appropriate safeguards are in place, including:</p>
             <ul style={{ paddingLeft: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
               <li>Standard Contractual Clauses (SCCs) approved by the European Commission</li>
               <li>Adequacy decisions for countries recognised as providing equivalent data protection</li>

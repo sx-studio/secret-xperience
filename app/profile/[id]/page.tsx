@@ -793,7 +793,7 @@ export default function ProfilePage() {
             )
           })()}
 
-          {/* Verified Provider prominent section */}
+          {/* Verified Advertiser prominent section */}
           {profile.verified && (
             <div style={{
               marginTop: '20px',
@@ -827,7 +827,7 @@ export default function ProfilePage() {
                   color: TEXT_MUTED,
                   lineHeight: 1.5,
                 }}>
-                  This provider has completed identity verification with Secret Xperience.
+                  This advertiser has completed identity verification with Secret Xperience.
                 </div>
               </div>
             </div>

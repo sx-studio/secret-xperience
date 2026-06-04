@@ -16,7 +16,7 @@ const sections = [
   {
     num: '01',
     title: 'Our Verification Process',
-    body: `Every provider on SecretXperience must complete a multi-step identity and age verification process before their listing becomes visible to clients. This is not optional.
+    body: `Every advertiser on SecretXperience must complete a multi-step identity and age verification process before their listing becomes visible to clients. This is not optional.
 
 Our verification flow includes:
 
@@ -25,20 +25,20 @@ Our verification flow includes:
 • Age confirmation — we verify that the individual is at least 18 years of age.
 • Profile review — our moderation team manually reviews each new listing before it goes live.
 
-A gold verification badge appears on all listings that have passed our full check. You can trust that any verified provider has been authenticated as a real adult.`,
+A gold verification badge appears on all listings that have passed our full check. You can trust that any verified advertiser has been authenticated as a real adult.`,
   },
   {
     num: '02',
     title: 'Community Guidelines',
-    body: `SecretXperience is a professional marketplace. All users — clients and providers alike — are expected to conduct themselves with respect and good faith.
+    body: `SecretXperience is a professional marketplace. All users — clients and advertisers alike — are expected to conduct themselves with respect and good faith.
 
-For providers:
+For advertisers:
 • All profile content must depict only you. Using another person's images without their documented consent is prohibited and may constitute a criminal offence.
 • Descriptions must be accurate and not misleading.
 • You may not impersonate another person or platform.
 
 For clients:
-• Treat providers with respect at all times.
+• Treat advertisers with respect at all times.
 • Do not attempt to negotiate services or prices outside the platform in ways that violate our terms.
 • Do not request or attempt to facilitate illegal activity.
 
@@ -60,7 +60,7 @@ For clients:
 • Trust your instincts. If something feels wrong, it probably is.
 • Never share your home address until you are comfortable doing so.
 
-For providers:
+For advertisers:
 • You are never obligated to accept a booking. Decline any request that makes you uncomfortable.
 • Screen clients using the platform's messaging tools before confirming.
 • Share your location with a trusted person when meeting clients in person.
@@ -95,23 +95,23 @@ Minors — Any content depicting individuals under 18 years of age in a sexual c
 
 Human Trafficking — Any content or activity that facilitates the trafficking, exploitation, or coercion of persons is strictly prohibited. We cooperate fully with Belgian and EU law enforcement on all trafficking-related investigations.
 
-Coercion and Non-Consent — Any content depicting non-consensual acts, or any communication that suggests a provider is operating under duress or coercion, will be treated as an emergency. We will escalate immediately.
+Coercion and Non-Consent — Any content depicting non-consensual acts, or any communication that suggests a advertiser is operating under duress or coercion, will be treated as an emergency. We will escalate immediately.
 
 These policies are not subject to interpretation, negotiation, or appeal. Our commitment to eradicating exploitation on this platform is absolute.`,
   },
   {
     num: '06',
     title: 'Verification Badge Explained',
-    body: `The gold verification badge that appears on provider profiles indicates the following has been confirmed:
+    body: `The gold verification badge that appears on advertiser profiles indicates the following has been confirmed:
 
-✓ The provider's government-issued ID has been checked by our third-party verification partner.
-✓ The provider is confirmed to be at least 18 years old.
+✓ The advertiser's government-issued ID has been checked by our third-party verification partner.
+✓ The advertiser is confirmed to be at least 18 years old.
 ✓ The profile photos match the verified individual via facial liveness check.
 ✓ The listing has been reviewed and approved by our moderation team.
 
-The badge does not constitute an endorsement of any service, guarantee any particular outcome, or mean that SecretXperience vouches for the provider's character beyond identity and age confirmation.
+The badge does not constitute an endorsement of any service, guarantee any particular outcome, or mean that SecretXperience vouches for the advertiser's character beyond identity and age confirmation.
 
-Providers who let their verification lapse, or whose documents are found to be fraudulent after the fact, will have their badge removed and their account reviewed immediately.
+Advertisers who let their verification lapse, or whose documents are found to be fraudulent after the fact, will have their badge removed and their account reviewed immediately.
 
 If you have reason to believe a verified badge has been obtained fraudulently, please report it at trust@secret-xperience.eu.`,
   },

@@ -875,7 +875,7 @@ export default function ListingDetailPage() {
             {/* ── Right column (sidebar) ── */}
             <div>
 
-              {/* Provider card */}
+              {/* Advertiser card */}
               <div style={{
                 background: 'rgba(255,255,255,0.02)',
                 border: '0.5px solid rgba(255,255,255,0.07)',
@@ -892,7 +892,7 @@ export default function ListingDetailPage() {
                   fontWeight: 600,
                   marginBottom: '1rem',
                 }}>
-                  {listing.profile_id ? 'Provider' : 'Listing Info'}
+                  {listing.profile_id ? 'Advertiser' : 'Listing Info'}
                 </p>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '1.25rem' }}>
@@ -909,7 +909,7 @@ export default function ListingDetailPage() {
                     {prof?.avatar_url ? (
                       <img
                         src={prof.avatar_url}
-                        alt={prof.full_name || 'Provider'}
+                        alt={prof.full_name || 'Advertiser'}
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       />
                     ) : (
@@ -961,7 +961,7 @@ export default function ListingDetailPage() {
                   </div>
                 </div>
 
-                {/* View profile link — only when there's a real provider */}
+                {/* View profile link — only when there's a real advertiser */}
                 {listing.profile_id && (
                   <a
                     href={`/profile/${listing.profile_id}`}

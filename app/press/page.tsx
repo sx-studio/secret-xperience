@@ -64,10 +64,10 @@ export default function PressPage() {
           </div>
           <div style={{ height: '0.5px', background: 'linear-gradient(90deg, #c5a05a44 0%, transparent 70%)', marginBottom: 24 }} />
           <p style={{ fontSize: 15, lineHeight: 1.85, color: '#999', marginBottom: 16 }}>
-            SecretXperience is a premium adult marketplace headquartered in Brussels, Belgium. The platform connects adult service providers with clients across Belgium and the European Union, operating under Belgian law and the General Data Protection Regulation (GDPR).
+            SecretXperience is a premium adult marketplace headquartered in Brussels, Belgium. The platform connects adult service advertisers with clients across Belgium and the European Union, operating under Belgian law and the General Data Protection Regulation (GDPR).
           </p>
           <p style={{ fontSize: 15, lineHeight: 1.85, color: '#999', marginBottom: 16 }}>
-            Founded in 2024, SecretXperience was built to address a gap in the market: a professionally governed, discreet, and verified adult marketplace that treats providers as independent professionals and gives clients the confidence of authenticated listings.
+            Founded in 2024, SecretXperience was built to address a gap in the market: a professionally governed, discreet, and verified adult marketplace that treats advertisers as independent professionals and gives clients the confidence of authenticated listings.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginTop: 24 }}>
             {[

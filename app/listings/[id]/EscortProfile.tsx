@@ -120,7 +120,7 @@ function classifyTags(tags: string[]) {
   return { height, weight, age: ageMatch, hair, build, ethnicity, nationality, languages, services, escortType, orientation, workingHours }
 }
 
-// Rates are shown as-set by the provider only — no fabricated multipliers.
+// Rates are shown as-set by the advertiser only — no fabricated multipliers.
 
 function cap(s: string) { return s.charAt(0).toUpperCase() + s.slice(1) }
 
@@ -327,7 +327,7 @@ export default function EscortProfile({
               VIP
             </span>
           )}
-          {/* Available Now badge — only shown when provider tagged their listing as available */}
+          {/* Available Now badge — only shown when advertiser tagged their listing as available */}
           {listing.tags?.some((t: string) => t === 'available-now' || t === 'available_now') && (
             <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: C.green, marginLeft: 'auto' }}>
               <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: C.green, boxShadow: `0 0 6px ${C.green}`, animation: 'rl-pulse 2s infinite' }} />
@@ -566,7 +566,7 @@ export default function EscortProfile({
                 </span>
               </div>
               <p style={{ marginTop: '10px', fontSize: '11px', color: C.t3, lineHeight: 1.55, padding: '8px 10px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>
-                Confirm exact pricing and availability directly with the provider.
+                Confirm exact pricing and availability directly with the advertiser.
               </p>
             </div>
           )}
@@ -649,7 +649,7 @@ export default function EscortProfile({
 
           {/* Safety note */}
           <div style={{ padding: '0.9rem 1rem', background: 'rgba(38,212,160,0.04)', border: '0.5px solid rgba(38,212,160,0.1)', borderRadius: '10px', fontSize: '11.5px', color: C.t3, lineHeight: 1.65 }}>
-            🔒 All contact is private between you and the provider. SecretXperience never shares your personal data.
+            🔒 All contact is private between you and the advertiser. SecretXperience never shares your personal data.
           </div>
 
         </div>

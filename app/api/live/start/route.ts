@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // Compliance gate: only verified providers (or admin) can broadcast.
+  // Compliance gate: only verified advertisers (or admin) can broadcast.
   const { data: prof } = await supabase
     .from('profiles').select('verified, role, full_name, username').eq('id', session.user.id).maybeSingle()
   let allowed = prof?.verified === true || prof?.role === 'admin'
@@ -44,7 +44,7 @@ export async function POST(req: Request) {
     { auth: { autoRefreshToken: false, persistSession: false } }
   )
 
-  // End any stale live rows for this provider first (one live stream per provider).
+  // End any stale live rows for this advertiser first (one live stream per advertiser).
   await admin.from('live_streams').update({ status: 'ended', ended_at: new Date().toISOString() })
     .eq('provider_id', session.user.id).eq('status', 'live')
 

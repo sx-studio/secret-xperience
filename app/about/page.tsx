@@ -18,7 +18,7 @@ const sections = [
     title: 'Our Story',
     body: `SecretXperience was born in Brussels — a city that has long stood at the intersection of cultures, discretion, and European cosmopolitanism. Founded in 2024 by a small team of product designers, legal professionals, and privacy advocates, we set out to build something the industry had never truly seen: a premium adult marketplace that places dignity, safety, and discretion at its very core.
 
-We had grown tired of platforms that treated their users as a liability — where providers operated in the shadows, clients had no assurance of authenticity, and everyone was left vulnerable. We believed a better experience was possible. One that treated adults as capable, autonomous individuals deserving of a trustworthy, elegant environment.
+We had grown tired of platforms that treated their users as a liability — where advertisers operated in the shadows, clients had no assurance of authenticity, and everyone was left vulnerable. We believed a better experience was possible. One that treated adults as capable, autonomous individuals deserving of a trustworthy, elegant environment.
 
 So we built SecretXperience.`,
   },
@@ -29,7 +29,7 @@ So we built SecretXperience.`,
 
 Every design decision, every policy, every feature on this platform flows from three guiding principles:
 
-• Verified — Every provider on SecretXperience completes an identity verification process before their listing goes live. Clients can browse with confidence, knowing who they are engaging with.
+• Verified — Every advertiser on SecretXperience completes an identity verification process before their listing goes live. Clients can browse with confidence, knowing who they are engaging with.
 
 • Safe — We maintain a zero-tolerance policy toward exploitation, coercion, and any content involving minors. Our moderation team operates around the clock. We cooperate fully with law enforcement.
 
@@ -43,7 +43,7 @@ Every design decision, every policy, every feature on this platform flows from t
 We exist to change that dynamic. By providing a regulated, professional marketplace, we:
 
 • Reduce the risks that come with unverified, street-based or informal arrangements
-• Give providers a professional platform to manage their business with dignity
+• Give advertisers a professional platform to manage their business with dignity
 • Give clients a transparent, authentic experience free from scams and deception
 • Demonstrate to regulators, journalists, and the public that this industry can operate responsibly
 
@@ -67,7 +67,7 @@ We are small, intentional, and deeply committed to getting this right.`,
 
 Operating here keeps us honest. We are not offshore, not in a regulatory grey zone. We are headquartered in the same city where the rules are written, and we believe that proximity to accountability makes us a better, more responsible company.
 
-SecretXperience currently serves clients and providers across Belgium, the Netherlands, Germany, France, Luxembourg, and Spain, with further expansion planned across the EU.
+SecretXperience currently serves clients and advertisers across Belgium, the Netherlands, Germany, France, Luxembourg, and Spain, with further expansion planned across the EU.
 
 We are registered and operating in full compliance with Belgian law and applicable EU regulations.`,
   },

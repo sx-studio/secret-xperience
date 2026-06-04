@@ -402,7 +402,7 @@ export default function CategoryAnimations() {
           </div>
 
           <footer className="section-foot">
-            <p className="t-caption">All categories · Verified providers · EU-wide · Members from €0</p>
+            <p className="t-caption">All categories · Verified advertisers · EU-wide · Members from €0</p>
           </footer>
 
         </div>

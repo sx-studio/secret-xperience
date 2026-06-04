@@ -212,7 +212,7 @@ export default async function EscortsCityPage({ params }: { params: { city: stri
                 <em style={{ color: S.gold }}>in {countryInfo.name}</em>
               </h1>
               <p style={{ fontSize: 16, color: S.t2, maxWidth: 520, margin: '0 auto 2rem', lineHeight: 1.75 }}>
-                {listingCount > 0 ? `Join ${listingCount}+ verified providers` : 'Join verified providers'} already reaching clients across {countryInfo.cities}. Free to list. No commission. Go live today.
+                {listingCount > 0 ? `Join ${listingCount}+ verified advertisers` : 'Join verified advertisers'} already reaching clients across {countryInfo.cities}. Free to list. No commission. Go live today.
               </p>
               <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
                 <a href="/listings/create" className="cta-btn">Create free profile →</a>
@@ -269,7 +269,7 @@ export default async function EscortsCityPage({ params }: { params: { city: stri
             <section style={{ padding: '3rem 0 4rem', borderTop: `0.5px solid ${S.b}` }}>
               <div style={{ fontSize: 11, letterSpacing: '0.22em', textTransform: 'uppercase', color: S.gold, marginBottom: '0.75rem', opacity: 0.8 }}>Why SecretXperience</div>
               <h2 style={{ fontFamily: S.serif, fontSize: 'clamp(26px,4vw,40px)', fontWeight: 400, marginBottom: '2.5rem', lineHeight: 1.2 }}>
-                Built for independent providers
+                Built for independent advertisers
               </h2>
               <div className="benefit-grid">
                 {BENEFITS.map(b => (
@@ -434,7 +434,7 @@ export default async function EscortsCityPage({ params }: { params: { city: stri
             Escort Girls <em style={{ fontStyle: 'italic', color: S.gold }}>{displayName}</em>
           </h1>
           <p style={{ fontSize: 14, color: S.t2, marginBottom: '2.5rem', maxWidth: 560, lineHeight: 1.7 }}>
-            {listingCount} verified provider{listingCount !== 1 ? 's' : ''} available in {displayName}. All listings independently submitted and identity-reviewed.
+            {listingCount} verified advertiser{listingCount !== 1 ? 's' : ''} available in {displayName}. All listings independently submitted and identity-reviewed.
           </p>
 
           {listingCount === 0 ? (

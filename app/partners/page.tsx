@@ -200,7 +200,7 @@ const SECTIONS: Section[] = [
     id: 'finance',
     title: 'Payments & Finance',
     emoji: '💸',
-    description: 'International money transfer and multi-currency tools. Highly relevant for providers working across EU borders.',
+    description: 'International money transfer and multi-currency tools. Highly relevant for advertisers working across EU borders.',
     items: [
       { name: 'Wise', emoji: '💸', tagline: 'Low-fee international transfers. Huge relevance for BE/NL/DE/FR/LU cross-border work. Strong Impact affiliate.', url: 'https://wise.com', network: 'Impact', badge: 'EU Trusted' },
       { name: 'Revolut', emoji: '💳', tagline: 'Multi-currency super-app. Instant payments, expense cards. Very popular in Belgium and Netherlands.', url: 'https://www.revolut.com', network: 'Revolut referral' },
@@ -213,7 +213,7 @@ const SECTIONS: Section[] = [
     id: 'wellness',
     title: 'Health & Wellness',
     emoji: '🌿',
-    description: 'Sexual health, supplements and wellness products. Practical essentials for providers and clients.',
+    description: 'Sexual health, supplements and wellness products. Practical essentials for advertisers and clients.',
     items: [
       { name: 'Durex', emoji: '❤️', tagline: 'World\'s leading sexual wellness brand. Subscription bundles drive repeat commissions. Discrete EU shipping.', url: 'https://www.durex.com', network: 'Direct (regional)' },
       { name: 'Superdrug Online Doctor', emoji: '💊', tagline: 'UK/EU sexual health — STI testing, contraception, PrEP. Essential for a safety-conscious audience.', url: 'https://www.superdrug.com', network: 'Awin' },

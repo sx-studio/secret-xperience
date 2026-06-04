@@ -51,7 +51,7 @@ export default function LiveStreamsPage() {
           <div>
             <div className="ls-badge"><span className="ls-dot" /> SecretXperience Live</div>
             <h1 className="ls-title">Our performers, <em>live now</em></h1>
-            <p className="ls-sub">Verified SecretXperience providers broadcasting in real time. Watch, chat, and tip with tokens.</p>
+            <p className="ls-sub">Verified SecretXperience advertisers broadcasting in real time. Watch, chat, and tip with tokens.</p>
           </div>
           {canHost && (
             <a href="/go-live" className="ls-golive"><i className="ti ti-broadcast" /> Go Live</a>
@@ -121,7 +121,7 @@ export default function LiveStreamsPage() {
         )}
 
         <div className="ls-disc">
-          All performers are verified SecretXperience providers, consenting adults aged 18+. By watching you confirm you are 18 or older and agree to our <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.
+          All performers are verified SecretXperience advertisers, consenting adults aged 18+. By watching you confirm you are 18 or older and agree to our <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.
         </div>
       </div>
     </>

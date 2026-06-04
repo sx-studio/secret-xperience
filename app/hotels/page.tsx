@@ -43,7 +43,7 @@ export default async function HotelsPage() {
           { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.secretxperience.eu' },
           { '@type': 'ListItem', position: 2, name: 'Hotels', item: 'https://www.secretxperience.eu/hotels' },
         ]},
-        { '@context': 'https://schema.org', '@type': 'Service', name: 'Discreet Hotels & Suites', serviceType: 'Adult Hospitality', provider: { '@type': 'Organization', name: 'SecretXperience', url: 'https://www.secretxperience.eu' }, areaServed: ['BE','NL','DE','FR','LU','CH'], url: 'https://www.secretxperience.eu/hotels', description: 'Curated adult-friendly hotels and suites for discreet stays across Europe.' },
+        { '@context': 'https://schema.org', '@type': 'Service', name: 'Discreet Hotels & Suites', serviceType: 'Adult Hospitality', advertiser: { '@type': 'Organization', name: 'SecretXperience', url: 'https://www.secretxperience.eu' }, areaServed: ['BE','NL','DE','FR','LU','CH'], url: 'https://www.secretxperience.eu/hotels', description: 'Curated adult-friendly hotels and suites for discreet stays across Europe.' },
       ]) }} />
       <style>{`
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

@@ -10,7 +10,7 @@ const supabase = createBrowserClient(
 
 /* ─── Types ─────────────────────────────────────────────── */
 
-interface ProviderRequest {
+interface AdvertiserRequest {
   id: string
   sender_id: string
   receiver_id: string
@@ -98,13 +98,13 @@ function StatusBadge({ status }: { status: string }) {
 
 /* ─── Page ──────────────────────────────────────────────── */
 
-export default function ProviderHubPage() {
+export default function AdvertiserHubPage() {
   const [userId, setUserId] = useState<string | null>(null)
   const [tab, setTab] = useState<'requests' | 'bookings' | 'earnings' | 'availability'>('requests')
   const [loading, setLoading] = useState(true)
 
   // Requests
-  const [requests, setRequests] = useState<ProviderRequest[]>([])
+  const [requests, setRequests] = useState<AdvertiserRequest[]>([])
   const [confirmingId, setConfirmingId] = useState<string | null>(null)
 
   // Bookings
@@ -122,15 +122,15 @@ export default function ProviderHubPage() {
     async function init() {
       const { data: { user }, error } = await supabase.auth.getUser()
       if (error || !user) {
-        window.location.href = '/login?next=/provider'
+        window.location.href = '/login?next=/advertiser'
         return
       }
       setUserId(user.id)
 
-      // Verify this user has a provider/venue/creator/admin role
+      // Verify this user has a advertiser/venue/creator/admin role
       const { data: roleCheck } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle()
-      const PROVIDER_ROLES = ['provider', 'venue', 'creator', 'admin']
-      if (!roleCheck || !PROVIDER_ROLES.includes(roleCheck.role || '')) {
+      const ADVERTISER_ROLES = ['provider', 'venue', 'creator', 'admin']
+      if (!roleCheck || !ADVERTISER_ROLES.includes(roleCheck.role || '')) {
         window.location.href = '/dashboard'
         return
       }
@@ -160,7 +160,7 @@ export default function ProviderHubPage() {
           .single(),
       ])
 
-      setRequests((msgs as ProviderRequest[]) || [])
+      setRequests((msgs as AdvertiserRequest[]) || [])
       setBookings((bkgs as Booking[]) || [])
 
       if (prof?.availability) {
@@ -184,7 +184,7 @@ export default function ProviderHubPage() {
   }, [])
 
   /* ── Mark booking confirmed from request ── */
-  async function confirmFromRequest(req: ProviderRequest) {
+  async function confirmFromRequest(req: AdvertiserRequest) {
     if (!userId || confirmingId) return
     setConfirmingId(req.id)
     await supabase.from('bookings').insert({
@@ -517,7 +517,7 @@ export default function ProviderHubPage() {
           {/* ── Header ── */}
           <div style={{ marginBottom: '2.5rem' }}>
             <h1 style={{ fontFamily: 'var(--serif, "Cormorant Garamond", serif)', fontSize: 'clamp(28px, 5vw, 40px)', fontWeight: 300, color: 'var(--t, #ece8e1)', letterSpacing: '-0.01em', lineHeight: 1.2, marginBottom: '8px' }}>
-              Provider Hub
+              Advertiser Hub
             </h1>
             <p style={{ fontFamily: 'var(--sans, "Poppins", sans-serif)', fontSize: '13px', color: 'rgba(255,255,255,0.3)', fontWeight: 300, letterSpacing: '0.03em' }}>
               Manage your requests, bookings, earnings and availability.

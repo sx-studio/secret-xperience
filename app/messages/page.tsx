@@ -141,7 +141,7 @@ export default function MessagesPage() {
           const { data: profile } = await supabase.from('profiles').select('full_name, username, email').eq('id', providerId).maybeSingle()
           conv = {
             other_id: providerId,
-            other_name: profile?.full_name || profile?.username || profile?.email || 'Provider',
+            other_name: profile?.full_name || profile?.username || profile?.email || 'Advertiser',
             listing_id: listingId || null,
             listing_title: listingTitle,
             last_message: '',
@@ -265,7 +265,7 @@ export default function MessagesPage() {
   )
 
   const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams()
-  const hasProviderParam = params.get('provider_id')
+  const hasAdvertiserParam = params.get('provider_id')
 
   return (
     <div style={{ display: 'flex', height: 'calc(100vh - var(--nav-h, 60px))', overflow: 'hidden', fontFamily: 'var(--sans, "Poppins", sans-serif)', color: 'var(--t, #ece8e1)' }}>
@@ -630,11 +630,11 @@ export default function MessagesPage() {
         </div>
 
         {/* Fix 5: empty state onboarding */}
-        {conversations.length === 0 && !hasProviderParam ? (
+        {conversations.length === 0 && !hasAdvertiserParam ? (
           <div className="msg-empty-state">
             <i className="ti ti-message-circle" style={{ fontSize: '48px', color: 'var(--t3, rgba(255,255,255,0.2))' }} />
             <div style={{ fontFamily: 'var(--serif, "Cormorant Garamond", serif)', fontSize: '22px', color: 'var(--t, #ece8e1)' }}>No conversations yet</div>
-            <div style={{ fontSize: '13px', color: 'var(--t2, rgba(255,255,255,0.4))', lineHeight: 1.6 }}>Browse listings and message a provider to get started</div>
+            <div style={{ fontSize: '13px', color: 'var(--t2, rgba(255,255,255,0.4))', lineHeight: 1.6 }}>Browse listings and message a advertiser to get started</div>
             <button
               onClick={() => window.location.href = '/'}
               style={{
@@ -726,7 +726,7 @@ export default function MessagesPage() {
               No conversations yet
             </div>
             <div style={{ fontSize: '13px', color: 'var(--t2, rgba(255,255,255,0.4))' }}>
-              Messages from providers will appear here.
+              Messages from advertisers will appear here.
             </div>
           </div>
         ) : (

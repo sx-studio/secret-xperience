@@ -114,7 +114,7 @@ async function handle(req: NextRequest) {
 
   await admin.from('payment_orders').update({
     status:            'completed',
-    provider_order_id: saleId,
+    advertiser_order_id: saleId,
     webhook_payload:   params,
     completed_at:      new Date().toISOString(),
   }).eq('id', orderId)

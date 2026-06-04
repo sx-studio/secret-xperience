@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
   // Fetch order from DB — ensures user can only query their own orders
   const { data: order } = await supabase
     .from('payment_orders')
-    .select('status, provider_order_id, tokens_granted, amount_eur, created_at, completed_at')
+    .select('status, advertiser_order_id, tokens_granted, amount_eur, created_at, completed_at')
     .eq('id', orderId)
     .eq('user_id', session.user.id)
     .single()
@@ -65,11 +65,11 @@ export async function GET(req: NextRequest) {
   }
 
   // Query CCBill API for live status
-  if (order.provider_order_id) {
+  if (order.advertiser_order_id) {
     try {
       const token = await getCCBillToken()
       const txRes = await fetch(
-        `${CCBILL_API_BASE}/transactions/${order.provider_order_id}`,
+        `${CCBILL_API_BASE}/transactions/${order.advertiser_order_id}`,
         { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } }
       )
       if (txRes.ok) {

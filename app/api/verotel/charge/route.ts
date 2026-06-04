@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
       package_id:     pkg.id,
       tokens_granted: totalTokens,
       amount_eur:     pkg.price_eur,
-      provider:       'verotel',
+      advertiser:       'verotel',
       status:         'pending',
     })
     .select('id')

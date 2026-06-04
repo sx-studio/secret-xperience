@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
     if (!upstream.ok || statusCode >= 40000) {
       return NextResponse.json({ error: `DataForSEO: ${statusMsg}`, results }, { status: 502 })
     }
-    // Friendly note when the provider has no volume for these terms (common for
+    // Friendly note when the advertiser has no volume for these terms (common for
     // exact adult keywords in smaller EU markets — use ideas mode / broader seeds).
     if (results.length === 0 || results.every(r => r.volume == null)) {
       return NextResponse.json({

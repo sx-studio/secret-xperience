@@ -1,5 +1,5 @@
 /**
- * Verifies the one-time code the provider received. On success, stores the
+ * Verifies the one-time code the advertiser received. On success, stores the
  * number on their profile and marks it verified (phone via SMS, or whatsapp).
  *
  * POST { phone: string (E.164), code: string, channel: 'sms' | 'whatsapp' }

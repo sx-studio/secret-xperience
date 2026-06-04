@@ -605,7 +605,7 @@ export default function DashboardPage() {
   const activeListings = listings.filter(l => l.active).length
   const myBookings       = bookings.filter(b => b.client_id === user?.id)
   const incomingBookings = bookings.filter(b => b.provider_id === user?.id)
-  const isProvider = profile?.role === 'provider' || profile?.role === 'venue' || profile?.role === 'creator'
+  const isAdvertiser = profile?.role === 'provider' || profile?.role === 'venue' || profile?.role === 'creator'
 
   return (
     <>
@@ -1329,7 +1329,7 @@ export default function DashboardPage() {
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
                 {[
-                  { role: 'provider', icon: 'ti-user-heart', label: 'Provider', desc: 'Escorts, companions, massage, experiences & more' },
+                  { role: 'provider', icon: 'ti-user-heart', label: 'Advertiser', desc: 'Escorts, companions, massage, experiences & more' },
                   { role: 'venue',    icon: 'ti-building',   label: 'Venue Host', desc: 'Nightlife venues, hotels, and event spaces' },
                   { role: 'creator',  icon: 'ti-camera',     label: 'Content Creator', desc: 'Adult content, subscriptions & digital media' },
                 ].map(opt => (
@@ -1375,7 +1375,7 @@ export default function DashboardPage() {
                     <div style={{ fontSize: '12px', color: 'var(--t2)', lineHeight: 1.4 }}>
                       {profile?.verification_status === 'pending'
                         ? 'Our team is reviewing your profile. Usually within 24–48 hours.'
-                        : 'Verified providers get a ✓ badge, appear higher in results, and earn more trust.'}
+                        : 'Verified advertisers get a ✓ badge, appear higher in results, and earn more trust.'}
                     </div>
                   </div>
                 </div>
@@ -1611,8 +1611,8 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* ── Incoming Booking Requests (provider view) ── */}
-          {isProvider && (
+          {/* ── Incoming Booking Requests (advertiser view) ── */}
+          {isAdvertiser && (
             <div className="db-card" style={{ marginBottom: '1.5rem' }}>
               <div style={{ marginBottom: '1.375rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span className="db-section-title">Incoming requests</span>
@@ -1822,9 +1822,9 @@ export default function DashboardPage() {
               {(profile?.role === 'provider' || profile?.role === 'creator' || profile?.role === 'venue') && (
                 <button
                   className="db-quick-btn-gold"
-                  onClick={() => window.location.href = '/provider'}
+                  onClick={() => window.location.href = '/advertiser'}
                 >
-                  Provider Hub →
+                  Advertiser Hub →
                 </button>
               )}
             </div>

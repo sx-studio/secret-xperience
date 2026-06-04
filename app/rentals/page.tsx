@@ -43,7 +43,7 @@ export default async function RentalsPage() {
           { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.secretxperience.eu' },
           { '@type': 'ListItem', position: 2, name: 'Rentals', item: 'https://www.secretxperience.eu/rentals' },
         ]},
-        { '@context': 'https://schema.org', '@type': 'Service', name: 'Discreet Rentals', serviceType: 'Adult Space Rental', provider: { '@type': 'Organization', name: 'SecretXperience', url: 'https://www.secretxperience.eu' }, areaServed: ['BE','NL','DE','FR','LU','CH'], url: 'https://www.secretxperience.eu/rentals', description: 'Private, discreet rental spaces for intimate encounters — apartments, suites and studios across Europe.' },
+        { '@context': 'https://schema.org', '@type': 'Service', name: 'Discreet Rentals', serviceType: 'Adult Space Rental', advertiser: { '@type': 'Organization', name: 'SecretXperience', url: 'https://www.secretxperience.eu' }, areaServed: ['BE','NL','DE','FR','LU','CH'], url: 'https://www.secretxperience.eu/rentals', description: 'Private, discreet rental spaces for intimate encounters — apartments, suites and studios across Europe.' },
       ]) }} />
       <style>{`
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

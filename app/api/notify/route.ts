@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
       id, date, time, duration_hours, total_amount, status, notes,
       listings ( title, category, city ),
       client:profiles!bookings_client_id_fkey ( full_name, email ),
-      provider:profiles!bookings_provider_id_fkey ( full_name, email )
+      advertiser:profiles!bookings_provider_id_fkey ( full_name, email )
     `)
     .eq('id', booking_id)
     .single()
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
 
   const listing = (booking as any).listings
   const client  = (booking as any).client
-  const provider = (booking as any).provider
+  const advertiser = (booking as any).advertiser
 
   // If RESEND_API_KEY is set, send via Resend; otherwise log
   if (process.env.RESEND_API_KEY) {
@@ -71,17 +71,17 @@ export async function POST(req: NextRequest) {
 
     const emails = []
 
-    if (type === 'booking_created' && provider?.email) {
+    if (type === 'booking_created' && advertiser?.email) {
       emails.push({
         from: 'SecretXperience <noreply@secretxperience.eu>',
-        to: [provider.email],
+        to: [advertiser.email],
         subject: `New booking request — ${listing?.title}`,
         html: `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${emailStyle}</style></head><body>
           <div class="wrap">
             <div class="header"><div class="logo">Secret<em>Xperience</em></div></div>
             <div class="body">
               <div class="title">New booking request</div>
-              <div class="sub">Hi ${provider?.full_name || 'there'}, <strong style="color:#ece8e1">${client?.full_name || 'A client'}</strong> has requested a booking for your listing.</div>
+              <div class="sub">Hi ${advertiser?.full_name || 'there'}, <strong style="color:#ece8e1">${client?.full_name || 'A client'}</strong> has requested a booking for your listing.</div>
               ${bookingCard}
               ${booking.notes ? `<div style="background:rgba(197,160,90,0.05);border:1px solid rgba(197,160,90,0.15);border-radius:8px;padding:12px 16px;margin-bottom:24px;font-size:13px;color:#8c8880"><strong style="color:#c5a05a;font-size:11px;text-transform:uppercase;letter-spacing:0.1em">Client notes</strong><br>${booking.notes}</div>` : ''}
               <div style="text-align:center"><a href="${siteUrl}/dashboard" class="btn">View in dashboard →</a></div>
@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
             <div class="header"><div class="logo">Secret<em>Xperience</em></div></div>
             <div class="body">
               <div class="title">Booking confirmed ✓</div>
-              <div class="sub">Hi ${client?.full_name || 'there'}, your booking with <strong style="color:#ece8e1">${provider?.full_name || listing?.title || 'your provider'}</strong> has been confirmed. Payment received.</div>
+              <div class="sub">Hi ${client?.full_name || 'there'}, your booking with <strong style="color:#ece8e1">${advertiser?.full_name || listing?.title || 'your advertiser'}</strong> has been confirmed. Payment received.</div>
               ${bookingCard}
               <div style="background:rgba(29,201,160,0.05);border:1px solid rgba(29,201,160,0.15);border-radius:8px;padding:12px 16px;margin-bottom:24px;font-size:13px;color:#1dc9a0">
                 ✓ Payment of €${booking.total_amount} received and processed securely.

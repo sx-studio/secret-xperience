@@ -4,7 +4,7 @@ import { rateLimit } from '../../../lib/ratelimit'
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.secretxperience.eu'
 
-function providerWelcomeHtml(name: string) {
+function advertiserWelcomeHtml(name: string) {
   const hi = name ? `Welcome, ${name} —` : 'Welcome —'
   return `
 <div style="background:#080612;padding:40px 20px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
@@ -32,7 +32,7 @@ function providerWelcomeHtml(name: string) {
           <td width="34" valign="top"><div style="width:26px;height:26px;border-radius:50%;background:#c5a05a;color:#080612;font-weight:700;font-size:13px;text-align:center;line-height:26px;">2</div></td>
           <td valign="top" style="padding-bottom:18px;">
             <div style="font-size:15px;color:#ece8e1;font-weight:600;margin-bottom:3px;">Verify your identity</div>
-            <div style="font-size:13px;line-height:1.6;color:rgba(236,232,225,0.55);">Verified providers get a trust badge and noticeably more enquiries.</div>
+            <div style="font-size:13px;line-height:1.6;color:rgba(236,232,225,0.55);">Verified advertisers get a trust badge and noticeably more enquiries.</div>
           </td>
         </tr>
         <tr>
@@ -48,7 +48,7 @@ function providerWelcomeHtml(name: string) {
       <a href="${SITE}/listings/create" style="display:inline-block;background:linear-gradient(135deg,#e7c87f,#c5a05a 55%,#a0803d);color:#1a1206;text-decoration:none;font-weight:700;font-size:15px;padding:14px 34px;border-radius:10px;">Create my listing →</a>
     </div>
     <div style="margin:24px 36px;padding:18px 20px;background:rgba(197,160,90,0.07);border:1px solid rgba(197,160,90,0.2);border-radius:12px;">
-      <div style="font-size:14px;color:#c5a05a;font-weight:600;margin-bottom:4px;">Invite providers, earn featured credit</div>
+      <div style="font-size:14px;color:#c5a05a;font-weight:600;margin-bottom:4px;">Invite advertisers, earn featured credit</div>
       <div style="font-size:13px;line-height:1.6;color:rgba(236,232,225,0.6);">Share your referral link — when someone you invite publishes their first listing, you're rewarded automatically. <a href="${SITE}/refer" style="color:#c5a05a;">Get your link →</a></div>
     </div>
     <div style="padding:8px 36px 34px;border-top:1px solid rgba(255,255,255,0.06);margin-top:8px;">
@@ -99,7 +99,7 @@ function memberWelcomeHtml(name: string) {
     </div>
     <div style="padding:26px 40px 10px;text-align:center;">
       <a href="${SITE}/discover" style="display:inline-block;background:linear-gradient(135deg,#e7c87f,#c5a05a 55%,#a0803d);color:#1a1206;text-decoration:none;font-weight:700;font-size:15px;padding:15px 40px;border-radius:11px;letter-spacing:0.02em;">Begin exploring →</a>
-      <div style="font-size:12px;color:rgba(236,232,225,0.4);margin-top:14px;">Browse verified providers, save your favourites, and book with confidence.</div>
+      <div style="font-size:12px;color:rgba(236,232,225,0.4);margin-top:14px;">Browse verified advertisers, save your favourites, and book with confidence.</div>
     </div>
     <div style="padding:22px 40px 34px;margin-top:14px;border-top:1px solid rgba(255,255,255,0.06);text-align:center;">
       <p style="font-size:11.5px;line-height:1.7;color:rgba(236,232,225,0.32);margin:0;">
@@ -117,11 +117,11 @@ async function sendWelcomeEmail(email: string, name: string, role: string) {
     console.warn('[welcome-email] RESEND_API_KEY not set — skipping welcome email for', email)
     return
   }
-  const isProvider = role === 'provider'
-  const subject = isProvider
+  const isAdvertiser = role === 'provider'
+  const subject = isAdvertiser
     ? 'Welcome to SecretXperience — let\'s get your first listing live'
     : 'Welcome in — your invitation to SecretXperience'
-  const html = isProvider ? providerWelcomeHtml(name) : memberWelcomeHtml(name)
+  const html = isAdvertiser ? advertiserWelcomeHtml(name) : memberWelcomeHtml(name)
 
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',

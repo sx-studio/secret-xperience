@@ -15,7 +15,7 @@ export async function GET(request: Request) {
   if (code) {
     const cookieStore = cookies()
     // Redirect target determined after we know if the user is new.
-    // Default to dashboard; updated below for new provider-role signups.
+    // Default to dashboard; updated below for new advertiser-role signups.
     const response = NextResponse.redirect(`${siteUrl}/dashboard`)
 
     const supabase = createServerClient(

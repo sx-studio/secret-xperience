@@ -5,7 +5,7 @@ import { createClient } from '../lib/supabase'
 
 const SITE = 'https://secretxperience.eu'
 
-const MSG_PROVIDER = (link: string) =>
+const MSG_ADVERTISER = (link: string) =>
   `Hey! I list on SecretXperience — the new premium adult platform across the EU. Free to join, real bookings, discreet. Create your listing here: ${link}`
 
 const MSG_CLIENT = (link: string) =>
@@ -38,17 +38,17 @@ export default function ReferPage() {
   }, [])
 
   const link = code ? `${SITE}/login?ref=${code}` : ''
-  const msgText = msgType === 'provider' ? MSG_PROVIDER(link) : MSG_CLIENT(link)
+  const msgText = msgType === 'provider' ? MSG_ADVERTISER(link) : MSG_CLIENT(link)
   const waLink = `https://wa.me/?text=${encodeURIComponent(msgText)}`
   const smsLink = `sms:?body=${encodeURIComponent(msgText)}`
-  const tgLink = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(msgType === 'provider' ? MSG_PROVIDER('') : MSG_CLIENT(''))}`
+  const tgLink = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(msgType === 'provider' ? MSG_ADVERTISER('') : MSG_CLIENT(''))}`
 
   async function copy() {
     try { await navigator.clipboard.writeText(link); setCopied(true); setTimeout(() => setCopied(false), 2000) } catch { /* ignore */ }
   }
 
   async function copyMsg(type: 'provider' | 'client') {
-    const text = type === 'provider' ? MSG_PROVIDER(link) : MSG_CLIENT(link)
+    const text = type === 'provider' ? MSG_ADVERTISER(link) : MSG_CLIENT(link)
     try { await navigator.clipboard.writeText(text); setCopiedMsg(type); setTimeout(() => setCopiedMsg(null), 2000) } catch { /* ignore */ }
   }
 
@@ -69,9 +69,9 @@ export default function ReferPage() {
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 50% 0%,rgba(197,160,90,0.08) 0%,transparent 65%)', pointerEvents: 'none' }} />
         <div style={{ position: 'relative', maxWidth: '620px', margin: '0 auto' }}>
           <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.3em', color: 'var(--gold)', textTransform: 'uppercase', marginBottom: '1.25rem' }}>Refer & earn</div>
-          <h1 style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(30px,6vw,46px)', fontWeight: 400, margin: '0 0 1rem', lineHeight: 1.1 }}>Invite providers. Earn featured credit.</h1>
+          <h1 style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(30px,6vw,46px)', fontWeight: 400, margin: '0 0 1rem', lineHeight: 1.1 }}>Invite advertisers. Earn featured credit.</h1>
           <p style={{ fontSize: '15px', color: 'var(--t2)', lineHeight: 1.7, margin: 0 }}>
-            Share your link with other providers. When someone you invite publishes their first listing, we credit you <strong style={{ color: 'var(--gold)' }}>75 tokens</strong> automatically — enough to feature a listing and rise to the top.
+            Share your link with other advertisers. When someone you invite publishes their first listing, we credit you <strong style={{ color: 'var(--gold)' }}>75 tokens</strong> automatically — enough to feature a listing and rise to the top.
           </p>
         </div>
       </section>
@@ -105,7 +105,7 @@ export default function ReferPage() {
               <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
                 {(['provider', 'client'] as const).map(t => (
                   <button key={t} onClick={() => setMsgType(t)} style={{ padding: '7px 16px', borderRadius: 'var(--r)', border: `0.5px solid ${msgType === t ? 'var(--gold)' : 'var(--b2)'}`, background: msgType === t ? 'rgba(197,160,90,0.1)' : 'transparent', color: msgType === t ? 'var(--gold)' : 'var(--t2)', fontSize: '12px', fontWeight: 600, cursor: 'pointer', textTransform: 'capitalize' }}>
-                    {t === 'provider' ? '🎭 For providers' : '👤 For clients'}
+                    {t === 'provider' ? '🎭 For advertisers' : '👤 For clients'}
                   </button>
                 ))}
               </div>
@@ -151,7 +151,7 @@ export default function ReferPage() {
             <div style={card}>
               <div style={{ fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--t3)', marginBottom: '14px' }}>How it works</div>
               {[
-                ['Share your link', 'Send it to other providers — on socials, in DMs, anywhere.'],
+                ['Share your link', 'Send it to other advertisers — on socials, in DMs, anywhere.'],
                 ['They sign up & list', 'Your link tags them to you when they join.'],
                 ['You get 75 tokens', 'Credited automatically the moment they publish their first listing.'],
               ].map(([t, d], i) => (

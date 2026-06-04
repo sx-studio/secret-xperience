@@ -401,7 +401,7 @@ export default function PrivateReceptionPage() {
       '@type': 'Service',
       name: 'Private Reception Services',
       serviceType: 'Adult Private Reception Services',
-      provider: { '@type': 'Organization', name: 'SecretXperience', url: 'https://www.secretxperience.eu' },
+      advertiser: { '@type': 'Organization', name: 'SecretXperience', url: 'https://www.secretxperience.eu' },
       areaServed: ['BE', 'NL', 'DE', 'FR', 'LU', 'CH'],
       url: 'https://www.secretxperience.eu/private-reception',
       description: 'Browse verified private hosts — companionship, massage, domination and experiences. You visit them at their private location.',

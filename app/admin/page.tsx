@@ -45,7 +45,7 @@ export default function AdminPage() {
   const [users, setUsers] = useState<any[]>([])
   const [bookings, setBookings] = useState<any[]>([])
   const [verifications, setVerifications] = useState<any[]>([])
-  const [stats, setStats] = useState({ listings: 0, users: 0, bookings: 0, revenue: 0, providers: 0, pendingListings: 0 })
+  const [stats, setStats] = useState({ listings: 0, users: 0, bookings: 0, revenue: 0, advertisers: 0, pendingListings: 0 })
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [verifWorking, setVerifWorking] = useState<string | null>(null)
@@ -119,9 +119,9 @@ export default function AdminPage() {
       setVerifications(vr.data || [])
       const revenue = bs.filter((b: any) => b.status === 'confirmed').reduce((s: number, b: any) => s + (b.total_amount || 0), 0)
       setListings(lsWithProfiles); setUsers(us); setBookings(bs)
-      const providers = us.filter((u: any) => ['provider','venue','creator'].includes(u.role)).length
+      const advertisers = us.filter((u: any) => ['provider','venue','creator'].includes(u.role)).length
       const pendingListings = lsWithProfiles.filter((l: any) => !l.active).length
-      setStats({ listings: lsWithProfiles.length, users: us.length, bookings: bs.length, revenue, providers, pendingListings })
+      setStats({ listings: lsWithProfiles.length, users: us.length, bookings: bs.length, revenue, advertisers, pendingListings })
 
       // Calculate initial badges — count items newer than last time each tab was visited
       const seenListings = loadLastSeen('Listings')
@@ -273,7 +273,7 @@ export default function AdminPage() {
       link: '/listings/create',
     })
     setVerifications(prev => prev.map(v => v.id === verifId ? { ...v, status: 'approved' } : v))
-    setVerifMsg({ id: verifId, ok: true, text: 'Approved — provider can now publish listings.' })
+    setVerifMsg({ id: verifId, ok: true, text: 'Approved — advertiser can now publish listings.' })
     setVerifWorking(null)
   }
 
@@ -297,7 +297,7 @@ export default function AdminPage() {
       link: '/verify',
     })
     setVerifications(prev => prev.map(v => v.id === verifId ? { ...v, status: 'rejected' } : v))
-    setVerifMsg({ id: verifId, ok: true, text: 'Rejected — provider notified.' })
+    setVerifMsg({ id: verifId, ok: true, text: 'Rejected — advertiser notified.' })
     setVerifWorking(null)
   }
 
@@ -502,7 +502,7 @@ export default function AdminPage() {
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', minWidth: '700px' }}>
                 <thead>
                   <tr style={{ background: 'var(--bg2, rgba(255,255,255,0.02))' }}>
-                    {['Title / Location', 'Category', 'Provider', 'Price', 'Status / Tier', 'Actions'].map(h => (
+                    {['Title / Location', 'Category', 'Advertiser', 'Price', 'Status / Tier', 'Actions'].map(h => (
                       <th key={h} style={{ textAlign: 'left', padding: '12px 16px', font: '600 9px/1 var(--sans)', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--t3, #4c4a47)' }}>{h}</th>
                     ))}
                   </tr>
@@ -699,7 +699,7 @@ export default function AdminPage() {
                             const role = u.role || 'user'
                             const roleStyles: Record<string, { bg: string; color: string }> = {
                               admin:    { bg: 'rgba(239,68,68,0.15)',   color: '#ef4444' },
-                              provider: { bg: 'rgba(197,160,90,0.15)',  color: 'var(--gold, #c5a05a)' },
+                              advertiser: { bg: 'rgba(197,160,90,0.15)',  color: 'var(--gold, #c5a05a)' },
                               venue:    { bg: 'rgba(99,102,241,0.15)',  color: '#818cf8' },
                               creator:  { bg: 'rgba(168,85,247,0.15)', color: '#c084fc' },
                               user:     { bg: 'rgba(255,255,255,0.06)', color: 'var(--t2, #8c8880)' },
@@ -1061,15 +1061,15 @@ export default function AdminPage() {
                   >Clear</button>
                 </div>
 
-                {/* Section 1: Provider WhatsApp opt-ins */}
+                {/* Section 1: Advertiser WhatsApp opt-ins */}
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
                     <div>
                       <div style={{ font: '600 11px/1 var(--sans)', color: 'var(--t2, #8c8880)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '4px' }}>
                         <i className="ti ti-brand-whatsapp" style={{ marginRight: '6px', color: '#25d366' }} />
-                        Provider WhatsApp Opt-ins
+                        Advertiser WhatsApp Opt-ins
                       </div>
-                      <div style={{ font: '300 11px/1 var(--sans)', color: 'var(--t3, #4c4a47)' }}>{filteredOptins.length} providers with phone + consent</div>
+                      <div style={{ font: '300 11px/1 var(--sans)', color: 'var(--t3, #4c4a47)' }}>{filteredOptins.length} advertisers with phone + consent</div>
                     </div>
                     <button
                       onClick={() => exportCsv(filteredOptins.map(c => ({ title: c.title, category: c.category, city: c.city, country: c.country, phone: c.contact_phone, optin_date: c.created_at })), `sx-whatsapp-optins-${new Date().toISOString().slice(0,10)}.csv`)}
@@ -1090,7 +1090,7 @@ export default function AdminPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {filteredOptins.length === 0 && <tr><td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: 'var(--t3, #4c4a47)' }}>No opted-in providers yet</td></tr>}
+                        {filteredOptins.length === 0 && <tr><td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: 'var(--t3, #4c4a47)' }}>No opted-in advertisers yet</td></tr>}
                         {filteredOptins.map(c => (
                           <tr key={c.id} className="adm-tr" style={{ borderTop: '0.5px solid var(--b, rgba(255,255,255,0.04))' }}>
                             <td style={{ padding: '12px 16px', fontWeight: 500, maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.title || '—'}</td>

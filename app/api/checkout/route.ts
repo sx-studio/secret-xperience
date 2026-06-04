@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'On-platform payment is not available for this listing type.' }, { status: 400 })
   }
 
-  const { data: provider } = await supabase
+  const { data: advertiser } = await supabase
     .from('profiles')
     .select('stripe_connect_account_id')
     .eq('id', listing.profile_id)
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
 
   if (bookingErr) return NextResponse.json({ error: bookingErr.message }, { status: 500 })
 
-  // Notify provider of new booking request (fire-and-forget)
+  // Notify advertiser of new booking request (fire-and-forget)
   const siteOrigin = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.secretxperience.eu'
   fetch(`${siteOrigin}/api/notify`, {
     method: 'POST',
@@ -87,10 +87,10 @@ export async function POST(req: NextRequest) {
     cancel_url:  `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.secretxperience.eu'}/?booking=cancelled`,
   }
 
-  if (provider?.stripe_connect_account_id) {
+  if (advertiser?.stripe_connect_account_id) {
     checkoutParams.payment_intent_data = {
       application_fee_amount: Math.round(price * 100 * PLATFORM_FEE_PCT),
-      transfer_data: { destination: provider.stripe_connect_account_id },
+      transfer_data: { destination: advertiser.stripe_connect_account_id },
     }
   }
 

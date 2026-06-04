@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next'
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: { userAgent: '*', allow: '/', disallow: ['/dashboard', '/admin', '/messages', '/provider', '/api/'] },
+    rules: { userAgent: '*', allow: '/', disallow: ['/dashboard', '/admin', '/messages', '/advertiser', '/api/'] },
     sitemap: 'https://www.secretxperience.eu/sitemap.xml',
   }
 }

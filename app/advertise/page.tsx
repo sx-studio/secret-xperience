@@ -87,7 +87,7 @@ const faqs = [
   { q: 'Is my personal information protected?', a: 'Yes. We never display your real name, address or personal contact details publicly. All client communication goes through our encrypted messaging system.' },
   { q: 'Can I list in multiple cities?', a: 'Yes. You can create listings in any city across Europe and manage them from one dashboard.' },
   { q: 'What is the difference between featured and slider?', a: 'Featured (€29/7 days) gives you a gold badge and priority in category/search pages. Slider (€79/30 days) adds placement in the homepage featured slider seen by every visitor.' },
-  { q: 'Do you accept providers from all European countries?', a: 'Yes. We currently serve Belgium, Netherlands, Germany, France, Luxembourg, Switzerland, Spain, Czech Republic, Hungary, Austria and more.' },
+  { q: 'Do you accept advertisers from all European countries?', a: 'Yes. We currently serve Belgium, Netherlands, Germany, France, Luxembourg, Switzerland, Spain, Czech Republic, Hungary, Austria and more.' },
 ]
 
 export default function AdvertisePage() {
@@ -111,7 +111,7 @@ export default function AdvertisePage() {
       <section style={{ padding: '7rem 1.5rem 5rem', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: '600px', height: '600px', background: 'radial-gradient(circle,rgba(197,160,90,0.08) 0%,transparent 70%)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: '760px', margin: '0 auto', position: 'relative' }}>
-          <div style={{ fontFamily: 'var(--sans)', fontSize: '11px', fontWeight: 700, letterSpacing: '0.3em', color: 'var(--gold)', textTransform: 'uppercase', marginBottom: '1.5rem' }}>For providers, creators &amp; venues</div>
+          <div style={{ fontFamily: 'var(--sans)', fontSize: '11px', fontWeight: 700, letterSpacing: '0.3em', color: 'var(--gold)', textTransform: 'uppercase', marginBottom: '1.5rem' }}>For advertisers, creators &amp; venues</div>
           <h1 style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(2.4rem,6vw,4rem)', fontWeight: 400, lineHeight: 1.15, margin: '0 0 1.5rem', color: 'var(--t)' }}>
             Reach thousands of<br /><em style={{ fontStyle: 'italic', color: 'var(--gold)' }}>verified, discreet clients</em><br />across Europe
           </h1>

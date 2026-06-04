@@ -1,6 +1,6 @@
 /**
  * Creator content posts.
- * POST { caption, mediaUrl, mediaType } → creates a post (creator/provider only)
+ * POST { caption, mediaUrl, mediaType } → creates a post (creator/advertiser only)
  * DELETE ?id=<postId> → removes own post
  */
 import { NextRequest, NextResponse } from 'next/server'

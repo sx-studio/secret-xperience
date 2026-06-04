@@ -1,6 +1,6 @@
 /**
  * Structured service "Possibilities" menu for escort / private-reception style
- * listings. Grouped exactly like the major EU directories so providers can tick
+ * listings. Grouped exactly like the major EU directories so advertisers can tick
  * what they offer and clients see a clean, scannable checklist on the listing.
  *
  * Stored on `listings.services` as a flat string[] of the selected labels;

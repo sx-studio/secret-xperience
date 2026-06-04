@@ -131,7 +131,7 @@ export default function VerifyPage() {
           Verify your <em style={{ color:S.gold, fontStyle:'italic' }}>identity</em>
         </h1>
         <p style={{ fontSize:14, color:S.t2, lineHeight:1.75, marginBottom:'2.5rem' }}>
-          SecretXperience requires identity verification for all providers before publishing listings. Your documents are stored securely and only reviewed by our compliance team. We accept national ID cards, passports, and driver's licences.
+          SecretXperience requires identity verification for all advertisers before publishing listings. Your documents are stored securely and only reviewed by our compliance team. We accept national ID cards, passports, and driver's licences.
         </p>
 
         {submitted || status === 'approved' ? (

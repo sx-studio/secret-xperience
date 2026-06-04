@@ -152,7 +152,7 @@ const sxTranslationsScript = `
     'Loading...':       {fr:'Chargement…',    nl:'Laden…',         de:'Laden…',           es:'Cargando…',       it:'Caricamento…',     pt:'A carregar…',      pl:'Ładowanie…',       ro:'Se încarcă…'},
     // ── Homepage stats ────────────────────────────────────────────────────────
     'Active Listings':  {fr:'Annonces actives',nl:'Actieve Advertenties',de:'Aktive Anzeigen',es:'Anuncios activos',it:'Annunci attivi',pt:'Anúncios Ativos',pl:'Aktywne ogłoszenia',ro:'Anunțuri active'},
-    'Verified Providers':{fr:'Prestataires vérifiés',nl:'Geverifieerde Aanbieders',de:'Verifizierte Anbieter',es:'Proveedores verificados',it:'Fornitori verificati',pt:'Prestadores Verificados',pl:'Zweryfikowani',ro:'Furnizori verificați'},
+    'Verified Advertisers':{fr:'Prestataires vérifiés',nl:'Geverifieerde Aanbieders',de:'Verifizierte Anbieter',es:'Proveedores verificados',it:'Fornitori verificati',pt:'Prestadores Verificados',pl:'Zweryfikowani',ro:'Furnizori verificați'},
     'Cities Covered':   {fr:'Villes couvertes',nl:'Steden',        de:'Städte',           es:'Ciudades',        it:'Città',            pt:'Cidades Cobertas', pl:'Miasta',           ro:'Orașe acoperite'},
     'Private Gallery':  {fr:'Galerie Privée', nl:'Privé Galerij',  de:'Private Galerie',  es:'Galería Privada', it:'Galleria Privata', pt:'Galeria Privada',  pl:'Prywatna Galeria', ro:'Galerie Privată'},
     // ── Footer ────────────────────────────────────────────────────────────────

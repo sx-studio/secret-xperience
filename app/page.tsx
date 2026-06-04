@@ -63,14 +63,14 @@ function showRoleStep(){
     +   '<i class="ti ti-eye" style="font-size:26px;color:var(--gold);flex-shrink:0;"></i>'
     +   '<span><span style="display:block;font-size:15px;font-weight:600;color:var(--t);margin-bottom:2px;">I am here to browse</span><span style="display:block;font-size:12px;color:var(--t3);">Discover companions, venues & experiences</span></span>'
     + '</button>'
-    + '<button id="roleProvider" style="display:flex;align-items:center;gap:14px;width:100%;padding:16px 18px;background:var(--bg2);border:0.5px solid var(--b2);border-radius:var(--rl);cursor:pointer;text-align:left;transition:border-color .15s,background .15s;font-family:var(--sans);">'
+    + '<button id="roleAdvertiser" style="display:flex;align-items:center;gap:14px;width:100%;padding:16px 18px;background:var(--bg2);border:0.5px solid var(--b2);border-radius:var(--rl);cursor:pointer;text-align:left;transition:border-color .15s,background .15s;font-family:var(--sans);">'
     +   '<i class="ti ti-briefcase" style="font-size:26px;color:var(--gold);flex-shrink:0;"></i>'
-    +   '<span><span style="display:block;font-size:15px;font-weight:600;color:var(--t);margin-bottom:2px;">I offer a service</span><span style="display:block;font-size:12px;color:var(--t3);">List as a provider, venue or creator — free</span></span>'
+    +   '<span><span style="display:block;font-size:15px;font-weight:600;color:var(--t);margin-bottom:2px;">I offer a service</span><span style="display:block;font-size:12px;color:var(--t3);">List as a advertiser, venue or creator — free</span></span>'
     + '</button>'
     + '</div>';
   var hov = function(b){ b.addEventListener('mouseover',function(){b.style.borderColor='var(--gold)';b.style.background='var(--gbg)';}); b.addEventListener('mouseout',function(){b.style.borderColor='var(--b2)';b.style.background='var(--bg2)';}); };
   var bv = document.getElementById('roleVisitor');
-  var bp = document.getElementById('roleProvider');
+  var bp = document.getElementById('roleAdvertiser');
   if (bv) { hov(bv); bv.addEventListener('click', function(){ try{localStorage.setItem('sx_role','visitor');}catch(e){} dismissGate(); }); }
   if (bp) { hov(bp); bp.addEventListener('click', function(){ try{localStorage.setItem('sx_role','provider');}catch(e){} dismissGate(); window.location.href='/advertise'; }); }
 }
@@ -1038,7 +1038,7 @@ document.getElementById('bookSubmit').addEventListener('click',async function(){
           document.getElementById('bookSubmit').style.display='';
           document.getElementById('bookBack3').style.display='';
           bookStep=0;selDate='';selTime='';updateBookSteps();
-          showToast('Request sent — the provider will confirm shortly');
+          showToast('Request sent — the advertiser will confirm shortly');
         },2500);
       }
     }catch(err){showToast('Network error — please try again');btn.textContent='Confirm Booking';btn.disabled=false;}
@@ -1052,7 +1052,7 @@ document.getElementById('bookSubmit').addEventListener('click',async function(){
       document.getElementById('bookSubmit').style.display='';
       document.getElementById('bookBack3').style.display='';
       bookStep=0;selDate='';selTime='';updateBookSteps();
-      showToast('Request sent — the provider will confirm shortly');
+      showToast('Request sent — the advertiser will confirm shortly');
     },2500);
   }
 });
@@ -1389,7 +1389,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         const mobileLoginBtn = document.getElementById('mobileLoginBtn')
         if (mobileLoginBtn) {
           mobileLoginBtn.classList.add('show')
-          // Route providers straight to /advertise based on their earlier role choice
+          // Route advertisers straight to /advertise based on their earlier role choice
           try {
             if (localStorage.getItem('sx_role') === 'provider') {
               ;(mobileLoginBtn as HTMLAnchorElement).href = '/advertise'
@@ -1468,7 +1468,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         container.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:4rem 2rem;display:flex;flex-direction:column;align-items:center;gap:1.25rem">
           <div style="width:64px;height:64px;border-radius:50%;background:rgba(197,160,90,0.08);border:0.5px solid rgba(197,160,90,0.2);display:flex;align-items:center;justify-content:center;font-size:26px">✦</div>
           <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:#ece8e1">Be among the first</div>
-          <div style="font-size:13px;color:#6a6560;max-width:320px;line-height:1.6">SecretXperience is just launching. Be an early provider and reach clients from day one.</div>
+          <div style="font-size:13px;color:#6a6560;max-width:320px;line-height:1.6">SecretXperience is just launching. Be an early advertiser and reach clients from day one.</div>
           <button onclick="window.location.href='/listings/create'" style="margin-top:0.5rem;padding:12px 28px;background:linear-gradient(135deg,#c5a05a,#a0803d);border:none;border-radius:10px;color:#080808;font-weight:600;font-size:13px;cursor:pointer;font-family:inherit;letter-spacing:0.04em">List your service →</button>
         </div>`
         if (countEl) countEl.textContent = '0 listings'
@@ -1656,7 +1656,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         const [
           { count: listingCount },
           { count: userCount },
-          { count: providerCount },
+          { count: advertiserCount },
           { data: activeRows },
         ] = await Promise.all([
           (supabase as any).from('listings').select('id', { count: 'exact', head: true }).eq('active', true),
@@ -1668,11 +1668,11 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         const countStr = (listingCount || 0).toLocaleString()
         if (el('statListings')) el('statListings')!.textContent = countStr
         if (el('statListingsAdmin')) el('statListingsAdmin')!.textContent = countStr
-        if (el('statProviders')) el('statProviders')!.textContent = (providerCount || 0).toLocaleString()
+        if (el('statAdvertisers')) el('statAdvertisers')!.textContent = (advertiserCount || 0).toLocaleString()
         if (el('statUsers')) el('statUsers')!.textContent = (userCount || 0).toLocaleString()
         if (el('statRevenue')) el('statRevenue')!.textContent = '—'
 
-        // Live social proof — distinct active providers + cities from live listings
+        // Live social proof — distinct active advertisers + cities from live listings
         const rows = (activeRows || []) as Array<{ profile_id: string | null; city: string | null }>
         const liveListings = listingCount || rows.length
         const liveCities = new Set(rows.map(r => (r.city || '').trim().toLowerCase()).filter(Boolean)).size
@@ -2104,7 +2104,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         <span class="cat-group-label">Outcall</span>
         <a class="cat-group-item" href="/escorts" role="menuitem">
           Escorts
-          <span class="cat-group-item-sub">Provider travels to you</span>
+          <span class="cat-group-item-sub">Advertiser travels to you</span>
         </a>
         <a class="cat-group-item" href="/private-reception" role="menuitem" style="color:var(--gold);font-size:11px;text-transform:uppercase;letter-spacing:0.1em;padding:6px 14px 4px;font-weight:600;">
           Incall · Private Reception →
@@ -2416,7 +2416,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         </div>
         <div class="admin-stats">
           <div class="astat"><div class="astat-v" id="statListingsAdmin">—</div><div class="astat-l">Active listings</div></div>
-          <div class="astat"><div class="astat-v" id="statProviders">—</div><div class="astat-l">Providers</div></div>
+          <div class="astat"><div class="astat-v" id="statAdvertisers">—</div><div class="astat-l">Advertisers</div></div>
           <div class="astat"><div class="astat-v" id="statUsers">—</div><div class="astat-l">Registered users</div></div>
           <div class="astat"><div class="astat-v" id="statRevenue">—</div><div class="astat-l">Revenue this month</div></div>
         </div>
@@ -2459,7 +2459,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         </a>
         <a href="/regulations" style="display:flex;align-items:center;gap:10px;background:rgba(197,160,90,0.06);border:0.5px solid rgba(197,160,90,0.18);border-radius:10px;padding:10px 16px;text-decoration:none;transition:background .2s;" onmouseover="this.style.background='rgba(197,160,90,0.11)'" onmouseout="this.style.background='rgba(197,160,90,0.06)'">
           <i class="ti ti-scale" style="color:#c5a05a;font-size:18px;flex-shrink:0;" aria-hidden="true"></i>
-          <span style="font-size:13px;color:rgba(236,232,225,0.8);font-family:var(--sans);">Know your rights. Our <span style="color:#c5a05a;font-weight:500;">Regulation &amp; Legal Rights</span> page covers EU/BE/NL/DE sex work law and provider protections.</span>
+          <span style="font-size:13px;color:rgba(236,232,225,0.8);font-family:var(--sans);">Know your rights. Our <span style="color:#c5a05a;font-weight:500;">Regulation &amp; Legal Rights</span> page covers EU/BE/NL/DE sex work law and advertiser protections.</span>
           <i class="ti ti-arrow-right" style="color:#c5a05a;font-size:14px;margin-left:auto;flex-shrink:0;" aria-hidden="true"></i>
         </a>
       </div>
@@ -2671,7 +2671,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         </div>
       </div>
       <div class="footer-bottom" style="border-top:0.5px solid var(--b);padding-top:1.5rem;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:1rem;">
-        <div class="footer-legal t-meta" style="color:var(--t3);">© 2025 SecretXperience.eu — All rights reserved. Adults only (18+). All listed providers are independent contractors.</div>
+        <div class="footer-legal t-meta" style="color:var(--t3);">© 2025 SecretXperience.eu — All rights reserved. Adults only (18+). All listed advertisers are independent contractors.</div>
         <div style="display:flex;align-items:center;gap:1rem;">
           <span class="t-meta" style="color:var(--t3);">EN · FR · NL · DE</span>
           <span class="t-meta" style="color:var(--t3);">💳 VISA · MC · AMEX · CRYPTO</span>
@@ -2726,7 +2726,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
             <div class="flbl" style="margin-bottom:.5rem">I am a</div>
             <div class="role-pick">
               <div class="role-card selected" data-role="user"><i class="ti ti-user"></i><span>User / Client</span></div>
-              <div class="role-card" data-role="provider"><i class="ti ti-briefcase"></i><span>Service Provider</span></div>
+              <div class="role-card" data-role="provider"><i class="ti ti-briefcase"></i><span>Service Advertiser</span></div>
               <div class="role-card" data-role="venue"><i class="ti ti-building"></i><span>Venue / Hotel</span></div>
               <div class="role-card" data-role="creator"><i class="ti ti-camera"></i><span>Content Creator</span></div>
             </div>
@@ -2840,8 +2840,8 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
           <div class="field">
             <label>Meeting type</label>
             <select id="meetType">
-              <option>Incall (at provider's location)</option>
-              <option>Outcall (provider comes to you)</option>
+              <option>Incall (at advertiser's location)</option>
+              <option>Outcall (advertiser comes to you)</option>
             </select>
           </div>
           <div class="field" id="locationField">
@@ -2875,7 +2875,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
               <option>Crypto (BTC / ETH / USDT)</option>
             </select>
           </div>
-          <div style="font-size:11px;color:var(--t3);line-height:1.7;margin-bottom:1rem">Your booking request is sent to the provider for approval. No payment is charged until they confirm. All transactions are encrypted and discreet.</div>
+          <div style="font-size:11px;color:var(--t3);line-height:1.7;margin-bottom:1rem">Your booking request is sent to the advertiser for approval. No payment is charged until they confirm. All transactions are encrypted and discreet.</div>
           <div style="display:flex;gap:8px">
             <button class="modal-btn secondary" id="bookBack3">Back</button>
             <button class="modal-btn" id="bookSubmit">Send booking request</button>
@@ -2883,7 +2883,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
           <div class="modal-success" id="bookSuccess">
             <i class="ti ti-calendar-check"></i>
             <h3>Booking request sent!</h3>
-            <p>Your request has been sent to the provider. You'll receive a confirmation message once they accept — usually within 30 minutes.</p>
+            <p>Your request has been sent to the advertiser. You'll receive a confirmation message once they accept — usually within 30 minutes.</p>
           </div>
         </div>
 
@@ -3034,7 +3034,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
             <div class="stack-card"><div class="stack-card-label">Required</div><div class="stack-card-name">2257 record-keeping</div><div class="stack-card-note">US / international: keep producer records if hosting US-origin content</div></div>
             <div class="stack-card"><div class="stack-card-label">Required</div><div class="stack-card-name">Payment processor</div><div class="stack-card-note">Adult-friendly processor: Stripe (with approval), CCBill, Segpay</div></div>
             <div class="stack-card"><div class="stack-card-label">Advised</div><div class="stack-card-name">Legal entity</div><div class="stack-card-note">BV (Belgium) or BV/VOF. Register with CBE. VAT registration required.</div></div>
-            <div class="stack-card"><div class="stack-card-label">Advised</div><div class="stack-card-name">Terms of Service</div><div class="stack-card-note">Explicit consent, provider liability limits, DMCA takedown policy</div></div>
+            <div class="stack-card"><div class="stack-card-label">Advised</div><div class="stack-card-name">Terms of Service</div><div class="stack-card-note">Explicit consent, advertiser liability limits, DMCA takedown policy</div></div>
           </div>
         </div>
 
@@ -3263,7 +3263,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
   </nav>
 
 </div><!-- #app -->` }} />
-      {/* Live-now ticker — portal into #liveBannerMount, renders only when a provider is broadcasting */}
+      {/* Live-now ticker — portal into #liveBannerMount, renders only when a advertiser is broadcasting */}
       <LiveBanner />
       {/* Homepage Premium banner — portal into #homepagePremiumMount, renders only when sold */}
       <PremiumBanner placement="homepage" portalTo="homepagePremiumMount" />
