@@ -71,6 +71,7 @@ interface FormState {
   age:         string
   meet_type:   string
   images:      string[]
+  videos:      string[]
   tags:        string[]
   services:    string[]
   ethnicity:   string
@@ -193,6 +194,7 @@ export default function CreateListingPage() {
     age:         '',
     meet_type:   'both',
     images:      [],
+    videos:      [],
     tags:        [],
     services:    [],
     ethnicity:   '',
@@ -209,7 +211,41 @@ export default function CreateListingPage() {
   const [isDragging, setIsDragging]           = useState(false)
   const [draftBanner, setDraftBanner]         = useState(false)
   const [draftSaved, setDraftSaved]           = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const fileInputRef    = useRef<HTMLInputElement>(null)
+  const videoInputRef   = useRef<HTMLInputElement>(null)
+  const [uploadingVideos, setUploadingVideos] = useState<{ id: string; name: string; loading: boolean; error?: string }[]>([])
+  const [isVideoDragging, setIsVideoDragging] = useState(false)
+
+  const uploadVideo = useCallback(async (file: File) => {
+    if (form.videos.length + uploadingVideos.filter(v => v.loading).length >= 3) return
+    const allowed = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo']
+    if (!allowed.includes(file.type)) { alert(`${file.name} is not a supported format (MP4, WebM, MOV).`); return }
+    if (file.size > 100 * 1024 * 1024) { alert(`${file.name} exceeds the 100 MB limit.`); return }
+    const uid = Math.random().toString(36).slice(2)
+    setUploadingVideos(prev => [...prev, { id: uid, name: file.name, loading: true }])
+    try {
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('Not authenticated')
+      const ext = file.name.split('.').pop()?.toLowerCase() ?? 'mp4'
+      const path = `listings/${session.user.id}/videos/${crypto.randomUUID()}.${ext}`
+      const { error } = await supabase.storage.from('listings').upload(path, file, { contentType: file.type, upsert: false })
+      if (error) throw error
+      const { data: { publicUrl } } = supabase.storage.from('listings').getPublicUrl(path)
+      setForm(f => ({ ...f, videos: [...f.videos, publicUrl] }))
+      setUploadingVideos(prev => prev.filter(v => v.id !== uid))
+    } catch (err: any) {
+      setUploadingVideos(prev => prev.map(v => v.id === uid ? { ...v, loading: false, error: err.message } : v))
+    }
+  }, [form.videos, uploadingVideos])
+
+  const handleVideoFiles = useCallback((files: FileList | null) => {
+    if (!files) return
+    const remaining = 3 - form.videos.length - uploadingVideos.filter(v => v.loading).length
+    Array.from(files).slice(0, remaining).forEach(uploadVideo)
+  }, [form.videos.length, uploadingVideos, uploadVideo])
+
+  const removeVideo = (url: string) => setForm(f => ({ ...f, videos: f.videos.filter(v => v !== url) }))
 
   useEffect(() => {
     async function load() {
@@ -457,6 +493,7 @@ export default function CreateListingPage() {
       meet_type:       form.meet_type,
       website:         (() => { try { const u = new URL(form.website.trim()); return ['https:', 'http:'].includes(u.protocol) ? u.href : null } catch { return null } })(),
       images:          form.images.length > 0 ? form.images : null,
+      videos:          form.videos.length > 0 ? form.videos : null,
       tags:            finalTags.length > 0 ? finalTags : null,
       services:        POSSIBILITY_CATEGORIES.has(form.category) && form.services.length > 0 ? form.services : null,
       contact_phone:   form.contact_phone.trim() || null,
@@ -1671,6 +1708,65 @@ export default function CreateListingPage() {
               }}>
                 {form.images.length} / 5 photos added
               </p>
+
+              {/* ── Video upload ── */}
+              <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '0.5px solid rgba(255,255,255,0.07)' }}>
+                <h3 style={{ fontFamily: 'var(--sans)', fontSize: 14, fontWeight: 600, color: 'var(--t2)', marginBottom: '0.75rem', letterSpacing: '0.04em' }}>
+                  Videos <span style={{ fontWeight: 300, fontSize: 12, color: 'var(--t3)', marginLeft: 6 }}>optional · up to 3 · MP4 / WebM / MOV · 100 MB each</span>
+                </h3>
+                <input
+                  ref={videoInputRef}
+                  type="file"
+                  accept="video/mp4,video/webm,video/quicktime,video/x-msvideo"
+                  multiple
+                  style={{ display: 'none' }}
+                  onChange={e => handleVideoFiles(e.target.files)}
+                />
+                {/* Video upload zone */}
+                <div
+                  className={`cl-upload-zone${isVideoDragging ? ' dragging' : ''}`}
+                  style={{ minHeight: 100, opacity: form.videos.length + uploadingVideos.filter(v => v.loading).length >= 3 ? 0.4 : 1 }}
+                  onClick={() => {
+                    if (form.videos.length + uploadingVideos.filter(v => v.loading).length < 3)
+                      videoInputRef.current?.click()
+                  }}
+                  onDragOver={e => { e.preventDefault(); setIsVideoDragging(true) }}
+                  onDragLeave={() => setIsVideoDragging(false)}
+                  onDrop={e => { e.preventDefault(); setIsVideoDragging(false); handleVideoFiles(e.dataTransfer.files) }}
+                >
+                  <i className="ti ti-video-plus" style={{ fontSize: 36, color: 'var(--t3)', display: 'block', marginBottom: '0.5rem' }} />
+                  <span style={{ fontSize: 13, color: 'var(--t2)', fontWeight: 500 }}>
+                    {form.videos.length + uploadingVideos.filter(v => v.loading).length >= 3 ? 'Maximum reached' : 'Add Videos'}
+                  </span>
+                </div>
+
+                {/* Video list */}
+                {(form.videos.length > 0 || uploadingVideos.length > 0) && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
+                    {form.videos.map((url, i) => (
+                      <div key={url} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.04)', border: '0.5px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: '10px 14px' }}>
+                        <i className="ti ti-video" style={{ color: 'var(--gold)', fontSize: 16, flexShrink: 0 }} />
+                        <span style={{ flex: 1, fontSize: 12, color: 'var(--t2)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Video {i + 1}</span>
+                        <button type="button" onClick={() => removeVideo(url)} style={{ background: 'none', border: 'none', color: 'rgba(255,100,100,0.6)', fontSize: 18, cursor: 'pointer', lineHeight: 1, padding: '0 4px' }}>×</button>
+                      </div>
+                    ))}
+                    {uploadingVideos.map(v => (
+                      <div key={v.id} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.04)', border: '0.5px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: '10px 14px' }}>
+                        <i className="ti ti-video" style={{ color: 'var(--t3)', fontSize: 16, flexShrink: 0 }} />
+                        <span style={{ flex: 1, fontSize: 12, color: 'var(--t3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v.name}</span>
+                        {v.loading ? (
+                          <div style={{ width: 16, height: 16, border: '2px solid rgba(197,160,90,0.25)', borderTop: '2px solid #c5a05a', borderRadius: '50%', animation: 'spin 0.8s linear infinite', flexShrink: 0 }} />
+                        ) : (
+                          <button type="button" onClick={() => setUploadingVideos(prev => prev.filter(u => u.id !== v.id))} style={{ background: 'none', border: 'none', color: 'rgba(255,100,100,0.6)', fontSize: 18, cursor: 'pointer', lineHeight: 1, padding: '0 4px' }}>×</button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <p style={{ fontSize: 11, color: 'var(--t3)', fontWeight: 300, marginTop: 8, textAlign: 'right', letterSpacing: '0.04em' }}>
+                  {form.videos.length} / 3 videos added
+                </p>
+              </div>
             </div>
           )}
 

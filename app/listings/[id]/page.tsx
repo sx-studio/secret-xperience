@@ -60,6 +60,7 @@ interface Listing {
   currency:    string
   meet_type:   string | null
   images:      string[] | null
+  videos:      string[] | null
   verified:    boolean
   premium:     boolean
   trending:    boolean
@@ -738,6 +739,33 @@ export default function ListingDetailPage() {
                       ))}
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* Video gallery */}
+              {listing.videos && listing.videos.length > 0 && (
+                <div style={{
+                  background: 'rgba(255,255,255,0.02)',
+                  border: '0.5px solid rgba(255,255,255,0.07)',
+                  borderRadius: '18px',
+                  padding: '1.5rem',
+                  marginBottom: '1.5rem',
+                }}>
+                  <div style={{ fontSize: 11, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--gold, #c5a05a)', fontWeight: 600, marginBottom: '1rem', opacity: 0.8 }}>
+                    Videos
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    {listing.videos.map((url, i) => (
+                      <video
+                        key={url}
+                        src={url}
+                        controls
+                        preload="metadata"
+                        style={{ width: '100%', borderRadius: 10, background: '#000', maxHeight: 360, outline: 'none' }}
+                        aria-label={`Video ${i + 1}`}
+                      />
+                    ))}
+                  </div>
                 </div>
               )}
 

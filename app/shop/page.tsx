@@ -135,6 +135,50 @@ export default async function ShopPage() {
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem 6rem' }}>
 
           <PremiumBanner placement="section" category="shop" />
+
+          {/* Dorcel Collection affiliate banner */}
+          <a
+            href="https://www.dorcelclub.com/en?aff=8103"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr auto',
+              alignItems: 'center',
+              gap: '1.5rem',
+              background: 'linear-gradient(120deg, rgba(20,8,8,0.95) 0%, rgba(80,10,20,0.7) 100%)',
+              border: '0.5px solid rgba(180,20,40,0.4)',
+              borderRadius: 16,
+              padding: '1.4rem 1.8rem',
+              marginBottom: '2rem',
+              textDecoration: 'none',
+              boxShadow: '0 8px 30px rgba(0,0,0,0.4)',
+              transition: 'border-color .18s, box-shadow .18s',
+            }}
+            onMouseOver={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(180,20,40,0.75)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 40px rgba(0,0,0,0.55)' }}
+            onMouseOut={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(180,20,40,0.4)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 30px rgba(0,0,0,0.4)' }}
+          >
+            <div>
+              <div style={{ fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 700, color: '#e02030', marginBottom: 8 }}>
+                ✦ Official Partner · Premium Content
+              </div>
+              <div style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(18px,3vw,26px)', fontWeight: 400, color: '#ece8e1', lineHeight: 1.15, marginBottom: 6 }}>
+                Dorcel Club
+              </div>
+              <div style={{ fontSize: 13, color: 'rgba(236,232,225,0.5)', lineHeight: 1.5 }}>
+                Europe&apos;s most prestigious adult studio — exclusive HD films, series &amp; live shows.
+              </div>
+            </div>
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap',
+              fontSize: 13, fontWeight: 700, color: '#fff',
+              background: 'linear-gradient(90deg, #c0001a, #8b000f)',
+              borderRadius: 10, padding: '9px 18px', flexShrink: 0,
+            }}>
+              Visit store <i className="ti ti-arrow-right" />
+            </span>
+          </a>
+
           <ProductGrid products={allProducts} />
 
           {/* VENDOR CTA */}
