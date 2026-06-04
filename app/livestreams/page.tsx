@@ -5,6 +5,7 @@ import { createClient } from '../lib/supabase'
 
 export default function LiveStreamsPage() {
   const [streams, setStreams] = useState<any[]>([])
+  const [replays, setReplays] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [canHost, setCanHost] = useState(false)
 
@@ -17,6 +18,13 @@ export default function LiveStreamsPage() {
         .eq('status', 'live').order('viewer_count', { ascending: false })
       setStreams(data || [])
       setLoading(false)
+      // Past shows that have a saved recording.
+      const { data: past } = await supabase
+        .from('live_streams')
+        .select('id, title, peak_viewers, ended_at, recording_url, profiles:provider_id(full_name, username, avatar_url)')
+        .eq('status', 'ended').not('recording_url', 'is', null)
+        .order('ended_at', { ascending: false }).limit(12)
+      setReplays(past || [])
     }
     load()
     ;(async () => {
@@ -83,6 +91,31 @@ export default function LiveStreamsPage() {
           </div>
         )}
 
+        {replays.length > 0 && (
+          <div className="ls-replays">
+            <div className="ls-rep-head"><i className="ti ti-player-play" /> Recent replays</div>
+            <div className="ls-grid">
+              {replays.map(s => {
+                const host = s.profiles?.full_name || s.profiles?.username || 'Host'
+                return (
+                  <a key={s.id} href={`/livestreams/${s.id}`} className="ls-card">
+                    <div className="ls-card-media">
+                      {s.profiles?.avatar_url
+                        ? <img src={s.profiles.avatar_url} alt={host} />
+                        : <div className="ls-card-ph"><i className="ti ti-player-play" /></div>}
+                      <div className="ls-card-replay"><i className="ti ti-player-play" /> REPLAY</div>
+                    </div>
+                    <div className="ls-card-info">
+                      <div className="ls-card-title">{s.title}</div>
+                      <div className="ls-card-host">{host}{s.peak_viewers ? ` · ${s.peak_viewers} watched` : ''}</div>
+                    </div>
+                  </a>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
         <div className="ls-disc">
           All performers are verified SecretXperience providers, consenting adults aged 18+. By watching you confirm you are 18 or older and agree to our <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.
         </div>
@@ -114,6 +147,10 @@ const styles = `
 .ls-card-live{position:absolute;top:9px;left:9px;display:inline-flex;align-items:center;gap:4px;background:rgba(239,68,68,.9);color:#fff;padding:3px 8px;border-radius:20px;font:700 9px 'Poppins';letter-spacing:.08em}
 .ls-card-live span{width:5px;height:5px;border-radius:50%;background:#fff;animation:lsdot 1.2s infinite}
 .ls-card-viewers{position:absolute;top:9px;right:9px;display:inline-flex;align-items:center;gap:4px;background:rgba(0,0,0,.6);color:#fff;padding:3px 8px;border-radius:20px;font:600 10px 'Poppins';backdrop-filter:blur(4px)}
+.ls-card-replay{position:absolute;top:9px;left:9px;display:inline-flex;align-items:center;gap:4px;background:rgba(0,0,0,.65);color:#c5a05a;padding:3px 8px;border-radius:20px;font:700 9px 'Poppins';letter-spacing:.06em;backdrop-filter:blur(4px)}
+.ls-replays{max-width:1280px;margin:0 auto;padding:8px 24px 40px}
+.ls-rep-head{display:flex;align-items:center;gap:8px;font:600 13px 'Poppins';color:#c5a05a;margin-bottom:16px;text-transform:uppercase;letter-spacing:.08em}
+.ls-replays .ls-grid{padding:0}
 .ls-card-info{padding:11px 13px}
 .ls-card-title{font:600 13px 'Poppins';white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ls-card-host{font:400 11px 'Poppins';color:#8c8880;margin-top:3px}

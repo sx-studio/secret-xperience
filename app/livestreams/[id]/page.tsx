@@ -14,6 +14,7 @@ export default function WatchPage({ params }: { params: { id: string } }) {
   const [chatInput, setChatInput] = useState('')
   const [me, setMe] = useState<{ id: string; name: string } | null>(null)
   const [ageOk, setAgeOk] = useState(false)
+  const [muted, setMuted] = useState(true)
 
   const videoRef = useRef<HTMLVideoElement>(null)
   const roomRef  = useRef<any>(null)
@@ -65,7 +66,11 @@ export default function WatchPage({ params }: { params: { id: string } }) {
         roomRef.current = room
 
         room.on(RoomEvent.TrackSubscribed, (track: any) => {
-          if (track.kind === Track.Kind.Video && videoRef.current) track.attach(videoRef.current)
+          if (track.kind === Track.Kind.Video && videoRef.current) {
+            track.attach(videoRef.current)
+            videoRef.current.muted = true   // guarantee autoplay; viewer unmutes via button
+            videoRef.current.play().catch(() => {})
+          }
           if (track.kind === Track.Kind.Audio) track.attach()
         })
         room.on(RoomEvent.ParticipantConnected, () => setViewers(room.numParticipants))
@@ -117,6 +122,12 @@ export default function WatchPage({ params }: { params: { id: string } }) {
 
   function confirmAge() { try { localStorage.setItem('sx_age_ok', '1') } catch {}; setAgeOk(true) }
 
+  async function enableSound() {
+    try { await roomRef.current?.startAudio() } catch {}
+    if (videoRef.current) videoRef.current.muted = false
+    setMuted(false)
+  }
+
   const host = stream?.profiles?.full_name || stream?.profiles?.username || 'SecretXperience host'
 
   // ── Age gate ──
@@ -156,11 +167,16 @@ export default function WatchPage({ params }: { params: { id: string } }) {
       <div className="wp">
         <div className="wp-main">
           <div className="wp-video-wrap">
-            <video ref={videoRef} className="wp-video" autoPlay playsInline />
+            <video ref={videoRef} className="wp-video" autoPlay playsInline muted />
             <div className="wp-overlay">
               <div className="wp-live"><span className="wp-dot" /> LIVE</div>
               <div className="wp-viewers"><i className="ti ti-eye" /> {viewers}</div>
             </div>
+            {muted && phase === 'live' && (
+              <button className="wp-unmute" onClick={enableSound}>
+                <i className="ti ti-volume-off" /> Tap for sound
+              </button>
+            )}
           </div>
           <div className="wp-meta">
             <div>
@@ -219,6 +235,9 @@ const styles = `
 .wp-dot{width:7px;height:7px;border-radius:50%;background:#fff;animation:wpdot 1.3s infinite}
 @keyframes wpdot{0%,100%{opacity:1}50%{opacity:.25}}
 .wp-viewers{display:inline-flex;align-items:center;gap:5px;background:rgba(0,0,0,.55);color:#fff;padding:5px 10px;border-radius:20px;font:600 12px 'Poppins';backdrop-filter:blur(6px)}
+.wp-unmute{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:inline-flex;align-items:center;gap:7px;background:rgba(197,160,90,.95);color:#0a0a0a;border:none;padding:10px 18px;border-radius:30px;font:700 13px 'Poppins';cursor:pointer;box-shadow:0 6px 22px rgba(0,0,0,.4);animation:wppulse 1.8s ease-in-out infinite}
+@keyframes wppulse{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.05)}}
+.wp-unmute:hover{background:#e8c97a}
 .wp-meta{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:14px;flex-wrap:wrap}
 .wp-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:400;line-height:1.1}
 .wp-host{color:#8c8880;font-size:13px;display:flex;align-items:center;gap:6px;margin-top:4px}

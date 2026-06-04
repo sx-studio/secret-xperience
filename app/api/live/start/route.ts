@@ -78,7 +78,7 @@ export async function POST(req: Request) {
       const egress = new EgressClient(LIVEKIT_URL, LIVEKIT_KEY, LIVEKIT_SECRET)
       const res = await egress.startRoomCompositeEgress(roomName, {
         fileType: EncodedFileType.MP4,
-        filepath: `recordings/${stream.id}.mp4`,
+        filepath: `${stream.id}.mp4`,
         s3: {
           accessKey: process.env.LIVE_REC_S3_ACCESS_KEY!,
           secret:    process.env.LIVE_REC_S3_SECRET!,

@@ -23,6 +23,7 @@ export default function GoLivePage() {
   const roomRef    = useRef<any>(null)
   const streamId   = useRef<string | null>(null)
   const previewStream = useRef<MediaStream | null>(null)
+  const keepStream = useRef(false)   // true once going live, so the setup cleanup won't kill the camera
   const chatEndRef = useRef<HTMLDivElement>(null)
 
   // ── Auth + verification gate ──────────────────────────────
@@ -56,7 +57,8 @@ export default function GoLivePage() {
       .catch(() => setError('Camera/microphone access was blocked. Allow access in your browser to go live.'))
     return () => {
       cancelled = true
-      previewStream.current?.getTracks().forEach(t => t.stop())
+      // Don't tear down the camera when we're transitioning into the live room.
+      if (!keepStream.current) previewStream.current?.getTracks().forEach(t => t.stop())
     }
   }, [gate, phase])
 
@@ -66,7 +68,9 @@ export default function GoLivePage() {
 
   // ── Go live ───────────────────────────────────────────────
   async function goLive() {
-    setError(''); setPhase('connecting')
+    setError('')
+    keepStream.current = true   // protect the camera tracks through the phase change
+    setPhase('connecting')
     try {
       const res = await fetch('/api/live/start', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -88,14 +92,17 @@ export default function GoLivePage() {
       room.on(RoomEvent.ParticipantDisconnected, () => setViewers(room.numParticipants))
 
       await room.connect(data.url, data.token)
-      // Publish the existing preview tracks so there's no second permission prompt.
+      // Publish the existing preview tracks (no second permission prompt) as long
+      // as they're still live; otherwise let LiveKit acquire fresh ones.
       const ms = previewStream.current
-      if (ms) {
-        for (const track of ms.getTracks()) {
+      const liveTracks = ms ? ms.getTracks().filter(t => t.readyState === 'live') : []
+      if (liveTracks.length > 0) {
+        for (const track of liveTracks) {
           await room.localParticipant.publishTrack(track)
         }
       } else {
-        await room.localParticipant.enableCameraAndMicrophone()
+        await room.localParticipant.setCameraEnabled(true)
+        await room.localParticipant.setMicrophoneEnabled(true)
         const camPub = room.localParticipant.getTrackPublication('camera' as any)
         const mt = camPub?.track?.mediaStreamTrack
         if (mt && videoRef.current) videoRef.current.srcObject = new MediaStream([mt])

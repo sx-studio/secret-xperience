@@ -42,9 +42,9 @@ export async function POST(req: Request) {
     try {
       const egress = new EgressClient(LIVEKIT_URL, LIVEKIT_KEY, LIVEKIT_SECRET)
       await egress.stopEgress(stream.egress_id)
-      // Public URL where the egress wrote the MP4 (path-style S3 / Supabase Storage).
+      // Public URL where the egress wrote the MP4 (Supabase Storage public bucket).
       if (process.env.LIVE_REC_PUBLIC_BASE) {
-        recordingUrl = `${process.env.LIVE_REC_PUBLIC_BASE.replace(/\/$/, '')}/recordings/${stream.id}.mp4`
+        recordingUrl = `${process.env.LIVE_REC_PUBLIC_BASE.replace(/\/$/, '')}/${stream.id}.mp4`
       }
     } catch (e) {
       console.warn('[live] egress stop failed:', (e as Error).message)
