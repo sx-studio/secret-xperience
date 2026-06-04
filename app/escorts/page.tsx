@@ -15,6 +15,7 @@ const supabase = createClient(
 /* ── Types ──────────────────────────────────────────────── */
 type Listing = {
   id: string
+  profile_id: string
   title: string
   description: string | null
   category: string
@@ -161,7 +162,7 @@ function SpotlightStrip({ items, discreet }: { items: Listing[]; discreet: boole
 }
 
 /* ── Card component ─────────────────────────────────────── */
-function EscortCard({ l, discreet, isPremier }: { l: Listing; discreet: boolean; isPremier?: boolean }) {
+function EscortCard({ l, discreet, isPremier, isLive }: { l: Listing; discreet: boolean; isPremier?: boolean; isLive?: boolean }) {
   const [imgIdx, setImgIdx] = useState(0)
   const imgs = l.images || []
   const img = imgs[imgIdx] || imgs[0] || null
@@ -228,6 +229,12 @@ function EscortCard({ l, discreet, isPremier }: { l: Listing; discreet: boolean;
             {l.premium && !isPremier && (
               <span style={{ background: 'var(--grad-gold)', color: '#000', fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', letterSpacing: '0.06em' }}>VIP</span>
             )}
+            {isLive && (
+              <a href="/livestreams" onClick={e => e.stopPropagation()} style={{ background: 'rgba(239,68,68,0.2)', border: '0.5px solid rgba(239,68,68,0.55)', color: '#ef4444', fontSize: '10px', fontWeight: 800, padding: '3px 8px', borderRadius: '6px', letterSpacing: '0.1em', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', gap: 4, textDecoration: 'none' }}>
+                <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#ef4444', display: 'inline-block', boxShadow: '0 0 6px #ef4444', animation: 'livepulse 1.2s infinite' }} />
+                LIVE NOW
+              </a>
+            )}
             {availNow && (
               <span style={{ background: 'rgba(62,207,142,0.18)', border: '0.5px solid rgba(62,207,142,0.45)', color: '#3ecf8e', fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', letterSpacing: '0.06em', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', gap: 4 }}>
                 <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#3ecf8e', display: 'inline-block', boxShadow: '0 0 4px #3ecf8e' }} />
@@ -263,6 +270,7 @@ function EscortCard({ l, discreet, isPremier }: { l: Listing; discreet: boolean;
 /* ── Main page ──────────────────────────────────────────── */
 export default function EscortsPage() {
   const [listings, setListings]         = useState<Listing[]>([])
+  const [liveSet, setLiveSet]           = useState<Set<string>>(new Set())
   const [loading, setLoading]           = useState(true)
   const [showFilters, setShowFilters]   = useState(false)
   const [discreetMode, setDiscreetMode] = useState(() => {
@@ -289,7 +297,7 @@ export default function EscortsPage() {
     try {
     let q = supabase
       .from('listings')
-      .select('id,title,description,category,subcategory,city,country,price_from,price_to,currency,meet_type,images,image_focus,verified,premium,tags,created_at,featured_until,age')
+      .select('id,profile_id,title,description,category,subcategory,city,country,price_from,price_to,currency,meet_type,images,image_focus,verified,premium,tags,created_at,featured_until,age')
       .eq('active', true)
       .in('category', ['escorts', 'companionship', 'domination', 'experiences', 'massage'])
 
@@ -357,6 +365,18 @@ export default function EscortsPage() {
 
   useEffect(() => { fetchListings() }, [fetchListings])
 
+  useEffect(() => {
+    async function fetchLive() {
+      const { data } = await supabase.from('live_streams').select('provider_id').eq('status', 'live')
+      setLiveSet(new Set((data || []).map((r: any) => r.provider_id)))
+    }
+    fetchLive()
+    const ch = supabase.channel('live_badge_escorts')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'live_streams' }, fetchLive)
+      .subscribe()
+    return () => { supabase.removeChannel(ch) }
+  }, [])
+
   function toggleService(s: string) {
     setSelectedServices(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s])
   }
@@ -413,6 +433,7 @@ export default function EscortsPage() {
         .type-btn { padding: 8px 16px; border-radius: 999px; border: 0.5px solid var(--b); background: transparent; color: var(--t2); font-size: 13px; cursor: pointer; transition: all 0.15s; white-space: nowrap; font-family: var(--sans); display: inline-flex; align-items: center; gap: 5px; }
         .type-btn.active { background: var(--gbg); color: var(--gold); border-color: var(--gbrd); font-weight: 600; }
         .filter-panel { display: none; }
+        @keyframes livepulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(1.4)} }
         .filter-panel.open { display: block; }
         @media (min-width: 900px) { .filter-panel { display: block !important; } .mobile-filter-toggle { display: none !important; } }
         .listing-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
@@ -690,7 +711,7 @@ export default function EscortsPage() {
                 <>
                   {firstBatch.length > 0 && (
                     <div className="listing-grid">
-                      {firstBatch.map(l => <EscortCard key={l.id} l={l} discreet={discreetMode} />)}
+                      {firstBatch.map(l => <EscortCard key={l.id} l={l} discreet={discreetMode} isLive={liveSet.has(l.profile_id)} />)}
                     </div>
                   )}
                   {premierList.length > 0 && (
@@ -701,13 +722,13 @@ export default function EscortsPage() {
                         <Link href="/advertise" style={{ fontSize: '11px', color: 'var(--gold)', textDecoration: 'none', opacity: 0.75, whiteSpace: 'nowrap' }}>Get placement →</Link>
                       </div>
                       <div className="premier-grid">
-                        {premierList.map(l => <EscortCard key={l.id} l={l} discreet={discreetMode} isPremier />)}
+                        {premierList.map(l => <EscortCard key={l.id} l={l} discreet={discreetMode} isPremier isLive={liveSet.has(l.profile_id)} />)}
                       </div>
                     </div>
                   )}
                   {restBatch.length > 0 && (
                     <div className="listing-grid" style={{ marginTop: '1.5rem' }}>
-                      {restBatch.map(l => <EscortCard key={l.id} l={l} discreet={discreetMode} />)}
+                      {restBatch.map(l => <EscortCard key={l.id} l={l} discreet={discreetMode} isLive={liveSet.has(l.profile_id)} />)}
                     </div>
                   )}
                 </>

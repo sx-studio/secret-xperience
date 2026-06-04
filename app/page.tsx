@@ -1448,6 +1448,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
     let currentPage = 0
     const PAGE_SIZE = 12
     let totalListings: any[] = []
+    let liveProviderIds = new Set<string>()
 
     const getCategoryIcon = (cat: string) => {
       const icons: any = {
@@ -1476,6 +1477,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
       container.innerHTML = listings.map((l: any) => {
         const badges: any[] = []
         const isFeatured = l.featured_until && new Date(l.featured_until) > new Date()
+        const isLive = liveProviderIds.has(l.profile_id || '')
         if (isFeatured) badges.unshift({cls:'bf',txt:'✦ Featured'})
         if (l.verified) badges.push({cls:'bv',txt:'✓ Verified'})
         if (l.premium) badges.push({cls:'bp',txt:'Premium'})
@@ -1514,7 +1516,8 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
             <span id="sc-${l.id}" class="slide-ctr">1/${l.images.length}</span>
             ` : ''}
             <div data-fav-lid="${l.id}" onclick="event.stopPropagation();(window.toggleFavorite||function(){})(\'${l.id}\',this)" style="position:absolute;top:0.5rem;right:0.5rem;width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,0.35);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:3;cursor:pointer;transition:background .2s;"><i class="ti ti-heart" style="color:#fff;font-size:14px;"></i></div>
-            <div class="card-badges" style="position:absolute;top:0.5rem;left:0.5rem;z-index:3;display:flex;gap:3px;flex-wrap:wrap;">
+            <div class="card-badges" style="position:absolute;top:0.5rem;left:0.5rem;z-index:3;display:flex;flex-direction:column;gap:4px;flex-wrap:wrap;">
+              ${isLive ? '<a href="/livestreams" onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:4px;background:rgba(239,68,68,0.2);border:0.5px solid rgba(239,68,68,0.55);color:#ef4444;padding:3px 8px;border-radius:6px;font:800 9px \'Poppins\',sans-serif;letter-spacing:0.1em;backdrop-filter:blur(6px);text-decoration:none"><span style="width:5px;height:5px;border-radius:50%;background:#ef4444;box-shadow:0 0 6px #ef4444;display:inline-block;animation:livepulse 1.2s infinite"></span>LIVE NOW</a>' : ''}
               ${isFeatured ? '<span class="badge bf">✦</span>' : ''}
               ${l.verified ? '<span class="badge bv">✓</span>' : ''}
             </div>
@@ -1560,7 +1563,11 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
       else if (sort === 'price_asc') query = query.order('price_from', { ascending: true, nullsFirst: false })
       else if (sort === 'price_desc') query = query.order('price_from', { ascending: false, nullsFirst: false })
       else query = query.order('created_at', { ascending: false })
-      const { data } = await query
+      const [{ data }, { data: liveData }] = await Promise.all([
+        query,
+        (supabase as any).from('live_streams').select('provider_id').eq('status', 'live'),
+      ])
+      liveProviderIds = new Set((liveData || []).map((r: any) => r.provider_id))
       ;(window as any).__sxCacheListings?.(data || [])
       totalListings = data || []
       currentPage = 0
@@ -1944,6 +1951,15 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         history.replaceState({}, '', window.location.pathname)
       }
     }
+
+    // Refresh live badge when streams start/stop
+    ;(supabase as any).channel('hp_live_badge')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'live_streams' }, async () => {
+        const { data: ld } = await (supabase as any).from('live_streams').select('provider_id').eq('status', 'live')
+        liveProviderIds = new Set((ld || []).map((r: any) => r.provider_id))
+        if (totalListings.length > 0) renderCards(totalListings.slice(0, Math.max(PAGE_SIZE, currentPage * PAGE_SIZE)))
+      })
+      .subscribe()
 
     // Initial load
     fetchListings(activeFilters).then(async () => {
