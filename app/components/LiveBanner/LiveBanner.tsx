@@ -72,10 +72,10 @@ export default function LiveBanner() {
           letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
         .lvbar-tag .d{width:8px;height:8px;border-radius:50%;background:#fff;animation:lvblink 1.2s infinite}
         @keyframes lvblink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.7)}}
-        .lvbar-track{flex:1;overflow:hidden;position:relative;display:flex;align-items:center;-webkit-mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent)}
-        .lvbar-move{display:inline-flex;white-space:nowrap;will-change:transform;animation:lvscroll 26s linear infinite;padding-left:100%}
+        .lvbar-track{flex:1;min-width:0;overflow:hidden;position:relative;display:flex;align-items:center}
+        .lvbar-move{display:flex;flex-shrink:0;white-space:nowrap;animation:lvscroll 26s linear infinite}
         .lvbar:hover .lvbar-move{animation-play-state:paused}
-        @keyframes lvscroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+        @keyframes lvscroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
         .lvbar-item{color:#f3e4d6;font:500 13.5px 'Poppins',sans-serif;padding:11px 0;margin-right:46px;display:inline-flex;align-items:center;gap:9px}
         .lvbar-item b{color:#fff;font-weight:600}
         .lvbar-item i{color:#ef4444}
@@ -94,9 +94,11 @@ export default function LiveBanner() {
       <a href={href} className="lvbar" aria-label="Watch live now">
         <div className="lvbar-tag"><span className="d" /><span className="txt">Live Now</span></div>
         <div className="lvbar-track">
+          {/* Two identical copies side-by-side. Animating -50% of total width = one copy,
+              so the loop is seamless. No padding-left needed. */}
           <div className="lvbar-move">
             {[0, 1].map(dup => (
-              <span key={dup} style={{ display: 'inline-flex' }} aria-hidden={dup === 1}>
+              <span key={dup} aria-hidden={dup === 1} style={{ display: 'inline-flex', flexShrink: 0 }}>
                 <span className="lvbar-item"><i className="ti ti-broadcast" /> <b>{phrase}</b></span>
                 <span className="lvbar-item"><i className="ti ti-eye" /> {totalViewers} watching</span>
                 <span className="lvbar-item"><i className="ti ti-flame" /> Tap to join the show</span>

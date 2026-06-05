@@ -2189,11 +2189,17 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
     <style>
     @media(max-width:960px){#editorialHero>div{grid-template-columns:1fr 1fr!important}}
     @media(max-width:640px){
+      #editorialHero{padding:2.5rem 1rem!important}
       #editorialHero>div{grid-template-columns:1fr!important;gap:1rem}
       #editorialHero .hero-promo-col{display:none!important}
-      #editorialHero h1{font-size:clamp(32px,9vw,56px)!important}
+      #editorialHero h1{font-size:clamp(28px,8vw,48px)!important}
       #editorialHero .hero-stats{grid-template-columns:repeat(2,1fr)!important;gap:.75rem!important}
       #editorialHero .hero-hero-col{display:none!important}
+      #editorialHero input[type=text]{font-size:16px!important}
+    }
+    @media(max-width:400px){
+      #editorialHero{padding:2rem .75rem!important}
+      #editorialHero h1{font-size:clamp(26px,7.5vw,36px)!important}
     }
     </style>
   </section>

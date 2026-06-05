@@ -220,7 +220,7 @@ export default function SliderAds() {
       {/* ── Stage ─────────────────────────────────── */}
       <div
         ref={stageRef}
-        style={{ position:'relative', height:STAGE_H, overflow:'hidden', borderRadius:18, background:'#080610' }}
+        style={{ position:'relative', height:STAGE_H, overflow:'hidden', borderRadius:18, background:'#080610', isolation:'isolate', contain:'layout paint' }}
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
         onTouchStart={onTouchStart}
