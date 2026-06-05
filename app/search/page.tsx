@@ -363,7 +363,7 @@ function ListingCard({ l, isFeatured }: { l: any; isFeatured: boolean }) {
     <Link href={`/listings/${l.id}`} className="s-card">
       <div className="s-card-hero" style={{ background: heroBg }}>
         {l.images?.[0] && (
-          <img src={l.images[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: focusPosition(l.image_focus, l.images[0]), position: 'absolute', inset: 0 }} />
+          <img src={l.images[0]} alt="" loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: focusPosition(l.image_focus, l.images[0]), position: 'absolute', inset: 0 }} />
         )}
         <div style={{ position: 'absolute', top: '0.6rem', left: '0.6rem', display: 'flex', gap: '4px', flexWrap: 'wrap', zIndex: 2 }}>
           {isFeatured && !l.premium && <span className="s-badge s-badge-feat">✦ Featured</span>}

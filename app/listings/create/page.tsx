@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '../../lib/supabase'
 import { POSSIBILITY_GROUPS, POSSIBILITY_CATEGORIES } from '../../lib/possibilities'
 import { ETHNICITIES, HAIR_COLOURS, BUILDS } from '../../lib/attributes'
+import { detectFocalPoint, imageFromFile } from '../../lib/imageFocus'
 
 /* ─── Data ─────────────────────────────────────────────── */
 
@@ -71,6 +72,7 @@ interface FormState {
   age:         string
   meet_type:   string
   images:      string[]
+  image_focus: Record<string, { x: number; y: number }>
   videos:      string[]
   tags:        string[]
   services:    string[]
@@ -194,6 +196,7 @@ export default function CreateListingPage() {
     age:         '',
     meet_type:   'both',
     images:      [],
+    image_focus: {},
     videos:      [],
     tags:        [],
     services:    [],
@@ -398,13 +401,24 @@ export default function CreateListingPage() {
 
     try {
       const resized = await resizeImage(file)
+      // Detect focal point from resized file in parallel with the upload.
+      const focusPromise = imageFromFile(resized)
+        .then(img => detectFocalPoint(img))
+        .catch(() => ({ x: 50, y: 30 } as { x: number; y: number }))
       const fd = new FormData()
       fd.append('file', resized)
-      const res = await fetch('/api/upload', { method: 'POST', body: fd })
+      const [res, focus] = await Promise.all([
+        fetch('/api/upload', { method: 'POST', body: fd }),
+        focusPromise,
+      ])
       if (!res.ok) throw new Error('Failed to upload image')
       const { publicUrl } = await res.json()
 
-      setForm(f => ({ ...f, images: [...f.images, publicUrl] }))
+      setForm(f => ({
+        ...f,
+        images: [...f.images, publicUrl],
+        image_focus: { ...f.image_focus, [publicUrl]: focus },
+      }))
       setUploadingImages(prev => prev.filter(u => u.id !== uid))
       URL.revokeObjectURL(preview)
     } catch (err: any) {
@@ -493,6 +507,7 @@ export default function CreateListingPage() {
       meet_type:       form.meet_type,
       website:         (() => { try { const u = new URL(form.website.trim()); return ['https:', 'http:'].includes(u.protocol) ? u.href : null } catch { return null } })(),
       images:          form.images.length > 0 ? form.images : null,
+      image_focus:     Object.keys(form.image_focus).length > 0 ? form.image_focus : null,
       videos:          form.videos.length > 0 ? form.videos : null,
       tags:            finalTags.length > 0 ? finalTags : null,
       services:        POSSIBILITY_CATEGORIES.has(form.category) && form.services.length > 0 ? form.services : null,

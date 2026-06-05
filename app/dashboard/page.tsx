@@ -5,7 +5,7 @@ import { signOut } from '../lib/auth'
 import { createClient } from '../lib/supabase'
 import PhoneVerify from '../components/PhoneVerify/PhoneVerify'
 import { ETHNICITIES, ETHNIC_VALUES, HAIR_COLOURS, HAIR_VALUES, BUILDS as CANONICAL_BUILDS, BUILD_VALUES } from '../lib/attributes'
-import { focusPosition } from '../lib/imageFocus'
+import { focusPosition, detectFocalPoint, imageFromFile } from '../lib/imageFocus'
 
 /* ── Country list (ISO 3166-1 alpha-2) for privacy / geo-blocking ── */
 const COUNTRIES = [
@@ -515,19 +515,28 @@ export default function DashboardPage() {
       exportCanvas.width = 800
       exportCanvas.height = 1067
       drawPhotoPreview(exportCanvas, photoImgRef.current, photoZoom, photoRotate, photoPanX, photoPanY)
+      // Start focus detection on the canvas immediately, in parallel with toBlob+upload.
+      const focusPromise = detectFocalPoint(exportCanvas).catch(() => ({ x: 50, y: 30 } as { x: number; y: number }))
       await new Promise<void>((resolve, reject) => {
         exportCanvas.toBlob(async (blob) => {
           if (!blob) { reject(new Error('toBlob returned null')); return }
           const file = new File([blob], 'photo.jpg', { type: 'image/jpeg' })
           const fd = new FormData()
           fd.append('file', file)
-          const res = await fetch('/api/upload', { method: 'POST', body: fd })
+          const [res, focus] = await Promise.all([
+            fetch('/api/upload', { method: 'POST', body: fd }),
+            focusPromise,
+          ])
           const json = await res.json()
           if (json.publicUrl) {
             setListingDraft((d: any) => {
               const imgs = [...(d.images || [])]
               imgs[photoEditing.imgIdx] = json.publicUrl
-              return { ...d, images: imgs }
+              return {
+                ...d,
+                images: imgs,
+                image_focus: { ...(d.image_focus || {}), [json.publicUrl]: focus },
+              }
             })
           }
           resolve()
@@ -572,14 +581,27 @@ export default function DashboardPage() {
     if (!file) return
     setPhotoUploading(true)
     const resized = await resizeImageForDashboard(file)
+
+    // Detect focal point from the resized file in parallel with the upload.
+    const focusPromise = imageFromFile(resized)
+      .then(img => detectFocalPoint(img))
+      .catch(() => ({ x: 50, y: 30 } as { x: number; y: number }))
+
     const fd = new FormData()
     fd.append('file', resized)
-    const res = await fetch('/api/upload', { method: 'POST', body: fd })
+    const [res, focus] = await Promise.all([
+      fetch('/api/upload', { method: 'POST', body: fd }),
+      focusPromise,
+    ])
     const json = await res.json()
     if (json.publicUrl) {
       setListingDraft((d: any) => {
         const imgs = (d.images || []).filter(Boolean)
-        return { ...d, images: [...imgs, json.publicUrl].slice(0, 5) }
+        return {
+          ...d,
+          images: [...imgs, json.publicUrl].slice(0, 5),
+          image_focus: { ...(d.image_focus || {}), [json.publicUrl]: focus },
+        }
       })
     } else {
       setNotification(json.error || 'Upload failed — please try again.')
