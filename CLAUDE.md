@@ -25,8 +25,18 @@ Live at **secretxperience.eu** (and www.secretxperience.eu). Owner email: heyoka
 - Static HTML in `dangerouslySetInnerHTML` is built at compile time — any `${var}` reference inside it must use variables that exist at JSX render scope, NOT inside useEffect-only scope. Heart buttons (`data-fav-lid`) go in the dynamic `renderCards` useEffect, NOT in the static template.
 - Provider/listing card category routes: `escorts → /escorts`, `companions → /companionship`, `nightlife → /nightlife`, `creators → /creators`, `rentals → /rentals`, `hotels → /hotels`, `events → /events`, `shop → /shop`.
 
-## ⚡ Next Session — Resume Here (2026-05-22)
-Last thing completed: **Mobile listing card redesign** (commit `40668f5` on `main`).
+## ⚡ Next Session — Resume Here (2026-06-05)
+Last thing completed: **Mobile horizontal-overflow fix** (commit `6c114d1` on `main`) — CONFIRMED working by user.
+
+What fixed it (after several failed attempts):
+- ROOT CAUSE: CSS grid items default to `min-width: auto` and refuse to shrink below content width. `.main` (a grid item in `.layout`) stayed at desktop width even when the grid said `1fr`, so the whole page overflowed right and the mobile media query never produced a narrow layout.
+- FIX: `min-width: 0` + `overflow-x:hidden` + `max-width:100%` on `.main` AND `.layout`. Mobile media-query rules for `.layout{grid-template-columns:1fr}`, `.cards{repeat(2,1fr)}`, `.admin-stats{repeat(2,1fr)}` made `!important`. `html`/`body` capped at `max-width:100vw`.
+- Also fixed "View listing" → "View advertisement" rename miss in featured banner.
+- LESSON: when a flex/grid CHILD overflows, the fix is almost always `min-width:0` on that child, NOT overflow-hidden on the parent.
+
+Earlier this session (2026-06-05): LiveBanner ticker overflow (removed `padding-left:100%`, two side-by-side copies), SliderAds GPU-escape (`contain:layout paint`), login OAuth key restore (`provider:'google'`), admin role labels (Advertiser), go-live camera fallback, live-badge realtime channel dedup.
+
+Prior milestone: **Mobile listing card redesign** (commit `40668f5` on `main`).
 
 What was done:
 - Homepage listing cards: 2-col grid forced at ALL mobile widths (420px no longer collapses to 1 col)
