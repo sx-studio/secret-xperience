@@ -12,6 +12,11 @@ export default function Home() {
     const supabase = createClient()
     let currentSession: any = null
 
+    // Detect viewer's country for geo-blocking (fire-and-forget, non-blocking)
+    fetch('/api/geo').then(r => r.json()).then(({ country }) => {
+      if (country) (window as any).__viewerCountry = country
+    }).catch(() => {})
+
 // ── Age Gate ──
 var gate = document.getElementById('gate');
 function dismissGate() {
@@ -1538,7 +1543,8 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
 
     const fetchListings = async (filters: any) => {
       ;(window as any).fetchListings = fetchListings
-      let query = (supabase as any).from('listings').select('*').eq('active', true)
+      // Join profiles to get blocked_countries for geo-filtering
+      let query = (supabase as any).from('listings').select('*, profiles!profile_id(blocked_countries)').eq('active', true)
       if (filters.category && filters.category !== 'all') query = query.eq('category', filters.category)
       if (filters.cities && filters.cities.length > 0) query = query.in('city', filters.cities)
       if (filters.meetTypes && filters.meetTypes.length > 0) query = query.in('meet_type', filters.meetTypes)
@@ -1568,8 +1574,15 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         (supabase as any).from('live_streams').select('provider_id').eq('status', 'live'),
       ])
       liveProviderIds = new Set((liveData || []).map((r: any) => r.provider_id))
-      ;(window as any).__sxCacheListings?.(data || [])
-      totalListings = data || []
+      // Geo-filter: hide listings where the advertiser blocked the viewer's country
+      const viewerCountry: string = (window as any).__viewerCountry || ''
+      const visibleListings = (data || []).filter((l: any) => {
+        if (!viewerCountry) return true
+        const blocked: string[] = l.profiles?.blocked_countries || []
+        return !blocked.includes(viewerCountry)
+      })
+      ;(window as any).__sxCacheListings?.(visibleListings)
+      totalListings = visibleListings
       currentPage = 0
       renderCards(totalListings.slice(0, PAGE_SIZE))
       const loadMoreBtn = document.getElementById('loadMoreBtn')
