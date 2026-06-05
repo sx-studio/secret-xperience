@@ -979,12 +979,14 @@ export default function DashboardPage() {
         .db-photo-num { font: 600 10px/1 var(--sans); color: var(--t3); min-width: 14px; text-align: right; }
 
         .db-photo-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 10px; }
-        @media (max-width: 480px) { .db-photo-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 480px) { .db-photo-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
 
         .db-photo-thumb {
-          position: relative; aspect-ratio: 3/4; border-radius: 8px; overflow: hidden;
+          position: relative; border-radius: 8px; overflow: hidden;
           background: #111; border: 0.5px solid rgba(255,255,255,0.08);
+          display: flex; flex-direction: column;
         }
+        .db-photo-thumb-img-wrap { position: relative; aspect-ratio: 3/4; flex-shrink: 0; }
         .db-photo-thumb img { width: 100%; height: 100%; object-fit: cover; object-position: center 20%; display: block; }
         .db-photo-thumb-add {
           aspect-ratio: 3/4; border-radius: 8px; border: 0.5px dashed rgba(197,160,90,0.3);
@@ -1009,6 +1011,17 @@ export default function DashboardPage() {
         .db-photo-order-badge {
           position: absolute; top: 4px; left: 4px; background: rgba(0,0,0,0.65); border-radius: 4px;
           padding: 2px 5px; font: 600 9px/1 var(--sans); color: rgba(255,255,255,0.5); letter-spacing: 0.06em;
+        }
+        @media (max-width: 480px) {
+          .db-photo-actions {
+            position: static; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+            padding: 6px 4px; gap: 4px; border-top: 0.5px solid rgba(255,255,255,0.08);
+          }
+          .db-photo-act-btn {
+            width: 100%; height: 40px; border-radius: 6px; font-size: 15px; flex: 1;
+            border-color: rgba(255,255,255,0.12);
+          }
+          .db-photo-act-btn.danger { border-color: rgba(226,83,107,0.3); color: #e2536b; }
         }
 
         .db-pe-modal {
@@ -1907,8 +1920,10 @@ export default function DashboardPage() {
               <div className="db-photo-grid">
                 {(listingDraft.images || []).filter(Boolean).map((url: string, i: number, arr: string[]) => (
                   <div key={i} className="db-photo-thumb">
-                    <img src={url} alt="" style={{ objectPosition: focusPosition(listingDraft.image_focus, url) }} />
-                    <div className="db-photo-order-badge">{i + 1}</div>
+                    <div className="db-photo-thumb-img-wrap">
+                      <img src={url} alt="" style={{ objectPosition: focusPosition(listingDraft.image_focus, url) }} />
+                      <div className="db-photo-order-badge">{i + 1}</div>
+                    </div>
                     <div className="db-photo-actions">
                       <button className="db-photo-act-btn" title="Move left" disabled={i === 0}
                         style={{ opacity: i === 0 ? 0.3 : 1 }}
@@ -1919,14 +1934,14 @@ export default function DashboardPage() {
                         })}>‹</button>
                       <button className="db-photo-act-btn" title="Set thumbnail focus"
                         onClick={() => openFocusPicker(url)}>
-                        <i className="ti ti-focus-2" style={{ fontSize: 12 }} />
+                        <i className="ti ti-focus-2" style={{ fontSize: 14 }} />
                       </button>
                       <button className="db-photo-act-btn" title="Edit / crop"
                         onClick={() => {
                           setPhotoZoom(1); setPhotoRotate(0); setPhotoPanX(0); setPhotoPanY(0)
                           setPhotoEditing({ imgIdx: i, url })
                         }}>
-                        <i className="ti ti-crop" style={{ fontSize: 12 }} />
+                        <i className="ti ti-crop" style={{ fontSize: 14 }} />
                       </button>
                       <button className="db-photo-act-btn" title="Move right" disabled={i === arr.length - 1}
                         style={{ opacity: i === arr.length - 1 ? 0.3 : 1 }}
