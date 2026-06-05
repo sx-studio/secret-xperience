@@ -127,7 +127,7 @@ export default function AdvertiserHubPage() {
       }
       setUserId(user.id)
 
-      // Verify this user has a advertiser/venue/creator/admin role
+      // Verify this user has an advertiser/venue/creator/admin role
       const { data: roleCheck } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle()
       const ADVERTISER_ROLES = ['provider', 'venue', 'creator', 'admin']
       if (!roleCheck || !ADVERTISER_ROLES.includes(roleCheck.role || '')) {

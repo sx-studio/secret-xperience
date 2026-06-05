@@ -4,7 +4,7 @@
  * POST { listingId }
  *
  * Basic listings are free and permanent on SecretXperience, so reactivating a
- * listing that a advertiser manually paused simply flips it back to active. No
+ * listing that an advertiser manually paused simply flips it back to active. No
  * tokens are charged. Paid tiers (featured/slider/premium) are purchased
  * separately via the /boost flow.
  */

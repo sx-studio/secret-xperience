@@ -323,7 +323,7 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
 
           {/* CTA */}
           <div style={{ marginTop: '4rem', padding: '2.5rem', background: 'var(--bg1)', border: '0.5px solid var(--b)', borderRadius: 'var(--rl)', textAlign: 'center' }}>
-            <div style={{ fontFamily: 'var(--serif)', fontSize: '22px', marginBottom: '0.75rem' }}>Are you a advertiser?</div>
+            <div style={{ fontFamily: 'var(--serif)', fontSize: '22px', marginBottom: '0.75rem' }}>Are you an advertiser?</div>
             <p style={{ fontSize: '14px', color: 'var(--t2)', marginBottom: '1.5rem' }}>List your service for free and reach thousands of verified clients across Europe.</p>
             <Link href="/advertise" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 28px', background: 'linear-gradient(135deg,var(--gold),var(--goldd))', border: 'none', borderRadius: 'var(--r)', color: '#0a0a0a', fontSize: '14px', fontWeight: 700, textDecoration: 'none' }}>
               <i className="ti ti-plus" /> List your service — it's free

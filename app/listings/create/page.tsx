@@ -256,7 +256,7 @@ export default function CreateListingPage() {
       const { data: prof } = await supabase
         .from('profiles').select('*').eq('id', session.user.id).single()
       setProfile(prof)
-      // Identity-verification gate (Verotel compliance): a advertiser can only
+      // Identity-verification gate (Verotel compliance): an advertiser can only
       // publish once their ID is approved. Mirror the RLS check on the client
       // so unverified users see a clear "verify first" screen instead of a
       // form that would fail on submit.

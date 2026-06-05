@@ -350,13 +350,13 @@ export default function WhySecretXperience() {
               In the adult services industry, trust is not a feature — it is the entire foundation. A platform that cannot be trusted by its advertisers is one they will leave. A platform that cannot be trusted by its clients is one they will never return to. SecretXperience was built with this axiom at every layer of the stack.
             </p>
             <p>
-              From the moment a advertiser signs up to the moment a client completes a booking, every interaction is governed by systems designed to protect all parties — legally, financially, and personally.
+              From the moment an advertiser signs up to the moment a client completes a booking, every interaction is governed by systems designed to protect all parties — legally, financially, and personally.
             </p>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0', marginBottom: '2.5rem' }}>
             {[
-              ['01', 'Identity verification on every advertiser', 'Before a advertiser receives a verified badge, they complete a secure identity and age verification process. Documents are handled by an encrypted verification flow — they are never stored on our servers in unprotected form. Verified profiles display a prominent badge that clients can trust at a glance.'],
+              ['01', 'Identity verification on every advertiser', 'Before an advertiser receives a verified badge, they complete a secure identity and age verification process. Documents are handled by an encrypted verification flow — they are never stored on our servers in unprotected form. Verified profiles display a prominent badge that clients can trust at a glance.'],
               ['02', 'End-to-end encrypted messaging', 'All client-advertiser communication flows through SecretXperience\'s private messaging system. No personal phone numbers, no personal email addresses, no external contact information is required or displayed. Your privacy is protected by the architecture itself.'],
               ['03', 'Wallet security by design', 'Token wallet balances can only be modified by server-side admin routes — never by the browser client directly. Row-Level Security on our database enforces this at the database layer, meaning no client-side exploit can manipulate a balance.'],
               ['04', 'GDPR compliance built in', 'SecretXperience was built for the EU. Cookie consent, data minimisation, right-to-erasure flows, and privacy-by-design architecture are not afterthoughts — they are first-class requirements. We are transparent about what data we collect, why, and for how long.'],

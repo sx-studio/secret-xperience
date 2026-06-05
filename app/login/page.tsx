@@ -111,7 +111,7 @@ export default function LoginPage() {
   async function handleGoogle() {
     const supabase = createClient()
     // Only pass role when signing up — on login the role already exists in the DB
-    // and must not be overwritten (e.g. a advertiser logging in via Google).
+    // and must not be overwritten (e.g. an advertiser logging in via Google).
     const callbackUrl = mode === 'signup'
       ? `${window.location.origin}/auth/callback?role=${encodeURIComponent(role)}`
       : `${window.location.origin}/auth/callback`

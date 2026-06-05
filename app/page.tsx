@@ -65,7 +65,7 @@ function showRoleStep(){
     + '</button>'
     + '<button id="roleAdvertiser" style="display:flex;align-items:center;gap:14px;width:100%;padding:16px 18px;background:var(--bg2);border:0.5px solid var(--b2);border-radius:var(--rl);cursor:pointer;text-align:left;transition:border-color .15s,background .15s;font-family:var(--sans);">'
     +   '<i class="ti ti-briefcase" style="font-size:26px;color:var(--gold);flex-shrink:0;"></i>'
-    +   '<span><span style="display:block;font-size:15px;font-weight:600;color:var(--t);margin-bottom:2px;">I offer a service</span><span style="display:block;font-size:12px;color:var(--t3);">List as a advertiser, venue or creator — free</span></span>'
+    +   '<span><span style="display:block;font-size:15px;font-weight:600;color:var(--t);margin-bottom:2px;">I offer a service</span><span style="display:block;font-size:12px;color:var(--t3);">List as an advertiser, venue or creator — free</span></span>'
     + '</button>'
     + '</div>';
   var hov = function(b){ b.addEventListener('mouseover',function(){b.style.borderColor='var(--gold)';b.style.background='var(--gbg)';}); b.addEventListener('mouseout',function(){b.style.borderColor='var(--b2)';b.style.background='var(--bg2)';}); };
@@ -1952,14 +1952,23 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
       }
     }
 
-    // Refresh live badge when streams start/stop
-    ;(supabase as any).channel('hp_live_badge')
+    // Refresh live badge when streams start/stop.
+    // Remove any stale channel of the same name first — otherwise StrictMode's
+    // double-mount (dev) re-runs .channel('hp_live_badge') against an already
+    // subscribed instance and .on() throws "callbacks after subscribe()".
+    try {
+      ;(supabase as any).getChannels?.()
+        .filter((c: any) => c.topic === 'realtime:hp_live_badge')
+        .forEach((c: any) => (supabase as any).removeChannel(c))
+    } catch { /* getChannels not available — ignore */ }
+    const liveBadgeCh = (supabase as any).channel('hp_live_badge')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'live_streams' }, async () => {
         const { data: ld } = await (supabase as any).from('live_streams').select('provider_id').eq('status', 'live')
         liveProviderIds = new Set((ld || []).map((r: any) => r.provider_id))
         if (totalListings.length > 0) renderCards(totalListings.slice(0, Math.max(PAGE_SIZE, currentPage * PAGE_SIZE)))
       })
       .subscribe()
+    ;(window as any).__sxLiveBadgeCh = liveBadgeCh
 
     // Initial load
     fetchListings(activeFilters).then(async () => {
@@ -1975,6 +1984,11 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
     const navLogo = document.querySelector('.nav-logo') as HTMLElement | null
     if (navLogo) { navLogo.style.cursor = 'pointer'; navLogo.addEventListener('click', () => { window.location.href = '/' }) }
 
+    // Tear down the live-badge realtime channel on unmount so a remount
+    // (StrictMode in dev, route changes in prod) starts from a clean slate.
+    return () => {
+      try { if (liveBadgeCh) (supabase as any).removeChannel(liveBadgeCh) } catch { /* ignore */ }
+    }
   }, [])
 
 
@@ -3269,7 +3283,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
   </nav>
 
 </div><!-- #app -->` }} />
-      {/* Live-now ticker — portal into #liveBannerMount, renders only when a advertiser is broadcasting */}
+      {/* Live-now ticker — portal into #liveBannerMount, renders only when an advertiser is broadcasting */}
       <LiveBanner />
       {/* Homepage Premium banner — portal into #homepagePremiumMount, renders only when sold */}
       <PremiumBanner placement="homepage" portalTo="homepagePremiumMount" />

@@ -95,7 +95,7 @@ Minors — Any content depicting individuals under 18 years of age in a sexual c
 
 Human Trafficking — Any content or activity that facilitates the trafficking, exploitation, or coercion of persons is strictly prohibited. We cooperate fully with Belgian and EU law enforcement on all trafficking-related investigations.
 
-Coercion and Non-Consent — Any content depicting non-consensual acts, or any communication that suggests a advertiser is operating under duress or coercion, will be treated as an emergency. We will escalate immediately.
+Coercion and Non-Consent — Any content depicting non-consensual acts, or any communication that suggests an advertiser is operating under duress or coercion, will be treated as an emergency. We will escalate immediately.
 
 These policies are not subject to interpretation, negotiation, or appeal. Our commitment to eradicating exploitation on this platform is absolute.`,
   },

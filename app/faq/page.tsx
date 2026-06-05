@@ -18,7 +18,7 @@ const faqGroups = [
     group: 'For Clients',
     items: [
       {
-        q: 'How do I book a advertiser?',
+        q: 'How do I book an advertiser?',
         a: `Browse verified advertiser listings and select a profile that interests you. On the profile page, click "Request Booking" and choose your preferred date, time, and duration. The advertiser will receive your request and confirm or decline. Once accepted, you complete payment securely through Stripe. You will receive a confirmation email with all details.`,
       },
       {

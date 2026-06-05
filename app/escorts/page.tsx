@@ -673,7 +673,7 @@ export default function EscortsPage() {
             </div>
           </div>
 
-          {/* Section Premium banner — renders only when a advertiser has bought it */}
+          {/* Section Premium banner — renders only when an advertiser has bought it */}
           <PremiumBanner placement="section" category="escorts" />
 
           {/* Active filter chips */}
