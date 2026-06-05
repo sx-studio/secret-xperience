@@ -21,6 +21,12 @@ const TAB_ICONS: Record<Tab, string> = {
 
 const LS_KEY = (t: Tab) => `sx_admin_seen_${t.toLowerCase()}`
 
+// Categories an admin can reassign a listing to (value must match the live category routes).
+const ADMIN_CATEGORIES = [
+  'escorts', 'massage', 'companionship', 'domination', 'adult',
+  'creators', 'nightlife', 'experiences', 'rentals', 'hotels', 'events', 'shop',
+]
+
 function exportCsv(rows: any[], filename: string) {
   if (!rows.length) return
   const headers = Object.keys(rows[0])
@@ -232,6 +238,12 @@ export default function AdminPage() {
     }
     await supabase.from('listings').update(update).eq('id', id)
     setListings(prev => prev.map(l => l.id === id ? { ...l, ...update } : l))
+  }
+
+  async function setListingCategory(id: string, category: string) {
+    const supabase = createClient()
+    await supabase.from('listings').update({ category }).eq('id', id)
+    setListings(prev => prev.map(l => l.id === id ? { ...l, category } : l))
   }
 
   async function featureListing(id: string, days: number) {
@@ -575,7 +587,17 @@ export default function AdminPage() {
                         <a href={`/listings/${l.id}`} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 500, color: l.active ? 'var(--t, #ece8e1)' : 'var(--t3, #4c4a47)', textDecoration: 'none', transition: 'color 0.15s' }} onMouseEnter={e => (e.currentTarget.style.color = 'var(--gold, #c5a05a)')} onMouseLeave={e => (e.currentTarget.style.color = l.active ? 'var(--t, #ece8e1)' : 'var(--t3, #4c4a47)')}>{l.title} ↗</a>
                         {l.city && <div style={{ font: '11px/1 var(--sans)', color: 'var(--t3, #4c4a47)', marginTop: '3px' }}><i className="ti ti-map-pin" style={{ fontSize: 10 }} /> {l.city}{l.country ? `, ${l.country}` : ''}</div>}
                       </td>
-                      <td style={{ padding: '14px 16px' }}><span style={{ background: 'rgba(255,255,255,0.05)', padding: '3px 8px', borderRadius: '20px', font: '500 11px/1 var(--sans)', color: 'var(--t2, #8c8880)', letterSpacing: '0.06em' }}>{l.category}</span></td>
+                      <td style={{ padding: '14px 16px' }}>
+                        <select
+                          value={ADMIN_CATEGORIES.includes(l.category) ? l.category : ''}
+                          onChange={e => setListingCategory(l.id, e.target.value)}
+                          title="Change listing category"
+                          style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--t2, #8c8880)', border: '0.5px solid var(--b2, rgba(255,255,255,0.1))', borderRadius: '20px', padding: '4px 10px', font: '500 11px/1 var(--sans)', letterSpacing: '0.04em', cursor: 'pointer', textTransform: 'capitalize', outline: 'none' }}
+                        >
+                          {!ADMIN_CATEGORIES.includes(l.category) && <option value="" disabled>{l.category || '— none —'}</option>}
+                          {ADMIN_CATEGORIES.map(c => <option key={c} value={c} style={{ background: '#1a1418', textTransform: 'capitalize' }}>{c}</option>)}
+                        </select>
+                      </td>
                       <td style={{ padding: '14px 16px', color: 'var(--t2, #8c8880)', fontSize: '12px' }}>{l.profiles?.full_name || l.profiles?.username || '—'}</td>
                       <td style={{ padding: '14px 16px', color: 'var(--gold, #c5a05a)', fontSize: '12px', fontWeight: 500 }}>{l.price_from ? `€${l.price_from}` : '—'}</td>
                       <td style={{ padding: '14px 16px' }}>
