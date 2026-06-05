@@ -202,9 +202,13 @@ export default function GoLivePage() {
       const blob: Blob | null = await new Promise(r => canvas.toBlob(r, 'image/jpeg', 0.7))
       if (!blob) return
       const supabase = createClient()
-      const path = `live-thumbs/${streamId.current}.jpg`
+      // Storage RLS requires the first path segment to be the uploader's user id
+      // (same convention as listing photos). A bare live-thumbs/ path is rejected.
+      const uid = me?.id
+      if (!uid) return
+      const path = `listings/${uid}/live-thumbs/${streamId.current}.jpg`
       const { error } = await supabase.storage.from('listings').upload(path, blob, { contentType: 'image/jpeg', upsert: true })
-      if (error) return
+      if (error) { console.warn('[live] thumbnail upload failed:', error.message); return }
       const url = supabase.storage.from('listings').getPublicUrl(path).data.publicUrl + `?t=${Date.now()}`
       // live_streams writes are service-role only; go through the server route.
       await fetch('/api/live/thumbnail', {
