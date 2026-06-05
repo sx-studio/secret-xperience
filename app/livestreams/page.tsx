@@ -26,7 +26,8 @@ export default function LiveStreamsPage() {
         .order('ended_at', { ascending: false }).limit(12)
       setReplays(past || [])
     }
-    load()
+    // Expire stale streams (broadcaster closed tab without ending) before first load.
+    fetch('/api/live/audit', { method: 'POST' }).then(() => load()).catch(() => load())
     ;(async () => {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) return

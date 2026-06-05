@@ -16,9 +16,10 @@ export default function WatchPage({ params }: { params: { id: string } }) {
   const [ageOk, setAgeOk] = useState(false)
   const [muted, setMuted] = useState(true)
 
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const roomRef  = useRef<any>(null)
-  const chatEndRef = useRef<HTMLDivElement>(null)
+  const videoRef        = useRef<HTMLVideoElement>(null)
+  const roomRef         = useRef<any>(null)
+  const chatEndRef      = useRef<HTMLDivElement>(null)
+  const pendingVideoRef = useRef<any>(null)  // track received before video element rendered
 
   useEffect(() => {
     try { if (localStorage.getItem('sx_age_ok') === '1') setAgeOk(true) } catch {}
@@ -66,10 +67,16 @@ export default function WatchPage({ params }: { params: { id: string } }) {
         roomRef.current = room
 
         room.on(RoomEvent.TrackSubscribed, (track: any) => {
-          if (track.kind === Track.Kind.Video && videoRef.current) {
-            track.attach(videoRef.current)
-            videoRef.current.muted = true   // guarantee autoplay; viewer unmutes via button
-            videoRef.current.play().catch(() => {})
+          if (track.kind === Track.Kind.Video) {
+            if (videoRef.current) {
+              track.attach(videoRef.current)
+              videoRef.current.muted = true
+              videoRef.current.play().catch(() => {})
+            } else {
+              // Video element isn't rendered yet (phase still 'loading').
+              // Store it — the phase-change useEffect will attach it.
+              pendingVideoRef.current = track
+            }
           }
           if (track.kind === Track.Kind.Audio) track.attach()
         })
@@ -78,11 +85,14 @@ export default function WatchPage({ params }: { params: { id: string } }) {
         room.on(RoomEvent.Disconnected, () => { if (!cancelled) setPhase('ended') })
 
         await room.connect(data.url, data.token)
-        // Attach any already-published tracks.
+        // Attach any already-published tracks (broadcaster started before viewer joined).
         room.remoteParticipants.forEach((p: any) => {
           p.trackPublications.forEach((pub: any) => {
             if (pub.track) {
-              if (pub.track.kind === Track.Kind.Video && videoRef.current) pub.track.attach(videoRef.current)
+              if (pub.track.kind === Track.Kind.Video) {
+                if (videoRef.current) pub.track.attach(videoRef.current)
+                else pendingVideoRef.current = pub.track
+              }
               if (pub.track.kind === Track.Kind.Audio) pub.track.attach()
             }
           })
@@ -95,6 +105,17 @@ export default function WatchPage({ params }: { params: { id: string } }) {
     })()
     return () => { cancelled = true; try { room?.disconnect() } catch {} }
   }, [ageOk, stream, streamId, me])
+
+  // Once phase becomes 'live' the video element renders; attach any track that arrived earlier.
+  useEffect(() => {
+    if (phase === 'live' && pendingVideoRef.current && videoRef.current) {
+      const track = pendingVideoRef.current
+      pendingVideoRef.current = null
+      track.attach(videoRef.current)
+      videoRef.current.muted = true
+      videoRef.current.play().catch(() => {})
+    }
+  }, [phase])
 
   // Chat subscription
   useEffect(() => {
