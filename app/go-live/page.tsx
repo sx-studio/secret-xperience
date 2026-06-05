@@ -18,6 +18,7 @@ export default function GoLivePage() {
   const [elapsed, setElapsed] = useState(0)
   const [messages, setMessages] = useState<ChatMsg[]>([])
   const [chatInput, setChatInput] = useState('')
+  const [camRetry, setCamRetry] = useState(0)
 
   const videoRef   = useRef<HTMLVideoElement>(null)
   const roomRef    = useRef<any>(null)
@@ -49,35 +50,66 @@ export default function GoLivePage() {
   useEffect(() => {
     if (gate !== 'verified' || phase !== 'setup') return
     let cancelled = false
-    // Request video + audio together so the browser prompts for both at once.
-    // Use ideal constraints (not exact) so mobile cameras aren't rejected.
-    const videoConstraints: MediaTrackConstraints = {
-      facingMode: 'user',
-      width: { ideal: 1280 },
-      height: { ideal: 720 },
+
+    const attach = (stream: MediaStream) => {
+      previewStream.current = stream
+      if (videoRef.current) { videoRef.current.srcObject = stream; videoRef.current.muted = true; videoRef.current.play().catch(() => {}) }
     }
-    navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: true })
-      .then(stream => {
-        if (cancelled) { stream.getTracks().forEach(t => t.stop()); return }
-        previewStream.current = stream
-        if (videoRef.current) { videoRef.current.srcObject = stream; videoRef.current.muted = true; videoRef.current.play().catch(() => {}) }
-      })
-      .catch(() => {
-        // Fallback: try minimal constraints in case the ideal ones failed
-        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-          .then(stream => {
-            if (cancelled) { stream.getTracks().forEach(t => t.stop()); return }
-            previewStream.current = stream
-            if (videoRef.current) { videoRef.current.srcObject = stream; videoRef.current.muted = true; videoRef.current.play().catch(() => {}) }
-          })
-          .catch(() => setError('Camera and microphone access is required to go live. Please allow both in your browser settings.'))
-      })
+
+    // Translate a getUserMedia rejection into a message the performer can act on.
+    const describe = (err: any): string => {
+      const name = err?.name || ''
+      if (name === 'NotAllowedError' || name === 'SecurityError')
+        return 'Camera or microphone access was blocked. Tap the 🔒 icon in your address bar → Permissions → allow Camera and Microphone, then reload this page.'
+      if (name === 'NotFoundError' || name === 'OverconstrainedError')
+        return 'No camera was found on this device. Make sure your camera is connected and not disabled.'
+      if (name === 'NotReadableError')
+        return 'Your camera is already in use by another app or browser tab. Close it (video calls, other camera apps) and reload this page.'
+      return 'Camera and microphone access is required to go live. Please allow both in your browser settings, then reload.'
+    }
+
+    async function init() {
+      // Use ideal constraints (not exact) so mobile cameras aren't rejected.
+      const videoConstraints: MediaTrackConstraints = { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
+      let stream: MediaStream | null = null
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: true })
+      } catch {
+        // Retry with minimal constraints — some mobile cameras reject ideal sizes.
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        } catch (err2) {
+          // Combined request failed. Probe each device separately so we can tell
+          // the performer EXACTLY what's wrong (camera blocked vs mic blocked).
+          let camErr: any = null, micErr: any = null
+          try { (await navigator.mediaDevices.getUserMedia({ video: true })).getTracks().forEach(t => t.stop()) } catch (e) { camErr = e }
+          try { (await navigator.mediaDevices.getUserMedia({ audio: true })).getTracks().forEach(t => t.stop()) } catch (e) { micErr = e }
+          if (cancelled) return
+          if (camErr && micErr) setError(describe(camErr))
+          else if (camErr) setError('Microphone is allowed, but the camera is blocked. ' + describe(camErr))
+          else if (micErr) setError('Camera is allowed, but the microphone is blocked. ' + describe(micErr))
+          else setError(describe(err2))
+          return
+        }
+      }
+      if (cancelled) { stream.getTracks().forEach(t => t.stop()); return }
+      // Confirm a real video track arrived — a mic-only stream isn't enough to broadcast.
+      if (stream.getVideoTracks().length === 0) {
+        stream.getTracks().forEach(t => t.stop())
+        setError('We could only access your microphone, not your camera. Tap the 🔒 icon in your address bar → Permissions → allow Camera, then reload this page.')
+        return
+      }
+      setError('')
+      attach(stream)
+    }
+    init()
+
     return () => {
       cancelled = true
       // Don't tear down the camera when we're transitioning into the live room.
       if (!keepStream.current) previewStream.current?.getTracks().forEach(t => t.stop())
     }
-  }, [gate, phase])
+  }, [gate, phase, camRetry])
 
   const scrollChat = useCallback(() => {
     requestAnimationFrame(() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }))
@@ -275,7 +307,17 @@ export default function GoLivePage() {
               <p className="gl-sub">Broadcast straight from your camera. Viewers can watch and chat in real time.</p>
               <label className="gl-label">Stream title</label>
               <input className="gl-input" value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Friday night with Mia" maxLength={80} />
-              {error && <div className="gl-err">{error}</div>}
+              {error && (
+                <div className="gl-err">
+                  {error}
+                  <button
+                    className="gl-retry"
+                    onClick={() => { setError(''); previewStream.current?.getTracks().forEach(t => t.stop()); previewStream.current = null; setCamRetry(n => n + 1) }}
+                  >
+                    <i className="ti ti-refresh" /> Try again
+                  </button>
+                </div>
+              )}
               <button className="gl-golive" onClick={goLive} disabled={phase === 'connecting'}>
                 <i className="ti ti-broadcast" /> {phase === 'connecting' ? 'Connecting…' : 'Go Live Now'}
               </button>
@@ -345,7 +387,9 @@ const styles = `
 .gl-golive:disabled{opacity:.6;cursor:default}
 .gl-note{color:#4c4a47;font-size:11px;line-height:1.6;margin-top:14px}
 .gl-note a{color:#8c8880}
-.gl-err{background:rgba(239,68,68,.1);border:0.5px solid rgba(239,68,68,.3);color:#f87171;padding:10px 12px;border-radius:9px;font-size:12.5px;margin-bottom:16px}
+.gl-err{background:rgba(239,68,68,.1);border:0.5px solid rgba(239,68,68,.3);color:#f87171;padding:10px 12px;border-radius:9px;font-size:12.5px;line-height:1.5;margin-bottom:16px}
+.gl-retry{display:inline-flex;align-items:center;gap:6px;margin-top:10px;background:rgba(239,68,68,.15);border:0.5px solid rgba(239,68,68,.4);color:#f87171;border-radius:8px;padding:7px 13px;font:600 12px 'Poppins';cursor:pointer;transition:background .15s}
+.gl-retry:hover{background:rgba(239,68,68,.25)}
 .gl-chatbox{background:#0c0c0c;border:0.5px solid rgba(255,255,255,.08);border-radius:16px;display:flex;flex-direction:column;height:560px;overflow:hidden}
 .gl-chat-head{padding:14px 16px;border-bottom:0.5px solid rgba(255,255,255,.06);font:600 12px 'Poppins';color:#c5a05a;display:flex;align-items:center;gap:7px}
 .gl-chat-scroll{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:9px}
