@@ -272,7 +272,7 @@
    RESET + BASE
    ════════════════════════════════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; overflow-x: hidden; max-width: 100%; }
+html { scroll-behavior: smooth; overflow-x: hidden; max-width: 100vw; width: 100%; }
 body {
   background: var(--bg);
   color: var(--t);
@@ -283,7 +283,8 @@ body {
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
   position: relative;
-  max-width: 100%;
+  max-width: 100vw;
+  width: 100%;
   transition: background var(--t-slow) var(--ease-out), color var(--t-slow) var(--ease-out);
 }
 a { text-decoration: none; color: inherit; }
@@ -863,7 +864,7 @@ select.input { appearance: none; padding-right: 32px; background-image: linear-g
 .nd-sub-link i{font-size:15px;width:18px;text-align:center;color:var(--t3)}
 
 /* ── LAYOUT ── */
-.layout{display:grid;grid-template-columns:230px 1fr;align-items:start}
+.layout{display:grid;grid-template-columns:230px 1fr;align-items:start;width:100%;max-width:100%;overflow-x:hidden}
 
 /* ── SIDEBAR ── */
 .sidebar{
@@ -917,7 +918,7 @@ select.input { appearance: none; padding-right: 32px; background-image: linear-g
 .sov.show{display:block}
 
 /* ── MAIN ── */
-.main{padding:1.25rem 1.5rem;background:var(--bg);min-height:calc(100vh - var(--nav-h) - 44px)}
+.main{padding:1.25rem 1.5rem;background:var(--bg);min-height:calc(100vh - var(--nav-h) - 44px);min-width:0;max-width:100%;overflow-x:hidden}
 
 /* ── ADMIN BAR ── */
 .admin-bar{
@@ -1206,7 +1207,8 @@ footer{background:var(--bg1);border-top:0.5px solid var(--b);padding:2.5rem 1.5r
   .mobile-auth-btn.show{display:inline-flex!important;order:-1}
   .catbar{top:var(--nav-h);padding:.6rem .9rem;gap:.35rem}
   .cat{padding:5px 11px;font-size:12px}
-  .layout{grid-template-columns:1fr}
+  .layout{grid-template-columns:1fr!important;width:100%!important;overflow-x:hidden!important}
+  .main{min-width:0!important;max-width:100%!important;overflow-x:hidden!important}
   /* Sidebar – full-height drawer on mobile with boosted contrast */
   .sidebar{
     position:fixed;
@@ -1244,8 +1246,8 @@ footer{background:var(--bg1);border-top:0.5px solid var(--b);padding:2.5rem 1.5r
     border-radius:0;
   }
   .how-wrap{padding:1.5rem .9rem;padding-bottom:calc(var(--bnav-h) + 1.5rem)}
-  .admin-stats{grid-template-columns:repeat(2,1fr)}
-  .cards{grid-template-columns:repeat(2,1fr);gap:9px}
+  .admin-stats{grid-template-columns:repeat(2,1fr)!important}
+  .cards{grid-template-columns:repeat(2,1fr)!important;gap:9px}
   .card-hero{height:200px!important}
   .card-body{padding:8px 9px 10px}
   .card-name{font-size:13px}
@@ -1274,7 +1276,7 @@ footer{background:var(--bg1);border-top:0.5px solid var(--b);padding:2.5rem 1.5r
   .sort-sel,.filter-select{min-height:44px}
 }
 @media(max-width:420px){
-  .cards{grid-template-columns:repeat(2,1fr);gap:7px}
+  .cards{grid-template-columns:repeat(2,1fr)!important;gap:7px}
   .card-hero{height:175px!important}
   .card-body{padding:7px 8px 9px}
   .card-name{font-size:12px}

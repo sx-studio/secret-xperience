@@ -2452,7 +2452,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
           <div class="ft-title" id="featuredBannerTitle">—</div>
           <div class="ft-sub" id="featuredBannerSub">—</div>
         </div>
-        <button class="ft-btn" id="featuredBannerBtn">View listing <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+        <button class="ft-btn" id="featuredBannerBtn">View advertisement <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
       </div>
 
       <!-- Homepage Premium banner mount point -->
