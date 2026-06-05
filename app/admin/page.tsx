@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '../lib/supabase'
+import { detectFocalPoint, imageFromUrl } from '../lib/imageFocus'
 
-const TABS = ['Listings', 'Users', 'Verification', 'Bookings', 'Newsletter', 'Contacts', 'Acquisition', 'Keywords'] as const
+const TABS = ['Listings', 'Users', 'Verification', 'Bookings', 'Newsletter', 'Contacts', 'Acquisition', 'Keywords', 'Tools'] as const
 type Tab = typeof TABS[number]
 
 const TAB_ICONS: Record<Tab, string> = {
@@ -15,6 +16,7 @@ const TAB_ICONS: Record<Tab, string> = {
   Contacts: 'address-book',
   Acquisition: 'chart-arrows-vertical',
   Keywords: 'search',
+  Tools: 'tool',
 }
 
 const LS_KEY = (t: Tab) => `sx_admin_seen_${t.toLowerCase()}`
@@ -39,7 +41,7 @@ function saveLastSeen(t: Tab) {
 export default function AdminPage() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [tab, setTab] = useState<Tab>('Listings')
-  const [badges, setBadges] = useState<Record<Tab, number>>({ Listings: 0, Users: 0, Verification: 0, Bookings: 0, Newsletter: 0, Contacts: 0, Acquisition: 0, Keywords: 0 })
+  const [badges, setBadges] = useState<Record<Tab, number>>({ Listings: 0, Users: 0, Verification: 0, Bookings: 0, Newsletter: 0, Contacts: 0, Acquisition: 0, Keywords: 0, Tools: 0 })
   const currentTab = useRef<Tab>('Listings')
   const [listings, setListings] = useState<any[]>([])
   const [users, setUsers] = useState<any[]>([])
@@ -80,6 +82,14 @@ export default function AdminPage() {
   const [kwResults, setKwResults]     = useState<any[]>([])
   const [kwLoading, setKwLoading]     = useState(false)
   const [kwError, setKwError]         = useState<string | null>(null)
+  // Image focus backfill tool
+  const [bfRunning, setBfRunning]     = useState(false)
+  const [bfTotal, setBfTotal]         = useState(0)
+  const [bfDone, setBfDone]           = useState(0)
+  const [bfSkipped, setBfSkipped]     = useState(0)
+  const [bfErrors, setBfErrors]       = useState(0)
+  const [bfLog, setBfLog]             = useState<string[]>([])
+  const bfAbort                       = useRef(false)
 
   useEffect(() => {
     let channel: ReturnType<ReturnType<typeof createClient>['channel']> | null = null
@@ -312,6 +322,56 @@ export default function AdminPage() {
     return { ok: true, text: `Granted ${data.granted} tokens. New balance: ${data.newBalance}` }
   }
 
+  async function runFocusBackfill() {
+    setBfRunning(true); setBfDone(0); setBfSkipped(0); setBfErrors(0); setBfLog([])
+    bfAbort.current = false
+    const supabase = createClient()
+    const log = (msg: string) => setBfLog(prev => [msg, ...prev].slice(0, 80))
+
+    // Fetch all listings that have at least one image.
+    const { data: all, error } = await supabase
+      .from('listings').select('id, title, images, image_focus').not('images', 'is', null)
+    if (error || !all) { log('❌ Failed to load listings: ' + (error?.message || 'unknown')); setBfRunning(false); return }
+    setBfTotal(all.length)
+
+    let done = 0, skipped = 0, errors = 0
+    for (const listing of all) {
+      if (bfAbort.current) { log('⏹ Stopped.'); break }
+      const images: string[] = listing.images || []
+      const existingFocus: Record<string, { x: number; y: number }> = listing.image_focus || {}
+      const newFocus = { ...existingFocus }
+      let changed = false
+
+      for (const url of images) {
+        if (!url) continue
+        if (existingFocus[url]) continue  // already has manual/auto focus — skip
+        try {
+          const img = await imageFromUrl(url)
+          const pt = await detectFocalPoint(img)
+          newFocus[url] = pt
+          changed = true
+        } catch {
+          errors++; log(`⚠ ${listing.title || listing.id}: could not load image`)
+        }
+      }
+
+      if (changed) {
+        const { error: upErr } = await supabase
+          .from('listings').update({ image_focus: newFocus }).eq('id', listing.id)
+        if (upErr) { errors++; log(`❌ ${listing.title || listing.id}: save failed`) }
+        else { done++; log(`✓ ${listing.title || listing.id}`) }
+      } else {
+        skipped++
+      }
+      setBfDone(d => d + (changed && !errors ? 1 : 0))
+      setBfSkipped(s => s + (changed ? 0 : 1))
+      setBfErrors(errors)
+    }
+
+    log(`Done — ${done} updated, ${skipped} already complete, ${errors} errors.`)
+    setBfRunning(false)
+  }
+
   async function runKeywords() {
     const keywords = kwInput.split('\n').map(s => s.trim()).filter(Boolean)
     if (keywords.length === 0) { setKwError('Enter at least one keyword (one per line).'); return }
@@ -461,7 +521,7 @@ export default function AdminPage() {
           <div>
             <h1 style={{ fontFamily: 'var(--serif)', fontWeight: 500, fontSize: '36px', color: 'var(--t, #ece8e1)', margin: 0, lineHeight: 1.1 }}>{tab}</h1>
             <div style={{ font: '300 11px/1 var(--sans)', color: 'var(--t3, #4c4a47)', marginTop: '4px', letterSpacing: '0.04em' }}>
-              {tab === 'Listings' ? `${filteredListings.length} listings` : tab === 'Users' ? `${filteredUsers.length} users` : tab === 'Newsletter' ? (search ? `${filteredNlSubs.length} of ${nlSubCount ?? '…'} subscribers` : `${nlSubCount ?? '…'} subscribers`) : tab === 'Contacts' ? `${optinContacts.length} opted-in · ${leads.length} leads` : tab === 'Acquisition' ? `${acqTotal} tracked signups · ${acq.length} sources` : tab === 'Keywords' ? `${kwResults.length ? `${kwResults.length} results` : 'SEO research'}` : `${filteredBookings.length} bookings`}
+              {tab === 'Listings' ? `${filteredListings.length} listings` : tab === 'Users' ? `${filteredUsers.length} users` : tab === 'Newsletter' ? (search ? `${filteredNlSubs.length} of ${nlSubCount ?? '…'} subscribers` : `${nlSubCount ?? '…'} subscribers`) : tab === 'Contacts' ? `${optinContacts.length} opted-in · ${leads.length} leads` : tab === 'Acquisition' ? `${acqTotal} tracked signups · ${acq.length} sources` : tab === 'Keywords' ? `${kwResults.length ? `${kwResults.length} results` : 'SEO research'}` : tab === 'Tools' ? 'Admin tools' : `${filteredBookings.length} bookings`}
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -1363,6 +1423,58 @@ export default function AdminPage() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+          {tab === 'Tools' && (
+            <div>
+              {/* ── Image Focus Backfill ── */}
+              <div style={{ background: 'var(--bg1)', border: '0.5px solid var(--b)', borderRadius: 'var(--rl)', padding: '1.5rem', marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', marginBottom: '1rem' }}>
+                  <div>
+                    <div style={{ font: '600 14px/1 var(--sans)', color: 'var(--t)', marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <i className="ti ti-focus-centered" style={{ color: 'var(--gold)' }} />
+                      Image Focus Backfill
+                    </div>
+                    <div style={{ font: '400 12.5px/1.5 var(--sans)', color: 'var(--t2)', maxWidth: 480 }}>
+                      Scans every existing listing&apos;s photos, detects where the person is using pixel analysis, and saves the focal point so thumbnails centre on them. Skips images that already have a manually or auto-set focal point.
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    {bfRunning && (
+                      <button onClick={() => { bfAbort.current = true }} style={{ padding: '9px 16px', background: 'rgba(226,83,107,0.12)', border: '0.5px solid rgba(226,83,107,0.3)', borderRadius: 9, color: '#e2536b', font: '600 12px/1 var(--sans)', cursor: 'pointer' }}>
+                        <i className="ti ti-player-stop" /> Stop
+                      </button>
+                    )}
+                    <button
+                      onClick={runFocusBackfill}
+                      disabled={bfRunning}
+                      style={{ padding: '9px 18px', background: bfRunning ? 'rgba(197,160,90,0.1)' : 'linear-gradient(90deg,#c5a05a,#e8c97a)', border: 'none', borderRadius: 9, color: bfRunning ? 'var(--gold)' : '#0a0a0a', font: '700 12px/1 var(--sans)', cursor: bfRunning ? 'default' : 'pointer', display: 'flex', alignItems: 'center', gap: 6, opacity: bfRunning ? 0.7 : 1 }}
+                    >
+                      {bfRunning ? <><div style={{ width: 12, height: 12, border: '2px solid rgba(197,160,90,0.3)', borderTopColor: 'var(--gold)', borderRadius: '50%', animation: 'adm-spin 0.8s linear infinite' }} /> Running…</> : <><i className="ti ti-sparkles" /> Run Backfill</>}
+                    </button>
+                  </div>
+                </div>
+
+                {(bfTotal > 0 || bfRunning) && (
+                  <>
+                    {/* Progress bar */}
+                    <div style={{ background: 'var(--bg2)', borderRadius: 99, height: 6, overflow: 'hidden', marginBottom: '0.75rem' }}>
+                      <div style={{ height: '100%', background: 'linear-gradient(90deg,#c5a05a,#e8c97a)', borderRadius: 99, width: bfTotal > 0 ? `${Math.round(((bfDone + bfSkipped) / bfTotal) * 100)}%` : '0%', transition: 'width 0.3s ease' }} />
+                    </div>
+                    <div style={{ display: 'flex', gap: 20, font: '600 11px/1 var(--sans)', letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--t3)', marginBottom: '1rem' }}>
+                      <span><span style={{ color: 'var(--t)', fontSize: 14 }}>{bfTotal}</span> total</span>
+                      <span><span style={{ color: '#1dc9a0', fontSize: 14 }}>{bfDone}</span> updated</span>
+                      <span><span style={{ color: 'var(--t2)', fontSize: 14 }}>{bfSkipped}</span> already set</span>
+                      {bfErrors > 0 && <span><span style={{ color: '#e2536b', fontSize: 14 }}>{bfErrors}</span> errors</span>}
+                    </div>
+
+                    {/* Log */}
+                    <div style={{ background: 'var(--bg2)', borderRadius: 10, padding: '0.75rem 1rem', maxHeight: 200, overflowY: 'auto', fontFamily: 'monospace', fontSize: 12, lineHeight: 1.7, color: 'var(--t2)' }}>
+                      {bfLog.length === 0 ? <span style={{ color: 'var(--t3)' }}>Starting…</span> : bfLog.map((l, i) => <div key={i}>{l}</div>)}
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           )}
         </div>

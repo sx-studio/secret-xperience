@@ -74,3 +74,15 @@ export function imageFromFile(file: File | Blob): Promise<HTMLImageElement> {
     img.src = url
   })
 }
+
+// Load an image URL with crossOrigin so the canvas isn't tainted.
+export function imageFromUrl(url: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+    img.onload  = () => resolve(img)
+    img.onerror = () => reject(new Error('load failed'))
+    // Strip cache-buster params that can cause CORS pre-flight issues on some CDNs.
+    img.src = url.split('?')[0]
+  })
+}
