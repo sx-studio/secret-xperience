@@ -116,7 +116,7 @@ export default function LoginPage() {
       ? `${window.location.origin}/auth/callback?role=${encodeURIComponent(role)}`
       : `${window.location.origin}/auth/callback`
     await supabase.auth.signInWithOAuth({
-      advertiser: 'google',
+      provider: 'google',
       options: { redirectTo: callbackUrl },
     })
   }

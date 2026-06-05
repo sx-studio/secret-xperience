@@ -699,16 +699,21 @@ export default function AdminPage() {
                             const role = u.role || 'user'
                             const roleStyles: Record<string, { bg: string; color: string }> = {
                               admin:    { bg: 'rgba(239,68,68,0.15)',   color: '#ef4444' },
-                              advertiser: { bg: 'rgba(197,160,90,0.15)',  color: 'var(--gold, #c5a05a)' },
+                              provider: { bg: 'rgba(197,160,90,0.15)',  color: 'var(--gold, #c5a05a)' },
                               venue:    { bg: 'rgba(99,102,241,0.15)',  color: '#818cf8' },
                               creator:  { bg: 'rgba(168,85,247,0.15)', color: '#c084fc' },
                               user:     { bg: 'rgba(255,255,255,0.06)', color: 'var(--t2, #8c8880)' },
                             }
+                            const roleLabels: Record<string, string> = { provider: 'Advertiser', user: 'Member', venue: 'Venue', creator: 'Creator', admin: 'Admin' }
                             const s = roleStyles[role] || roleStyles.user
-                            return <span style={{ display: 'inline-block', background: s.bg, color: s.color, padding: '2px 8px', borderRadius: '20px', font: '600 10px/1.4 var(--sans)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{role}</span>
+                            return <span style={{ display: 'inline-block', background: s.bg, color: s.color, padding: '2px 8px', borderRadius: '20px', font: '600 10px/1.4 var(--sans)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{roleLabels[role] || role}</span>
                           })()}
-                          <select value={u.role || 'user'} onChange={e => setUserRole(u.id, e.target.value)} style={{ background: 'var(--bg2, #151515)', border: '0.5px solid var(--b2, rgba(255,255,255,0.1))', borderRadius: 'var(--r, 6px)', color: 'var(--t, #ece8e1)', padding: '5px 10px', font: '400 12px/1 var(--sans)', cursor: 'pointer', outline: 'none', width: '100px' }}>
-                            {['user', 'provider', 'venue', 'creator', 'admin'].map(r => <option key={r} value={r}>{r}</option>)}
+                          <select value={u.role || 'user'} onChange={e => setUserRole(u.id, e.target.value)} style={{ background: 'var(--bg2, #151515)', border: '0.5px solid var(--b2, rgba(255,255,255,0.1))', borderRadius: 'var(--r, 6px)', color: 'var(--t, #ece8e1)', padding: '5px 10px', font: '400 12px/1 var(--sans)', cursor: 'pointer', outline: 'none', width: '110px' }}>
+                            <option value="user">Member</option>
+                            <option value="provider">Advertiser</option>
+                            <option value="venue">Venue</option>
+                            <option value="creator">Creator</option>
+                            <option value="admin">Admin</option>
                           </select>
                         </div>
                       </td>

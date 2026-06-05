@@ -49,13 +49,29 @@ export default function GoLivePage() {
   useEffect(() => {
     if (gate !== 'verified' || phase !== 'setup') return
     let cancelled = false
-    navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: true })
+    // Request video + audio together so the browser prompts for both at once.
+    // Use ideal constraints (not exact) so mobile cameras aren't rejected.
+    const videoConstraints: MediaTrackConstraints = {
+      facingMode: 'user',
+      width: { ideal: 1280 },
+      height: { ideal: 720 },
+    }
+    navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: true })
       .then(stream => {
         if (cancelled) { stream.getTracks().forEach(t => t.stop()); return }
         previewStream.current = stream
         if (videoRef.current) { videoRef.current.srcObject = stream; videoRef.current.muted = true; videoRef.current.play().catch(() => {}) }
       })
-      .catch(() => setError('Camera/microphone access was blocked. Allow access in your browser to go live.'))
+      .catch(() => {
+        // Fallback: try minimal constraints in case the ideal ones failed
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+          .then(stream => {
+            if (cancelled) { stream.getTracks().forEach(t => t.stop()); return }
+            previewStream.current = stream
+            if (videoRef.current) { videoRef.current.srcObject = stream; videoRef.current.muted = true; videoRef.current.play().catch(() => {}) }
+          })
+          .catch(() => setError('Camera and microphone access is required to go live. Please allow both in your browser settings.'))
+      })
     return () => {
       cancelled = true
       // Don't tear down the camera when we're transitioning into the live room.
