@@ -223,7 +223,7 @@ export default function CreateListingPage() {
     if (form.videos.length + uploadingVideos.filter(v => v.loading).length >= 3) return
     const allowed = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo', 'video/mpeg']
     if (!allowed.includes(file.type)) { alert(`${file.name} is not a supported format (MP4, WebM, MOV).`); return }
-    if (file.size > 100 * 1024 * 1024) { alert(`${file.name} exceeds the 100 MB limit.`); return }
+    if (file.size > 500 * 1024 * 1024) { alert(`${file.name} exceeds the 500 MB limit.`); return }
     const uid = Math.random().toString(36).slice(2)
     setUploadingVideos(prev => [...prev, { id: uid, name: file.name, loading: true }])
     try {
@@ -239,7 +239,7 @@ export default function CreateListingPage() {
 
       // Upload directly to Supabase Storage via the signed URL.
       const supabase = createClient()
-      const { error } = await supabase.storage.from('listings').uploadToSignedUrl(urlData.path, urlData.token, file, { contentType: file.type })
+      const { error } = await supabase.storage.from('videos').uploadToSignedUrl(urlData.path, urlData.token, file, { contentType: file.type })
       if (error) throw error
 
       setForm(f => ({ ...f, videos: [...f.videos, urlData.publicUrl] }))
@@ -1734,7 +1734,7 @@ export default function CreateListingPage() {
               {/* ── Video upload ── */}
               <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '0.5px solid rgba(255,255,255,0.07)' }}>
                 <h3 style={{ fontFamily: 'var(--sans)', fontSize: 14, fontWeight: 600, color: 'var(--t2)', marginBottom: '0.75rem', letterSpacing: '0.04em' }}>
-                  Videos <span style={{ fontWeight: 300, fontSize: 12, color: 'var(--t3)', marginLeft: 6 }}>optional · up to 3 · MP4 / WebM / MOV · 100 MB each</span>
+                  Videos <span style={{ fontWeight: 300, fontSize: 12, color: 'var(--t3)', marginLeft: 6 }}>optional · up to 3 · MP4 / WebM / MOV · 500 MB each</span>
                 </h3>
                 <input
                   ref={videoInputRef}

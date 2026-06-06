@@ -3,8 +3,8 @@ import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
-const ALLOWED = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo', 'video/mpeg']
-const MAX_BYTES = 100 * 1024 * 1024  // 100 MB
+const ALLOWED = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo', 'video/mpeg', 'video/3gpp', 'video/3gpp2']
+const MAX_BYTES = 500 * 1024 * 1024  // 500 MB
 
 export async function POST(req: Request) {
   const cookieStore = cookies()
@@ -20,10 +20,12 @@ export async function POST(req: Request) {
   if (!contentType || !ALLOWED.includes(contentType))
     return NextResponse.json({ error: 'Unsupported video format (MP4, WebM, MOV).' }, { status: 400 })
   if (size && size > MAX_BYTES)
-    return NextResponse.json({ error: 'File exceeds 100 MB limit.' }, { status: 400 })
+    return NextResponse.json({ error: 'File exceeds 500 MB limit.' }, { status: 400 })
 
   const ext = (filename as string | undefined)?.split('.').pop()?.toLowerCase() ?? 'mp4'
-  const path = `listings/${session.user.id}/videos/${crypto.randomUUID()}.${ext}`
+  // Use a dedicated 'videos' bucket (no MIME restrictions, 500 MB limit).
+  // Path still starts with user id so RLS policy can scope to the owner.
+  const path = `${session.user.id}/${crypto.randomUUID()}.${ext}`
 
   const admin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -31,10 +33,10 @@ export async function POST(req: Request) {
     { auth: { autoRefreshToken: false, persistSession: false } }
   )
 
-  const { data, error } = await admin.storage.from('listings').createSignedUploadUrl(path)
+  const { data, error } = await admin.storage.from('videos').createSignedUploadUrl(path)
   if (error || !data)
     return NextResponse.json({ error: error?.message || 'Could not create upload URL' }, { status: 500 })
 
-  const publicUrl = admin.storage.from('listings').getPublicUrl(path).data.publicUrl
+  const publicUrl = admin.storage.from('videos').getPublicUrl(path).data.publicUrl
   return NextResponse.json({ signedUrl: data.signedUrl, token: data.token, path, publicUrl })
 }
