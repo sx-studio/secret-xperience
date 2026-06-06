@@ -221,21 +221,28 @@ export default function CreateListingPage() {
 
   const uploadVideo = useCallback(async (file: File) => {
     if (form.videos.length + uploadingVideos.filter(v => v.loading).length >= 3) return
-    const allowed = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo']
+    const allowed = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo', 'video/mpeg']
     if (!allowed.includes(file.type)) { alert(`${file.name} is not a supported format (MP4, WebM, MOV).`); return }
     if (file.size > 100 * 1024 * 1024) { alert(`${file.name} exceeds the 100 MB limit.`); return }
     const uid = Math.random().toString(36).slice(2)
     setUploadingVideos(prev => [...prev, { id: uid, name: file.name, loading: true }])
     try {
+      // Get a signed upload URL from the server (service-role, bypasses storage RLS
+      // and Vercel's 4.5 MB body limit — file goes directly to Supabase Storage).
+      const urlRes = await fetch('/api/upload-video-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contentType: file.type, size: file.size, filename: file.name }),
+      })
+      const urlData = await urlRes.json()
+      if (!urlRes.ok) throw new Error(urlData.error || 'Could not get upload URL')
+
+      // Upload directly to Supabase Storage via the signed URL.
       const supabase = createClient()
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) throw new Error('Not authenticated')
-      const ext = file.name.split('.').pop()?.toLowerCase() ?? 'mp4'
-      const path = `listings/${session.user.id}/videos/${crypto.randomUUID()}.${ext}`
-      const { error } = await supabase.storage.from('listings').upload(path, file, { contentType: file.type, upsert: false })
+      const { error } = await supabase.storage.from('listings').uploadToSignedUrl(urlData.path, urlData.token, file, { contentType: file.type })
       if (error) throw error
-      const { data: { publicUrl } } = supabase.storage.from('listings').getPublicUrl(path)
-      setForm(f => ({ ...f, videos: [...f.videos, publicUrl] }))
+
+      setForm(f => ({ ...f, videos: [...f.videos, urlData.publicUrl] }))
       setUploadingVideos(prev => prev.filter(v => v.id !== uid))
     } catch (err: any) {
       setUploadingVideos(prev => prev.map(v => v.id === uid ? { ...v, loading: false, error: err.message } : v))
@@ -1766,9 +1773,9 @@ export default function CreateListingPage() {
                       </div>
                     ))}
                     {uploadingVideos.map(v => (
-                      <div key={v.id} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.04)', border: '0.5px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: '10px 14px' }}>
-                        <i className="ti ti-video" style={{ color: 'var(--t3)', fontSize: 16, flexShrink: 0 }} />
-                        <span style={{ flex: 1, fontSize: 12, color: 'var(--t3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v.name}</span>
+                      <div key={v.id} style={{ display: 'flex', alignItems: 'center', gap: 10, background: v.error ? 'rgba(226,83,107,0.07)' : 'rgba(255,255,255,0.04)', border: `0.5px solid ${v.error ? 'rgba(226,83,107,0.3)' : 'rgba(255,255,255,0.08)'}`, borderRadius: 10, padding: '10px 14px' }}>
+                        <i className={`ti ${v.error ? 'ti-alert-circle' : 'ti-video'}`} style={{ color: v.error ? '#e2536b' : 'var(--t3)', fontSize: 16, flexShrink: 0 }} />
+                        <span style={{ flex: 1, fontSize: 12, color: v.error ? '#e2536b' : 'var(--t3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v.error ? `${v.name} — ${v.error}` : v.name}</span>
                         {v.loading ? (
                           <div style={{ width: 16, height: 16, border: '2px solid rgba(197,160,90,0.25)', borderTop: '2px solid #c5a05a', borderRadius: '50%', animation: 'spin 0.8s linear infinite', flexShrink: 0 }} />
                         ) : (
