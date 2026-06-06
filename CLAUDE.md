@@ -2,6 +2,12 @@
 
 Read this at the start of every session. Update as state changes.
 
+## ⚠️ Payment processor compliance — VERIFIED FACTS (do NOT paraphrase from memory; these are quoted from actual vendor emails, 2026-06)
+- **Verotel** — WILL process escort sites, but ONLY if escorts is the sole vertical. Verbatim (email from Mathilda, Yoursafe/Verotel CES, 2026-06): *"We unfortunately do not process for websites that combine escorts with any other services. Websites with escort listings may be the only service offered on such websites."* Also explicitly refuses these categories entirely: **Massage, Nightlife, Rentals, Hotels, Events**. Physical goods (Shop) capped at 30% (rest must be digital), and goods must be hosted on own site — third-party links only allowed to own social (X, Instagram). Acceptable single-vertical shapes they listed: escort listings / content creation / pics & clips / dating & AI companionship. **NET: Verotel = YES for an escorts-only site, NO for the current multi-vertical site.**
+- **CCBill** — FLAT NO for escorts, regardless of site structure. Verbatim (email from Mili Torres, Sales Development, CCBill, milit@ccbill.com): *"Unfortunately, we do not provide payment services for any escort sites."* **NET: CCBill = dead end for escorts. Do not pursue for this site.**
+- **DECISION STILL OPEN (as of 2026-06-06)**: narrow site to escorts-only (Verotel approves) vs. keep multi-vertical and pursue a high-risk processor. User is thinking it over — do NOT make site-structure changes until they decide.
+- **Accuracy rule for this project**: when a claim depends on what a vendor said, quote the source text and separate "what they wrote" from "my interpretation." Flag general-industry reasoning (fallible) vs. facts from documents the user provided (verifiable).
+
 ## What this is
 Premium adult services marketplace for the EU (BE/NL/DE/FR/LU primary).
 Live at **secretxperience.eu** (and www.secretxperience.eu). Owner email: heyokanaga@gmail.com.
@@ -48,7 +54,7 @@ What was done:
 What's next (user hasn't asked for these yet, don't do proactively):
 - The category pages (escorts, nightlife, etc.) have their own card components — they may also need the same mobile 2-col + slider treatment if user requests it
 - Pending Supabase migrations still need to be applied (see Pending section)
-- CCBill — do NOT mention, waiting on credentials
+- CCBill — DECLINED escorts entirely (2026-06, see top "Payment processor compliance" section). Dead end, do not pursue.
 
 ---
 
@@ -145,7 +151,7 @@ What's next (user hasn't asked for these yet, don't do proactively):
   - `20250521_search_indexes.sql` (requires pg_trgm)
   - `20250521_bookings.sql` (if bookings table doesn't exist yet)
   - `20250521_messages.sql` (if messages table doesn't exist yet)
-- **CCBill integration** — blocked on credentials. Do NOT bring up unless user mentions it first.
+- **CCBill integration** — ABANDONED. CCBill declined escorts entirely (2026-06). The dead `app/api/ccbill/*` routes can be removed whenever convenient.
 - **Stripcash affiliate verification** — draft email response is ready (in chat history), waiting for user to send.
 - **secretxperience.eu deployment visibility** — user has reported latest changes sometimes don't appear; could be browser cache (Ctrl+Shift+R) or Vercel domain alias issue.
 
@@ -163,7 +169,7 @@ What's next (user hasn't asked for these yet, don't do proactively):
 ## Constraints / things NOT to do
 - Don't push to non-main branches without explicit permission
 - Don't install local CLIs in this container — it's ephemeral, they won't survive
-- Don't bring up CCBill — waiting on credentials
+- CCBill declined escorts (2026-06) — it's a dead end, not a pending lead
 - Don't claim a UI change works without verifying (user has called this out before)
 - Don't add comments explaining "what" the code does — only "why" if non-obvious
 
