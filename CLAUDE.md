@@ -7,6 +7,16 @@ Read this at the start of every session. Update as state changes.
 - **CCBill** — FLAT NO for escorts, regardless of site structure. Verbatim (email from Mili Torres, Sales Development, CCBill, milit@ccbill.com): *"Unfortunately, we do not provide payment services for any escort sites."* **NET: CCBill = dead end for escorts. Do not pursue for this site.**
 - **DECISION STILL OPEN (as of 2026-06-06)**: narrow site to escorts-only (Verotel approves) vs. keep multi-vertical and pursue a high-risk processor. User is thinking it over — do NOT make site-structure changes until they decide.
 - **Accuracy rule for this project**: when a claim depends on what a vendor said, quote the source text and separate "what they wrote" from "my interpretation." Flag general-industry reasoning (fallible) vs. facts from documents the user provided (verifiable).
+- **Research rule**: always use WebSearch (and WebFetch / gstack browser where accessible) to verify processor claims before recommending them. Do not rely on training-data memory for processor policies.
+
+## Payment processor research — brokers/ISOs (researched 2026-06-06 via WebSearch)
+Direct adult PSPs (Verotel, CCBill, Segpay, Vendo) are NOT the right channel for a multi-vertical escort-listing site. The realistic path is a **high-risk broker/ISO** that places you with an acquiring bank. Key findings:
+- **QuadraPay** — explicitly covers escort *listing* sites, EU/SEPA acquiring with 1–2 day SEPA settlement to European bank account. Confirmed reseller/ISO (not direct processor). Active thread: initial outreach sent and replied; our pre-approval response sent 2026-06-06. Full thread in `docs/processor-outreach.md`. Their own site candidly notes: *"Globally, the escort listing industry is gradually decreasing... it's no longer a potential industry for most acquiring banks"* — honest market signal. Source: https://quadrapay.com/escort-merchant-account/
+- **Instabill** — advertises escort accounts, 160+ currencies, EU + offshore. However, documented reviewer reports: applied with full docs, then *"declined... Instabill DON'T support adult sites, dating sites, or escort sites"* — treat as a maybe, not a yes. Not yet contacted. Source: https://instabill.com/ecommerce-industries/escort-merchant-accounts/
+- **Merchant Advice Service** — UK broker, covers EU, places escort/adult merchants. Not yet contacted.
+- **Segpay / Vendo** — markets as "adult/dating" but does NOT explicitly confirm escort listing acceptance. Do not assume from their adult marketing pages.
+- **Key framing for all applications**: we charge for B2B advertising credits (tokens), not escort bookings. Escort/companionship = meetup-request only, zero on-platform payment. This is the compliance story that differentiates us from a booking platform. Lead with it.
+- **Crypto fallback**: no processor can decline crypto. NOWPayments / BTCPay Server can wire into the existing token/wallet flow as a parallel rail. Recommend as backup regardless of which broker approves.
 
 ## What this is
 Premium adult services marketplace for the EU (BE/NL/DE/FR/LU primary).
