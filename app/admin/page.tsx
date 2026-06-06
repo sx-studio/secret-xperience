@@ -154,6 +154,7 @@ export default function AdminPage() {
         Contacts:     (leadsr.data || []).filter((l: any) => new Date(l.created_at).getTime() > seenContacts).length,
         Acquisition:  0,
         Keywords:     0,
+        Tools:        0,
       })
       // Mark the initial active tab as seen immediately
       saveLastSeen('Listings')
@@ -441,17 +442,23 @@ export default function AdminPage() {
           .adm-shell { flex-direction: column !important; }
           .adm-sidebar {
             width: 100% !important; height: auto !important;
-            position: static !important; border-right: none !important;
+            position: sticky !important; top: 0 !important; z-index: 50 !important;
+            border-right: none !important;
             border-bottom: 0.5px solid var(--b, rgba(255,255,255,0.06)) !important;
-            flex-direction: row !important; align-items: center !important;
+            flex-direction: column !important;
             padding: 0 !important;
           }
           .adm-sidebar-brand { display: none !important; }
-          .adm-sidebar-footer { display: none !important; }
+          .adm-sidebar-footer {
+            display: flex !important;
+            padding: 8px 12px !important;
+            border-top: 0.5px solid var(--b, rgba(255,255,255,0.06)) !important;
+          }
+          .adm-sidebar-footer button { width: auto !important; padding: 6px 14px !important; font-size: 12px !important; }
           .adm-sidebar nav { flex-direction: row !important; overflow-x: auto !important; padding: 0 !important; flex: 1; display: flex; scrollbar-width: none; }
           .adm-sidebar nav::-webkit-scrollbar { display: none; }
           .adm-tab-btn {
-            padding: 14px 16px !important; white-space: nowrap;
+            padding: 12px 14px !important; white-space: nowrap;
             border-left: none !important; border-bottom: 2px solid transparent !important;
             font-size: 12px !important; flex-shrink: 0 !important;
           }
