@@ -214,6 +214,10 @@ export default function CreateListingPage() {
   const [isDragging, setIsDragging]           = useState(false)
   const [draftBanner, setDraftBanner]         = useState(false)
   const [draftSaved, setDraftSaved]           = useState(false)
+  // Autosave stays OFF until we know there's no pending draft to restore (or
+  // the user has resumed/dismissed it). Otherwise the empty initial form would
+  // immediately overwrite a saved draft before the user can click "Resume".
+  const autosaveOn = useRef(false)
   const fileInputRef    = useRef<HTMLInputElement>(null)
   const videoInputRef   = useRef<HTMLInputElement>(null)
   const [uploadingVideos, setUploadingVideos] = useState<{ id: string; name: string; loading: boolean; error?: string }[]>([])
@@ -227,22 +231,24 @@ export default function CreateListingPage() {
     const uid = Math.random().toString(36).slice(2)
     setUploadingVideos(prev => [...prev, { id: uid, name: file.name, loading: true }])
     try {
-      // Get a signed upload URL from the server (service-role, bypasses storage RLS
-      // and Vercel's 4.5 MB body limit — file goes directly to Supabase Storage).
-      const urlRes = await fetch('/api/upload-video-url', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contentType: file.type, size: file.size, filename: file.name }),
-      })
-      const urlData = await urlRes.json()
-      if (!urlRes.ok) throw new Error(urlData.error || 'Could not get upload URL')
-
-      // Upload directly to Supabase Storage via the signed URL.
+      // Upload directly from the browser to the dedicated 'videos' bucket using
+      // the user's own auth session. Direct browser→Supabase upload bypasses
+      // Vercel's 4.5 MB body limit; the bucket's RLS policy ("Users upload own
+      // videos") lets an authenticated user write to their own /<uid>/ folder.
       const supabase = createClient()
-      const { error } = await supabase.storage.from('videos').uploadToSignedUrl(urlData.path, urlData.token, file, { contentType: file.type })
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('Your session expired — please sign in again.')
+
+      const ext = (file.name.split('.').pop() || 'mp4').toLowerCase()
+      const path = `${session.user.id}/${crypto.randomUUID()}.${ext}`
+
+      const { error } = await supabase.storage
+        .from('videos')
+        .upload(path, file, { contentType: file.type, upsert: false })
       if (error) throw error
 
-      setForm(f => ({ ...f, videos: [...f.videos, urlData.publicUrl] }))
+      const publicUrl = supabase.storage.from('videos').getPublicUrl(path).data.publicUrl
+      setForm(f => ({ ...f, videos: [...f.videos, publicUrl] }))
       setUploadingVideos(prev => prev.filter(v => v.id !== uid))
     } catch (err: any) {
       setUploadingVideos(prev => prev.map(v => v.id === uid ? { ...v, loading: false, error: err.message } : v))
@@ -284,11 +290,13 @@ export default function CreateListingPage() {
       const { data: w } = await supabase
         .from('user_wallets').select('balance').eq('user_id', session.user.id).maybeSingle()
       setWallet(w)
-      // Check for saved draft
+      // Check for saved draft. If one exists, hold autosave until the user
+      // resumes or dismisses it; otherwise enable autosave right away.
       try {
         const saved = localStorage.getItem('sx_listing_draft')
         if (saved) setDraftBanner(true)
-      } catch(e) {}
+        else autosaveOn.current = true
+      } catch(e) { autosaveOn.current = true }
     }
     load()
   }, [])
@@ -314,11 +322,15 @@ export default function CreateListingPage() {
       }))
       setStep(savedStep || 1)
       setDraftBanner(false)
-    } catch(e) { setDraftBanner(false) }
+      autosaveOn.current = true
+    } catch(e) { setDraftBanner(false); autosaveOn.current = true }
   }
 
-  // Autosave to localStorage on every form/step change
+  // Autosave to localStorage on every form/step change (once enabled — see
+  // autosaveOn). Skipping the initial render protects a saved draft from being
+  // clobbered by the empty starting form before the user can resume it.
   useEffect(() => {
+    if (!autosaveOn.current) return
     try {
       localStorage.setItem('sx_listing_draft', JSON.stringify({ step, form }))
     } catch(e) {}
@@ -527,6 +539,7 @@ export default function CreateListingPage() {
     }).select('id').single()
 
     if (err) { setError(err.message); setLoading(false); return }
+    autosaveOn.current = false
     try { localStorage.removeItem('sx_listing_draft') } catch(e) {}
 
     // Trigger AI moderation (non-blocking — listing stays pending until resolved)
@@ -1014,7 +1027,7 @@ export default function CreateListingPage() {
               <span style={{ color: 'var(--t2, rgba(255,255,255,0.55))', fontWeight: 300 }}>Resume draft? You have unsaved progress.</span>
               <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                 <button type="button" onClick={restoreDraft} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--gold, #c5a05a)', fontSize: '13px', fontFamily: 'var(--sans, "Poppins", sans-serif)', fontWeight: 500, padding: 0 }}>Resume</button>
-                <button type="button" onClick={() => { localStorage.removeItem('sx_listing_draft'); setDraftBanner(false) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--t3, rgba(255,255,255,0.25))', fontSize: '13px', fontFamily: 'var(--sans, "Poppins", sans-serif)', fontWeight: 300, padding: 0 }}>Dismiss</button>
+                <button type="button" onClick={() => { localStorage.removeItem('sx_listing_draft'); setDraftBanner(false); autosaveOn.current = true }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--t3, rgba(255,255,255,0.25))', fontSize: '13px', fontFamily: 'var(--sans, "Poppins", sans-serif)', fontWeight: 300, padding: 0 }}>Dismiss</button>
               </div>
             </div>
           )}
