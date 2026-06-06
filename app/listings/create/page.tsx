@@ -526,7 +526,7 @@ export default function CreateListingPage() {
       meet_type:       form.meet_type,
       website:         (() => { try { const u = new URL(form.website.trim()); return ['https:', 'http:'].includes(u.protocol) ? u.href : null } catch { return null } })(),
       images:          form.images.length > 0 ? form.images : null,
-      image_focus:     Object.keys(form.image_focus).length > 0 ? form.image_focus : null,
+      image_focus:     form.image_focus || {},
       videos:          form.videos.length > 0 ? form.videos : null,
       tags:            finalTags.length > 0 ? finalTags : null,
       services:        POSSIBILITY_CATEGORIES.has(form.category) && form.services.length > 0 ? form.services : null,
