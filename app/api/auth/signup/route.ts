@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
   try {
     const { email, password, fullName, role, newsletter, ref } = await request.json()
 
-    const VALID_ROLES = ['client', 'provider']
+    const VALID_ROLES = ['client', 'provider', 'user', 'venue', 'creator']
     if (!email || !password || !role) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
