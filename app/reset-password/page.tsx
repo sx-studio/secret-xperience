@@ -12,19 +12,57 @@ export default function ResetPasswordPage() {
   const [ready, setReady]       = useState(false)
   const [done, setDone]         = useState(false)
 
-  // The reset link drops the user here with a recovery session in the URL hash.
+  // The reset link drops the user here with recovery credentials either in the
+  // URL hash (implicit flow) or as ?code= (PKCE). Both are processed async by
+  // the client, so never declare the link dead on first look — listen for the
+  // auth event and poll briefly before giving up.
   useEffect(() => {
     const supabase = createClient()
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) setReady(true)
-      else setError('This reset link is invalid or has expired. Request a new one from the login page.')
+    let settled = false
+
+    // Supabase reports link problems in the hash, e.g. #error_description=...
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''))
+    const hashError = hashParams.get('error_description')
+    if (hashError) {
+      setError(decodeURIComponent(hashError.replace(/\+/g, ' ')) + ' — request a new link from the login page.')
+      return
+    }
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session && (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+        settled = true
+        setReady(true)
+        setError('')
+      }
     })
+
+    // PKCE flow: exchange ?code= explicitly in case detectSessionInUrl missed it.
+    const code = new URLSearchParams(window.location.search).get('code')
+    const bootstrap = async () => {
+      const { data } = await supabase.auth.getSession()
+      if (data.session) { settled = true; setReady(true); return }
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code)
+        if (!error) { settled = true; setReady(true); return }
+      }
+    }
+    bootstrap()
+
+    // Give async URL detection a few seconds before declaring the link invalid.
+    const timer = setTimeout(async () => {
+      if (settled) return
+      const { data } = await supabase.auth.getSession()
+      if (data.session) { setReady(true); return }
+      setError('This reset link is invalid or has expired. Request a new one from the login page.')
+    }, 3500)
+
+    return () => { subscription.unsubscribe(); clearTimeout(timer) }
   }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
-    if (password.length < 6) { setError('Password must be at least 6 characters.'); return }
+    if (password.length < 8) { setError('Password must be at least 8 characters.'); return }
     if (password !== confirm) { setError('The two passwords don’t match.'); return }
     setLoading(true)
     const supabase = createClient()
