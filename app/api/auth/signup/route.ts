@@ -117,7 +117,7 @@ async function sendWelcomeEmail(email: string, name: string, role: string) {
     console.warn('[welcome-email] RESEND_API_KEY not set — skipping welcome email for', email)
     return
   }
-  const isAdvertiser = role === 'provider'
+  const isAdvertiser = ['provider', 'venue', 'creator'].includes(role)
   const subject = isAdvertiser
     ? 'Welcome to SecretXperience — let\'s get your first listing live'
     : 'Welcome in — your invitation to SecretXperience'
@@ -169,9 +169,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: authError.message }, { status: 400 })
     }
 
+    const newUserId = created?.user?.id
+
+    // Guarantee the profile row carries the chosen role — the auth trigger
+    // creates the row but may not copy role from user_metadata.
+    if (newUserId) {
+      try {
+        await supabase.from('profiles').upsert(
+          { id: newUserId, email: email.toLowerCase().trim(), full_name: fullName || null, role },
+          { onConflict: 'id' }
+        )
+      } catch { /* trigger-created row still exists; don't block signup */ }
+    }
+
     // Referral attribution — record a pending conversion against the referrer.
     // The reward fires later via DB trigger when this user publishes a listing.
-    const newUserId = created?.user?.id
     if (ref && typeof ref === 'string' && newUserId) {
       try {
         const { data: rc } = await supabase

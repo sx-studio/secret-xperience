@@ -1425,8 +1425,8 @@ export default function DashboardPage() {
 
           {/* Phone verification temporarily disabled */}
 
-          {/* ── Role Selector (members only) ── */}
-          {profile?.role === 'user' && (
+          {/* ── Role Selector (members only) — 'client' is the legacy member value */}
+          {(profile?.role === 'user' || profile?.role === 'client') && (
             <div className="db-card" style={{ marginBottom: '1.5rem', border: '0.5px solid var(--gbrd, rgba(197,160,90,0.25))' }}>
               <div style={{ marginBottom: '1rem' }}>
                 <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--t)', marginBottom: '4px' }}>How do you want to use SecretXperience?</div>
@@ -1913,7 +1913,7 @@ export default function DashboardPage() {
               >
                 Edit profile
               </button>
-              {profile?.role && profile.role !== 'user' && (
+              {profile?.role && profile.role !== 'user' && profile.role !== 'client' && (
                 <button
                   className="db-quick-btn-dark"
                   onClick={() => {
@@ -1939,7 +1939,7 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Privacy Settings card ── */}
-      {profile?.role && profile.role !== 'user' && (
+      {profile?.role && profile.role !== 'user' && profile.role !== 'client' && (
         <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 1.5rem 2rem' }}>
           <div className="db-card">
             <div style={{ marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: 10 }}>
