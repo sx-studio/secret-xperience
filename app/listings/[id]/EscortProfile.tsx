@@ -33,6 +33,8 @@ interface EscortProfileProps {
     verified: boolean
     premium: boolean
     profile_id: string
+    contact_phone?: string | null
+    whatsapp_optin?: boolean | null
     profile: {
       full_name: string | null
       username: string | null
@@ -508,28 +510,37 @@ export default function EscortProfile({
         {/* ══ RIGHT SIDEBAR ══ */}
         <div style={{ position: 'sticky', top: '80px', display: 'flex', flexDirection: 'column' }}>
 
-          {/* Verified contact numbers */}
+          {/* Contact numbers */}
           {(() => {
             const p = listing.profile || ({} as any)
-            const showPhone = p.phone && p.phone_verified && p.show_phone !== false
-            const showWa    = p.whatsapp && p.whatsapp_verified && p.show_whatsapp !== false
-            if (!showPhone && !showWa) return null
-            const waDigits = showWa ? String(p.whatsapp).replace(/[^0-9]/g, '') : ''
+            // Profile phone (verified or not), unless advertiser explicitly hid it
+            const phoneNum  = p.show_phone === false ? null : (p.phone || listing.contact_phone || null)
+            const phoneVerified = !!(p.phone && p.phone_verified)
+            // WhatsApp: verified profile WA, or fall back to contact_phone when whatsapp_optin
+            const waNum     = p.show_whatsapp === false ? null
+              : (p.whatsapp || (listing.whatsapp_optin ? (p.phone || listing.contact_phone) : null) || null)
+            const waVerified = !!(p.whatsapp && p.whatsapp_verified)
+            const waDigits  = waNum ? String(waNum).replace(/[^0-9]/g, '') : ''
+            if (!phoneNum && !waNum) return null
             return (
               <div className="rl-scard">
                 <div className="rl-section-title" style={{ fontSize: '10px' }}>Contact</div>
-                {showPhone && (
-                  <a href={`tel:${p.phone}`} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 0', textDecoration: 'none', color: C.t }}>
+                {phoneNum && (
+                  <a href={`tel:${phoneNum}`} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 0', textDecoration: 'none', color: C.t }}>
                     <span style={{ fontSize: '17px' }}>📞</span>
-                    <span style={{ fontSize: '15px', fontFamily: "'Poppins',sans-serif", letterSpacing: '0.02em' }}>{p.phone}</span>
-                    <span title="Verified number" style={{ marginLeft: 'auto', fontSize: '10px', fontWeight: 700, color: C.green, background: 'rgba(38,212,160,0.12)', border: `0.5px solid ${C.green}55`, borderRadius: '20px', padding: '2px 8px' }}>✓</span>
+                    <span style={{ fontSize: '15px', fontFamily: "'Poppins',sans-serif", letterSpacing: '0.02em' }}>{phoneNum}</span>
+                    {phoneVerified && (
+                      <span title="Verified number" style={{ marginLeft: 'auto', fontSize: '10px', fontWeight: 700, color: C.green, background: 'rgba(38,212,160,0.12)', border: `0.5px solid ${C.green}55`, borderRadius: '20px', padding: '2px 8px' }}>✓</span>
+                    )}
                   </a>
                 )}
-                {showWa && (
-                  <a href={`https://wa.me/${waDigits}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 0', borderTop: showPhone ? `0.5px solid ${C.b}` : 'none', textDecoration: 'none', color: C.t }}>
+                {waNum && (
+                  <a href={`https://wa.me/${waDigits}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 0', borderTop: phoneNum ? `0.5px solid ${C.b}` : 'none', textDecoration: 'none', color: C.t }}>
                     <span style={{ fontSize: '17px' }}>🟢</span>
                     <span style={{ fontSize: '15px', fontFamily: "'Poppins',sans-serif", letterSpacing: '0.02em' }}>WhatsApp</span>
-                    <span title="Verified WhatsApp" style={{ marginLeft: 'auto', fontSize: '10px', fontWeight: 700, color: C.green, background: 'rgba(38,212,160,0.12)', border: `0.5px solid ${C.green}55`, borderRadius: '20px', padding: '2px 8px' }}>✓</span>
+                    {waVerified && (
+                      <span title="Verified WhatsApp" style={{ marginLeft: 'auto', fontSize: '10px', fontWeight: 700, color: C.green, background: 'rgba(38,212,160,0.12)', border: `0.5px solid ${C.green}55`, borderRadius: '20px', padding: '2px 8px' }}>✓</span>
+                    )}
                   </a>
                 )}
               </div>

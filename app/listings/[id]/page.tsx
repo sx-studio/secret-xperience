@@ -961,6 +961,36 @@ export default function ListingDetailPage() {
                   </div>
                 </div>
 
+                {/* Phone / WhatsApp */}
+                {(() => {
+                  const p = prof as any
+                  const phoneNum = p?.show_phone === false ? null : (p?.phone || (listing as any).contact_phone || null)
+                  const phoneVerified = !!(p?.phone && p?.phone_verified)
+                  const waNum = p?.show_whatsapp === false ? null
+                    : (p?.whatsapp || ((listing as any).whatsapp_optin ? (p?.phone || (listing as any).contact_phone) : null) || null)
+                  const waVerified = !!(p?.whatsapp && p?.whatsapp_verified)
+                  const waDigits = waNum ? String(waNum).replace(/[^0-9]/g, '') : ''
+                  if (!phoneNum && !waNum) return null
+                  return (
+                    <div style={{ borderTop: '0.5px solid rgba(255,255,255,0.07)', paddingTop: '1rem', marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {phoneNum && (
+                        <a href={`tel:${phoneNum}`} style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', color: '#ece8e1', fontFamily: "'Poppins',sans-serif", fontSize: '14px' }}>
+                          <span style={{ fontSize: '16px' }}>📞</span>
+                          <span style={{ letterSpacing: '0.02em' }}>{phoneNum}</span>
+                          {phoneVerified && <span style={{ marginLeft: 'auto', fontSize: '10px', fontWeight: 700, color: '#1dc98f', background: 'rgba(29,201,143,0.1)', border: '0.5px solid rgba(29,201,143,0.35)', borderRadius: '20px', padding: '2px 7px' }}>✓</span>}
+                        </a>
+                      )}
+                      {waNum && (
+                        <a href={`https://wa.me/${waDigits}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', color: '#ece8e1', fontFamily: "'Poppins',sans-serif", fontSize: '14px' }}>
+                          <span style={{ fontSize: '16px' }}>🟢</span>
+                          <span>WhatsApp</span>
+                          {waVerified && <span style={{ marginLeft: 'auto', fontSize: '10px', fontWeight: 700, color: '#1dc98f', background: 'rgba(29,201,143,0.1)', border: '0.5px solid rgba(29,201,143,0.35)', borderRadius: '20px', padding: '2px 7px' }}>✓</span>}
+                        </a>
+                      )}
+                    </div>
+                  )
+                })()}
+
                 {/* View profile link — only when there's a real advertiser */}
                 {listing.profile_id && (
                   <a
@@ -984,6 +1014,7 @@ export default function ListingDetailPage() {
                       transition: 'border-color 0.2s, color 0.2s',
                       width: '100%',
                       boxSizing: 'border-box',
+                      marginTop: '0.75rem',
                     }}
                   >
                     View Profile →
