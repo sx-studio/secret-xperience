@@ -49,7 +49,41 @@ export default function VerifyPage() {
     })
   }, [])
 
-  function handleFile(file: File, setter: (f: File) => void, previewSetter: (s: string) => void) {
+  async function handleFile(file: File, setter: (f: File) => void, previewSetter: (s: string) => void) {
+    const isHeic = file.type === 'image/heic' || file.type === 'image/heif'
+      || /\.(heic|heif)$/i.test(file.name)
+
+    if (isHeic) {
+      // Try canvas conversion (works in Safari/macOS which can decode HEIC natively)
+      try {
+        const converted = await new Promise<File>((resolve, reject) => {
+          const img = new Image()
+          const url = URL.createObjectURL(file)
+          img.onload = () => {
+            URL.revokeObjectURL(url)
+            if (img.width === 0) { reject(new Error('decode')); return }
+            const canvas = document.createElement('canvas')
+            canvas.width = img.width; canvas.height = img.height
+            canvas.getContext('2d')!.drawImage(img, 0, 0)
+            canvas.toBlob(blob => {
+              if (!blob) { reject(new Error('blob')); return }
+              resolve(new File([blob], file.name.replace(/\.(heic|heif)$/i, '.jpg'), { type: 'image/jpeg' }))
+            }, 'image/jpeg', 0.92)
+          }
+          img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('load')) }
+          img.src = url
+        })
+        setter(converted)
+        const reader = new FileReader()
+        reader.onload = e => previewSetter(e.target?.result as string)
+        reader.readAsDataURL(converted)
+        return
+      } catch {
+        setError('Your photo is in HEIC format (iPhone default). On your iPhone go to Settings → Camera → Formats → Most Compatible, then retake and re-upload the photo.')
+        return
+      }
+    }
+
     setter(file)
     const reader = new FileReader()
     reader.onload = e => previewSetter(e.target?.result as string)
@@ -163,11 +197,11 @@ export default function VerifyPage() {
                   <>
                     <p style={{ fontSize:28, marginBottom:'0.5rem' }}>🪪</p>
                     <p style={{ fontSize:13, color:S.t2 }}>Click to upload front of ID</p>
-                    <p style={{ fontSize:11, color:S.t3, marginTop:'0.4rem' }}>JPG, PNG or PDF — max 10 MB</p>
+                    <p style={{ fontSize:11, color:S.t3, marginTop:'0.4rem' }}>JPG, PNG or PDF — iPhone users: enable "Most Compatible" in Camera settings</p>
                   </>
                 )}
               </div>
-              <input ref={frontRef} type="file" accept="image/*,.pdf"
+              <input ref={frontRef} type="file" accept="image/*,.heic,.heif,.pdf"
                 onChange={e => e.target.files?.[0] && handleFile(e.target.files[0], setFrontFile, setFrontPreview)} />
             </div>
 
@@ -186,7 +220,7 @@ export default function VerifyPage() {
                   </>
                 )}
               </div>
-              <input ref={backRef} type="file" accept="image/*,.pdf"
+              <input ref={backRef} type="file" accept="image/*,.heic,.heif,.pdf"
                 onChange={e => e.target.files?.[0] && handleFile(e.target.files[0], setBackFile, setBackPreview)} />
             </div>
 
@@ -206,7 +240,7 @@ export default function VerifyPage() {
                   </>
                 )}
               </div>
-              <input ref={selfieRef} type="file" accept="image/*"
+              <input ref={selfieRef} type="file" accept="image/*,.heic,.heif"
                 onChange={e => e.target.files?.[0] && handleFile(e.target.files[0], setSelfieFile, setSelfiePreview)} />
             </div>
 
