@@ -281,6 +281,13 @@ export default function LivePage() {
           <div className="lp-empty">
             <i className="ti ti-wifi-off" style={{ fontSize: 28, display: 'block', marginBottom: 8 }} />
             Live feeds temporarily unavailable. Please try again shortly.
+            <br />
+            <button
+              onClick={() => { setError(false); setLoading(true); load(tag) }}
+              style={{ marginTop: 12, padding: '8px 20px', background: 'rgba(197,160,90,0.12)', border: '0.5px solid rgba(197,160,90,0.3)', borderRadius: 8, color: '#c5a05a', cursor: 'pointer', fontSize: 13, fontFamily: 'var(--sans)' }}
+            >
+              Try again
+            </button>
           </div>
         )}
 

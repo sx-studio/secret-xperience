@@ -80,14 +80,19 @@ export async function POST(req: NextRequest) {
   base.setDate(base.getDate() + cost.days)
 
   // Deduct from wallet
-  await admin.from('user_wallets').update({
+  const { error: walletErr } = await admin.from('user_wallets').update({
     balance:     newBalance,
     total_spent: newTotalSpent,
     updated_at:  new Date().toISOString(),
   }).eq('user_id', session.user.id)
 
+  if (walletErr) {
+    console.error('Token spend: wallet update failed', walletErr)
+    return NextResponse.json({ error: 'Failed to deduct tokens. Please try again.' }, { status: 500 })
+  }
+
   // Write ledger
-  await admin.from('token_ledger').insert({
+  const { error: ledgerErr } = await admin.from('token_ledger').insert({
     user_id:      session.user.id,
     amount:       -cost.tokens,
     balance_after: newBalance,
@@ -95,6 +100,16 @@ export async function POST(req: NextRequest) {
     description:  cost.label,
     reference_id: listingId,
   })
+
+  if (ledgerErr) {
+    console.error('Token spend: ledger insert failed', ledgerErr)
+    // Reverse wallet deduction to keep balance consistent.
+    await admin.from('user_wallets').update({
+      balance:     wallet.balance,
+      total_spent: wallet.total_spent,
+    }).eq('user_id', session.user.id)
+    return NextResponse.json({ error: 'Transaction record failed. Your balance was not changed.' }, { status: 500 })
+  }
 
   // Update listing tier
   const tierUpdates: Record<string, boolean | string> = {
@@ -113,7 +128,21 @@ export async function POST(req: NextRequest) {
     tierUpdates.premium        = true
   }
 
-  await admin.from('listings').update(tierUpdates).eq('id', listingId)
+  const { error: listingErr } = await admin.from('listings').update(tierUpdates).eq('id', listingId)
+
+  if (listingErr) {
+    console.error('Token spend: listing tier update failed', listingErr)
+    // Tokens were spent and ledger was written — return success but flag the
+    // tier update failure so the client can show a warning to contact support.
+    return NextResponse.json({
+      success:     true,
+      newBalance,
+      tier,
+      expires:     base.toISOString(),
+      tokensSpent: cost.tokens,
+      warning:     'Tier upgrade may not have applied. Contact support if your listing does not show the upgraded tier.',
+    })
+  }
 
   return NextResponse.json({
     success:    true,

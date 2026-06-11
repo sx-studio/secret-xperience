@@ -402,15 +402,45 @@ export default function CreateListingPage() {
   }, [])
 
   /* ── Image upload ── */
-  const uploadFile = useCallback(async (file: File) => {
+  const uploadFile = useCallback(async (rawFile: File) => {
     if (form.images.length + uploadingImages.filter(u => u.loading).length >= 5) return
+
+    // Auto-convert HEIC (iPhone default) to JPEG before further checks.
+    let file = rawFile
+    const isHeic = rawFile.type === 'image/heic' || rawFile.type === 'image/heif'
+      || /\.(heic|heif)$/i.test(rawFile.name)
+    if (isHeic) {
+      try {
+        file = await new Promise<File>((resolve, reject) => {
+          const img = new Image()
+          const url = URL.createObjectURL(rawFile)
+          img.onload = () => {
+            URL.revokeObjectURL(url)
+            if (img.width === 0) { reject(new Error('decode')); return }
+            const canvas = document.createElement('canvas')
+            canvas.width = img.width; canvas.height = img.height
+            canvas.getContext('2d')!.drawImage(img, 0, 0)
+            canvas.toBlob(blob => {
+              if (!blob) { reject(new Error('blob')); return }
+              resolve(new File([blob], rawFile.name.replace(/\.(heic|heif)$/i, '.jpg'), { type: 'image/jpeg' }))
+            }, 'image/jpeg', 0.92)
+          }
+          img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('load')) }
+          img.src = url
+        })
+      } catch {
+        alert(`${rawFile.name} is in HEIC format and could not be converted automatically.\nOn iPhone go to Settings → Camera → Formats → Most Compatible, then re-take the photo.`)
+        return
+      }
+    }
+
     if (file.size > 4 * 1024 * 1024) {
       alert(`${file.name} exceeds the 4 MB limit.`)
       return
     }
     const allowed = ['image/jpeg', 'image/png', 'image/webp']
     if (!allowed.includes(file.type)) {
-      alert(`${file.name} is not a supported format (JPEG, PNG, WebP).`)
+      alert(`${rawFile.name} is not a supported format (JPEG, PNG, WebP). iPhone users: go to Settings → Camera → Formats → Most Compatible.`)
       return
     }
 
@@ -560,8 +590,8 @@ export default function CreateListingPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ listingId: newListing.id, tier: form.tier }),
         })
+        const spendData = await spendRes.json().catch(() => ({}))
         if (!spendRes.ok) {
-          const spendData = await spendRes.json().catch(() => ({}))
           // Downgrade to basic if token spend fails (insufficient balance etc.)
           await supabase.from('listings').update({ tier: 'basic', tier_expires_at: null }).eq('id', newListing.id)
           if (spendRes.status === 402) {
@@ -571,6 +601,9 @@ export default function CreateListingPage() {
           }
           setLoading(false)
           return
+        }
+        if (spendData.warning) {
+          setError(spendData.warning)
         }
       } catch (e) {
         await supabase.from('listings').update({ tier: 'basic', tier_expires_at: null }).eq('id', newListing.id)
@@ -1625,7 +1658,7 @@ export default function CreateListingPage() {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/jpeg,image/png,image/webp"
+                accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
                 multiple
                 style={{ display: 'none' }}
                 onChange={e => handleFiles(e.target.files)}

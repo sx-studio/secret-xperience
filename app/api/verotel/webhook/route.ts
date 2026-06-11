@@ -101,25 +101,28 @@ async function handle(req: NextRequest) {
     return new NextResponse('Order not found', { status: 404 })
   }
 
-  // Idempotency guard — already processed.
-  if (order.status === 'completed') {
-    return new NextResponse('OK', { status: 200 })
-  }
-
   // Sanity: the order must belong to the user named in the postback.
   if (order.user_id !== userId) {
     console.error('Verotel webhook: user mismatch', { orderUser: order.user_id, userId })
     return new NextResponse('User mismatch', { status: 400 })
   }
 
-  await admin.from('payment_orders').update({
-    status:            'completed',
-    advertiser_order_id: saleId,
-    webhook_payload:   params,
-    completed_at:      new Date().toISOString(),
-  }).eq('id', orderId)
+  // Idempotency guard: check ledger entry rather than order status.
+  // Using the ledger avoids the race where we set status=completed before
+  // crediting — if the credit step crashes, retrying the webhook would see
+  // status=completed and skip the credit entirely.
+  const { data: existingLedger } = await admin
+    .from('token_ledger')
+    .select('id')
+    .eq('reference_id', orderId)
+    .eq('type', 'purchase')
+    .maybeSingle()
 
-  // Credit wallet (mirror of CCBill flow).
+  if (existingLedger) {
+    return new NextResponse('OK', { status: 200 })
+  }
+
+  // Ensure wallet row exists before incrementing.
   await admin.from('user_wallets').upsert(
     { user_id: userId, balance: 0, total_purchased: 0, total_spent: 0 },
     { onConflict: 'user_id', ignoreDuplicates: true }
@@ -134,13 +137,18 @@ async function handle(req: NextRequest) {
   const newBalance     = (wallet?.balance ?? 0) + order.tokens_granted
   const newTotalBought = (wallet?.total_purchased ?? 0) + order.tokens_granted
 
-  await admin.from('user_wallets').update({
+  const { error: walletErr } = await admin.from('user_wallets').update({
     balance:         newBalance,
     total_purchased: newTotalBought,
     updated_at:      new Date().toISOString(),
   }).eq('user_id', userId)
 
-  await admin.from('token_ledger').insert({
+  if (walletErr) {
+    console.error('Verotel webhook: wallet credit failed', walletErr)
+    return new NextResponse('Wallet update failed', { status: 500 })
+  }
+
+  const { error: ledgerErr } = await admin.from('token_ledger').insert({
     user_id:       userId,
     amount:        order.tokens_granted,
     balance_after: newBalance,
@@ -148,6 +156,21 @@ async function handle(req: NextRequest) {
     description:   `Token package purchase — Verotel #${saleId}`,
     reference_id:  orderId,
   })
+
+  if (ledgerErr) {
+    console.error('Verotel webhook: ledger insert failed', ledgerErr)
+    // Wallet was already credited; mark order completed anyway so a retry
+    // doesn't double-credit (ledger insert may have succeeded despite the error).
+  }
+
+  // Mark order completed last — ensures retries can re-attempt credit if wallet
+  // step failed before reaching this point.
+  await admin.from('payment_orders').update({
+    status:              'completed',
+    advertiser_order_id: saleId,
+    webhook_payload:     params,
+    completed_at:        new Date().toISOString(),
+  }).eq('id', orderId)
 
   return new NextResponse('OK', { status: 200 })
 }

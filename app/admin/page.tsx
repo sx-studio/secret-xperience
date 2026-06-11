@@ -215,10 +215,10 @@ export default function AdminPage() {
     }
   }
 
-  async function setListingTier(id: string, tier: 'basic' | 'featured' | 'slider' | 'premium') {
+  async function setListingTier(id: string, tier: 'basic' | 'featured' | 'slider' | 'section' | 'premium' | 'homepage') {
     const supabase = createClient()
     const now = new Date()
-    const days = tier === 'premium' ? 30 : tier === 'basic' ? 0 : 7
+    const days = (tier === 'premium' || tier === 'homepage') ? 30 : tier === 'basic' ? 0 : 7
     const until = days > 0 ? new Date(now.getTime() + days * 86400000) : null
     const update: Record<string, unknown> = {
       tier,
@@ -226,10 +226,10 @@ export default function AdminPage() {
       active: true,
       status: 'approved',
     }
-    if (tier === 'featured' || tier === 'slider') {
+    if (tier === 'featured' || tier === 'slider' || tier === 'section') {
       update.featured_until = until!.toISOString()
       update.premium = false
-    } else if (tier === 'premium') {
+    } else if (tier === 'premium' || tier === 'homepage') {
       update.featured_until = until!.toISOString()
       update.premium = true
     } else {
@@ -659,10 +659,10 @@ export default function AdminPage() {
                           {/* Row 2: Tier buttons — Basic · Featured 7d · Slider 7d · Premium 30d */}
                           <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', alignItems: 'center' }}>
                             <span style={{ font: '500 9px/1 var(--sans)', color: 'var(--t3)', letterSpacing: '0.1em', marginRight: 2 }}>TIER:</span>
-                            {(['basic', 'featured', 'slider', 'premium'] as const).map(tier => {
+                            {(['basic', 'featured', 'slider', 'section', 'premium', 'homepage'] as const).map(tier => {
                               const active = l.tier === tier
-                              const colors: Record<string, string> = { basic: 'rgba(236,232,225,0.5)', featured: '#c5a05a', slider: '#b0a0f8', premium: '#f5a826' }
-                              const labels: Record<string, string> = { basic: 'Basic', featured: 'Featured 7d', slider: 'Slider 7d', premium: 'Premium 30d' }
+                              const colors: Record<string, string> = { basic: 'rgba(236,232,225,0.5)', featured: '#c5a05a', slider: '#b0a0f8', section: '#5ec8c0', premium: '#f5a826', homepage: '#e8c97a' }
+                              const labels: Record<string, string> = { basic: 'Basic', featured: 'Featured 7d', slider: 'Slider 7d', section: 'Section 7d', premium: 'Premium 30d', homepage: 'Homepage 30d' }
                               return (
                                 <button
                                   key={tier}
