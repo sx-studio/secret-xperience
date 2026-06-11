@@ -75,11 +75,11 @@ export async function POST(req: NextRequest) {
 
   const { email } = await req.json()
 
-  if (!email || typeof email !== 'string' || !email.includes('@')) {
+  const normalised = typeof email === 'string' ? email.toLowerCase().trim() : ''
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(normalised)
+  if (!normalised || !emailOk) {
     return NextResponse.json({ error: 'Invalid email' }, { status: 400 })
   }
-
-  const normalised = email.toLowerCase().trim()
 
   const { error } = await supabase
     .from('newsletter_subscribers')

@@ -233,8 +233,14 @@ export default function MessagesPage() {
     setBody('')
     // Reset textarea height
     if (textareaRef.current) { textareaRef.current.style.height = 'auto' }
-    await supabase.from('messages').insert({ sender_id: userId, receiver_id: activeConv.other_id, listing_id: activeConv.listing_id, body: optimistic.body })
+    const { error: sendErr } = await supabase.from('messages').insert({ sender_id: userId, receiver_id: activeConv.other_id, listing_id: activeConv.listing_id, body: optimistic.body })
     setSending(false)
+    if (sendErr) {
+      // Remove the optimistic message and restore body so user can retry
+      setMessages(prev => prev.filter(m => m.id !== optimistic.id))
+      setBody(optimistic.body)
+      return
+    }
     // Notify receiver by email (fire-and-forget)
     fetch('/api/messages/notify', {
       method: 'POST',

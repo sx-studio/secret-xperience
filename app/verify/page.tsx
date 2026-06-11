@@ -50,6 +50,11 @@ export default function VerifyPage() {
   }, [])
 
   async function handleFile(file: File, setter: (f: File) => void, previewSetter: (s: string) => void) {
+    if (file.size > 10 * 1024 * 1024) {
+      setError(`${file.name} is too large (max 10 MB). Please compress the photo and try again.`)
+      return
+    }
+
     const isHeic = file.type === 'image/heic' || file.type === 'image/heif'
       || /\.(heic|heif)$/i.test(file.name)
 
