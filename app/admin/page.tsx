@@ -106,13 +106,14 @@ export default function AdminPage() {
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single()
       if (profile?.role !== 'admin') { window.location.href = '/'; return }
       setIsAdmin(true)
-      const [lr, ur, br, vr, ocr, leadsr] = await Promise.all([
+      const [lr, ur, br, vr, ocr, leadsr, wr] = await Promise.all([
         supabase.from('listings').select('*').order('created_at', { ascending: false }),
         supabase.from('profiles').select('*').order('created_at', { ascending: false }),
         supabase.from('bookings').select('*, listings(title)').order('created_at', { ascending: false }),
         supabase.from('identity_verifications').select('*, profiles(full_name, username, email, role)').order('submitted_at', { ascending: false }),
         supabase.from('listings').select('id,title,category,city,country,contact_phone,created_at').eq('whatsapp_optin', true).order('created_at', { ascending: false }),
         supabase.from('leads').select('*').order('created_at', { ascending: false }),
+        supabase.from('user_wallets').select('user_id,balance,total_purchased,total_spent'),
       ])
       // newsletter_subscribers is service-role-only; fetch via server route
       fetch('/api/newsletter/list')
@@ -128,7 +129,10 @@ export default function AdminPage() {
         .finally(() => setAcqLoading(false))
       setOptinContacts(ocr.data || [])
       setLeads(leadsr.data || [])
-      const ls = lr.data || [], us = ur.data || [], bs = br.data || []
+      const ls = lr.data || [], bs = br.data || []
+      // Attach wallet balances to profiles client-side
+      const walletMap = Object.fromEntries((wr.data || []).map((w: any) => [w.user_id, w]))
+      const us = (ur.data || []).map((u: any) => ({ ...u, wallet: walletMap[u.id] || null }))
       // Attach profile data to listings client-side (avoids PostgREST embedded join issues)
       const profileMap = Object.fromEntries(us.map((u: any) => [u.id, u]))
       const lsWithProfiles = ls.map((l: any) => ({ ...l, profiles: profileMap[l.profile_id] || null }))
@@ -616,8 +620,8 @@ export default function AdminPage() {
                           </div>
                           {/* Tier badge */}
                           {(() => {
-                            const tierColors: Record<string, string> = { basic: 'rgba(236,232,225,0.4)', featured: '#c5a05a', slider: '#b0a0f8', premium: '#f5a826' }
-                            const tierBg: Record<string, string> = { basic: 'rgba(255,255,255,0.04)', featured: 'rgba(197,160,90,0.1)', slider: 'rgba(176,160,248,0.1)', premium: 'rgba(245,168,38,0.1)' }
+                            const tierColors: Record<string, string> = { basic: 'rgba(236,232,225,0.4)', featured: '#c5a05a', slider: '#b0a0f8', section: '#5ec8c0', premium: '#f5a826', homepage: '#e8c97a' }
+                            const tierBg: Record<string, string> = { basic: 'rgba(255,255,255,0.04)', featured: 'rgba(197,160,90,0.1)', slider: 'rgba(176,160,248,0.1)', section: 'rgba(94,200,192,0.1)', premium: 'rgba(245,168,38,0.1)', homepage: 'rgba(232,201,122,0.1)' }
                             const tier = l.tier || 'basic'
                             const exp = l.tier_expires_at ? new Date(l.tier_expires_at) : null
                             const expStr = exp && exp > new Date() ? ` · until ${exp.toLocaleDateString('en-GB', { day:'numeric', month:'short' })}` : ''
@@ -764,13 +768,13 @@ export default function AdminPage() {
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', minWidth: '640px' }}>
                 <thead>
                   <tr style={{ background: 'var(--bg2, rgba(255,255,255,0.02))' }}>
-                    {['User', 'Role', 'Joined', 'Badges', 'Actions'].map(h => (
+                    {['User', 'Role', 'Joined', 'Tokens', 'Badges', 'Actions'].map(h => (
                       <th key={h} style={{ textAlign: 'left', padding: '12px 16px', font: '600 9px/1 var(--sans)', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--t3, #4c4a47)' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredUsers.length === 0 && <tr><td colSpan={5} style={{ padding: '3rem', textAlign: 'center', color: 'var(--t3, #4c4a47)', fontFamily: 'var(--sans)' }}>No users found</td></tr>}
+                  {filteredUsers.length === 0 && <tr><td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: 'var(--t3, #4c4a47)', fontFamily: 'var(--sans)' }}>No users found</td></tr>}
                   {filteredUsers.map(u => (
                     <tr key={u.id} className="adm-tr" style={{ borderTop: '0.5px solid var(--b, rgba(255,255,255,0.04))', color: 'var(--t, #ece8e1)', transition: 'background var(--t-fast, .1s)' }}>
                       <td style={{ padding: '14px 16px' }}>
@@ -807,6 +811,18 @@ export default function AdminPage() {
                         </div>
                       </td>
                       <td style={{ padding: '14px 16px', color: 'var(--t2, #8c8880)', fontSize: '12px' }}>{new Date(u.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
+                      <td style={{ padding: '14px 16px' }}>
+                        {u.wallet ? (
+                          <div>
+                            <div style={{ font: '600 13px/1 var(--sans)', color: 'var(--gold)' }}>{u.wallet.balance.toLocaleString()}</div>
+                            <div style={{ font: '400 10px/1 var(--sans)', color: 'var(--t3)', marginTop: '3px' }}>
+                              {u.wallet.total_purchased > 0 ? `${u.wallet.total_purchased.toLocaleString()} bought` : 'no purchases'}
+                            </div>
+                          </div>
+                        ) : (
+                          <span style={{ color: 'var(--t3)', fontSize: '12px' }}>—</span>
+                        )}
+                      </td>
                       <td style={{ padding: '14px 16px' }}>
                         <div style={{ display: 'flex', gap: '4px' }}>
                           {u.verified && <span style={{ background: 'rgba(38,212,160,0.12)', color: 'var(--verified, #1dc9a0)', padding: '2px 7px', borderRadius: '20px', font: '600 10px/1 var(--sans)', letterSpacing: '0.08em' }}>Verified</span>}
