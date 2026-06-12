@@ -1,6 +1,7 @@
 import Stripe from 'stripe'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { siteUrl } from '../../../lib/site'
 
 export async function POST(req: NextRequest) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2024-06-20' })
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest) {
         premium: true,
       }).eq('id', meta.listing_id)
       // Fire listing_boosted notification (fire-and-forget)
-      fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.secretxperience.eu'}/api/notify`, {
+      fetch(`${siteUrl()}/api/notify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.INTERNAL_SECRET || 'sx-internal'}` },
         body: JSON.stringify({ type: 'listing_boosted', booking_id: meta.listing_id }),
@@ -53,7 +54,7 @@ export async function POST(req: NextRequest) {
         stripe_payment_intent: session.payment_intent as string,
       }).eq('id', meta.booking_id)
       // Fire booking_confirmed notification
-      fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.secretxperience.eu'}/api/notify`, {
+      fetch(`${siteUrl()}/api/notify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.INTERNAL_SECRET || 'sx-internal'}` },
         body: JSON.stringify({ type: 'booking_confirmed', booking_id: meta.booking_id }),

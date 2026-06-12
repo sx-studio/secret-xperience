@@ -1,7 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+import { siteUrl } from '../../../lib/site'
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.secretxperience.eu'
+const SITE = siteUrl()
 
 export async function POST(req: NextRequest) {
   const { receiver_id, sender_name, listing_title, listing_id } = await req.json()

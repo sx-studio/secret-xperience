@@ -574,8 +574,10 @@ export default function CreateListingPage() {
 
     // Trigger AI moderation (non-blocking — listing stays pending until resolved)
     if (newListing?.id) {
-      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || ''
-      fetch(`${siteUrl}/api/moderation/check`, {
+      // Relative URL — always hits the deployment the user is actually on.
+      // (NEXT_PUBLIC_SITE_URL once pointed at a dead vercel.app deployment,
+      // which made this call 404 silently and left listings stuck pending.)
+      fetch(`/api/moderation/check`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.NEXT_PUBLIC_INTERNAL_SECRET || 'sx-internal'}` },
         body: JSON.stringify({ listingId: newListing.id, title: form.title, description: form.description, category: form.category }),

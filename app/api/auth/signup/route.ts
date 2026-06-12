@@ -1,8 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { rateLimit } from '../../../lib/ratelimit'
+import { siteUrl } from '../../../lib/site'
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.secretxperience.eu'
+const SITE = siteUrl()
 
 function advertiserWelcomeHtml(name: string) {
   const hi = name ? `Welcome, ${name} —` : 'Welcome —'

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
+import { siteUrl } from '../../../lib/site'
 
 // Non-payment booking request — used for escorts, companions, creators, nightlife, etc.
 // Creates a meetup-request record with no online payment. Advertiser confirms via dashboard.
@@ -57,7 +58,7 @@ export async function POST(req: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   // In-app notification for advertiser + email (fire-and-forget)
-  const origin = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.secretxperience.eu'
+  const origin = siteUrl()
   admin.from('notifications').insert({
     user_id:    listing.profile_id,
     type:       'booking_new',

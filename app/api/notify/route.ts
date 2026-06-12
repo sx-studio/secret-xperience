@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { siteUrl as canonicalSiteUrl } from '../../lib/site'
 
 // Simple email notification via Supabase's built-in SMTP (or logs for now)
 // Set RESEND_API_KEY env var to enable real email sending
@@ -39,7 +40,7 @@ export async function POST(req: NextRequest) {
 
   // If RESEND_API_KEY is set, send via Resend; otherwise log
   if (process.env.RESEND_API_KEY) {
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.secretxperience.eu'
+    const siteUrl = canonicalSiteUrl()
     const emailStyle = `
       body{margin:0;padding:0;background:#080808;font-family:'Helvetica Neue',Arial,sans-serif}
       .wrap{max-width:560px;margin:0 auto;background:#0f0f0f;border:1px solid rgba(197,160,90,0.15)}

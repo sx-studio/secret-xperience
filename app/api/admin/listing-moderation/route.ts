@@ -2,8 +2,9 @@ import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
+import { siteUrl } from '../../../lib/site'
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.secretxperience.eu'
+const SITE = siteUrl()
 
 export async function POST(req: NextRequest) {
   const cookieStore = cookies()

@@ -2,6 +2,7 @@ import Stripe from 'stripe'
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { siteUrl } from '../../lib/site'
 
 export async function POST(req: NextRequest) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2024-06-20' })
@@ -56,7 +57,7 @@ export async function POST(req: NextRequest) {
   if (bookingErr) return NextResponse.json({ error: bookingErr.message }, { status: 500 })
 
   // Notify advertiser of new booking request (fire-and-forget)
-  const siteOrigin = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.secretxperience.eu'
+  const siteOrigin = siteUrl()
   fetch(`${siteOrigin}/api/notify`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.INTERNAL_SECRET || 'sx-internal'}` },
@@ -83,8 +84,8 @@ export async function POST(req: NextRequest) {
       listing_id,
       client_id: session.user.id,
     },
-    success_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.secretxperience.eu'}/dashboard?booking=success`,
-    cancel_url:  `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.secretxperience.eu'}/?booking=cancelled`,
+    success_url: `${siteOrigin}/dashboard?booking=success`,
+    cancel_url:  `${siteOrigin}/?booking=cancelled`,
   }
 
   if (advertiser?.stripe_connect_account_id) {

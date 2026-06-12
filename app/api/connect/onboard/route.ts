@@ -2,6 +2,7 @@ import Stripe from 'stripe'
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { siteUrl as canonicalSiteUrl } from '../../../lib/site'
 
 export async function POST(req: NextRequest) {
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2024-06-20' })
@@ -41,7 +42,7 @@ export async function POST(req: NextRequest) {
       .eq('id', session.user.id)
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.secretxperience.eu'
+  const siteUrl = canonicalSiteUrl()
   const accountLink = await stripe.accountLinks.create({
     account: accountId,
     refresh_url: `${siteUrl}/dashboard?connect=refresh`,

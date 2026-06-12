@@ -2,6 +2,7 @@ import Stripe from 'stripe'
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { siteUrl as canonicalSiteUrl } from '../../lib/site'
 
 const PLANS: Record<string, { label: string; days: number; amount: number }> = {
   week:  { label: '7-Day Featured Boost',  days: 7,  amount: 2900  },
@@ -35,7 +36,7 @@ export async function POST(req: NextRequest) {
   if (!listing) return NextResponse.json({ error: 'Listing not found or unauthorized' }, { status: 404 })
 
   const p = PLANS[plan]
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.secretxperience.eu'
+  const siteUrl = canonicalSiteUrl()
 
   const checkoutSession = await stripe.checkout.sessions.create({
     mode: 'payment',
