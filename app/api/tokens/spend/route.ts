@@ -79,14 +79,19 @@ export async function POST(req: NextRequest) {
     : new Date()
   base.setDate(base.getDate() + cost.days)
 
-  // Deduct from wallet
-  const { error: walletErr } = await admin.from('user_wallets').update({
+  // Deduct from wallet — optimistic lock: only update if balance is still what we read.
+  // If another request changed the balance concurrently, this affects 0 rows and we reject.
+  const { error: walletErr, data: walletResult } = await admin.from('user_wallets').update({
     balance:     newBalance,
     total_spent: newTotalSpent,
     updated_at:  new Date().toISOString(),
-  }).eq('user_id', session.user.id)
+  }).eq('user_id', session.user.id).eq('balance', wallet.balance).select('balance')
 
-  if (walletErr) {
+  if (walletErr || !walletResult?.length) {
+    if (!walletErr) {
+      // 0 rows matched — balance changed concurrently; re-check current balance
+      return NextResponse.json({ error: 'Balance changed during transaction. Please try again.' }, { status: 409 })
+    }
     console.error('Token spend: wallet update failed', walletErr)
     return NextResponse.json({ error: 'Failed to deduct tokens. Please try again.' }, { status: 500 })
   }
