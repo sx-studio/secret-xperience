@@ -2704,7 +2704,7 @@ document.getElementById('msgModal').addEventListener('transitionend',function(){
         </div>
       </div>
       <div class="footer-bottom" style="border-top:0.5px solid var(--b);padding-top:1.5rem;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:1rem;">
-        <div class="footer-legal t-meta" style="color:var(--t3);">© 2025 SecretXperience.eu — All rights reserved. Adults only (18+). All listed advertisers are independent contractors.</div>
+        <div class="footer-legal t-meta" style="color:var(--t3);">© 2026 SecretXperience.eu — All rights reserved. Adults only (18+). All listed advertisers are independent contractors.</div>
         <div style="display:flex;align-items:center;gap:1rem;">
           <span class="t-meta" style="color:var(--t3);">EN · FR · NL · DE</span>
           <span class="t-meta" style="color:var(--t3);">💳 VISA · MC · AMEX · CRYPTO</span>

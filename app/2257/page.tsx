@@ -42,7 +42,7 @@ export default function Page2257() {
         </div>
       </main>
       <footer style={{ borderTop: '0.5px solid #c5a05a22', padding: '2rem 24px', textAlign: 'center' }}>
-        <p style={{ fontSize: 12, color: S.t2 }}>© 2025 SecretXperience.eu · <a href="/terms">Terms of Use</a> · <a href="/privacy">Privacy Policy</a> · <a href="/dmca">DMCA</a></p>
+        <p style={{ fontSize: 12, color: S.t2 }}>© 2026 SecretXperience.eu · <a href="/terms">Terms of Use</a> · <a href="/privacy">Privacy Policy</a> · <a href="/dmca">DMCA</a></p>
       </footer>
     </div>
   )

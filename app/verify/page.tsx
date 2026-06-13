@@ -281,7 +281,7 @@ export default function VerifyPage() {
       </main>
 
       <footer style={{ borderTop:`0.5px solid #c5a05a22`, padding:'2rem 24px', textAlign:'center' }}>
-        <p style={{ fontSize:12, color:S.t2 }}>© 2025 SecretXperience.eu · <a href="/privacy">Privacy Policy</a> · <a href="/contact">Support</a></p>
+        <p style={{ fontSize:12, color:S.t2 }}>© 2026 SecretXperience.eu · <a href="/privacy">Privacy Policy</a> · <a href="/contact">Support</a></p>
       </footer>
     </div>
   )

@@ -219,7 +219,7 @@ export default function ContactPage() {
       </main>
 
       <footer style={{ borderTop: `0.5px solid ${S.b}`, padding: '2rem 24px', textAlign: 'center' }}>
-        <p style={{ fontSize: 12, color: S.t2 }}>© 2025 SecretXperience.eu · <a href="/regulations">Regulations</a> · <a href="/medical">Medical Info</a> · <a href="/terms">Terms of Use</a> · <a href="/privacy">Privacy Policy</a> · <a href="/cookies">Cookie Policy</a> · <a href="/dmca">DMCA</a> · <a href="/contact">Contact</a></p>
+        <p style={{ fontSize: 12, color: S.t2 }}>© 2026 SecretXperience.eu · <a href="/regulations">Regulations</a> · <a href="/medical">Medical Info</a> · <a href="/terms">Terms of Use</a> · <a href="/privacy">Privacy Policy</a> · <a href="/cookies">Cookie Policy</a> · <a href="/dmca">DMCA</a> · <a href="/contact">Contact</a></p>
       </footer>
     </div>
   )
