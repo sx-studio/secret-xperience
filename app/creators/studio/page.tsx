@@ -65,9 +65,15 @@ export default function CreatorStudio() {
 
   async function deletePost(id: string) {
     try {
-      await fetch(`/api/creators/posts?id=${id}`, { method: 'DELETE' })
-      setMyPosts(prev => prev.filter(p => p.id !== id))
-    } catch { /* ignore */ }
+      const res = await fetch(`/api/creators/posts?id=${id}`, { method: 'DELETE' })
+      if (res.ok) {
+        setMyPosts(prev => prev.filter(p => p.id !== id))
+      } else {
+        setPostMsg('Failed to delete post. Please try again.')
+      }
+    } catch {
+      setPostMsg('Failed to delete post. Please try again.')
+    }
   }
 
   function addLink() {

@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
         messages:   [{ role: 'user', content }],
       })
 
-      const text = msg.content[0].type === 'text' ? msg.content[0].text : ''
+      const text = msg.content?.[0]?.type === 'text' ? (msg.content[0] as any).text : ''
       const parsed = JSON.parse(text)
       result = {
         approved: !!parsed.approved,

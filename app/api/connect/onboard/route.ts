@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     .from('profiles')
     .select('stripe_connect_account_id, full_name, email')
     .eq('id', session.user.id)
-    .single()
+    .maybeSingle()
 
   let accountId = profile?.stripe_connect_account_id
 

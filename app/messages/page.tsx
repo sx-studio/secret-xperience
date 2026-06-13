@@ -217,8 +217,10 @@ export default function MessagesPage() {
   async function openConversation(c: Conversation, _allMessages: Message[], uid: string) {
     setActiveConv(c)
     const supabase = createClient()
-    const { data } = await supabase.from('messages').select('*').or(`sender_id.eq.${uid},receiver_id.eq.${uid}`).order('created_at', { ascending: true })
-    setMessages((data || []).filter((m: Message) => (m.sender_id === uid && m.receiver_id === c.other_id) || (m.sender_id === c.other_id && m.receiver_id === uid)))
+    const { data } = await supabase.from('messages').select('*')
+      .or(`and(sender_id.eq.${uid},receiver_id.eq.${c.other_id}),and(sender_id.eq.${c.other_id},receiver_id.eq.${uid})`)
+      .order('created_at', { ascending: true })
+    setMessages(data || [])
     setConversations(prev => prev.map(x => x.other_id === c.other_id ? { ...x, unread: 0 } : x))
     // Fix 2: mark received messages as read
     await supabase.from('messages').update({ read: true }).eq('receiver_id', uid).eq('sender_id', c.other_id)
@@ -245,7 +247,7 @@ export default function MessagesPage() {
     fetch('/api/messages/notify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ receiver_id: activeConv.other_id, sender_name: ownName || null, listing_title: activeConv.listing_title || null, listing_id: activeConv.listing_id }),
+      body: JSON.stringify({ receiver_id: activeConv.other_id, sender_id: userId, sender_name: ownName || null, listing_title: activeConv.listing_title || null, listing_id: activeConv.listing_id }),
     }).catch(() => {})
     // Fix 3: update conversations list locally after send so sender sees the bump
     setConversations(prev => {

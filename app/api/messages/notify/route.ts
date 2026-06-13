@@ -5,7 +5,7 @@ import { siteUrl } from '../../../lib/site'
 const SITE = siteUrl()
 
 export async function POST(req: NextRequest) {
-  const { receiver_id, sender_name, listing_title, listing_id } = await req.json()
+  const { receiver_id, sender_id, sender_name, listing_title, listing_id } = await req.json()
   if (!receiver_id) return NextResponse.json({ ok: false })
 
   const key = process.env.RESEND_API_KEY
@@ -21,10 +21,13 @@ export async function POST(req: NextRequest) {
   const { data: profile } = await admin.from('profiles').select('email, full_name').eq('id', receiver_id).single()
   if (!profile?.email) return NextResponse.json({ ok: false })
 
-  // Throttle: only email if no message in this conversation in the last 10 minutes
+  // Throttle: only email once per conversation per 10 minutes
   const since = new Date(Date.now() - 10 * 60 * 1000).toISOString()
-  const { count } = await admin.from('messages').select('id', { count: 'exact', head: true })
+  const throttleQuery = admin.from('messages').select('id', { count: 'exact', head: true })
     .eq('receiver_id', receiver_id).gte('created_at', since)
+  const { count } = sender_id
+    ? await throttleQuery.eq('sender_id', sender_id)
+    : await throttleQuery
   if ((count ?? 0) > 1) return NextResponse.json({ ok: false }) // already notified recently
 
   const subject = sender_name
