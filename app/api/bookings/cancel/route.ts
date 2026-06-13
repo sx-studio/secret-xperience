@@ -35,7 +35,11 @@ export async function POST(req: NextRequest) {
     { auth: { autoRefreshToken: false, persistSession: false } }
   )
 
-  await admin.from('bookings').update({ status: 'cancelled' }).eq('id', bookingId)
+  const { error: cancelErr } = await admin.from('bookings').update({ status: 'cancelled' }).eq('id', bookingId)
+  if (cancelErr) {
+    console.error('[bookings/cancel] update failed:', cancelErr.message)
+    return NextResponse.json({ error: 'Failed to cancel booking. Please try again.' }, { status: 500 })
+  }
 
   return NextResponse.json({ ok: true })
 }

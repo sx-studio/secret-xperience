@@ -239,6 +239,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Signup failed' }, { status: 500 })
+    console.error('[signup] unexpected error:', err?.message)
+    return NextResponse.json({ error: 'Signup failed. Please try again.' }, { status: 500 })
   }
 }
