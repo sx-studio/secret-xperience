@@ -107,7 +107,7 @@ export default function VerifyPage() {
       const prefix = `${uid}/${Date.now()}`
       const bucket = 'identity-docs'
 
-      async function uploadToStorage(file: File, name: string): Promise<string> {
+      const uploadToStorage = async (file: File, name: string): Promise<string> => {
         const { error } = await supabase.storage.from(bucket).upload(
           `${prefix}/${name}`, file, { contentType: file.type, upsert: true }
         )
