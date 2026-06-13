@@ -40,6 +40,16 @@ export async function POST(req: NextRequest) {
 
   if (!listing) return NextResponse.json({ error: 'Listing not found' }, { status: 404 })
 
+  // Apply the moderation decision
+  const { error: modErr } = await admin.from('listings').update({
+    active: action === 'approve',
+    status: action === 'approve' ? 'approved' : 'rejected',
+  }).eq('id', listing_id)
+  if (modErr) {
+    console.error('[listing-moderation] update failed:', modErr.message)
+    return NextResponse.json({ error: 'Failed to update listing status.' }, { status: 500 })
+  }
+
   const ownerEmail = (listing as any).profiles?.email
   const ownerName  = (listing as any).profiles?.full_name || 'there'
 
