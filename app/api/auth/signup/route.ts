@@ -230,8 +230,7 @@ export async function POST(request: NextRequest) {
       supabase
         .from('newsletter_subscribers')
         .upsert({ email: email.toLowerCase().trim(), subscribed_at: new Date().toISOString() }, { onConflict: 'email', ignoreDuplicates: true })
-        .then(() => {})
-        .catch(() => {})
+        .then(() => {}, () => {})
     }
 
     // Fire-and-forget — don't block signup on email delivery
