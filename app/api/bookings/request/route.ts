@@ -55,7 +55,10 @@ export async function POST(req: NextRequest) {
     meet_type:      meet_type || null,
   }).select('id').single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[bookings/request] insert failed:', error.message)
+    return NextResponse.json({ error: 'Failed to submit request. Please try again.' }, { status: 500 })
+  }
 
   // In-app notification for advertiser + email (fire-and-forget)
   const origin = siteUrl()

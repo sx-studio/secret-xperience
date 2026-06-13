@@ -55,14 +55,15 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
   const category = searchParams.category || 'all'
   const city     = searchParams.city || ''
   const sort     = searchParams.sort || 'relevance'
-  const page     = Math.max(0, parseInt(searchParams.page || '0'))
+  const page     = Math.max(0, parseInt(searchParams.page || '0') || 0)
   const verified = searchParams.verified === '1'
-  const meet     = searchParams.meet || ''
+  const meetRaw  = searchParams.meet || ''
+  const meet     = ['incall', 'outcall', 'both'].includes(meetRaw) ? meetRaw : ''
   const minPrice = searchParams.min ? parseInt(searchParams.min) : null
   const maxPrice = searchParams.max ? parseInt(searchParams.max) : null
 
-  // Escape PostgREST-significant chars (`,` `(` `)` `*`) so user input can't break the .or() parse
-  const safeQ = q.replace(/[,()*\\]/g, ' ').trim()
+  // Escape PostgREST-significant chars and ILIKE wildcards so user input can't break parsing or match unintentionally
+  const safeQ = q.replace(/[,()*\\%_]/g, ' ').trim()
 
   let query = supabase
     .from('listings')

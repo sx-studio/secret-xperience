@@ -40,7 +40,10 @@ export async function POST(req: NextRequest) {
     media_type: mediaType === 'video' ? 'video' : 'image',
   }).select('id').single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[creators/posts] insert failed:', error.message)
+    return NextResponse.json({ error: 'Failed to create post. Please try again.' }, { status: 500 })
+  }
   return NextResponse.json({ ok: true, id: data.id })
 }
 
@@ -53,6 +56,9 @@ export async function DELETE(req: NextRequest) {
   if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
 
   const { error } = await admin().from('creator_posts').delete().eq('id', id).eq('creator_id', session.user.id)
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[creators/posts] delete failed:', error.message)
+    return NextResponse.json({ error: 'Failed to delete post.' }, { status: 500 })
+  }
   return NextResponse.json({ ok: true })
 }

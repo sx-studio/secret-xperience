@@ -33,8 +33,8 @@ export async function PATCH(req: NextRequest) {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { id } = await req.json().catch(() => ({}))
-  const query = supabase.from('notifications').update({ read: true }).eq('user_id', session.user.id)
-  if (id) query.eq('id', id)
+  let query = supabase.from('notifications').update({ read: true }).eq('user_id', session.user.id)
+  if (id) query = query.eq('id', id)
   await query
 
   return NextResponse.json({ ok: true })

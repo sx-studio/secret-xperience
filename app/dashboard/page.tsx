@@ -1678,6 +1678,8 @@ export default function DashboardPage() {
                               active: listing.active ?? true,
                               images: Array.isArray(listing.images) ? [...listing.images] : [],
                               image_focus: listing.image_focus && typeof listing.image_focus === 'object' ? { ...listing.image_focus } : {},
+                              contact_phone: listing.contact_phone || '',
+                              whatsapp_optin: !!listing.whatsapp_optin,
                               ...parsed,
                             })
                             setEditingListing(listing)
@@ -1701,6 +1703,8 @@ export default function DashboardPage() {
                               active: listing.active ?? true,
                               images: Array.isArray(listing.images) ? [...listing.images] : [],
                               image_focus: listing.image_focus && typeof listing.image_focus === 'object' ? { ...listing.image_focus } : {},
+                              contact_phone: listing.contact_phone || '',
+                              whatsapp_optin: !!listing.whatsapp_optin,
                               ...parsed,
                             })
                             setEditingListing(listing)

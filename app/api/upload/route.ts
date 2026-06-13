@@ -37,7 +37,10 @@ export async function POST(req: NextRequest) {
     .from('listings')
     .upload(key, buffer, { contentType: file.type, upsert: false })
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[upload] storage upload failed:', error.message)
+    return NextResponse.json({ error: 'Upload failed. Please try again.' }, { status: 500 })
+  }
 
   const { data: { publicUrl } } = supabaseAdmin.storage.from('listings').getPublicUrl(key)
 

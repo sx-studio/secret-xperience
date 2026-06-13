@@ -52,7 +52,10 @@ export async function POST(req: Request) {
     },
     { onConflict: 'user_id' }
   )
-  if (walletErr) return NextResponse.json({ error: walletErr.message }, { status: 500 })
+  if (walletErr) {
+    console.error('[grant-tokens] wallet upsert failed:', walletErr.message)
+    return NextResponse.json({ error: 'Failed to update wallet.' }, { status: 500 })
+  }
 
   // Ledger entry
   await admin.from('token_ledger').insert({

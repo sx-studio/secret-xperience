@@ -41,6 +41,9 @@ export async function POST(req: NextRequest) {
   )
 
   const { error } = await admin.from('profiles').update({ external_links: clean }).eq('id', session.user.id)
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[creators/links] update failed:', error.message)
+    return NextResponse.json({ error: 'Failed to save links. Please try again.' }, { status: 500 })
+  }
   return NextResponse.json({ ok: true, links: clean })
 }

@@ -28,7 +28,10 @@ export async function GET() {
     .select('utm_source, utm_medium, utm_campaign, referrer, created_at')
     .order('created_at', { ascending: false })
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[admin/acquisition]', error.message)
+    return NextResponse.json({ error: 'Failed to fetch acquisition data.' }, { status: 500 })
+  }
 
   const rows = data || []
 

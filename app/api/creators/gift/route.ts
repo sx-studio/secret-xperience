@@ -26,15 +26,19 @@ export async function POST(req: NextRequest) {
   if (creatorId === session.user.id)
     return NextResponse.json({ error: 'Cannot gift yourself' }, { status: 400 })
 
-  const tokens = Number(amountTokens)
-  const senderId = session.user.id
-  const cleanMsg = message && typeof message === 'string' ? message.trim().slice(0, 200) : null
-
   const admin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     { auth: { autoRefreshToken: false, persistSession: false } }
   )
+
+  // Verify creator exists before transferring tokens
+  const { data: creatorProfile } = await admin.from('profiles').select('id').eq('id', creatorId).maybeSingle()
+  if (!creatorProfile) return NextResponse.json({ error: 'Creator not found' }, { status: 404 })
+
+  const tokens = Number(amountTokens)
+  const senderId = session.user.id
+  const cleanMsg = message && typeof message === 'string' ? message.trim().slice(0, 200) : null
 
   // check sender balance
   const { data: wallet } = await admin.from('user_wallets').select('balance').eq('user_id', senderId).maybeSingle()
@@ -46,7 +50,10 @@ export async function POST(req: NextRequest) {
     .from('user_wallets')
     .update({ balance: wallet.balance - tokens })
     .eq('user_id', senderId)
-  if (deductErr) return NextResponse.json({ error: deductErr.message }, { status: 500 })
+  if (deductErr) {
+    console.error('[creators/gift] deduct failed:', deductErr.message)
+    return NextResponse.json({ error: 'Failed to process gift. Please try again.' }, { status: 500 })
+  }
 
   // credit to creator wallet (upsert in case they don't have one yet)
   const { data: creatorWallet } = await admin.from('user_wallets').select('balance').eq('user_id', creatorId).maybeSingle()
@@ -62,14 +69,13 @@ export async function POST(req: NextRequest) {
     { user_id: creatorId,  amount:  tokens, type: 'bonus', description: `Gift received from fan` },
   ])
 
-  // record the gift
-  const { error: giftErr } = await admin.from('creator_gifts').insert({
+  // record the gift (fire-and-forget — tokens already transferred)
+  admin.from('creator_gifts').insert({
     sender_id: senderId,
     creator_id: creatorId,
     amount_tokens: tokens,
     message: cleanMsg,
-  })
-  if (giftErr) return NextResponse.json({ error: giftErr.message }, { status: 500 })
+  }).then(({ error }) => { if (error) console.error('[creators/gift] gift record failed:', error.message) })
 
   return NextResponse.json({ ok: true, newBalance: wallet.balance - tokens })
 }

@@ -29,7 +29,10 @@ export async function GET() {
     .select('id, email, subscribed_at, unsubscribed_at, active')
     .order('subscribed_at', { ascending: false })
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[newsletter/list]', error.message)
+    return NextResponse.json({ error: 'Failed to fetch subscribers.' }, { status: 500 })
+  }
 
   return NextResponse.json({ subscribers: data || [] })
 }

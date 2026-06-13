@@ -123,7 +123,8 @@ export default function DiscoverPage() {
       q = q.ilike('category', cat + '%')
     }
 
-    const { data } = await q
+    const { data, error } = await q
+    if (error) { console.error('[discover] load failed:', error.message) }
     let filtered = (data || []).filter((c: any) => !skipped.has(c.id))
     if (cat === '__available') filtered = filtered.filter((c: any) => isAvailableNow(c.tags))
     setCards(filtered.slice(0, BATCH))

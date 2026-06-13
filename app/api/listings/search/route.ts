@@ -10,7 +10,8 @@ export async function GET(req: NextRequest) {
   const minPrice  = searchParams.get('min_price')
   const maxPrice  = searchParams.get('max_price')
   const verified  = searchParams.get('verified') === 'true'
-  const meetType  = searchParams.get('meet_type') || ''
+  const meetTypeRaw = searchParams.get('meet_type') || ''
+  const meetType  = ['incall', 'outcall', 'both'].includes(meetTypeRaw) ? meetTypeRaw : ''
   const sort      = searchParams.get('sort') || 'relevance'
   const page      = parseInt(searchParams.get('page') || '0')
   const limit     = Math.min(parseInt(searchParams.get('limit') || '24'), 48)
@@ -53,7 +54,10 @@ export async function GET(req: NextRequest) {
 
   const { data, count, error } = await query.range(page * limit, (page + 1) * limit - 1)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) {
+    console.error('[listings/search]', error.message)
+    return NextResponse.json({ error: 'Search failed. Please try again.' }, { status: 500 })
+  }
 
   return NextResponse.json({ listings: data || [], total: count || 0, page, limit })
 }

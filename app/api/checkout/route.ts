@@ -54,7 +54,10 @@ export async function POST(req: NextRequest) {
     status: 'pending',
   }).select('id').single()
 
-  if (bookingErr) return NextResponse.json({ error: bookingErr.message }, { status: 500 })
+  if (bookingErr) {
+    console.error('[checkout] booking insert failed:', bookingErr.message)
+    return NextResponse.json({ error: 'Failed to create booking. Please try again.' }, { status: 500 })
+  }
 
   // Notify advertiser of new booking request (fire-and-forget)
   const siteOrigin = siteUrl()

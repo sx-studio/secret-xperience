@@ -91,11 +91,14 @@ export async function POST(req: NextRequest) {
       error = retry.error
     }
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    if (error) {
+      console.error('[verify/submit] upsert error:', error.message)
+      return NextResponse.json({ error: 'Failed to record submission. Please try again.' }, { status: 500 })
+    }
 
     return NextResponse.json({ success: true, status: 'pending' })
   } catch (e: any) {
     console.error('[verify/submit] error:', e?.message, e)
-    return NextResponse.json({ error: e.message || 'Failed to record submission' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to record submission. Please try again.' }, { status: 500 })
   }
 }

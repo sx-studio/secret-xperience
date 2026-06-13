@@ -55,29 +55,37 @@ export async function POST(req: NextRequest) {
     : new Date()
   const featured_until = new Date(base.getTime() + FLASH_BOOST_HOURS * 60 * 60 * 1000).toISOString()
 
-  const [{ error: walletErr }, { error: listingErr }, { error: ledgerErr }] = await Promise.all([
-    supabaseAdmin
-      .from('user_wallets')
-      .update({ balance: wallet.balance - FLASH_BOOST_TOKENS })
-      .eq('user_id', session.user.id),
-    supabaseAdmin
-      .from('listings')
-      .update({ featured_until, premium: true })
-      .eq('id', listing_id),
-    supabaseAdmin
-      .from('token_ledger')
-      .insert({
-        user_id: session.user.id,
-        amount: -FLASH_BOOST_TOKENS,
-        type: 'spend',
-        description: `Flash boost: "${listing.title}" — 6 hours`,
-      }),
-  ])
+  // Apply listing boost first — if this fails, no tokens are charged
+  const { error: listingErr } = await supabaseAdmin
+    .from('listings')
+    .update({ featured_until, premium: true })
+    .eq('id', listing_id)
 
-  if (walletErr || listingErr) {
-    console.error('[flash-boost]', walletErr, listingErr, ledgerErr)
-    return NextResponse.json({ error: 'Update failed, tokens not deducted' }, { status: 500 })
+  if (listingErr) {
+    console.error('[flash-boost] listing update failed:', listingErr.message)
+    return NextResponse.json({ error: 'Boost failed — tokens not charged' }, { status: 500 })
   }
+
+  // Deduct tokens
+  const { error: walletErr } = await supabaseAdmin
+    .from('user_wallets')
+    .update({ balance: wallet.balance - FLASH_BOOST_TOKENS })
+    .eq('user_id', session.user.id)
+
+  if (walletErr) {
+    console.error('[flash-boost] wallet update failed:', walletErr.message)
+    // Boost already applied — reverse it before returning error
+    await supabaseAdmin.from('listings').update({ featured_until: listing.featured_until ?? null, premium: false }).eq('id', listing_id)
+    return NextResponse.json({ error: 'Payment failed — boost not applied' }, { status: 500 })
+  }
+
+  // Record ledger entry (fire-and-forget — boost and deduction already committed)
+  supabaseAdmin.from('token_ledger').insert({
+    user_id: session.user.id,
+    amount: -FLASH_BOOST_TOKENS,
+    type: 'spend',
+    description: `Flash boost: "${listing.title}" — 6 hours`,
+  }).then(({ error }) => { if (error) console.error('[flash-boost] ledger insert failed:', error.message) })
 
   return NextResponse.json({ ok: true, featured_until })
 }

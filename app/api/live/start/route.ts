@@ -58,7 +58,8 @@ export async function POST(req: Request) {
   }).select('id, room_name').single()
 
   if (insErr || !stream) {
-    return NextResponse.json({ error: insErr?.message || 'Could not create stream' }, { status: 500 })
+    console.error('[live/start] stream insert failed:', insErr?.message)
+    return NextResponse.json({ error: 'Could not create stream. Please try again.' }, { status: 500 })
   }
 
   // Broadcaster token — can publish camera/mic.
