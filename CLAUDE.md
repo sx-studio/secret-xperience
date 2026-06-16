@@ -136,6 +136,8 @@ What's next (user hasn't asked for these yet, don't do proactively):
   - Next.js version confirmed as **13.5.1** — `cookies()` is synchronous (no `await`), important for all server code
 
 ## Pending
+- **Apply `20260616_reports.sql`** — SAFETY/COMPLIANCE. Creates the `reports` table (was written by `app/report/page.tsx` but had NO migration — submissions were failing silently). Idempotent (`create table if not exists`), safe to run even if the table was created manually. Adds RLS: anon/authenticated can INSERT (file a report), admins can SELECT/UPDATE (triage). Until applied, the new Admin → Reports tab will read an empty/missing table and the report form shows a graceful error instead of a false "submitted". Run the file in the Supabase SQL editor.
+- **Apply `20260616_events_table.sql`** — Backfills the `events` table schema into version control (the live project already has it; this is idempotent and a no-op there, but reproduces the schema on a fresh environment). Only needed if standing up a new Supabase project.
 - **Apply `20260604_verification_gate.sql`** — COMPLIANCE (Verotel). Adds a RESTRICTIVE RLS policy so only `profiles.verified = true` (or admin) users can INSERT listings, and adds `consent_given`/`consent_at` columns to `identity_verifications`. Until applied: the client gate + consent checkbox still work and the submit API falls back gracefully (logs a warning, skips consent columns), but the **server-side publish gate is NOT enforced** and consent isn't recorded. Run in Supabase SQL editor:
   ```sql
   DROP POLICY IF EXISTS "Only verified providers can publish listings" ON public.listings;

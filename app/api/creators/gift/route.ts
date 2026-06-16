@@ -45,29 +45,38 @@ export async function POST(req: NextRequest) {
   if (!wallet || wallet.balance < tokens)
     return NextResponse.json({ error: 'Insufficient token balance' }, { status: 402 })
 
-  // deduct from sender
-  const { error: deductErr } = await admin
+  const senderBalanceAfter = wallet.balance - tokens
+
+  // deduct from sender — optimistic lock guards against concurrent spends draining the wallet
+  const { data: deductRows, error: deductErr } = await admin
     .from('user_wallets')
-    .update({ balance: wallet.balance - tokens })
+    .update({ balance: senderBalanceAfter })
     .eq('user_id', senderId)
+    .eq('balance', wallet.balance)
+    .select('balance')
   if (deductErr) {
     console.error('[creators/gift] deduct failed:', deductErr.message)
     return NextResponse.json({ error: 'Failed to process gift. Please try again.' }, { status: 500 })
   }
+  if (!deductRows?.length) {
+    return NextResponse.json({ error: 'Balance changed during transaction. Please try again.' }, { status: 409 })
+  }
 
   // credit to creator wallet (upsert in case they don't have one yet)
   const { data: creatorWallet } = await admin.from('user_wallets').select('balance').eq('user_id', creatorId).maybeSingle()
+  const creatorBalanceAfter = (creatorWallet?.balance ?? 0) + tokens
   if (creatorWallet) {
-    await admin.from('user_wallets').update({ balance: creatorWallet.balance + tokens }).eq('user_id', creatorId)
+    await admin.from('user_wallets').update({ balance: creatorBalanceAfter }).eq('user_id', creatorId)
   } else {
     await admin.from('user_wallets').insert({ user_id: creatorId, balance: tokens })
   }
 
-  // ledger entries
-  await admin.from('token_ledger').insert([
-    { user_id: senderId,   amount: -tokens, type: 'spend', description: `Gift to creator` },
-    { user_id: creatorId,  amount:  tokens, type: 'bonus', description: `Gift received from fan` },
+  // ledger entries — balance_after is NOT NULL, so it must be supplied for both sides
+  const { error: ledgerErr } = await admin.from('token_ledger').insert([
+    { user_id: senderId,   amount: -tokens, balance_after: senderBalanceAfter,  type: 'spend', description: `Gift to creator` },
+    { user_id: creatorId,  amount:  tokens, balance_after: creatorBalanceAfter, type: 'bonus', description: `Gift received from fan` },
   ])
+  if (ledgerErr) console.error('[creators/gift] ledger insert failed:', ledgerErr.message)
 
   // record the gift (fire-and-forget — tokens already transferred)
   admin.from('creator_gifts').insert({

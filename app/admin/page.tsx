@@ -4,13 +4,14 @@ import { useState, useEffect, useRef } from 'react'
 import { createClient } from '../lib/supabase'
 import { detectFocalPoint, imageFromUrl } from '../lib/imageFocus'
 
-const TABS = ['Listings', 'Users', 'Verification', 'Bookings', 'Newsletter', 'Contacts', 'Acquisition', 'Keywords', 'Tools'] as const
+const TABS = ['Listings', 'Users', 'Verification', 'Reports', 'Bookings', 'Newsletter', 'Contacts', 'Acquisition', 'Keywords', 'Tools'] as const
 type Tab = typeof TABS[number]
 
 const TAB_ICONS: Record<Tab, string> = {
   Listings: 'layout-list',
   Users: 'users',
   Verification: 'shield-check',
+  Reports: 'flag',
   Bookings: 'calendar-event',
   Newsletter: 'mail',
   Contacts: 'address-book',
@@ -47,7 +48,9 @@ function saveLastSeen(t: Tab) {
 export default function AdminPage() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [tab, setTab] = useState<Tab>('Listings')
-  const [badges, setBadges] = useState<Record<Tab, number>>({ Listings: 0, Users: 0, Verification: 0, Bookings: 0, Newsletter: 0, Contacts: 0, Acquisition: 0, Keywords: 0, Tools: 0 })
+  const [badges, setBadges] = useState<Record<Tab, number>>({ Listings: 0, Users: 0, Verification: 0, Reports: 0, Bookings: 0, Newsletter: 0, Contacts: 0, Acquisition: 0, Keywords: 0, Tools: 0 })
+  const [reports, setReports] = useState<any[]>([])
+  const [reportWorking, setReportWorking] = useState<string | null>(null)
   const currentTab = useRef<Tab>('Listings')
   const [listings, setListings] = useState<any[]>([])
   const [users, setUsers] = useState<any[]>([])
@@ -106,7 +109,7 @@ export default function AdminPage() {
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', session.user.id).single()
       if (profile?.role !== 'admin') { window.location.href = '/'; return }
       setIsAdmin(true)
-      const [lr, ur, br, vr, ocr, leadsr, wr] = await Promise.all([
+      const [lr, ur, br, vr, ocr, leadsr, wr, rr] = await Promise.all([
         supabase.from('listings').select('*').order('created_at', { ascending: false }),
         supabase.from('profiles').select('*').order('created_at', { ascending: false }),
         supabase.from('bookings').select('*, listings(title)').order('created_at', { ascending: false }),
@@ -114,7 +117,9 @@ export default function AdminPage() {
         supabase.from('listings').select('id,title,category,city,country,contact_phone,created_at').eq('whatsapp_optin', true).order('created_at', { ascending: false }),
         supabase.from('leads').select('*').order('created_at', { ascending: false }),
         supabase.from('user_wallets').select('user_id,balance,total_purchased,total_spent'),
+        supabase.from('reports').select('*').order('created_at', { ascending: false }),
       ])
+      setReports(rr.data || [])
       // newsletter_subscribers is service-role-only; fetch via server route
       fetch('/api/newsletter/list')
         .then(r => r.ok ? r.json() : { subscribers: [] })
@@ -149,10 +154,12 @@ export default function AdminPage() {
       const seenVerification = loadLastSeen('Verification')
       const seenBookings = loadLastSeen('Bookings')
       const seenContacts = loadLastSeen('Contacts')
+      const seenReports = loadLastSeen('Reports')
       setBadges({
         Listings:     lsWithProfiles.filter((l: any) => new Date(l.created_at).getTime() > seenListings).length,
         Users:        us.filter((u: any) => new Date(u.created_at).getTime() > seenUsers).length,
         Verification: (vr.data || []).filter((v: any) => new Date(v.submitted_at || v.created_at).getTime() > seenVerification).length,
+        Reports:      (rr.data || []).filter((r: any) => r.status === 'open' && new Date(r.created_at).getTime() > seenReports).length,
         Bookings:     bs.filter((b: any) => new Date(b.created_at).getTime() > seenBookings).length,
         Newsletter:   0,
         Contacts:     (leadsr.data || []).filter((l: any) => new Date(l.created_at).getTime() > seenContacts).length,
@@ -193,6 +200,10 @@ export default function AdminPage() {
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'leads' }, payload => {
           setLeads(prev => [payload.new, ...prev])
           if (currentTab.current !== 'Contacts') setBadges(b => ({ ...b, Contacts: b.Contacts + 1 }))
+        })
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'reports' }, payload => {
+          setReports(prev => [payload.new, ...prev])
+          if (currentTab.current !== 'Reports') setBadges(b => ({ ...b, Reports: b.Reports + 1 }))
         })
         .subscribe()
     }
@@ -544,7 +555,7 @@ export default function AdminPage() {
           <div>
             <h1 style={{ fontFamily: 'var(--serif)', fontWeight: 500, fontSize: '36px', color: 'var(--t, #ece8e1)', margin: 0, lineHeight: 1.1 }}>{tab}</h1>
             <div style={{ font: '300 11px/1 var(--sans)', color: 'var(--t3, #4c4a47)', marginTop: '4px', letterSpacing: '0.04em' }}>
-              {tab === 'Listings' ? `${filteredListings.length} listings` : tab === 'Users' ? `${filteredUsers.length} users` : tab === 'Newsletter' ? (search ? `${filteredNlSubs.length} of ${nlSubCount ?? '…'} subscribers` : `${nlSubCount ?? '…'} subscribers`) : tab === 'Contacts' ? `${optinContacts.length} opted-in · ${leads.length} leads` : tab === 'Acquisition' ? `${acqTotal} tracked signups · ${acq.length} sources` : tab === 'Keywords' ? `${kwResults.length ? `${kwResults.length} results` : 'SEO research'}` : tab === 'Tools' ? 'Admin tools' : `${filteredBookings.length} bookings`}
+              {tab === 'Listings' ? `${filteredListings.length} listings` : tab === 'Users' ? `${filteredUsers.length} users` : tab === 'Reports' ? `${reports.filter(r => r.status === 'open').length} open · ${reports.length} total` : tab === 'Newsletter' ? (search ? `${filteredNlSubs.length} of ${nlSubCount ?? '…'} subscribers` : `${nlSubCount ?? '…'} subscribers`) : tab === 'Contacts' ? `${optinContacts.length} opted-in · ${leads.length} leads` : tab === 'Acquisition' ? `${acqTotal} tracked signups · ${acq.length} sources` : tab === 'Keywords' ? `${kwResults.length ? `${kwResults.length} results` : 'SEO research'}` : tab === 'Tools' ? 'Admin tools' : `${filteredBookings.length} bookings`}
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -1425,6 +1436,64 @@ export default function AdminPage() {
           )}
 
           {/* ── Bookings table ── */}
+          {tab === 'Reports' && (() => {
+            const CRITICAL = new Set(['Underage content', 'Human trafficking', 'Non-consensual content'])
+            const STATUS_COLOR: Record<string, string> = { open: '#e0a050', reviewing: '#5a9bd4', resolved: '#4caf7d', dismissed: '#7c7a77' }
+            async function setReportStatus(id: string, status: string) {
+              setReportWorking(id)
+              const supabase = createClient()
+              const { data: { session } } = await supabase.auth.getSession()
+              const upd: any = { status, reviewed_at: new Date().toISOString(), reviewed_by: session?.user?.id || null }
+              const { error } = await supabase.from('reports').update(upd).eq('id', id)
+              if (!error) setReports(prev => prev.map(r => r.id === id ? { ...r, ...upd } : r))
+              setReportWorking(null)
+            }
+            const visible = reports.filter(r =>
+              !search ||
+              `${r.reason} ${r.detail} ${r.url} ${r.email || ''}`.toLowerCase().includes(search.toLowerCase())
+            )
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {visible.length === 0 && (
+                  <div style={{ background: 'var(--bg1, #0a0a0a)', border: '0.5px solid var(--b, rgba(255,255,255,0.06))', borderRadius: 'var(--rl, 13px)', padding: '3rem', textAlign: 'center', color: 'var(--t3, #4c4a47)' }}>
+                    No reports {search ? 'match your search' : 'yet'}.
+                  </div>
+                )}
+                {visible.map(r => {
+                  const isCritical = CRITICAL.has(r.reason)
+                  return (
+                    <div key={r.id} style={{ background: 'var(--bg1, #0a0a0a)', border: `0.5px solid ${isCritical ? 'rgba(196,90,90,0.45)' : 'var(--b, rgba(255,255,255,0.06))'}`, borderRadius: 'var(--rl, 13px)', padding: '1.25rem 1.5rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', marginBottom: '10px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                          <span style={{ background: isCritical ? 'rgba(196,90,90,0.15)' : 'var(--gbg, rgba(197,160,90,0.08))', color: isCritical ? '#e08080' : 'var(--gold, #c5a05a)', border: `0.5px solid ${isCritical ? 'rgba(196,90,90,0.4)' : 'var(--gbrd, rgba(197,160,90,0.2))'}`, borderRadius: '6px', padding: '4px 10px', font: '600 12px/1 var(--sans)' }}>
+                            {isCritical && <i className="ti ti-alert-triangle" style={{ marginRight: 5 }} />}{r.reason}
+                          </span>
+                          <span style={{ color: STATUS_COLOR[r.status] || '#888', font: '600 10px/1 var(--sans)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{r.status}</span>
+                        </div>
+                        <span style={{ color: 'var(--t3, #4c4a47)', fontSize: '11px' }}>{new Date(r.created_at).toLocaleString('en-GB')}</span>
+                      </div>
+                      <p style={{ color: 'var(--t, #ece8e1)', fontSize: '13px', lineHeight: 1.7, margin: '0 0 12px', whiteSpace: 'pre-wrap' }}>{r.detail}</p>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', fontSize: '12px', color: 'var(--t2, #8c8880)', marginBottom: '14px' }}>
+                        <span><i className="ti ti-link" style={{ marginRight: 5 }} /><a href={r.url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--gold, #c5a05a)', textDecoration: 'none' }}>{r.url.length > 60 ? r.url.slice(0, 60) + '…' : r.url}</a></span>
+                        {r.listing_id && <a href={`/listings/${r.listing_id}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--t2, #8c8880)', textDecoration: 'none' }}><i className="ti ti-eye" style={{ marginRight: 5 }} />View listing</a>}
+                        {r.email && <span><i className="ti ti-mail" style={{ marginRight: 5 }} /><a href={`mailto:${r.email}`} style={{ color: 'var(--t2, #8c8880)', textDecoration: 'none' }}>{r.email}</a></span>}
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        {(['reviewing', 'resolved', 'dismissed'] as const).map(s => (
+                          <button key={s} disabled={reportWorking === r.id || r.status === s}
+                            onClick={() => setReportStatus(r.id, s)}
+                            style={{ background: r.status === s ? 'var(--gbg, rgba(197,160,90,0.08))' : 'transparent', border: '0.5px solid var(--b2, rgba(255,255,255,0.1))', borderRadius: '8px', padding: '6px 14px', color: r.status === s ? 'var(--gold, #c5a05a)' : 'var(--t2, #8c8880)', font: '500 12px/1 var(--sans)', cursor: reportWorking === r.id || r.status === s ? 'default' : 'pointer', textTransform: 'capitalize', opacity: reportWorking === r.id ? 0.5 : 1 }}>
+                            {s === 'reviewing' ? 'Mark reviewing' : s === 'resolved' ? 'Resolve' : 'Dismiss'}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )
+          })()}
+
           {tab === 'Bookings' && (
             <div style={{ background: 'var(--bg1, #0a0a0a)', border: '0.5px solid var(--b, rgba(255,255,255,0.06))', borderRadius: 'var(--rl, 13px)', overflow: 'hidden' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>

@@ -22,16 +22,21 @@ export default function ReportPage() {
     }
   }, [])
 
+  const [submitError, setSubmitError] = useState('')
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     if (!form.url || !form.reason || !form.detail) return
     setSubmitting(true)
+    setSubmitError('')
     try {
       const supabase = createClient()
       // Extract listing_id from URL if present
       const match = form.url.match(/\/listings\/([a-f0-9-]{36})/)
       const listing_id = match ? match[1] : null
-      await supabase.from('reports').insert({
+      // Supabase returns { error } rather than throwing — a safety report must
+      // not show "submitted" if the insert actually failed.
+      const { error } = await supabase.from('reports').insert({
         listing_id,
         url: form.url,
         reason: form.reason,
@@ -39,9 +44,16 @@ export default function ReportPage() {
         email: form.email || null,
       })
       setSubmitting(false)
+      if (error) {
+        console.error('[report] insert failed:', error.message)
+        setSubmitError('We couldn’t submit your report. Please email report@secretxperience.eu directly — for emergencies involving minors or trafficking, contact local law enforcement immediately.')
+        return
+      }
       setDone(true)
-    } catch {
+    } catch (err) {
+      console.error('[report] unexpected error:', err)
       setSubmitting(false)
+      setSubmitError('We couldn’t submit your report. Please email report@secretxperience.eu directly.')
     }
   }
 
@@ -83,6 +95,11 @@ export default function ReportPage() {
               <label style={{ display: 'block', fontSize: 11, letterSpacing: '0.08em', color: S.t2, textTransform: 'uppercase', marginBottom: 6 }}>Your email <span style={{ color: '#555' }}>(optional — for follow-up)</span></label>
               <input style={inp} type="email" placeholder="you@example.com" value={form.email} onChange={set('email')} />
             </div>
+            {submitError && (
+              <div style={{ background: 'rgba(155,48,48,0.12)', border: '0.5px solid rgba(196,90,90,0.45)', borderRadius: 8, padding: '12px 14px', fontSize: 13, color: '#e09090', lineHeight: 1.6 }}>
+                {submitError}
+              </div>
+            )}
             <button type="submit" disabled={submitting} style={{ background: 'linear-gradient(135deg,#9b3030,#7a2020)', border: 'none', borderRadius: 10, padding: '13px 24px', color: '#fff', fontFamily: S.sans, fontWeight: 600, fontSize: 14, cursor: submitting ? 'default' : 'pointer', letterSpacing: '0.04em', opacity: submitting ? 0.7 : 1 }}>
               {submitting ? 'Submitting…' : 'Submit report →'}
             </button>
